@@ -3,18 +3,15 @@
 /**
  * Copyright 2014 the HtmlGoBoard project authors.
  * All rights reserved.
- * Project  WebSKD
+ * Project  WebSDK
  * Author   Ilya Kirillov
  * Date     13.09.14
  * Time     3:26
  */
 
-var EBoardPoint =
-{
-    Empty : 0x00,
-    Black : 0x01,
-    White : 0x02
-};
+var BOARD_EMPTY = 0x00;
+var BOARD_BLACK = 0x01;
+var BOARD_WHITE = 0x02;
 
 function CBoardKo()
 {
@@ -30,7 +27,7 @@ CBoardKo.prototype.Reset = function()
 
 function CBoardPoint(eValue, nNum)
 {
-    this.m_eValue = (undefined === eValue ? EBoardPoint.Empty : eValue);
+    this.m_eValue = (undefined === eValue ? BOARD_WHITE : eValue);
     this.m_nNum   = (undefined === nNum ? - 1 : nNum);
 }
 
@@ -125,8 +122,8 @@ CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue)
     var eOtherValue;
     switch( Value )
     {
-        case EBoardPoint.Black : eOtherValue = EBoardPoint.White; break;
-        case EBoardPoint.White : eOtherValue = EBoardPoint.Black; break;
+        case BOARD_BLACK : eOtherValue = BOARD_WHITE; break;
+        case BOARD_WHITE : eOtherValue = BOARD_BLACK; break;
         default : return false;
     }
 
@@ -182,7 +179,7 @@ CLogicBoard.prototype.private_IsDame = function(nX, nY, eValue, oChecker)
 
     var eThisValue = this.Get(nX, nY);
 
-    if (EBoardPoint.Empty === eThisValue)
+    if (BOARD_EMPTY === eThisValue)
         return true;
     else if (eValue === eThisValue)
         return this.Check_Dame(X, Y, Value, oChecker);
@@ -252,4 +249,8 @@ CLogicBoard.prototype.private_Is_StoneInGroup = function(nX, nY, oChecker)
     oChecker.m_nGroupSize++;
 
     return false;
+};
+
+CLogicBoard.prototype.Set_ScorePoint = function(nX, nY, eValue)
+{
 };
