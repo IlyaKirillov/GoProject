@@ -9,10 +9,6 @@
  * Time     3:26
  */
 
-var BOARD_EMPTY = 0x00;
-var BOARD_BLACK = 0x01;
-var BOARD_WHITE = 0x02;
-
 function CBoardKo()
 {
     this.m_nMove     = 0; // Значение ход, который съел ко
@@ -27,8 +23,14 @@ CBoardKo.prototype.Reset = function()
 
 function CBoardPoint(eValue, nNum)
 {
-    this.m_eValue = (undefined === eValue ? BOARD_WHITE : eValue);
+    this.m_eValue = Math.floor((Math.random() * 3));// (undefined === eValue ? BOARD_EMPTY : eValue);
     this.m_nNum   = (undefined === nNum ? - 1 : nNum);
+}
+
+CBoardPoint.prototype.Clear = function()
+{
+    this.m_eValue = BOARD_EMPTY;
+    this.m_nNum   = -1;
 }
 
 function CDeadGroupChecker()
@@ -46,6 +48,10 @@ CDeadGroupChecker.prototype.Get_Size = function()
 {
     return this.m_nGroupSize;
 };
+CDeadGroupChecker.prototype.Get_Value = function(Index)
+{
+    return this.m_aGroup[Index];
+};
 
 function CLogicBoard(nW, nH)
 {
@@ -61,13 +67,21 @@ function CLogicBoard(nW, nH)
 
 CLogicBoard.prototype.private_InitBoard = function()
 {
-    var nSize = this.m_nW * m_nH;
+    var nSize = this.m_nW * this.m_nH;
 
     this.m_aBoard = new Array(nSize);
     for (var nIndex = 0; nIndex < nSize; nIndex++)
     {
         this.m_aBoard[nIndex] = new CBoardPoint();
-        this.m_aBoardScores[nIndex] = 0;
+    }
+};
+
+CLogicBoard.prototype.Clear = function()
+{
+    var nSize = this.m_nW * m_nH;
+    for (var nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        this.m_aBoard[nIndex].Clear();
     }
 };
 
@@ -102,19 +116,19 @@ CLogicBoard.prototype.Set = function(nX, nY, eValue, nNum)
 
 CLogicBoard.prototype.Get = function(nX, nY)
 {
-    return this.m_aBoard[this.privateGet_Pos(nX, nY)].m_eValue;
+    return this.m_aBoard[this.private_GetPos(nX, nY)].m_eValue;
 };
 
 CLogicBoard.prototype.Get_Num = function(nX, nY)
 {
-    return this.m_aBoard[this.privateGet_Pos(nX, nY)].m_nNum;
+    return this.m_aBoard[this.private_GetPos(nX, nY)].m_nNum;
 };
 
 CLogicBoard.prototype.Check_Dead = function(nX, nY, eValue)
 {
     var oChecker = new CDeadGroupChecker();
     this.private_CheckDead(nX, nY, eValue, oChecker);
-    return oChecker.Get_Size();
+    return oChecker;
 };
 
 CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue)
@@ -124,7 +138,7 @@ CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue)
     {
         case BOARD_BLACK : eOtherValue = BOARD_WHITE; break;
         case BOARD_WHITE : eOtherValue = BOARD_BLACK; break;
-        default : return false;
+        default : return null;
     }
 
     var oChecker = new CDeadGroupChecker();
@@ -148,8 +162,8 @@ CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue)
         var Val1 = (Y << 8) + X;
         var Val2 = this.m_aGroup[0];
 
-        if ( Val1 == this.m_nKo1 && Val2 == this.m_nKo2 && true == CheckKo )
-            return false;
+        if (Val1 == this.m_nKo1 && Val2 == this.m_nKo2 && true == CheckKo)
+            return null;
 
         this.m_nKo1 = Val2;
         this.m_nKo2 = Val1;
@@ -158,8 +172,10 @@ CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue)
     {
         this.m_oKo.Reset();
     }
+    else if (nDeadCount <= 0)
+        return null;
 
-    return bKill;
+    return oChecker;
 };
 
 /**
@@ -253,4 +269,14 @@ CLogicBoard.prototype.private_Is_StoneInGroup = function(nX, nY, oChecker)
 
 CLogicBoard.prototype.Set_ScorePoint = function(nX, nY, eValue)
 {
+};
+
+CLogicBoard.prototype.Get_ScorePoint = function(nX, nY)
+{
+    return BOARD_EMPTY;
+};
+
+CLogicBoard.prototype.Count_Scores = function()
+{
+    return {Black : 0, White : 0};
 };

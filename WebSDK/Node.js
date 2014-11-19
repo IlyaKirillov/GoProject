@@ -9,15 +9,15 @@
 
 function CNode(oGameTree)
 {
-    this.m_nId        = oGameTree.Get_NewNodeId();   // Id ноды
-    this.m_aNext      = [];                          // Массив следующих нод
-    this.m_nNextCur   = -1;                          // Номер текущей следующей ноды
-    this.m_oPrev      = null;                        // Родительская нода
-    this.m_aCommands  = [];                          // Массив команд данной ноды
-    this.m_oMove      = new CMove( 0, move_N );      // Основной ход данной ноды (если он есть)
-    this.m_sComment   = "";                          // Комментарий
-    this.m_oTerritory = new CTerritory( false, {} ); // Метки территории (если в данной ноде есть подсчет очков)
-    this.m_oNavInfo   = { X : -1, Y : -1 };          // Позиция данной ноды в навигаторе
+    this.m_nId        = oGameTree.Get_NewNodeId(); // Id ноды
+    this.m_aNext      = [];                        // Массив следующих нод
+    this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
+    this.m_oPrev      = null;                      // Родительская нода
+    this.m_aCommands  = [];                        // Массив команд данной ноды
+    this.m_oMove      = new CMove(0, BOARD_WHITE); // Основной ход данной ноды (если он есть)
+    this.m_sComment   = "";                        // Комментарий
+    this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
+    this.m_oNavInfo   = {X : -1, Y : -1};          // Позиция данной ноды в навигаторе
 
     oGameTree.Add_Node(this);
 }
@@ -124,9 +124,13 @@ CNode.prototype.Clear_TerritoryPoints = function()
 {
     this.m_oTerritory.Clear_Points();
 };
-CNode.prototype.Fill_Territory = function(LogicBoard)
+CNode.prototype.Fill_TerritoryToLogicBoard = function(LogicBoard)
 {
-    this.m_oTerritory.Fill_Points(LogicBoard);
+    this.m_oTerritory.Fill_PointsToLogicBoard(LogicBoard);
+};
+CNode.prototype.Fill_TerritoryFromLogicBoard = function(LogicBoard)
+{
+    this.m_oTerritory.Fill_PointsFromLogicBoard(LogicBoard);
 };
 CNode.prototype.Get_MainVariantLen = function()
 {
@@ -139,6 +143,15 @@ CNode.prototype.Get_MainVariantLen = function()
     }
 
     return Count;
+};
+CNode.prototype.GoTo_MainVariant = function()
+{
+    var Node = this;
+    while(Node.Get_NextsCount() > 0)
+    {
+        Node.Set_NextCur(0);
+        Node = Node.Get_Next(0);
+    }
 };
 CNode.prototype.Get_LastNodeInMainVariant = function()
 {
@@ -170,7 +183,7 @@ CNode.prototype.Make_ThisNodeCurrent = function()
             }
         }
 
-        if (!bFlag)
+        if (!bFind)
             return false;
 
         NextNode = CurrNode;
@@ -215,4 +228,84 @@ CNode.prototype.Set_NavigatorInfo = function(X,Y)
 CNode.prototype.Get_NavigatorInfo = function()
 {
     return this.m_oNavInfo;
+};
+CNode.prototype.Add_Move = function(X, Y, Value)
+{
+    var Pos = Common_XYtoValue(X, Y);
+    this.Add_Command(new CCommand((BOARD_BLACK === Value ? ECommand.B : ECommand.W), Pos));
+
+    if (BOARD_EMPTY === this.m_oMove.Value)
+    {
+        this.m_oMove.Set_Value(Pos);
+        this.m_oMove.Set_Type(Value);
+    }
+};
+CNode.prototype.Add_MoveNumber = function(MoveNumber)
+{
+    this.Add_Command(new CCommand(ECommand.MN, MoveNumber));
+};
+CNode.prototype.AddOrRemove_Stones = function(Value, arrPos)
+{
+    var Type = (BOARD_BLACK === Value ? ECommand.AB : (BOARD_WHITE === Value ? ECommand.AW : ECommand.AE));
+    this.Add_Command(new CCommand(Type, Common_CopyArray(arrPos), arrPos.length));
+};
+CNode.prototype.Add_Mark = function(Type, arrPos)
+{
+    this.Add_Command(new CCommand(Type, Common_CopyArray(arrPos), arrPos.length));
+};
+CNode.prototype.Add_TextMark = function(sText, Pos)
+{
+    this.Add_Command(new CCommand(ECommand.LB, {Text : sText, Pos : Pos}));
+};
+CNode.prototype.Set_NextMove = function(Value)
+{
+    this.Add_Command(new CCommand(ECommand.PL, Value));
+};
+CNode.prototype.Add_BlackTimeLeft = function(Time)
+{
+    this.Add_Command(new CCommand(ECommand.BL, Time));
+};
+CNode.prototype.Add_WhiteTimeLeft = function(Time)
+{
+    this.Add_Command(new CCommand(ECommand.WL, Time));
+};
+CNode.prototype.Show_Variants = function(oDrawing)
+{
+    switch (this.m_nShowVariants)
+    {
+        case EShowVariants.Next:
+        {
+            this.private_ShowNextVariants(oDrawing, -1);
+            break;
+        }
+
+        case EShowVariants.Curr:
+        {
+            var PrevNode = this.Get_Prev();
+            if (null !== PrevNode)
+                PrevNode.private_ShowNextVariants(oDrawing, this.Get_Move().Get_Value());
+
+            break;
+        }
+
+        default:
+            return;
+    }
+};
+CNode.prototype.private_ShowNextVariants = function(oDrawing, ExceptionalValue)
+{
+    if (!oDrawing)
+        return;
+
+    for (var Index = 0, NextsCount = this.Get_NextsCount(); Index < NextsCount; Index++)
+    {
+        var oNode = this.Get_Next(Index);
+        var oMove = oNode.Get_Move();
+
+        if (BOARD_EMPTY !== oMove.Get_Type() && ExceptionalValue !== oMove.Get_Value())
+        {
+            var Pos = Common_ValuetoXY(oMove.Get_Value());
+            this.m_oDrawing.Draw_Variant(Pos.X, Pos.Y);
+        }
+    }
 };

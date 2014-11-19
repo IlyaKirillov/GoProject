@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<head>
+    <title>Тестируем вставление доски в DIV</title>
+</head>
+
+<script type="text/javascript" language="JavaScript" src="../Drawing/Controls.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Board.js"></script>
+
+<script type="text/javascript" language="JavaScript" src="../Command.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Consts.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Common.js"></script>
+<script type="text/javascript" language="JavaScript" src="../GameTree.js"></script>
+<script type="text/javascript" language="JavaScript" src="../LogicBoard.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Move.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Node.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Territory.js"></script>
+
+<body>
+
+<div id="div1" style="position:relative; height: 300px;width: 300px"></div>
+<div id="div2" style="position:relative; height: 500px;width: 500px"></div>
+
+<script>
+    var GameTree1 = new CGameTree();
+    var DrawingBoard1 = new CDrawingBoard();
+    DrawingBoard1.Init("div1", GameTree1);
+    DrawingBoard1.Update_Size(300, 300);
+
+    var GameTree2 = new CGameTree();
+    var DrawingBoard2 = new CDrawingBoard();
+    DrawingBoard2.Init("div2", GameTree2);
+    DrawingBoard2.Update_Size(500, 500);
+</script>
+
+</body>
+</html>
