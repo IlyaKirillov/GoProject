@@ -30,7 +30,9 @@ function CDrawingBoard()
         H           : 0,
         StoneDiam   : 0,
         ShadowOff   : 0,
+        HandiRad    : 2,
         Lines       : null,
+        Handi       : null,
         Board       : null,
         BlackStone  : null,
         WhiteStones : new Array(),
@@ -39,14 +41,17 @@ function CDrawingBoard()
         WhiteTarget : null
     };
 
+    this.m_oBoardColor = new CColor(231, 188, 95, 255);
+    this.m_oLinesColor = new CColor(0, 0, 0, 255);
+
     this.m_oSimpleBoardPr =
     {
-        BoardColor        : new CColor( 0xE8, 0xC4, 0x73, 255 ),
-        WhiteStoneColor   : new CColor( 0xFF, 0xFF, 0xFF, 255 ),
-        BlackStoneColor   : new CColor( 0x00, 0x00, 0x00, 255 ),
-        StoneContourColor : new CColor(  141,  141,  141, 255 ),
-        HandiPointsColor  : new CColor(  112,   95,   54, 255 ),
-        LineColor         : new CColor(  112,   95,   54, 255 )
+        BoardColor        : new CColor(0xE8, 0xC4, 0x73, 255),
+        WhiteStoneColor   : new CColor(0xFF, 0xFF, 0xFF, 255),
+        BlackStoneColor   : new CColor(0x00, 0x00, 0x00, 255),
+        StoneContourColor : new CColor( 141,  141,  141, 255),
+        HandiPointsColor  : new CColor( 112,   95,   54, 255),
+        LineColor         : new CColor( 112,   95,   54, 255)
     };
 
     this.HtmlElement =
@@ -78,6 +83,17 @@ function CDrawingBoard()
     {
         //check_MouseDownEvent(e, true);
         //var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
+    };
+    this.private_StartDrawingTimer = function()
+    {
+        return setTimeout(function()
+        {
+            oThis.private_CreateTrueColorBoard();
+            oThis.private_CreateLines();
+            oThis.private_CreateTrueColorStones();
+            oThis.private_CreateShadows();
+            oThis.private_OnResize();
+        }, 1000);
     };
 }
 
@@ -132,6 +148,55 @@ CDrawingBoard.prototype.Update_Size = function(W, H)
 
     this.private_UpdateKoeffs();
     this.private_OnResize();
+};
+CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
+{
+    var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
+    var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
+
+    var d = this.m_oImageData.StoneDiam;
+    var Rad = (d - 1) / 2;
+    var Lines = this.m_oImageData.Lines;
+    var Off = this.m_oImageData.ShadowOff;
+
+    var _X = Lines[X - 1].X - Rad;
+    var _Y = Lines[Y - 1].Y - Rad;
+
+    switch( Value )
+    {
+        case BOARD_BLACK:
+        {
+            StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y );
+            ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off );
+            break;
+        }
+        case BOARD_WHITE:
+        {
+            var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * 19];
+            StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y );
+            ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off );
+            break;
+        }
+        case BOARD_EMPTY:
+        default:
+        {
+            StonesCanvas.clearRect(_X, _Y, d, d);
+            ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
+            break;
+        }
+    }
+
+//    if (X === this.m_oLastTargetPos.X && Y === this.m_oLastTargetPos.Y)
+//    {
+//        if ( black === Value || white === Value )
+//        {
+//            this.Hide_Target();
+//        }
+//        else
+//        {
+//            this.Show_Target();
+//        }
+//    }
 };
 CDrawingBoard.prototype.private_CreateCanvasElement = function(oParentElement, sName)
 {
@@ -208,15 +273,14 @@ CDrawingBoard.prototype.private_OnResize = function()
             clearTimeout(this.m_oCreateWoodyId);
 
         // Стартуем таймер с отрисовкой красивой доски
-        //this.m_oCreateWoodyId = setTimeout( function(){ this.Create_WoodyBoard(); }, 200 );
+        this.m_oCreateWoodyId = this.private_StartDrawingTimer();
 
         // Пока рисуем простой вариант
         this.private_DrawSimpleBoard(W, H);
     }
     else
     {
-        // TODO: Релизовать данный вариант
-        this.private_DrawSimpleBoard(W, H);
+        this.private_DrawTrueColorFullBoard();
     }
 };
 CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
@@ -326,4 +390,615 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     this.HtmlElement.Variants.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Marks.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Target.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+};
+CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
+{
+    var W = this.HtmlElement.Board.Control.HtmlElement.width;
+    var H = this.HtmlElement.Board.Control.HtmlElement.height;
+
+    var Board = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
+
+    if (0 === W || 0 === H)
+        return;
+
+    var ImageData = Board.createImageData(W, H);
+    var f = 9e-1;
+
+    var Red   = this.m_oBoardColor.r;
+    var Green = this.m_oBoardColor.g;
+    var Blue  = this.m_oBoardColor.b;
+
+    var dCoffWf = new Array(W);
+    for (var j = 0; j < W; j++)
+    {
+        dCoffWf[j] = (Math.tan(300 * j / W) + 1) / 2 + (Math.tan(100 * j / W) + 1) / 10;
+    }
+
+    var dCoffHf = new Array(H);
+    for (var i = 0; i < H; i++)
+    {
+        dCoffHf[i] = 0.02 * Math.tan(i / H);
+    }
+
+    var r, g, b;
+    for (var i = 0; i < H; i++)
+    {
+        for (var j = 0; j < W; j++)
+        {
+            f = ( dCoffWf[j] + dCoffHf[i] ) * 40 + 0.5;
+            f = f - Math.floor(f);
+
+            if ( f < 2e-1 )
+                f = 1 - f / 2;
+            else if ( f < 4e-1 )
+                f = 1 - ( 4e-1 - f ) / 2;
+            else
+                f = 1;
+
+            if (i == H - 1 || (i == H - 2 && j < W - 2) || j >= W - 1 || (j == W - 2 && i < H - 1))
+                f = f / 2;
+
+            if (i == 0 || (i == 1 && j > 1) || j == 0 || (j == 1 && i > 1))
+            {
+                r = 128 + Red   * f / 2;
+                g = 128 + Green * f / 2;
+                b = 128 + Blue  * f / 2;
+            }
+            else
+            {
+                r = Red   * f;
+                g = Green * f;
+                b = Blue  * f;
+            }
+
+            var Index = (j + i * W) * 4;
+            ImageData.data[Index + 0] = r;
+            ImageData.data[Index + 1] = g;
+            ImageData.data[Index + 2] = b;
+            ImageData.data[Index + 3] = 255;
+        }
+    }
+
+    this.m_oImageData.Board = ImageData;
+    this.m_oImageData.W = W;
+    this.m_oImageData.H = H;
+
+    this.m_oCreateWoodyId = null;
+};
+CDrawingBoard.prototype.private_DrawTrueColorFullBoard = function()
+{
+    this.private_DrawTrueColorBoard();
+    this.private_DrawTrueColorLines();
+    this.private_DrawTrueColorAllStones();
+};
+CDrawingBoard.prototype.private_DrawTrueColorBoard = function()
+{
+    var Board = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
+    Board.putImageData(this.m_oImageData.Board, 0, 0);
+};
+CDrawingBoard.prototype.private_CreateLines = function()
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    if (0 === W || 0 === H)
+        return;
+
+    var dHorOff = this.m_dKoeffOffsetX * W;
+    var dVerOff = this.m_dKoeffOffsetY * H;
+    var dCellH  = this.m_dKoeffCellH * H;
+    var dCellW  = this.m_dKoeffCellW * W;
+
+    var oSize = this.m_oLogicBoard.Get_Size();
+
+    // TODO: Пока мы реализуем для случая oSize.X == oSize.Y
+    var Lines = new Array(oSize.X);
+    var X = dHorOff;
+    var Y = dVerOff;
+    for (var Index = 0; Index < oSize.X; Index++)
+    {
+        X = dHorOff + Index * dCellW;
+        Y = dVerOff + Index * dCellH;
+        Lines[Index] =
+        {
+            X : Math.floor(X + 0.5),
+            Y : Math.floor(Y + 0.5)
+        };
+    }
+
+    this.m_oImageData.Lines = Lines;
+
+    var dRad = this.m_dKoeffDiam * W / 2;
+    var nRad = Math.max(2, Math.ceil(dRad)); // Минимальный радиус пункта должен быть 2 пикселя.
+    var Diam = nRad * 2 + 1;
+    var _x   = nRad;
+    var _y   = nRad;
+
+    var HandiColor = this.m_oLinesColor;
+    this.m_oImageData.Handi = this.private_DrawHandiMark(_x, _y, nRad, Diam, Diam, HandiColor);
+    this.m_oImageData.HandiRad = nRad;
+};
+CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    var LinesCanvas = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
+    var oSize = this.m_oLogicBoard.Get_Size();
+    var Lines = this.m_oImageData.Lines;
+
+    // Очищаем канву
+    LinesCanvas.clearRect(0, 0, W, H);
+
+    // Рисуем форовые метки
+    if (oSize.X === oSize.Y && (9 === oSize.X || 13 === oSize.X || 19 === oSize.X))
+    {
+        var Handi = this.m_oImageData.Handi;
+        var nRad  = this.m_oImageData.HandiRad;
+
+        var aPoints = [];
+        switch (oSize.X)
+        {
+            case 9:  aPoints = [[2, 2], [2, 6], [4, 4], [6, 2], [6, 6]]; break;
+            case 13: aPoints = [[3, 3], [3, 6], [3, 9], [6, 3], [6, 6], [6, 9], [9, 3], [9, 6], [9, 9]]; break;
+            case 19: aPoints = [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]]; break;
+        }
+
+        for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
+        {
+            var dX = Lines[aPoints[nPointIndex][0]].X - nRad;
+            var dY = Lines[aPoints[nPointIndex][1]].Y - nRad;
+
+            LinesCanvas.putImageData(Handi, dX, dY);
+        }
+    }
+
+    // Рисуем сетку
+    var X_0 = Lines[0].X;
+    var X_1 = Lines[Lines.length - 1].X;
+
+    var Y_0 = Lines[0].Y;
+    var Y_1 = Lines[Lines.length - 1].Y;
+
+    var VerLine = LinesCanvas.createImageData(1, Y_1 - Y_0);
+    var HorLine = LinesCanvas.createImageData(X_1 - X_0, 1);
+
+    var LineColor = this.m_oLinesColor;
+    for (var i = 0; i < Y_1 - Y_0; i++)
+    {
+        var Index = i * 4;
+        VerLine.data[Index + 0] = LineColor.r;
+        VerLine.data[Index + 1] = LineColor.g;
+        VerLine.data[Index + 2] = LineColor.b;
+        VerLine.data[Index + 3] = LineColor.a;
+    }
+
+    for (var i = 0; i < X_1 - X_0; i++)
+    {
+        var Index = i * 4;
+        HorLine.data[Index + 0] = LineColor.r;
+        HorLine.data[Index + 1] = LineColor.g;
+        HorLine.data[Index + 2] = LineColor.b;
+        HorLine.data[Index + 3] = LineColor.a;
+    }
+
+    for (var i = 0; i < oSize.X; i++)
+    {
+        LinesCanvas.putImageData(VerLine, Lines[i].X, Lines[0].Y);
+        LinesCanvas.putImageData(HorLine, Lines[0].X, Lines[i].Y);
+    }
+
+    // Пересечения на доске, которые мы не отрисовываем из-за текстовых отметок
+    if (undefined !== Exclude)
+    {
+        var DWidth = parseInt(this.m_dkoefCellW * W);
+        var d = Math.floor(DWidth / 2) * 2 + 1;
+        var Rad = (d - 1) / 2;
+
+        var clear_w = Lines[1].X - Lines[0].X + 2;
+        var clear_h = Lines[1].Y - Lines[0].Y + 2;
+
+        for ( var Index = 0; Index < Exclude.length; Index++ )
+        {
+            var X = Exclude[Index].X;
+            var Y = Exclude[Index].Y;
+
+            if (BOARD_EMPTY === this.m_oLogicBoard.Get(X,Y) )
+            {
+                var _X = Lines[X - 1].X - Rad;
+                var _Y = Lines[Y - 1].Y - Rad;
+
+                LinesCanvas.clearRect( _X, _Y, clear_w, clear_h );
+            }
+        }
+    }
+};
+CDrawingBoard.prototype.private_DrawHandiMark = function(x, y, radius, w, h, Color)
+{
+    var Canv   = document.createElement("canvas");
+    var Canvas = Canv.getContext("2d");
+
+    var ImageData = Canvas.createImageData(w,h);
+
+    var u = radius // ставим минимум 2, чтобы при любом маленьком зуме точки не пропадали
+    var v = -1;
+    var s = u * u;
+    var l = 0.0;
+
+    while ( u > v )
+    {
+        v++;
+
+        var p  = Math.sqrt(s - v * v);
+        var d  = Math.ceil(p) - p;
+
+        if (d <= l)
+            u--;
+
+        // Внешняя часть
+
+        var a0 = Math.floor((1.0 - d) * 255);
+
+        var xpu  = x + u;
+        var ypu  = y + u;
+        var xpv  = x + v;
+        var ypv  = y + v;
+        var xmu  = x - u;
+        var ymu  = y - u;
+        var xmv  = x - v;
+        var ymv  = y - v;
+
+        this.private_PutPixel(ImageData, xpu , ypv , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xpv , ypu , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xmu , ypv , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xmv , ypu , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xpu , ymv , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xpv , ymu , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xmu , ymv , a0, w, h, Color);
+        this.private_PutPixel(ImageData, xmv , ymu , a0, w, h, Color);
+
+        // Внутренняя часть
+
+        var a1 = 255;
+
+        var xpu0 = xpu - 1;
+        var ypu0 = ypu - 1;
+        var xmu1 = xmu + 1;
+        var ymu1 = ymu + 1;
+
+        this.private_PutHorLine(ImageData, xmu1, xpu0, a1, ypv, w, h, Color);
+        this.private_PutVerLine(ImageData, ymu1, ypu0, a1, xpv, w, h, Color);
+        this.private_PutHorLine(ImageData, xmu1, xpu0, a1, ymv, w, h, Color);
+        this.private_PutVerLine(ImageData, ymu1, ypu0, a1, xmv, w, h, Color);
+
+        l = d;
+    }
+
+    return ImageData;
+};
+CDrawingBoard.prototype.private_PutPixel = function(ImageData, x, y, alpha, w, h, Color)
+{
+    var Index = (x + y * w ) * 4;
+
+    ImageData.data[Index + 0] = Color.r;
+    ImageData.data[Index + 1] = Color.g;
+    ImageData.data[Index + 2] = Color.b;
+    ImageData.data[Index + 3] = alpha;
+};
+CDrawingBoard.prototype.private_PutHorLine = function(ImageData, x1, x2,alpha, y, w, h, Color)
+{
+    for (var x = x1; x <= x2; x++)
+        this.private_PutPixel(ImageData, x, y, alpha, w, h, Color);
+};
+CDrawingBoard.prototype.private_PutVerLine = function(ImageData, y1, y2,alpha, x, w, h, Color)
+{
+    for (var y = y1; y <= y2; y++)
+        this.private_PutPixel(ImageData, x, y, alpha, w, h, Color);
+};
+CDrawingBoard.prototype.private_CreateTrueColorStones = function()
+{
+    var W = this.HtmlElement.Board.Control.HtmlElement.width;
+    var H = this.HtmlElement.Board.Control.HtmlElement.height;
+
+    var pixel = 0.8, shadow = 0.7;
+
+    var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
+
+    var DWidth = Math.floor(this.m_dKoeffCellW * W);
+
+    var d = Math.floor(DWidth / 2) * 2 + 1;
+    this.m_oImageData.StoneDiam = d;
+
+    this.m_oImageData.BlackStone  = StonesCanvas.createImageData(d, d);
+    this.m_oImageData.WhiteStone  = StonesCanvas.createImageData(d, d);
+    this.m_oImageData.BlackTarget = StonesCanvas.createImageData(d, d);
+    this.m_oImageData.WhiteTarget = StonesCanvas.createImageData(d, d);
+
+    var BlackBitmap = this.m_oImageData.BlackStone.data;
+    var WhiteBitmap = this.m_oImageData.WhiteStone.data;
+    var BlackTarget = this.m_oImageData.BlackTarget.data;
+    var WhiteTarget = this.m_oImageData.WhiteTarget.data;
+
+    var d2 = d / 2.0 - 5e-1;
+    var r = d2 - 2e-1;
+    var f = Math.sqrt(3);
+
+    for (var i = 0; i < d; i++)
+    {
+        for (var j = 0; j < d; j++)
+        {
+            var di = i - d2;
+            var dj = j - d2;
+            var hh = r - Math.sqrt( di * di + dj * dj );
+            var Index = (i * d + d - j - 1) * 4;
+            if (hh >= 0)
+            {
+                var z = r * r - di * di - dj * dj;
+
+                if (z > 0)
+                    z = Math.sqrt(z) * f;
+                else
+                    z = 0;
+
+                var x = di;
+                var y = dj;
+
+                var xr = Math.sqrt( 6 * ( x * x + y * y + z * z ) );
+                xr = (2 * z - x + y) / xr;
+
+                var xg = 0;
+
+                if (xr > 0.9)
+                    xg = (xr - 0.9) * 10;
+
+                var alpha = 255;
+
+                if ( hh <= pixel )
+                {
+                    hh = (pixel - hh) / pixel;
+                    var shade = shadow;
+                    if (di - dj < r/3)
+                        shade = 1;
+
+                    alpha = parseInt((1 - hh * shade ) * 255);
+                }
+
+                var g = parseInt(10 + 10 * xr + xg * 140);
+
+                BlackBitmap[Index + 0] = g;
+                BlackBitmap[Index + 1] = g;
+                BlackBitmap[Index + 2] = g;
+                BlackBitmap[Index + 3] = alpha;
+
+                BlackTarget[Index + 0] = g;
+                BlackTarget[Index + 1] = g;
+                BlackTarget[Index + 2] = g;
+                BlackTarget[Index + 3] = parseInt(alpha / 2);
+
+                g = parseInt(200 + 10 * xr + xg * 45);
+
+                WhiteBitmap[Index + 0] = g;
+                WhiteBitmap[Index + 1] = g;
+                WhiteBitmap[Index + 2] = g;
+                WhiteBitmap[Index + 3] = alpha;
+
+                WhiteTarget[Index + 0] = g;
+                WhiteTarget[Index + 1] = g;
+                WhiteTarget[Index + 2] = g;
+                WhiteTarget[Index + 3] = parseInt(alpha / 2);
+            }
+            else
+            {
+                BlackBitmap[Index + 0] = 0;
+                BlackBitmap[Index + 1] = 0;
+                BlackBitmap[Index + 2] = 0;
+                BlackBitmap[Index + 3] = 0;
+
+                BlackTarget[Index + 0] = 0;
+                BlackTarget[Index + 1] = 0;
+                BlackTarget[Index + 2] = 0;
+                BlackTarget[Index + 3] = 0;
+
+                WhiteBitmap[Index + 0] = 0;
+                WhiteBitmap[Index + 1] = 0;
+                WhiteBitmap[Index + 2] = 0;
+                WhiteBitmap[Index + 3] = 0;
+
+                WhiteTarget[Index + 0] = 0;
+                WhiteTarget[Index + 1] = 0;
+                WhiteTarget[Index + 2] = 0;
+                WhiteTarget[Index + 3] = 0;
+            }
+        }
+    }
+
+    var WhiteStones = new Array();
+    var WhiteStones2 = new Array();
+
+    for (var Index = 0; Index < 28; Index++)
+    {
+        WhiteStones[Index]  = StonesCanvas.createImageData(d, d);
+        WhiteStones2[Index] = WhiteStones[Index].data;
+        for (var i = 0; i < d; i++)
+        {
+            for (var j = 0; j < d; j++)
+            {
+                var CurIndex = (i * d + j) * 4;
+                WhiteStones2[Index][CurIndex + 0] = WhiteBitmap[CurIndex + 0];
+                WhiteStones2[Index][CurIndex + 1] = WhiteBitmap[CurIndex + 1];
+                WhiteStones2[Index][CurIndex + 2] = WhiteBitmap[CurIndex + 2];
+                WhiteStones2[Index][CurIndex + 3] = WhiteBitmap[CurIndex + 3];
+            }
+        }
+    }
+
+    WhiteStones2.push(WhiteTarget);
+    WhiteStones2.push(WhiteBitmap);
+
+    this.private_CreateSlateWhiteStones(WhiteStones2, W, H, d, d);
+    this.m_oImageData.WhiteStones  = WhiteStones;
+
+    for (var Y = 0; Y < 19; Y++)
+    {
+        for (var X = 0; X < 19; X++)
+        {
+            var Rand = Math.floor(Math.random() * (this.m_oImageData.WhiteStones.length - 1));
+            this.m_oImageData.WhiteStones2[X + Y * 19] = Rand;
+        }
+    }
+};
+CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w, h, _w, _h)
+{
+    var f = 9e-1;
+
+    var dCoffWf = new Array( w );
+
+    for ( var j = 0; j < w; j++ )
+    {
+        dCoffWf[j] =  (Math.sin(18 * j / w) + 1) / 20 + (Math.sin(3 * j / w) + 1) / 10;
+    }
+
+    var dCoffHf = new Array( h );
+    for ( var i = 0; i < h; i++ )
+    {
+        dCoffHf[i] = 0.2 * Math.cos( 5 * i / h ) + 0.1 * Math.sin( 11 * i / h );
+    }
+
+    var aKoefs = new Array( w * h );
+
+    for (var i = 0; i < h; i++)
+    {
+        for (var j = 0; j < w; j++)
+        {
+            f = ( dCoffWf[j] + dCoffHf[i] ) * 75 + 0.5;
+            f = f - Math.floor(f);
+
+            if ( f < 2e-1 )
+                f = 1 - f / 2;
+            else if ( f < 4e-1 )
+                f = 1 - ( 4e-1 - f ) / 2;
+            else
+                f = 1;
+
+            aKoefs[j + i * w] = f;
+        }
+    }
+
+    var Lines = this.m_oImageData.Lines;
+    var Rad   = (this.m_oImageData.StoneDiam - 1) / 2;
+    var Count = ImageDatas.length;
+    for (var Index = 0; Index < Count; Index++)
+    {
+        var ImageData = ImageDatas[Index];
+
+        var __x = 0;
+        var __y = 0;
+
+        switch (Index)
+        {
+            /*
+             case  0: __x =  5; __y =  7; break;
+             case  1: __x =  5; __y =  8; break;
+             case  2: __x = 10; __y =  8; break;
+             case  3: __x = 10; __y =  9; break;
+             case  4: __x = 10; __y = 10; break;
+             case  5: __x = 11; __y =  7; break;
+             case  6: __x = 12; __y =  7; break;
+             case  7: __x =  5; __y =  5; break;
+             case  8: __x =  4; __y =  4; break;
+             case  9: __x =  6; __y =  3; break;
+             case 10: __x =  5; __y = 18; break;
+             case 11: __x =  6; __y = 18; break;
+             */
+
+            case  0: __x =  0; __y =  3; break;
+            case  1: __x =  0; __y =  4; break;
+            case  2: __x =  0; __y =  5; break;
+            case  3: __x =  0; __y =  6; break;
+            case  4: __x =  1; __y =  3; break;
+            case  5: __x =  1; __y =  4; break;
+            case  6: __x =  1; __y =  5; break;
+            case  7: __x =  1; __y =  6; break;
+            case  8: __x =  2; __y =  3; break;
+            case  9: __x =  2; __y =  4; break;
+            case 10: __x =  2; __y =  5; break;
+            case 11: __x =  2; __y =  6; break;
+            case 12: __x =  3; __y =  3; break;
+            case 13: __x =  3; __y =  4; break;
+            case 14: __x =  3; __y =  5; break;
+            case 15: __x =  3; __y =  6; break;
+            case 16: __x =  4; __y =  3; break;
+            case 17: __x =  4; __y =  4; break;
+            case 18: __x =  4; __y =  5; break;
+            case 19: __x =  4; __y =  6; break;
+            case 20: __x =  5; __y =  3; break;
+            case 21: __x =  5; __y =  4; break;
+            case 22: __x =  5; __y =  5; break;
+            case 23: __x =  5; __y =  6; break;
+            case 24: __x =  6; __y =  3; break;
+            case 25: __x =  6; __y =  4; break;
+            case 26: __x =  6; __y =  5; break;
+            case 27: __x =  6; __y =  6; break;
+        }
+
+        var x = Lines[__x].X - Rad;
+        var y = Lines[__y].Y - Rad;
+
+        for (var i = 0; i < _h; i++)
+        {
+            for (var j = 0; j < _w; j++)
+            {
+                f = aKoefs[x + j + (y + i) * w];
+
+                var ImageDataIndex = (j + i * _w) * 4;
+                ImageData[ImageDataIndex + 0] *= f;
+                ImageData[ImageDataIndex + 1] *= f;
+                ImageData[ImageDataIndex + 2] *= f;
+            }
+        }
+    }
+};
+CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    this.HtmlElement.Stones.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+
+    var oSize = this.m_oLogicBoard.Get_Size();
+    for (var Y = 1; Y <= oSize.Y; Y++)
+    {
+        for (var X = 1; X <= oSize.X; X++)
+        {
+            this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
+        }
+    }
+};
+CDrawingBoard.prototype.private_CreateShadows = function()
+{
+    var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
+    var d = this.m_oImageData.StoneDiam;
+    this.m_oImageData.Shadow = ShadowCanvas.createImageData(d, d);
+    var Shadow = this.m_oImageData.Shadow.data;
+    this.m_oImageData.ShadowOff = Math.max(parseInt(d * 0.15), 3);
+
+    var r = (d - 5) / 2 + 1;
+    for (var i = 0; i < d; i++)
+    {
+        for (var j = 0; j < d; j++)
+        {
+            var y = Math.abs(i - r);
+            var x = Math.abs(j - r);
+            var dist = Math.sqrt(x * x + y * y) / r;
+
+            var f = ( dist < 1.0 ? 0.15 + 0.75 * ( 1 - dist ) : 0 );
+
+            var Index = (d * i + j) * 4;
+            Shadow[Index + 0] = 0;
+            Shadow[Index + 1] = 0;
+            Shadow[Index + 2] = 0;
+            Shadow[Index + 3] = parseInt( 255 * f );
+        }
+    }
 };
