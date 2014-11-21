@@ -58,7 +58,7 @@ function CControlContainer()
     this.HtmlElement    = null;
 
     this.AbsolutePosition = new CControlBounds();
-	
+
     this.Controls       = new Array();
 }
 

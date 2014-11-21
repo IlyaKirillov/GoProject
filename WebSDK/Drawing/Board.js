@@ -68,16 +68,21 @@ function CDrawingBoard()
         Event    : {Control : null}  // Div для обработки сообщений мыши и клавиатуры.
     };
 
+    this.m_oLastTargetPos = { X : -1, Y : -1 };
+
     var oThis = this;
 
     this.private_OnMouseMove = function(e)
     {
-        //check_MouseMoveEvent(e);
-        //var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
+        check_MouseMoveEvent(e);
+        var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
+        oPos = oThis.private_GetBoardPosByXY(oPos.X, oPos.Y);
+        oThis.private_UpdateTarget(oPos.X, oPos.Y, e, false);
     };
     this.private_OnMouseOut = function(e)
     {
-        //check_MouseMoveEvent(e);
+        check_MouseMoveEvent(e);
+        oThis.private_HideTarget();
     };
     this.private_OnMouseDown = function(e)
     {
@@ -197,6 +202,10 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 //            this.Show_Target();
 //        }
 //    }
+};
+CDrawingBoard.Show_Target = function()
+{
+    this.private_UpdateTarget(this.m_oLastTargetPos.X, this.m_oLastTargetPos.Y, null, true);
 };
 CDrawingBoard.prototype.private_CreateCanvasElement = function(oParentElement, sName)
 {
@@ -1001,4 +1010,139 @@ CDrawingBoard.prototype.private_CreateShadows = function()
             Shadow[Index + 3] = parseInt( 255 * f );
         }
     }
+};
+CDrawingBoard.prototype.private_UpdateTarget = function(X, Y, e, bForce)
+{
+    if (null !== this.m_oCreateWoodyId || null === this.m_oImageData.Lines)
+        return;
+
+    if (undefined === bForce)
+        bForce = false;
+
+    if (X !== this.m_oLastTargetPos.X || Y !== this.m_oLastTargetPos.Y || true === bForce)
+    {
+        this.m_oLastTargetPos.X = X;
+        this.m_oLastTargetPos.Y = Y;
+
+        var W = this.m_oImageData.W;
+        var H = this.m_oImageData.H;
+
+        var TargetCanvas = this.HtmlElement.Target.Control.HtmlElement.getContext("2d");
+        TargetCanvas.clearRect(0, 0, W, H);
+
+        var d = this.m_oImageData.StoneDiam;
+        var Rad = (d - 1) / 2;
+        var Lines = this.m_oImageData.Lines;
+
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
+
+        if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
+        {
+            if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
+                TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
+            else
+                TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
+        }
+                /*
+        switch( this.m_nEditMode )
+        {
+            case editmode_Move:
+            {
+                if ( empty == this.m_oBoard.Get(X, Y) )
+                {
+                    if ( black == this.m_oGameTree.Get_NextMove() )
+                        Target.putImageData( this.m_oImgData.BlackTarget, _X, _Y );
+                    else
+                        Target.putImageData( this.m_oImgData.WhiteTarget, _X, _Y );
+                }
+
+                break;
+            }
+            case editmode_CountScores:
+            {
+                if ( black == this.m_oBoard.Get(X, Y) )
+                    Target.putImageData( this.m_oImgData.X_White, _X, _Y );
+                else if ( white == this.m_oBoard.Get(X, Y) )
+                    Target.putImageData( this.m_oImgData.X_Black, _X, _Y );
+
+                break;
+            }
+            case editmode_AddRemove:
+            {
+                if ( black == this.m_oBoard.Get(X, Y) )
+                    Target.putImageData( this.m_oImgData.X_White, _X, _Y );
+                else if ( white == this.m_oBoard.Get(X, Y) )
+                    Target.putImageData( this.m_oImgData.X_Black, _X, _Y );
+                else
+                {
+                    if ( e.shiftKey )
+                        Target.putImageData( this.m_oImgData.WhiteTarget, _X, _Y );
+                    else
+                        Target.putImageData( this.m_oImgData.BlackTarget, _X, _Y );
+                }
+
+                break;
+            }
+            default:
+            {
+                if ( black == this.m_oBoard.Get(X, Y) )
+                    Target.putImageData( this.m_oImgData.X_White, _X, _Y );
+                else
+                    Target.putImageData( this.m_oImgData.X_Black, _X, _Y );
+
+                break;
+            }
+        }
+        */
+    }
+
+    // TODO: Обновление статус бара, когда он будет
+};
+CDrawingBoard.prototype.private_HideTarget = function()
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    var TargetCanvas = this.HtmlElement.Target.Control.HtmlElement.getContext("2d");
+    TargetCanvas.clearRect(0, 0, W, H);
+
+    this.m_oLastTargetPos.X = -1;
+    this.m_oLastTargetPos.Y = -1;
+};
+CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    var dHorOff = this.m_dKoeffOffsetX * W;
+    var dVerOff = this.m_dKoeffOffsetY * H;
+    var dCellH  = this.m_dKoeffCellH * H;
+    var dCellW  = this.m_dKoeffCellW * W;
+
+    var Y = 0;
+
+    var oSize = this.m_oLogicBoard.Get_Size();
+    for (Y = 0; Y < oSize.Y - 1; Y++)
+    {
+        if (_Y > dVerOff + dCellH * Y + dCellH / 2)
+            continue;
+        else
+        {
+            break;
+        }
+    }
+
+    var X = 0;
+    for (X = 0; X < oSize.X - 1; X++)
+    {
+        if (_X > dHorOff + dCellW * X + dCellW / 2)
+            continue;
+        else
+        {
+            break;
+        }
+    }
+
+    return {X : X + 1, Y : Y + 1};
 };

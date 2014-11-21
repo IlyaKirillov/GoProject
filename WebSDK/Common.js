@@ -50,3 +50,20 @@ function Common_CopyArray(arrSrc)
 
     return arrDst;
 }
+
+function Common_FindPosition( oElement )
+{
+    if( typeof( oElement.offsetParent ) != 'undefined' )
+    {
+        for( var posX = 0, posY = 0; oElement; oElement = oElement.offsetParent )
+        {
+            posX += oElement.offsetLeft;
+            posY += oElement.offsetTop;
+        }
+        return { X:posX, Y:posY };
+    }
+    else
+    {
+        return { X:oElement.x, Y:oElement.y };
+    }
+}
