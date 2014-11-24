@@ -232,8 +232,17 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
         this.private_OnResize(true);
     }
 };
-CDrawingBoard.prototype.Update_Size = function(W, H)
+CDrawingBoard.prototype.Update_Size = function()
 {
+    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
+    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
+
+    if (W !== H)
+    {
+        W = Math.min(W, H);
+        H = W;
+    }
+
     this.HtmlElement.Control.Resize(W, H);
 
     this.private_UpdateKoeffs();
