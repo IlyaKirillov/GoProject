@@ -14,7 +14,7 @@ function CNode(oGameTree)
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
     this.m_oPrev      = null;                      // Родительская нода
     this.m_aCommands  = [];                        // Массив команд данной ноды
-    this.m_oMove      = new CMove(0, BOARD_WHITE); // Основной ход данной ноды (если он есть)
+    this.m_oMove      = new CMove(0, BOARD_EMPTY); // Основной ход данной ноды (если он есть)
     this.m_sComment   = "";                        // Комментарий
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
     this.m_oNavInfo   = {X : -1, Y : -1};          // Позиция данной ноды в навигаторе
@@ -28,7 +28,7 @@ CNode.prototype.Get_Id = function()
 };
 CNode.prototype.Get_Next = function(Index)
 {
-    return (undefined !== this.m_aNex[Index] ? this.m_aNext[Index] : this.m_aNext[this.m_nNextCur]);
+    return (undefined !== this.m_aNext[Index] ? this.m_aNext[Index] : this.m_aNext[this.m_nNextCur]);
 };
 CNode.prototype.Get_NextCur = function()
 {
@@ -46,7 +46,7 @@ CNode.prototype.Get_NextsCount = function()
 };
 CNode.prototype.Add_Next = function(Node, bSetCur)
 {
-    this.m_aNext.Add(Node);
+    this.m_aNext.push(Node);
 
     if (true === bSetCur)
         this.m_nNextCur = this.m_aNext.length - 1;
@@ -71,7 +71,7 @@ CNode.prototype.Set_Prev = function(Node)
 };
 CNode.prototype.Add_Command = function(Command)
 {
-    this.m_aCommands.Add(Command);
+    this.m_aCommands.push(Command);
 };
 CNode.prototype.Get_Command = function(Index)
 {
@@ -136,7 +136,7 @@ CNode.prototype.Get_MainVariantLen = function()
 {
     var Count = 1; // сама нода всегда входит в основной вариант
     var NextNode = this;
-    while (NextNode.Get_Nexts_Count() > 0)
+    while (NextNode.Get_NextsCount() > 0)
     {
         Count++;
         NextNode = NextNode.Get_Next(0);
@@ -157,7 +157,7 @@ CNode.prototype.Get_LastNodeInMainVariant = function()
 {
     // Смещаемся к последней ноде в основном варианте
     var CurNode = this;
-    while (CurNode.Get_Nexts_Count() > 0)
+    while (CurNode.Get_NextsCount() > 0)
         CurNode = CurNode.Get_Next(0);
 
     return CurNode;
@@ -170,10 +170,10 @@ CNode.prototype.Make_ThisNodeCurrent = function()
 {
     var CurrNode = this.Get_Prev();
     var NextNode = this;
-    while (null != CurrentNode)
+    while (null != CurrNode)
     {
         var bFind = false;
-        for (var Index = 0, NextsCount = CurrNode.Get_Nexts_Count(); Index < NextsCount; Index++)
+        for (var Index = 0, NextsCount = CurrNode.Get_NextsCount(); Index < NextsCount; Index++)
         {
             if (NextNode === CurrNode.Get_Next(Index))
             {
@@ -234,7 +234,7 @@ CNode.prototype.Add_Move = function(X, Y, Value)
     var Pos = Common_XYtoValue(X, Y);
     this.Add_Command(new CCommand((BOARD_BLACK === Value ? ECommand.B : ECommand.W), Pos));
 
-    if (BOARD_EMPTY === this.m_oMove.Value)
+    if (BOARD_EMPTY === this.m_oMove.Get_Type())
     {
         this.m_oMove.Set_Value(Pos);
         this.m_oMove.Set_Type(Value);
@@ -249,9 +249,20 @@ CNode.prototype.AddOrRemove_Stones = function(Value, arrPos)
     var Type = (BOARD_BLACK === Value ? ECommand.AB : (BOARD_WHITE === Value ? ECommand.AW : ECommand.AE));
     this.Add_Command(new CCommand(Type, Common_CopyArray(arrPos), arrPos.length));
 };
-CNode.prototype.Add_Mark = function(Type, arrPos)
+CNode.prototype.Add_Mark = function(MarkType, arrPos)
 {
-    this.Add_Command(new CCommand(Type, Common_CopyArray(arrPos), arrPos.length));
+    var CommandType = ECommand.Unknown;
+    switch(MarkType)
+    {
+        case EDrawingMark.Cr: CommandType = ECommand.CR; break;
+        case EDrawingMark.Lm: CommandType = ECommand.LM; break;
+        case EDrawingMark.Sq: CommandType = ECommand.SQ; break;
+        case EDrawingMark.Tr: CommandType = ECommand.TR; break;
+        case EDrawingMark.Tx: CommandType = ECommand.Tx; break;
+        case EDrawingMark.X : CommandType = ECommand.X;  break;
+    }
+
+    this.Add_Command(new CCommand(CommandType, Common_CopyArray(arrPos), arrPos.length));
 };
 CNode.prototype.Add_TextMark = function(sText, Pos)
 {
@@ -269,13 +280,15 @@ CNode.prototype.Add_WhiteTimeLeft = function(Time)
 {
     this.Add_Command(new CCommand(ECommand.WL, Time));
 };
-CNode.prototype.Show_Variants = function(oDrawing)
+CNode.prototype.Show_Variants = function(eType, oDrawingBoard)
 {
-    switch (this.m_nShowVariants)
+    oDrawingBoard.Clear_Variants();
+
+    switch (eType)
     {
         case EShowVariants.Next:
         {
-            this.private_ShowNextVariants(oDrawing, -1);
+            this.private_ShowNextVariants(oDrawingBoard, -1);
             break;
         }
 
@@ -283,7 +296,7 @@ CNode.prototype.Show_Variants = function(oDrawing)
         {
             var PrevNode = this.Get_Prev();
             if (null !== PrevNode)
-                PrevNode.private_ShowNextVariants(oDrawing, this.Get_Move().Get_Value());
+                PrevNode.private_ShowNextVariants(oDrawingBoard, this.Get_Move().Get_Value());
 
             break;
         }
@@ -292,9 +305,9 @@ CNode.prototype.Show_Variants = function(oDrawing)
             return;
     }
 };
-CNode.prototype.private_ShowNextVariants = function(oDrawing, ExceptionalValue)
+CNode.prototype.private_ShowNextVariants = function(oDrawingBoard, ExceptionalValue)
 {
-    if (!oDrawing)
+    if (!oDrawingBoard)
         return;
 
     for (var Index = 0, NextsCount = this.Get_NextsCount(); Index < NextsCount; Index++)
@@ -305,7 +318,7 @@ CNode.prototype.private_ShowNextVariants = function(oDrawing, ExceptionalValue)
         if (BOARD_EMPTY !== oMove.Get_Type() && ExceptionalValue !== oMove.Get_Value())
         {
             var Pos = Common_ValuetoXY(oMove.Get_Value());
-            this.m_oDrawing.Draw_Variant(Pos.X, Pos.Y);
+            oDrawingBoard.Draw_Variant(Pos.X, Pos.Y);
         }
     }
 };

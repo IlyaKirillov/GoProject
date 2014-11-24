@@ -15,6 +15,7 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_oMarks          = Marks;
 
     this.m_oBoard          = new CLogicBoard();
+    this.m_oDrawingBoard   = null;
 
     this.m_aNodes          = [];                // Список со всеми нодами
     this.m_oFirstNode      = new CNode(this);   // Первая нода
@@ -23,6 +24,8 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
 
     this.m_nBlackCapt      = 0; // количество пленников черного игрока
     this.m_nWhiteCapt      = 0; // количество пленников белого игрока
+
+    this.m_nNextMove       = BOARD_BLACK;
 
     this.m_nKomi           = 0;
     this.m_nHandicap       = 0;
@@ -63,16 +66,11 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     //       "GN", "GC", "ON", "PC", "RO", "SO", "TM", "US", "WT"
 
     this.m_bEventEnable  = true;
-    this.m_nShowVariants = EShowVariants.Next;
+    this.m_eShowVariants = EShowVariants.Next;
 };
-
-CGameTree.prototype.Init_Match = function()
+CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {
-    this.m_oCurNode      = this.m_oFirstNode;
-    this.m_nBlackCapt    = 0;
-    this.m_nWhiteCapt    = 0;
-    this.m_nMovesCount   = 0;
-    this.m_nCurNodeDepth = 0;
+    this.m_oDrawingBoard = DrawingBoard;
 };
 CGameTree.prototype.Reset = function()
 {
@@ -92,6 +90,113 @@ CGameTree.prototype.Reset = function()
 
     this.Init_Match();
 };
+CGameTree.prototype.Step_BackwardToStart = function()
+{
+    this.GoTo_Node(this.m_oFirstNode);
+};
+CGameTree.prototype.Step_Backward = function(Count)
+{
+    var ParentNode = this.Get_CurNode();
+    while (null != ParentNode.Get_Prev() && Count > 0)
+    {
+        ParentNode = ParentNode.Get_Prev();
+        Count--;
+    }
+
+    this.GoTo_Node(ParentNode);
+}
+CGameTree.prototype.Step_Forward = function(Count)
+{
+    if (1 === Count)
+    {
+        if (!this.GoTo_Next())
+            return;
+
+        this.Execute_CurNodeCommands();
+    }
+    else
+    {
+        for (var Index = 0; Index < Count; Index++)
+            this.GoTo_Next();
+
+        this.GoTo_Node(this.Get_CurNode());
+    }
+};
+CGameTree.prototype.Step_ForwardToEnd = function()
+{
+    while (this.GoTo_Next())
+        ;
+
+    this.GoTo_Node(this.Get_CurNode());
+};
+CGameTree.prototype.GoTo_PrevVariant = function()
+{
+    var PrevNode = this.m_oCurNode.Get_Prev();
+    if (null !== PrevNode)
+    {
+        // Ищем ветку с предыдущим вариантом
+        var NextCur = PrevNode.Get_NextCur();
+        if (PrevNode.Get_NextsCount() > 0 && NextCur > 0)
+        {
+            var Node = PrevNode.Get_Next(NextCur - 1);
+            this.GoTo_Node(Node);
+        }
+    }
+};
+CGameTree.prototype.GoTo_NextVariant = function()
+{
+    var PrevNode = this.m_oCurNode.Get_Prev();
+    if (null !== PrevNode)
+    {
+        // Ищем ветку со следующим вариантом
+        var NextCur    = PrevNode.Get_NextCur();
+        var NextsCount = PrevNode.Get_NextsCount();
+        if (NextCur < NextsCount - 1)
+        {
+            var Node = PrevNode.Get_Next(NextCur + 1);
+            this.GoTo_Node(Node);
+        }
+    }
+};
+CGameTree.prototype.GoTo_MainVariant = function()
+{
+    var CurNode = this.m_oCurNode;
+    while (!CurNode.Is_OnMainVariant())
+    {
+        var PrevNode = CurNode.Get_Prev();
+
+        // Такого не должно быть.
+        if (null === PrevNode && CurNode !== this.m_oFirstNode)
+            return;
+
+        CurNode = PrevNode;
+    }
+
+    CurNode.GoTo_MainVariant();
+    this.GoTo_Node(CurNode);
+};
+CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
+{
+    if (this.m_oSound)
+        this.m_oSound.Set_Silence( true );
+
+    var CurNode = this.m_oCurNode;
+    this.Step_BackwardToStart();
+
+    var BreakCounter = 0;
+    while (BreakCounter < 1000 && BOARD_EMPTY === this.m_oBoard.Get(X, Y))
+    {
+        this.Step_Forward(1);
+        BreakCounter++;
+    }
+
+    // Если мы не нашли искомую ноду, тогда возвращаемся к начальной
+    if (BOARD_EMPTY === this.m_oBoard.Get(X, Y))
+        this.GoTo_Node(CurNode);
+
+    if (this.m_oSound)
+        this.m_oSound.Set_Silence( false );
+};
 CGameTree.prototype.Get_NewNodeId = function()
 {
     return ++this.m_nNodesIdCounter;
@@ -100,13 +205,10 @@ CGameTree.prototype.Add_Node = function(oNode)
 {
     this.m_aNodes[oNode.Get_Id()] = oNode;
 };
-CGameTree.prototype.Change_NextMove = function(Value)
-{
-    this.m_nNextMove = (BOARD_BLACK === Value ? BOARD_WHITE : BOARD_BLACK);
-};
 CGameTree.prototype.Set_NextMove = function(Value)
 {
     this.m_nNextMove = Value;
+    this.m_oCurNode.Set_NextMove(Value);
 };
 CGameTree.prototype.Get_FirstNode = function()
 {
@@ -148,8 +250,11 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
             this.m_oCurNode = oNode;
             this.m_nCurNodeDepth++;
 
-            // TODO: Обновляем текущую позицию в визуальном дереве вариантов
-            this.m_oDrawing.Update_NavigatorCurrent(true);
+            if (this.m_oDrawinh)
+            {
+                // TODO: Обновляем текущую позицию в визуальном дереве вариантов
+                this.m_oDrawing.Update_NavigatorCurrent(true);
+            }
             return;
         }
     }
@@ -158,9 +263,12 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
     this.Add_NewNode(false);
     this.m_oCurNode.Add_Move(X, Y, Value);
 
-    // TODO: Обновляем визуальное дерево вариантов
-    this.m_oNavigator.Create_From_GameTree();
-    this.m_oDrawing.Update_Navigator();
+    if (this.m_oDrawing)
+    {
+        // TODO: Обновляем визуальное дерево вариантов
+        this.m_oNavigator.Create_From_GameTree();
+        this.m_oDrawing.Update_Navigator();
+    }
 };
 CGameTree.prototype.Add_MoveNumber = function(MoveNumber)
 {
@@ -236,6 +344,7 @@ CGameTree.prototype.Remove_CurNode = function()
             // удаляем, потом что придется пересчитывать номера всех нод, что очень затратно
             PrevNode.Remove_Next(Index);
             this.m_oCurNode = PrevNode;
+            this.GoTo_Node(PrevNode);
             return;
         }
     }
@@ -254,20 +363,14 @@ CGameTree.prototype.Is_CurNodeLast = function()
 };
 CGameTree.prototype.Execute_CurNodeCommands = function()
 {
-    // TODO: Отключения подсчета очков
-    // При переходе к ноде отключаем подсчет очков, если он был включен
-    if (this.m_oDrawing && editmode_CountScores == this.m_oDrawing.Get_EditMode())
-        this.m_oDrawing.Set_EditMode2( editmode_Move );
-
-    // TODO: Очистить доску от отметок и комментариев.
-    // Очистим доску от отметок и комментариев предыдущей ноды
-    if (this.m_oMarks)
-        this.m_oMarks.RemoveAll();
-
-    if (this.m_oDrawing)
+    if (this.m_oDrawingBoard)
     {
-        this.m_oDrawing.Clear_Comments();
-        this.m_oDrawing.Clear_Variants();
+        // При переходе к ноде отключаем подсчет очков, если он был включен
+        if (EBoardMode.CountScores === this.m_oDrawingBoard.Get_Mode())
+            this.m_oDrawingBoard.Set_Mode(EBoardMode.Move);
+
+        // Очистим доску от отметок и комментариев предыдущей ноды
+        this.m_oDrawingBoard.Remove_AllMarks();
         this.Show_Variants();
     }
 
@@ -283,13 +386,13 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
             case ECommand.B:
             {
                 var Pos = Common_ValuetoXY(Command_Value);
-                this.Execute_Move(Pos.X, Pos.Y, BOARD_BLACK);
+                this.Execute_Move(Pos.X, Pos.Y, BOARD_BLACK, false);
                 break;
             }
             case ECommand.W:
             {
                 var Pos = Common_ValuetoXY(Command_Value);
-                this.Execute_Move(Pos.X, Pos.Y, BOARD_WHITE);
+                this.Execute_Move(Pos.X, Pos.Y, BOARD_WHITE, false);
                 break;
             }
             case ECommand.AB:
@@ -321,74 +424,74 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
             }
             case ECommand.PL:
             {
-                this.Set_NextMove(Command_Value);
+                this.private_SetNextMove(Command_Value);
                 break;
             }
             case ECommand.CR:
             {
-                if (this.m_oMarks)
+                if (this.m_oDrawingBoard)
                 {
                     for (var Index = 0; Index < Command_Count; Index++)
                     {
                         var Pos = Common_ValuetoXY(Command_Value[Index]);
-                        this.m_oMarks.Set(Pos.X, Pos.Y, new CDrawingMark(Pos.X, Pos.Y, drawing_mark_Cr, ""));
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Cr, ""));
                     }
                 }
                 break;
             }
             case ECommand.MA:
             {
-                if (this.m_oMarks)
+                if (this.m_oDrawingBoard)
                 {
                     for (var Index = 0; Index < Command_Count; Index++)
                     {
                         var Pos = Common_ValuetoXY(Command_Value[Index]);
-                        this.m_oMarks.Set(Pos.X, Pos.Y, new CDrawingMark(Pos.X, Pos.Y, drawing_mark_X, ""));
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.X, ""));
                     }
                 }
                 break;
             }
             case ECommand.SQ:
             {
-                if (this.m_oMarks)
+                if (this.m_oDrawingBoard)
                 {
                     for (var Index = 0; Index < Command_Count; Index++)
                     {
                         var Pos = Common_ValuetoXY(Command_Value[Index]);
-                        this.m_oMarks.Set(Pos.X, Pos.Y, new CDrawingMark(Pos.X, Pos.Y, drawing_mark_Sq, ""));
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Sq, ""));
                     }
                 }
                 break;
             }
             case ECommand.TR:
             {
-                if (this.m_oMarks)
+                if (this.m_oDrawingBoard)
                 {
                     for (var Index = 0; Index < Command_Count; Index++)
                     {
                         var Pos = Common_ValuetoXY(Command_Value[Index]);
-                        this.m_oMarks.Set(Pos.X, Pos.Y, new CDrawingMark(Pos.X, Pos.Y, drawing_mark_Tr, ""));
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Tr, ""));
                     }
                 }
                 break;
             }
             case ECommand.LB:
             {
-                if (this.m_oMarks)
+                if (this.m_oDrawingBoard)
                 {
                     var Pos = Common_ValuetoXY(Command_Value.Pos);
-                    this.m_oMarks.Set(Pos.X, Pos.Y, new CDrawingMark(Pos.X, Pos.Y, drawing_mark_Tx, Command_Value.Text));
+                    this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Tx, Command_Value.Text));
                 }
                 break;
             }
             case ECommand.RM:
             {
-                if (this.m_oMarks)
+                if (this.m_oDrawingBoard)
                 {
                     for (var Index = 0; Index < Command_Count; Index++)
                     {
                         var Pos = Common_ValuetoXY(Command_Value[Index]);
-                        this.m_oMarks.RemoveAt(Pos.X, Pos.Y);
+                        this.m_oDrawingBoard.Remove_Mark(Pos.X, Pos.Y);
                     }
                 }
                 break;
@@ -409,19 +512,29 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         }
     }
 
-    if (this.m_oDrawing)
+    if (this.m_oDrawingBoard)
     {
         if (this.m_oCurNode.Is_TerritoryUse())
-            this.m_oDrawing.Set_EditMode2(editmode_CountScores);
-        else
-            this.m_oDrawing.Update_Prisoners();
+            this.m_oDrawingBoard.Set_Mode(EBoardMode.CountScores);
 
-        this.m_oDrawing.Add_Comment(this.m_oCurNode.Get_Comment());
-        this.m_oMarks.Draw(this.m_oDrawing);
-        this.m_oDrawing.Update_NavigatorCurrent(true);
+        if (this.m_oCurNode.Have_Move())
+        {
+            var oMove = this.m_oCurNode.Get_Move();
+            var X = oMove.Get_X();
+            var Y = oMove.Get_Y();
+
+            // У паса нет отметки
+            if (0 != X && 0 != Y)
+                this.m_oDrawingBoard.Set_LastMoveMark(X, Y);
+        }
+
+        this.m_oDrawingBoard.Draw_Marks();
     }
+
+    if (this.m_oDrawingComments)
+        this.m_oDrawingComments.Set(this.m_oCurNode.Get_Comment());
 };
-CGameTree.prototype.Execute_Move = function(X, Y, Value)
+CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 {
     // Проверяем пасс
     if (0 == X && 0 == Y)
@@ -436,26 +549,23 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value)
     //  3. Если камень, не убивает чужие камни, тогда проверяем самоубийство
     //  4. Увеличиваем номер хода на 1
 
-    if (this.m_oSound)
+    if (this.m_oSound && true !== bSilent)
         this.m_oSound.Play_PlaceStone();
 
-    this.m_oBoard.Set(X, Y, Value, this.m_nMovesCount + 1);
-
-    if (this.m_oDrawing)
-        this.m_oDrawing.Draw_Sector(X, Y, Value);
+    this.private_SetBoardPoint(X, Y, Value, this.m_nMovesCount + 1, bSilent);
 
     // Проверяем, убиваем ли мы данным ходом чужие камни (без проверки правила КО)
     var oDeadChecker = null;
-    if (null !== (oDeadChecker == this.m_oBoard.Check_Kill(X, Y, Value)) && oDeadChecker.Get_Size() > 0)
+    if (null !== (oDeadChecker = this.m_oBoard.Check_Kill(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
     {
-        var nGroupSize = oDeadChecker.Get_GroupSize();
+        var nGroupSize = oDeadChecker.Get_Size();
         for (var Index = 0; Index < nGroupSize; Index++)
         {
             var Pos = Common_ValuetoXY(oDeadChecker.Get_Value(Index));
             this.private_SetBoardPoint(Pos.X, Pos.Y, BOARD_EMPTY, -1);
         }
 
-        if (this.m_oSound)
+        if (this.m_oSound && true !== bSilent)
             this.m_oSound.Play_CaptureStones(oDeadChecker);
 
         if (BOARD_BLACK === Value)
@@ -466,14 +576,14 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value)
     // Проверяем самоубийство
     else  if (null !== (oDeadChecker = this.m_oBoard.Check_Dead(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
     {
-        var nGroupSize = oDeadChecker.Get_GroupSize();
+        var nGroupSize = oDeadChecker.Get_Size();
         for (var Index = 0; Index < nGroupSize; Index++)
         {
             var Pos = Common_ValuetoXY(oDeadChecker.Get_Value(Index));
             this.private_SetBoardPoint(Pos.X, Pos.Y, BOARD_EMPTY, -1);
         }
 
-        if (this.m_oSound)
+        if (this.m_oSound && true !== bSilent)
             this.m_oSound.Play_CaptureStones( g_nGroupSize );
 
         if (BOARD_BLACK === Value)
@@ -486,10 +596,6 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value)
         // Обнуляем КО
         this.m_oBoard.Reset_Ko();
     }
-
-    // Пас
-    if (this.m_oMarks && 0 != X && 0 != Y)
-        this.m_oMarks.Set_LastMoveMark(X, Y);
 
     this.private_UpdateNextMove(Value);
 };
@@ -505,12 +611,8 @@ CGameTree.prototype.GoTo_Next = function()
 };
 CGameTree.prototype.Show_Variants = function()
 {
-    this.m_oCurNode.Show_Variants();
-};
-CGameTree.prototype.GoTo_MainVariant = function(Node)
-{
-    var _Node = (undefined === Node ? this.m_oFirstNode : Node);
-    _Node.GoTo_MainVariant();
+    if (this.m_oDrawingBoard)
+        this.m_oCurNode.Show_Variants(this.m_eShowVariants, this.m_oDrawingBoard);
 };
 CGameTree.prototype.Count_Scores = function()
 {
@@ -525,23 +627,20 @@ CGameTree.prototype.GoTo_Node = function(Node)
     this.m_oBoard.Clear();
 
     // Временно отключаем звук, отрисовку камней и перемещение навигации
-    var oDrawing = this.m_oDrawing;
-    var oSound   = this.m_oSound;
-
-    this.m_oDrawing = null;
-    this.m_oSound   = null;
+    if (this.m_oSound)
+        this.m_oSound.Off();
 
     // Делаем вариант с данной нодой текущим
-    if (!oResult.Node.Make_ThisNodeCurrent())
+    if (!Node.Make_ThisNodeCurrent())
         return;
 
     this.m_oCurNode = this.m_oFirstNode;
-    while (this.m_oCurNode != Node && this.m_oCurNode.Get_Nexts_Count() > 0)
+    while (this.m_oCurNode != Node && this.m_oCurNode.Get_NextsCount() > 0)
     {
         // Выполняем на данной ноде только следующие команды:
         // ход (белых/черных), добавление/удаление камня.
 
-        var CommandsCount = this.m_oCurNode.Get_Commands_Count();
+        var CommandsCount = this.m_oCurNode.Get_CommandsCount();
         for ( var CommandIndex = 0; CommandIndex < CommandsCount; CommandIndex++ )
         {
             var Command = this.m_oCurNode.Get_Command( CommandIndex );
@@ -554,13 +653,13 @@ CGameTree.prototype.GoTo_Node = function(Node)
                 case ECommand.B:
                 {
                     var Pos = Common_ValuetoXY(Command_Value);
-                    this.Execute_Move(Pos.X, Pos.Y, BOARD_BLACK);
+                    this.Execute_Move(Pos.X, Pos.Y, BOARD_BLACK, true);
                     break;
                 }
                 case ECommand.W:
                 {
                     var Pos = Common_ValuetoXY(Command_Value);
-                    this.Execute_Move(Pos.X, Pos.Y, BOARD_WHITE);
+                    this.Execute_Move(Pos.X, Pos.Y, BOARD_WHITE, true);
                     break;
                 }
                 case ECommand.AB:
@@ -597,23 +696,16 @@ CGameTree.prototype.GoTo_Node = function(Node)
             break;
     }
 
-    // Включаем звук
-    this.m_oSound = oSound;
+    // Отрисовываем текущую позицию
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Draw_AllStones();
 
     // У последней ноды выполняем команды в нормальном режиме
     this.Execute_CurNodeCommands();
 
-    // Вклчаем отрисовку и рисуем текущую позицию
-    this.m_oDrawing = oDrawing;
-
-    if (this.m_oDrawing)
-    {
-        // Отрисовываем все камни
-        this.m_oDrawing.Draw_Board_AllStones();
-
-        // Если это необходимо, то перерисовываем навигатор
-        this.m_oDrawing.Update_Navigator();
-    }
+    // Включаем звук
+    if (this.m_oSound)
+        this.m_oSound.On();
 };
 CGameTree.prototype.Info_Get_BlackName = function()
 {
@@ -695,13 +787,17 @@ CGameTree.prototype.Get_Charset = function()
 {
     return this.m_sCharset;
 };
-CGameTree.prototype.Set_ShowVariants = function(nType)
+CGameTree.prototype.Set_ShowVariants = function(eType)
 {
-    this.m_nShowVariants = nType;
+    if (eType !== this.m_eShowVariants)
+    {
+        this.m_eShowVariants = eType;
+        this.Show_Variants();
+    }
 };
 CGameTree.prototype.Get_ShowVariants = function()
 {
-    return this.m_nShowVariants;
+    return this.m_eShowVariants;
 };
 CGameTree.prototype.Set_Annotator = function(sAnnotator)
 {
@@ -819,20 +915,31 @@ CGameTree.Set_BoardSize = function(W, H)
     if (this.m_oDrawing)
         this.m_oDrawing.OnReset_BoardSize();
 };
+CGameTree.prototype.Init_Match = function()
+{
+    this.m_oCurNode      = this.m_oFirstNode;
+    this.m_nBlackCapt    = 0;
+    this.m_nWhiteCapt    = 0;
+    this.m_nMovesCount   = 0;
+    this.m_nCurNodeDepth = 0;
+};
 CGameTree.prototype.private_UpdateNextMove = function(CurMoveValue)
 {
     if (BOARD_BLACK === CurMoveValue)
-        this.Set_NextMove(BOARD_WHITE);
+        this.private_SetNextMove(BOARD_WHITE);
     else
-        this.Set_NextMove(BOARD_BLACK);
+        this.private_SetNextMove(BOARD_BLACK);
 
     this.m_nMovesCount++;
 };
-CGameTree.prototype.private_SetBoardPoint = function(X, Y, Value, Num)
+CGameTree.prototype.private_SetBoardPoint = function(X, Y, Value, Num, bSilent)
 {
     this.m_oBoard.Set(X, Y, Value, Num);
 
-    // TODO: отрисовка
-    if (this.m_oDrawing)
-        this.m_oDrawing.Draw_Sector(X, Y, Value);
+    if (this.m_oDrawingBoard && true !== bSilent)
+        this.m_oDrawingBoard.Draw_Sector(X, Y, Value);
+};
+CGameTree.prototype.private_SetNextMove = function(Value)
+{
+    this.m_nNextMove = Value;
 };
