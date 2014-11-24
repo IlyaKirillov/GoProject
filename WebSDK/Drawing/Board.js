@@ -218,6 +218,10 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
 
     return oControl;
 };
+CDrawingBoard.prototype.Focus = function()
+{
+    this.HtmlElement.Event.Control.HtmlElement.focus();
+};
 CDrawingBoard.prototype.Set_Rulers = function(bRulers)
 {
     if (bRulers !== this.m_bRulers)
@@ -232,6 +236,11 @@ CDrawingBoard.prototype.Update_Size = function(W, H)
 {
     this.HtmlElement.Control.Resize(W, H);
 
+    this.private_UpdateKoeffs();
+    this.private_OnResize();
+};
+CDrawingBoard.prototype.On_Resize = function()
+{
     this.private_UpdateKoeffs();
     this.private_OnResize();
 };
@@ -304,9 +313,9 @@ CDrawingBoard.prototype.Draw_Marks = function()
 {
     this.private_DrawMarks();
 };
-CDrawingBoard.prototype.Draw_AllStones = function()
+CDrawingBoard.prototype.Draw_AllStones = function(OldLogicBoard)
 {
-    this.private_DrawTrueColorAllStones();
+    this.private_DrawTrueColorAllStones(OldLogicBoard);
 };
 CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 {
@@ -669,6 +678,9 @@ CDrawingBoard.prototype.private_CreateLines = function()
 };
 CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
 {
+    if (!this.m_oImageData.Lines)
+        return;
+
     var W = this.m_oImageData.W;
     var H = this.m_oImageData.H;
 
@@ -1107,20 +1119,37 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
         }
     }
 };
-CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
+CDrawingBoard.prototype.private_DrawTrueColorAllStones = function(OldLogicBoard)
 {
-    var W = this.m_oImageData.W;
-    var H = this.m_oImageData.H;
-
-    this.HtmlElement.Stones.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
-    this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
-
-    var oSize = this.m_oLogicBoard.Get_Size();
-    for (var Y = 1; Y <= oSize.Y; Y++)
+    if (undefined === OldLogicBoard)
     {
-        for (var X = 1; X <= oSize.X; X++)
+        var W = this.m_oImageData.W;
+        var H = this.m_oImageData.H;
+
+        this.HtmlElement.Stones.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+        this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+
+        var oSize = this.m_oLogicBoard.Get_Size();
+        for (var Y = 1; Y <= oSize.Y; Y++)
         {
-            this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
+            for (var X = 1; X <= oSize.X; X++)
+            {
+                this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
+            }
+        }
+    }
+    else
+    {
+        var oSize = this.m_oLogicBoard.Get_Size();
+        for (var Y = 1; Y <= oSize.Y; Y++)
+        {
+            for (var X = 1; X <= oSize.X; X++)
+            {
+                var Value = this.m_oLogicBoard.Get(X, Y);
+
+                if (Value !== OldLogicBoard.Get(X, Y))
+                    this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
+            }
         }
     }
 };
@@ -1881,6 +1910,11 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     if (8 === KeyCode || 46 === KeyCode) // backspace/delete
     {
         this.m_oGameTree.Remove_CurNode();
+    }
+    else if (13 === KeyCode) // Enter
+    {
+        var sSgfFile = prompt("Enter here code of ur sgf file", "");
+        this.m_oGameTree.Read_Sgf(sSgfFile);
     }
     else if (37 === KeyCode) // Left Arrow
     {

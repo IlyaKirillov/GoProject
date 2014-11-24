@@ -68,6 +68,13 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_bEventEnable  = true;
     this.m_eShowVariants = EShowVariants.Next;
 };
+CGameTree.prototype.Read_Sgf = function(sFile)
+{
+    var oReader = new CSgfReader(this);
+    oReader.Load(sFile);
+    this.GoTo_Node(this.m_oFirstNode);
+    this.m_oFirstNode.GoTo_MainVariant();
+};
 CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {
     this.m_oDrawingBoard = DrawingBoard;
@@ -221,6 +228,10 @@ CGameTree.prototype.Get_CurNode = function()
 CGameTree.prototype.Set_CurNode = function(oNode)
 {
     return this.m_oCurNode = oNode;
+};
+CGameTree.prototype.Add_Move = function(X, Y, Value)
+{
+    this.m_oCurNode.Add_Move(X, Y, Value);
 };
 CGameTree.prototype.Add_NewNode = function(bUpdateNavigator)
 {
@@ -623,6 +634,8 @@ CGameTree.prototype.Count_Scores = function()
 };
 CGameTree.prototype.GoTo_Node = function(Node)
 {
+    var OldLogicBoard = this.m_oBoard.Get_Copy();
+
     this.Init_Match();
     this.m_oBoard.Clear();
 
@@ -696,9 +709,10 @@ CGameTree.prototype.GoTo_Node = function(Node)
             break;
     }
 
+    // TODO: Здесь нужно оптимизировать отрисовку всех камней
     // Отрисовываем текущую позицию
     if (this.m_oDrawingBoard)
-        this.m_oDrawingBoard.Draw_AllStones();
+        this.m_oDrawingBoard.Draw_AllStones(OldLogicBoard);
 
     // У последней ноды выполняем команды в нормальном режиме
     this.Execute_CurNodeCommands();
@@ -707,19 +721,19 @@ CGameTree.prototype.GoTo_Node = function(Node)
     if (this.m_oSound)
         this.m_oSound.On();
 };
-CGameTree.prototype.Info_Get_BlackName = function()
+CGameTree.prototype.Get_BlackName = function()
 {
     return this.m_sBlack;
 };
-CGameTree.prototype.Info_Get_BlackRating = function()
+CGameTree.prototype.Get_BlackRating = function()
 {
     return this.m_sBlackRating;
 };
-CGameTree.prototype.Info_Get_WhiteName = function()
+CGameTree.prototype.Get_WhiteName = function()
 {
     return this.m_sWhite;
 };
-CGameTree.prototype.Info_Get_WhiteRating = function()
+CGameTree.prototype.Get_WhiteRating = function()
 {
     return this.m_sWhiteRating;
 };
@@ -907,13 +921,12 @@ CGameTree.prototype.Set_WhiteTeam = function(sWhiteTeam)
 {
     this.m_sWhiteTeam = sWhiteTeam;
 };
-CGameTree.Set_BoardSize = function(W, H)
+CGameTree.prototype.Set_BoardSize = function(W, H)
 {
     this.m_oBoard.Reset_Size(W, H);
 
-    // TODO: перерисовать доску
-    if (this.m_oDrawing)
-        this.m_oDrawing.OnReset_BoardSize();
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.On_Resize();
 };
 CGameTree.prototype.Init_Match = function()
 {

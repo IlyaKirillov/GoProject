@@ -71,6 +71,11 @@ CBoardPoint.prototype.Get_Num = function()
 {
     return this.m_nNum;
 };
+CBoardPoint.prototype.Copy_To = function(OtherPoint)
+{
+    OtherPoint.m_eValue = this.m_eValue;
+    OtherPoint.m_nNum   = this.m_nNum;
+};
 
 function CDeadGroupChecker()
 {
@@ -147,7 +152,6 @@ CLogicBoard.prototype.private_InitBoard = function()
         this.m_aBoard[nIndex] = new CBoardPoint();
     }
 };
-
 CLogicBoard.prototype.Clear = function()
 {
     var nSize = this.m_nW * this.m_nH;
@@ -156,7 +160,6 @@ CLogicBoard.prototype.Clear = function()
         this.m_aBoard[nIndex].Clear();
     }
 };
-
 CLogicBoard.prototype.Get_Ko = function()
 {
     return this.m_oKo.Copy();
@@ -330,6 +333,18 @@ CLogicBoard.prototype.private_CheckDead = function(nX, nY, eValue, oChecker)
     }
 };
 
+CLogicBoard.prototype.Get_Copy = function()
+{
+    var Board = new CLogicBoard(this.m_nW, this.m_nH);
+
+    var nSize = this.m_nW * this.m_nH;
+    for (var nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        this.m_aBoard[nIndex].Copy_To(Board.m_aBoard[nIndex]);
+    }
+
+    return Board;
+};
 CLogicBoard.prototype.Set_ScorePoint = function(nX, nY, eValue)
 {
 };

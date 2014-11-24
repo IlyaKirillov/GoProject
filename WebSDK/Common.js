@@ -168,3 +168,59 @@ function Common_SortIncrease(First, Second)
     else
         return 0;
 }
+
+function Common_UTF8_Decode(utftext)
+{
+    var string = "";
+    var i = 0;
+    var c = c1 = c2 = 0;
+
+    while (i < utftext.length)
+    {
+        c = utftext.charCodeAt(i);
+
+        if (c < 128)
+        {
+            string += String.fromCharCode(c);
+            i++;
+        }
+        else if((c > 191) && (c < 224))
+        {
+            c2 = utftext.charCodeAt(i+1);
+            var charCode = ((c & 31) << 6) | (c2 & 63);
+            string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+            i += 2;
+        }
+        else
+        {
+            c2 = utftext.charCodeAt(i+1);
+            c3 = utftext.charCodeAt(i+2);
+            var charCode = ((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63);
+            string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+            i += 3;
+        }
+
+    }
+
+    return string;
+}
+
+function Common_EncodeString(string, Encoding)
+{
+    var Enc = Encodings[Encoding];
+    var Len = string.length;
+    var Bytes = "";
+    for (var Index = 0; Index < Len; Index++)
+    {
+        for (var Code = 0; Code < 256; Code++)
+        {
+            if (Enc.charCodeAt(Code) === string.charCodeAt(Index))
+            {
+                Bytes += String.fromCharCode(Code);
+                break;
+            }
+        }
+    }
+
+    return Bytes;
+}
