@@ -4,34 +4,20 @@
     <meta charset="UTF-8">
     <title>Simple Board</title>
 
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Drawing/Controls.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Drawing/Board.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Drawing/HtmlEvents.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Drawing/Mark.js"></script>
-
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Command.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Consts.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Common.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/GameTree.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/LogicBoard.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Move.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Node.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/Territory.js"></script>
-    <script type="text/javascript" language="JavaScript" src="../WebSDK/SgfReader.js"></script>
+    <script type="text/javascript" language="JavaScript" src="goboardmin.js"></script>
 </head>
 <body style="position:absolute;padding:0;margin:0;">
 
 <div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
 <script>
-    var GameTree = new CGameTree();
-    var DrawingBoard = new CDrawingBoard();
-    DrawingBoard.Init("divId", GameTree);
-    DrawingBoard.Update_Size();
-    DrawingBoard.Focus();
+
+    var oGameTree = GoBoardApi.Create_GameTree();
+    GoBoardApi.Create_SimpleBoard(oGameTree, "divId");
+    GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
 
     window.onresize = function()
     {
-        DrawingBoard.Update_Size();
+        GoBoardApi.Update_Size(oGameTree);
     };
 </script>
 </body>

@@ -1923,7 +1923,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     else if (13 === KeyCode) // Enter
     {
         var sSgfFile = prompt("Enter here code of ur sgf file", "");
-        this.m_oGameTree.Read_Sgf(sSgfFile);
+        this.m_oGameTree.Load_Sgf(sSgfFile);
     }
     else if (37 === KeyCode) // Left Arrow
     {

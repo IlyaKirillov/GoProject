@@ -68,7 +68,7 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_bEventEnable  = true;
     this.m_eShowVariants = EShowVariants.Next;
 };
-CGameTree.prototype.Read_Sgf = function(sFile)
+CGameTree.prototype.Load_Sgf = function(sFile)
 {
     var oReader = new CSgfReader(this);
     oReader.Load(sFile);
