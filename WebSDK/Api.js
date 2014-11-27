@@ -30,10 +30,17 @@ CGoBoardApi.prototype.Create_GameTree = function()
  */
 CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
 {
-    var DrawingBoard = new CDrawingBoard();
-    DrawingBoard.Init(sDivId, oGameTree);
-    DrawingBoard.Update_Size();
-    DrawingBoard.Focus();
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_SimpleBoard(sDivId);
+};
+
+/*
+ Создаем графическую доску и кнопки управления снизу.
+ */
+CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDivId)
+{
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_BoardWithNavigateButtons(sDivId);
 };
 
 /*
@@ -49,13 +56,12 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile)
  */
 CGoBoardApi.prototype.Update_Size = function(oGameTree)
 {
-    var oDrawingBoard = oGameTree.m_oDrawingBoard;
-    if (oDrawingBoard)
-        oDrawingBoard.Update_Size();
+    oGameTree.Update_Size();
 };
 
 window['GoBoardApi'] = new CGoBoardApi();
-CGoBoardApi.prototype['Create_GameTree']    = CGoBoardApi.prototype.Create_GameTree;
-CGoBoardApi.prototype['Create_SimpleBoard'] = CGoBoardApi.prototype.Create_SimpleBoard;
-CGoBoardApi.prototype['Load_Sgf']           = CGoBoardApi.prototype.Load_Sgf;
-CGoBoardApi.prototype['Update_Size']        = CGoBoardApi.prototype.Update_Size;
+CGoBoardApi.prototype['Create_GameTree']                 = CGoBoardApi.prototype.Create_GameTree;
+CGoBoardApi.prototype['Create_SimpleBoard']              = CGoBoardApi.prototype.Create_SimpleBoard;
+CGoBoardApi.prototype['Create_BoardWithNavigateButtons'] = CGoBoardApi.prototype.Create_BoardWithNavigateButtons;
+CGoBoardApi.prototype['Load_Sgf']                        = CGoBoardApi.prototype.Load_Sgf;
+CGoBoardApi.prototype['Update_Size']                     = CGoBoardApi.prototype.Update_Size;

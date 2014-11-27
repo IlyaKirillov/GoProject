@@ -16,8 +16,8 @@ var EDrawingButtonType =
     Backward_5      : 2,
     Backward        : 3,
     Forward         : 4,
-    Forward_5       : 4,
-    ForwardToEnd    : 5
+    Forward_5       : 5,
+    ForwardToEnd    : 6
 };
 
 var EDrawingButtonState =
@@ -31,8 +31,14 @@ function CDrawingButton()
 {
     this.m_oGameTree = null;
     this.m_nType     = EDrawingButtonType.Unknown;
+    this.m_nState    = EDrawingButtonState.Normal;
 
-    this.m_oImageData = null;
+    this.m_oImageData =
+    {
+        Normal : null,
+        Hover  : null,
+        Active : null
+    };
 
     this.HtmlElement =
     {
@@ -40,7 +46,10 @@ function CDrawingButton()
         Canvas  : {Control : null}
     };
 
-    this.m_oBackColor = new CColor(255, 255, 255);
+    this.m_oNormaBColor = new CColor(217, 217, 217, 255);
+    this.m_oNormaFColor = new CColor(  0,   0,   0, 255);
+    this.m_oHoverBColor = new CColor( 54, 101, 179, 255);
+    this.m_oHoverFColor = new CColor(255, 255, 255, 255);
 
     this.m_nW = 0;
     this.m_nH = 0;
@@ -49,22 +58,35 @@ function CDrawingButton()
 
     this.private_OnMouseDown = function(e)
     {
-
+        oThis.m_nState = EDrawingButtonState.Active;
+        oThis.private_UpdateState();
+        oThis.private_HandleMouseDown();
     };
 
     this.private_OnMouseUp = function(e)
     {
-
+        oThis.m_nState = EDrawingButtonState.Hover;
+        oThis.private_UpdateState();
     };
 
     this.private_OnMouseOver = function(e)
     {
+        if (EDrawingButtonState.Active !== oThis.m_nState)
+            oThis.m_nState = EDrawingButtonState.Hover;
 
+        oThis.private_UpdateState();
     };
 
     this.private_OnMouseOut = function(e)
     {
-
+        oThis.m_nState = EDrawingButtonState.Normal;
+        oThis.private_UpdateState();
+    };
+    this.private_OnFocus = function()
+    {
+        // При нажатии на кнопки выставляем фокус на доску, к которой привязаны кнопки.
+        if (oThis.m_oGameTree)
+            oThis.m_oGameTree.Focus_DrawingBoard();
     };
 }
 CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
@@ -91,6 +113,8 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     oDivElement.onmouseup   = this.private_OnMouseUp;
     oDivElement.onmouseover = this.private_OnMouseOver;
     oDivElement.onmouseout  = this.private_OnMouseOut;
+    oDivElement.onfocus     = this.private_OnFocus;
+    oDivElement.tabIndex    = -1;
 
     this.Update_Size();
 };
@@ -108,57 +132,140 @@ CDrawingButton.prototype.private_OnResize = function()
     var H = this.m_nH;
     var W = this.m_nW;
 
+    if (0 === W || 0 === H)
+        return;
+
+    this.m_oImageData.Active = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
+    this.m_oImageData.Hover  = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
+    this.m_oImageData.Normal = this.private_Draw(this.m_oNormaBColor, this.m_oNormaFColor, W, H);
+};
+CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H)
+{
     var Canvas = this.HtmlElement.Canvas.Control.HtmlElement.getContext("2d");
-    Canvas.fillStyle = this.m_oBackColor.ToString();
+    Canvas.fillStyle = BackColor.ToString();
     Canvas.fillRect(0, 0, W, H);
 
-    Canvas.fillStyle = (new CColor(0, 0, 0, 255)).ToString();
+    Canvas.fillStyle = FillColor.ToString();
+
+    // Дополнительные параметры для квадратных кнопок
+    var Size  = Math.min(W, H);
+    var X_off = (W - Size) / 2;
+    var Y_off = (H - Size) / 2;
+
     switch(this.m_nType)
     {
         case EDrawingButtonType.BackwardToStart:
         {
-            var X0 = Math.ceil(W / 4 + 0.5);
-            var X1 = Math.ceil(3 * W / 4 - W / 16 + 0.5);
-            var Y_1_3 = Math.ceil(H / 5 + 0.5);
-            var Y_1_2 = Math.ceil(H / 2 + 0.5);
-            var Y_2_3 = Math.ceil(4 * H / 5 + 0.5);
-
-            Canvas.beginPath();
-            Canvas.moveTo(X0, Y_1_2);
-            Canvas.lineTo(X1, Y_1_3);
-            Canvas.lineTo(X1, Y_2_3);
-            Canvas.closePath();
-            Canvas.fill();
-
-            var X = Math.ceil(W / 8 + 0.5);
-            var Y = Math.ceil(H / 5 + 0.5);
-            var _W = Math.ceil(W / 8 + 0.5);
-            var _H = Math.ceil(3  * H / 5 + 0.5);
-            Canvas.fillRect(X, Y, _W, _H);
+            this.private_DrawTriangle(Size, X_off, Y_off, Canvas, -1);
+            var X_1_10 = Math.ceil(X_off + Size / 10 + 0.5);
+            var Y_1_5  = Math.ceil(Y_off + Size / 5 + 0.5);
+            var _W = Math.floor(Size / 10 + 0.5);
+            var _H = Math.floor(3 * Size / 5 + 0.5);
+            Canvas.fillRect(X_1_10, Y_1_5, _W, _H);
 
             break;
         }
         case EDrawingButtonType.Backward_5:
         {
-            Canvas.beginPath();
-            Canvas.moveTo(W / 4, H / 2);
-            Canvas.lineTo(3 * W / 4 - W / 16, H / 3);
-            Canvas.lineTo(3 * W / 4 - W / 16, 2 * H / 3);
-            Canvas.closePath();
-            Canvas.fill();
+            this.private_DrawTriangle(Size, X_off - Size / 10, Y_off, Canvas, -1);
+            var X_8_10 = Math.ceil(X_off + 8 * Size / 10 + 0.5);
+            var Y_1_5  = Math.ceil(Y_off + Size / 5 + 0.5);
+            var _W = Math.floor(Size / 10 + 0.5);
+            var _H = Math.floor(3 * Size / 5 + 0.5);
+            Canvas.fillRect(X_8_10, Y_1_5, _W, _H);
 
-            Canvas.fillRect(3 * W / 4, H / 3, W / 8, H / 3 );
             break;
         }
         case EDrawingButtonType.Backward:
         {
-            Canvas.beginPath();
-            Canvas.moveTo(W / 4, H / 2);
-            Canvas.lineTo(3 * W / 4 - W / 16, H / 3);
-            Canvas.lineTo(3 * W / 4 - W / 16, 2 * H / 3);
-            Canvas.closePath();
-            Canvas.fill();
+            this.private_DrawTriangle(Size, X_off - Size / 10, Y_off, Canvas, -1);
             break;
         }
+        case EDrawingButtonType.Forward:
+        {
+            this.private_DrawTriangle(Size, X_off - Size / 10, Y_off, Canvas, 1);
+            break;
+        }
+        case EDrawingButtonType.Forward_5:
+        {
+            this.private_DrawTriangle(Size, X_off + Size / 10, Y_off, Canvas, 1);
+            var X_1_10 = Math.ceil(X_off + Size / 10 + 0.5);
+            var Y_1_5  = Math.ceil(Y_off + Size / 5 + 0.5);
+            var _W = Math.floor(Size / 10 + 0.5);
+            var _H = Math.floor(3 * Size / 5 + 0.5);
+            Canvas.fillRect(X_1_10, Y_1_5, _W, _H);
+
+            break;
+        }
+        case EDrawingButtonType.ForwardToEnd:
+        {
+            this.private_DrawTriangle(Size, X_off, Y_off, Canvas, 1);
+            var X_8_10 = Math.ceil(X_off + 8 * Size / 10 + 0.5);
+            var Y_1_5  = Math.ceil(Y_off + Size / 5 + 0.5);
+            var _W = Math.floor(Size / 10 + 0.5);
+            var _H = Math.floor(3 * Size / 5 + 0.5);
+            Canvas.fillRect(X_8_10, Y_1_5, _W, _H);
+
+            break;
+        }
+    };
+
+    return Canvas.getImageData(0, 0, W, H);
+};
+CDrawingButton.prototype.private_DrawTriangle = function(Size, X_off, Y_off, Canvas, Direction)
+{
+    var X_1_5 = Math.ceil(X_off +     Size / 5 + 0.5);
+    var X_4_5 = Math.ceil(X_off + 4 * Size / 5 + 0.5);
+    var Y_1_5 = Math.ceil(Y_off +     Size / 5 + 0.5);
+    var Y_1_2 = Math.ceil(Y_off +     Size / 2 + 0.5);
+    var Y_4_5 = Math.ceil(Y_off + 4 * Size / 5 + 0.5);
+
+    if (Direction < 0)
+    {
+        Canvas.beginPath();
+        Canvas.moveTo(X_1_5, Y_1_2);
+        Canvas.lineTo(X_4_5, Y_1_5);
+        Canvas.lineTo(X_4_5, Y_4_5);
+        Canvas.closePath();
+        Canvas.fill();
+    }
+    else
+    {
+        Canvas.beginPath();
+        Canvas.moveTo(X_1_5, Y_1_5);
+        Canvas.lineTo(X_4_5, Y_1_2);
+        Canvas.lineTo(X_1_5, Y_4_5);
+        Canvas.closePath();
+        Canvas.fill();
+    }
+};
+CDrawingButton.prototype.private_UpdateState = function()
+{
+    var Canvas = this.HtmlElement.Canvas.Control.HtmlElement.getContext("2d");
+
+    var ImageData = null;
+    switch(this.m_nState)
+    {
+        case EDrawingButtonState.Hover:  ImageData = this.m_oImageData.Hover; break;
+        case EDrawingButtonState.Active: ImageData = this.m_oImageData.Active; break;
+        default:
+        case EDrawingButtonState.Normal: ImageData = this.m_oImageData.Normal; break;
+    }
+
+    Canvas.putImageData(ImageData, 0, 0);
+};
+CDrawingButton.prototype.private_HandleMouseDown = function()
+{
+    if (!this.m_oGameTree)
+        return;
+
+    switch(this.m_nType)
+    {
+        case EDrawingButtonType.BackwardToStart: this.m_oGameTree.Step_BackwardToStart(); break;
+        case EDrawingButtonType.Backward_5     : this.m_oGameTree.Step_Backward(5); break;
+        case EDrawingButtonType.Backward       : this.m_oGameTree.Step_Backward(1); break;
+        case EDrawingButtonType.Forward        : this.m_oGameTree.Step_Forward(1); break;
+        case EDrawingButtonType.Forward_5      : this.m_oGameTree.Step_Forward(5); break;
+        case EDrawingButtonType.ForwardToEnd   : this.m_oGameTree.Step_ForwardToEnd(); break;
     };
 };

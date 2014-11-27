@@ -10,6 +10,8 @@
 <script type="text/javascript" language="JavaScript" src="../Drawing/HtmlEvents.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/Mark.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/Button.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Toolbar.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Drawing.js"></script>
 
 <script type="text/javascript" language="JavaScript" src="../Command.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Consts.js"></script>
@@ -20,10 +22,10 @@
 <script type="text/javascript" language="JavaScript" src="../Node.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Territory.js"></script>
 <script type="text/javascript" language="JavaScript" src="../SgfReader.js"></script>
-
+<script type="text/javascript" language="JavaScript" src="../Api.js"></script>
 <body>
 
-<div id="div1" style="position:relative; height: 25px;width: 150px"></div>
+<div id="div1" style="position:relative; height: 20px;width: 500px"></div>
 <div id="div2" style="position:relative; height: 500px;width: 500px"></div>
 
 <script>
@@ -32,18 +34,22 @@
 //    DrawingBoard1.Init("div1", GameTree1);
 //    DrawingBoard1.Update_Size();
 
-    var GameTree2 = new CGameTree();
-    var DrawingBoard2 = new CDrawingBoard();
-    DrawingBoard2.Init("div2", GameTree2);
-    DrawingBoard2.Update_Size();
-    GameTree2.Load_Sgf("(;FF[4]GM[1]SZ[19];B[aa];W[bb](;B[cc]N[Var A];W[dd];B[ad];W[bd])\
-            (;B[hh]N[Var B];W[hg])\
-    (;B[gg]N[Var C];W[gh];B[hh]  (;W[hg]N[Var A];B[kk])  (;W[kl]N[Var B])))");
+//    var GameTree2 = new CGameTree();
+//    var DrawingBoard2 = new CDrawingBoard();
+//    DrawingBoard2.Init("div2", GameTree2);
+//    DrawingBoard2.Update_Size();
+//    GameTree2.Load_Sgf("(;FF[4]GM[1]SZ[19];B[aa];W[bb](;B[cc]N[Var A];W[dd];B[ad];W[bd])\
+//            (;B[hh]N[Var B];W[hg])\
+//    (;B[gg]N[Var C];W[gh];B[hh]  (;W[hg]N[Var A];B[kk])  (;W[kl]N[Var B])))");
 
-    DrawingBoard2.Focus();
+//    DrawingBoard2.Focus();
+//
+//    var Toolbar = new CDrawingToolbar();
+//    Toolbar.Init("div1", GameTree2, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd]});
 
-    var Button = new CDrawingButton();
-    Button.Init("div1", GameTree2, EDrawingButtonType.BackwardToStart);
+var oGameTree = GoBoardApi.Create_GameTree();
+GoBoardApi.Create_BoardWithNavigateButtons(oGameTree, "div2");
+GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
 </script>
 
 </body>

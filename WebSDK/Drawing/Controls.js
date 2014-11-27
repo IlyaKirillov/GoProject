@@ -237,3 +237,59 @@ function CreateControlContainer(name)
     ctrl.HtmlElement = document.getElementById(name);
     return ctrl;
 }
+function CControlContainerBoardAndBottomButtons()
+{
+    this.Parent         = null;
+    this.HtmlElement    = null;
+
+    this.H              = 0;
+
+    this.Controls       = new Array();
+}
+CControlContainerBoardAndBottomButtons.prototype.Set = function(H)
+{
+    // Задается высота панели с кнопками
+    this.H = H;
+};
+CControlContainerBoardAndBottomButtons.prototype.AddControl = function(ctrl)
+{
+    ctrl.Parent = this;
+    this.Controls[this.Controls.length] = ctrl;
+};
+CControlContainerBoardAndBottomButtons.prototype.Resize = function(_width,_height)
+{
+    var BoardH = _height - this.H;
+    var BoardW = _width;
+
+    if (BoardW !== BoardH)
+    {
+        BoardW = Math.min(BoardW, BoardH);
+        BoardH = BoardW;
+    }
+
+    var X_off = (_width - BoardW) / 2;
+    var Y_off = (_height - this.H - BoardH) / 2;
+
+
+
+    this.HtmlElement.style.left 	= parseInt(X_off + 0.5) + "px";
+    this.HtmlElement.style.top 		= parseInt(Y_off + 0.5) + "px";
+    this.HtmlElement.style.width 	= parseInt(BoardW + 0.5) + "px";
+    this.HtmlElement.style.height 	= parseInt(BoardH + this.H + 0.5) + "px";
+
+    this.HtmlElement.width 	= parseInt(BoardW + 0.5);
+    this.HtmlElement.height = parseInt(BoardH + this.H + 0.5);
+
+    var lCount = this.Controls.length;
+    for (var i = 0; i < lCount; i++)
+    {
+        this.Controls[i].Resize(BoardW, BoardH + this.H);
+    }
+};
+CControlContainerBoardAndBottomButtons.Create = function(sName)
+{
+    var ctrl = new CControlContainerBoardAndBottomButtons();
+    ctrl.Name = sName;
+    ctrl.HtmlElement = document.getElementById(sName);
+    return ctrl;
+};
