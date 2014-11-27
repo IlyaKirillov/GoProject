@@ -9,6 +9,7 @@
 <script type="text/javascript" language="JavaScript" src="../Drawing/Board.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/HtmlEvents.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/Mark.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Button.js"></script>
 
 <script type="text/javascript" language="JavaScript" src="../Command.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Consts.js"></script>
@@ -22,14 +23,14 @@
 
 <body>
 
-<div id="div1" style="position:relative; height: 300px;width: 300px"></div>
+<div id="div1" style="position:relative; height: 25px;width: 150px"></div>
 <div id="div2" style="position:relative; height: 500px;width: 500px"></div>
 
 <script>
-    var GameTree1 = new CGameTree();
-    var DrawingBoard1 = new CDrawingBoard();
-    DrawingBoard1.Init("div1", GameTree1);
-    DrawingBoard1.Update_Size();
+//    var GameTree1 = new CGameTree();
+//    var DrawingBoard1 = new CDrawingBoard();
+//    DrawingBoard1.Init("div1", GameTree1);
+//    DrawingBoard1.Update_Size();
 
     var GameTree2 = new CGameTree();
     var DrawingBoard2 = new CDrawingBoard();
@@ -40,6 +41,9 @@
     (;B[gg]N[Var C];W[gh];B[hh]  (;W[hg]N[Var A];B[kk])  (;W[kl]N[Var B])))");
 
     DrawingBoard2.Focus();
+
+    var Button = new CDrawingButton();
+    Button.Init("div1", GameTree2, EDrawingButtonType.BackwardToStart);
 </script>
 
 </body>
