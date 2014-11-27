@@ -63,7 +63,7 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     oControl.AddControl(oToolbarControl);
 
     var oDrawingToolbar = new CDrawingToolbar();
-    oDrawingToolbar.Init(sToolbaDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd]});
+    oDrawingToolbar.Init(sToolbaDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant]});
 
     this.m_oControl = oMainControl;
     this.m_aElements.push(oDrawingBoard);

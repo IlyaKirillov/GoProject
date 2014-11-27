@@ -46,6 +46,8 @@ CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
             case EDrawingButtonType.Forward:
             case EDrawingButtonType.Forward_5:
             case EDrawingButtonType.ForwardToEnd:
+            case EDrawingButtonType.NextVariant:
+            case EDrawingButtonType.PrevVariant:
                 oControl = new CDrawingButton();
                 break;
         }

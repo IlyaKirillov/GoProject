@@ -17,7 +17,10 @@ var EDrawingButtonType =
     Backward        : 3,
     Forward         : 4,
     Forward_5       : 5,
-    ForwardToEnd    : 6
+    ForwardToEnd    : 6,
+    NextVariant     : 7,
+    PrevVariant     : 8
+
 };
 
 var EDrawingButtonState =
@@ -96,6 +99,9 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
 
     this.HtmlElement.Control = CreateControlContainer(sDivId);
     var oDivElement = this.HtmlElement.Control.HtmlElement;
+
+    var sHint = this.private_GetHint();
+    oDivElement.setAttribute("title", sHint);
 
     var oCanvasElement = document.createElement("canvas");
     oCanvasElement.setAttribute("id", sDivId + "_canvas");
@@ -208,6 +214,65 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H)
 
             break;
         }
+        case EDrawingButtonType.NextVariant:
+        {
+            var X0 = Math.ceil(X_off + 0.20 * Size + 0.5);
+            var X1 = Math.ceil(X_off + 0.35 * Size + 0.5);
+            var X2 = Math.ceil(X_off + 0.57 * Size + 0.5);
+            var X3 = Math.ceil(X_off + 0.92 * Size + 0.5);
+
+            var Y0 = Math.ceil(Y_off + 0.20 * Size + 0.5);
+            var Y1 = Math.ceil(Y_off + 0.38 * Size + 0.5);
+            var Y2 = Math.ceil(Y_off + 0.52 * Size + 0.5);
+            var Y3 = Math.ceil(Y_off + 0.60 * Size + 0.5);
+            var Y4 = Math.ceil(Y_off + 0.68 * Size + 0.5);
+            var Y5 = Math.ceil(Y_off + 0.84 * Size + 0.5);
+
+            Canvas.beginPath();
+            Canvas.moveTo(X0, Y0);
+            Canvas.lineTo(X1, Y0);
+            Canvas.lineTo(X1, Y2);
+            Canvas.lineTo(X2, Y2)
+            Canvas.lineTo(X2, Y1);
+            Canvas.lineTo(X3, Y3);
+            Canvas.lineTo(X2, Y5);
+            Canvas.lineTo(X2, Y4);
+            Canvas.lineTo(X0, Y4);
+            Canvas.closePath();
+            Canvas.fill();
+
+            break;
+        }
+
+        case EDrawingButtonType.PrevVariant:
+        {
+            var X0 = Math.ceil(X_off + 0.20 * Size + 0.5);
+            var X1 = Math.ceil(X_off + 0.35 * Size + 0.5);
+            var X2 = Math.ceil(X_off + 0.57 * Size + 0.5);
+            var X3 = Math.ceil(X_off + 0.92 * Size + 0.5);
+
+            var Y0 = Math.ceil(Y_off + (1 - 0.20) * Size + 0.5);
+            var Y1 = Math.ceil(Y_off + (1 - 0.38) * Size + 0.5);
+            var Y2 = Math.ceil(Y_off + (1 - 0.52) * Size + 0.5);
+            var Y3 = Math.ceil(Y_off + (1 - 0.60) * Size + 0.5);
+            var Y4 = Math.ceil(Y_off + (1 - 0.68) * Size + 0.5);
+            var Y5 = Math.ceil(Y_off + (1 - 0.84) * Size + 0.5);
+
+            Canvas.beginPath();
+            Canvas.moveTo(X0, Y0);
+            Canvas.lineTo(X1, Y0);
+            Canvas.lineTo(X1, Y2);
+            Canvas.lineTo(X2, Y2)
+            Canvas.lineTo(X2, Y1);
+            Canvas.lineTo(X3, Y3);
+            Canvas.lineTo(X2, Y5);
+            Canvas.lineTo(X2, Y4);
+            Canvas.lineTo(X0, Y4);
+            Canvas.closePath();
+            Canvas.fill();
+
+            break;
+        }
     };
 
     return Canvas.getImageData(0, 0, W, H);
@@ -267,5 +332,21 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.Forward        : this.m_oGameTree.Step_Forward(1); break;
         case EDrawingButtonType.Forward_5      : this.m_oGameTree.Step_Forward(5); break;
         case EDrawingButtonType.ForwardToEnd   : this.m_oGameTree.Step_ForwardToEnd(); break;
+        case EDrawingButtonType.NextVariant    : this.m_oGameTree.GoTo_NextVariant(); break;
+        case EDrawingButtonType.PrevVariant    : this.m_oGameTree.GoTo_PrevVariant(); break;
+    };
+};
+CDrawingButton.prototype.private_GetHint = function()
+{
+    switch(this.m_nType)
+    {
+        case EDrawingButtonType.BackwardToStart: return "Back to the start";
+        case EDrawingButtonType.Backward_5     : return "Back 5 moves";
+        case EDrawingButtonType.Backward       : return "Back";
+        case EDrawingButtonType.Forward        : return "Forward";
+        case EDrawingButtonType.Forward_5      : return "Forward 5 moves";
+        case EDrawingButtonType.ForwardToEnd   : return "Go to the end";
+        case EDrawingButtonType.NextVariant    : return "Next variant";
+        case EDrawingButtonType.PrevVariant    : return "Previous variant";
     };
 };
