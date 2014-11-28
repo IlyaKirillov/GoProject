@@ -14,6 +14,8 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_oDrawing        = Drawing;
     this.m_oMarks          = Marks;
 
+    this.m_oInterfaceState = new CInterfaceState();
+
     this.m_oBoard          = new CLogicBoard();
     this.m_oDrawingBoard   = null;
 
@@ -571,6 +573,8 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
 
     if (this.m_oDrawingComments)
         this.m_oDrawingComments.Set(this.m_oCurNode.Get_Comment());
+
+    this.Update_IntrefaceState();
 };
 CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 {
@@ -989,4 +993,34 @@ CGameTree.prototype.private_SetBoardPoint = function(X, Y, Value, Num, bSilent)
 CGameTree.prototype.private_SetNextMove = function(Value)
 {
     this.m_nNextMove = Value;
+};
+CGameTree.prototype.Update_IntrefaceState = function()
+{
+    if (this.m_oDrawing)
+    {
+        var oIState = this.m_oInterfaceState;
+        var PrevNode = this.m_oCurNode.Get_Prev();
+
+        oIState.Backward = null === this.m_oCurNode.Get_Prev() ? false : true;
+        oIState.Forward  = this.m_oCurNode.Get_NextsCount() <= 0 ? false : true;
+
+        if (null !== PrevNode)
+        {
+            var PrevNextCur = PrevNode.Get_NextCur();
+            var PrevNextsCount = PrevNode.Get_NextsCount();
+            oIState.NextVariant = PrevNextCur < PrevNextsCount - 1 ? true : false;
+            oIState.PrevVariant = PrevNextCur > 0 ? true : false;
+        }
+        else
+        {
+            oIState.NextVariant = false;
+            oIState.PrevVariant = false;
+        }
+
+        if (this.m_oDrawingBoard)
+            oIState.BoardMode = this.m_oDrawingBoard.Get_Mode();
+
+        this.m_oDrawing.Update_IntrefaceState(oIState);
+    }
+
 };

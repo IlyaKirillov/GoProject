@@ -9,8 +9,9 @@
  * Time     1:27
  */
 
-function CDrawingToolbar()
+function CDrawingToolbar(oDrawing)
 {
+    this.m_oDrawing  = oDrawing;
     this.m_oGameTree = null;
 
     this.HtmlElement =
@@ -57,7 +58,7 @@ CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
             case EDrawingButtonType.EditModeX      :
             case EDrawingButtonType.EditModeText   :
             case EDrawingButtonType.EditModeNum    :
-                oControl = new CDrawingButton();
+                oControl = new CDrawingButton(this.m_oDrawing);
                 break;
         }
 

@@ -33,22 +33,29 @@ var EDrawingButtonType =
 
 var EDrawingButtonState =
 {
-    Normal : 0,
-    Active : 1,
-    Hover  : 2
+    Normal   : 0,
+    Active   : 1,
+    Hover    : 2,
+    Disabled : 3,
+    Selected : 4
 };
 
-function CDrawingButton()
+function CDrawingButton(oDrawing)
 {
+    this.m_oDrawing  = oDrawing;
     this.m_oGameTree = null;
     this.m_nType     = EDrawingButtonType.Unknown;
     this.m_nState    = EDrawingButtonState.Normal;
 
+    this.m_bSelected = false;
+
     this.m_oImageData =
     {
-        Normal : null,
-        Hover  : null,
-        Active : null
+        Disabled : null,
+        Normal   : null,
+        Hover    : null,
+        Active   : null,
+        Selected : null
     };
 
     this.HtmlElement =
@@ -57,10 +64,12 @@ function CDrawingButton()
         Canvas  : {Control : null}
     };
 
-    this.m_oNormaBColor = new CColor(217, 217, 217, 255);
-    this.m_oNormaFColor = new CColor(  0,   0,   0, 255);
-    this.m_oHoverBColor = new CColor( 54, 101, 179, 255);
-    this.m_oHoverFColor = new CColor(255, 255, 255, 255);
+    this.m_oNormaBColor    = new CColor(217, 217, 217, 255);
+    this.m_oNormaFColor    = new CColor(  0,   0,   0, 255);
+    this.m_oHoverBColor    = new CColor( 54, 101, 179, 255);
+    this.m_oHoverFColor    = new CColor(255, 255, 255, 255);
+    this.m_oDisabledFColor = new CColor(140, 140, 140, 255);
+    this.m_oSelectedBColor = new CColor(  0, 175, 240, 255);
 
     this.m_nW = 0;
     this.m_nH = 0;
@@ -69,29 +78,41 @@ function CDrawingButton()
 
     this.private_OnMouseDown = function(e)
     {
-        oThis.m_nState = EDrawingButtonState.Active;
-        oThis.private_UpdateState();
-        oThis.private_HandleMouseDown();
+        if (EDrawingButtonState.Disabled !== oThis.m_nState)
+        {
+            oThis.m_nState = EDrawingButtonState.Active;
+            oThis.private_UpdateState();
+            oThis.private_HandleMouseDown();
+        }
     };
 
     this.private_OnMouseUp = function(e)
     {
-        oThis.m_nState = EDrawingButtonState.Hover;
-        oThis.private_UpdateState();
+        if (EDrawingButtonState.Disabled !== oThis.m_nState)
+        {
+            oThis.m_nState = EDrawingButtonState.Hover;
+            oThis.private_UpdateState();
+        }
     };
 
     this.private_OnMouseOver = function(e)
     {
-        if (EDrawingButtonState.Active !== oThis.m_nState)
-            oThis.m_nState = EDrawingButtonState.Hover;
+        if (EDrawingButtonState.Disabled !== oThis.m_nState)
+        {
+            if (EDrawingButtonState.Active !== oThis.m_nState)
+                oThis.m_nState = EDrawingButtonState.Hover;
 
-        oThis.private_UpdateState();
+            oThis.private_UpdateState();
+        }
     };
 
     this.private_OnMouseOut = function(e)
     {
-        oThis.m_nState = EDrawingButtonState.Normal;
-        oThis.private_UpdateState();
+        if (EDrawingButtonState.Disabled !== oThis.m_nState)
+        {
+            oThis.m_nState = oThis.m_bSelected ? EDrawingButtonState.Selected : EDrawingButtonState.Normal;
+            oThis.private_UpdateState();
+        }
     };
     this.private_OnFocus = function()
     {
@@ -105,6 +126,7 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     this.m_oGameTree = oGameTree;
     this.m_nType     = nButtonType;
 
+    this.private_RegisterButton();
     this.HtmlElement.Control = CreateControlContainer(sDivId);
     var oDivElement = this.HtmlElement.Control.HtmlElement;
 
@@ -141,6 +163,37 @@ CDrawingButton.prototype.Update_Size = function()
 
     this.private_OnResize();
 };
+CDrawingButton.prototype.Set_Enabled = function(Value)
+{
+    if (true === Value && this.m_nState === EDrawingButtonState.Disabled)
+    {
+        this.m_nState = EDrawingButtonState.Normal;
+        this.private_UpdateState();
+    }
+    else if (false === Value && this.m_nState !== EDrawingButtonState.Disabled)
+    {
+        this.m_nState = EDrawingButtonState.Disabled;
+        this.private_UpdateState();
+    }
+};
+CDrawingButton.prototype.Set_Selected = function(Value)
+{
+    if (this.m_bSelected !== Value)
+    {
+        this.m_bSelected = Value;
+
+        if (true === Value && EDrawingButtonState.Normal === this.m_nState)
+        {
+            this.m_nState = EDrawingButtonState.Selected;
+            this.private_UpdateState();
+        }
+        else if (false === Value && EDrawingButtonState.Selected === this.m_nState)
+        {
+            this.m_nState = EDrawingButtonState.Normal;
+            this.private_UpdateState();
+        }
+    }
+};
 CDrawingButton.prototype.private_OnResize = function()
 {
     var H = this.m_nH;
@@ -149,13 +202,19 @@ CDrawingButton.prototype.private_OnResize = function()
     if (0 === W || 0 === H)
         return;
 
-    this.m_oImageData.Active = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
-    this.m_oImageData.Hover  = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
-    this.m_oImageData.Normal = this.private_Draw(this.m_oNormaBColor, this.m_oNormaFColor, W, H);
+    this.m_oImageData.Active   = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor, W, H);
+    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor, W, H);
+    this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor,    this.m_oNormaFColor, W, H);
+    this.m_oImageData.Disabled = this.private_Draw(this.m_oNormaBColor,    this.m_oDisabledFColor, W, H);
+    this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
+
+    this.private_UpdateState();
 };
-CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H)
+CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSelected)
 {
     var Canvas = this.HtmlElement.Canvas.Control.HtmlElement.getContext("2d");
+    Canvas.fillStyle = BackColor.ToString();
+
     Canvas.fillStyle = BackColor.ToString();
     Canvas.fillRect(0, 0, W, H);
 
@@ -538,10 +597,12 @@ CDrawingButton.prototype.private_UpdateState = function()
     var ImageData = null;
     switch(this.m_nState)
     {
-        case EDrawingButtonState.Hover:  ImageData = this.m_oImageData.Hover; break;
-        case EDrawingButtonState.Active: ImageData = this.m_oImageData.Active; break;
+        case EDrawingButtonState.Hover   : ImageData = this.m_oImageData.Hover; break;
+        case EDrawingButtonState.Active  : ImageData = this.m_oImageData.Active; break;
+        case EDrawingButtonState.Disabled: ImageData = this.m_oImageData.Disabled; break;
+        case EDrawingButtonState.Selected: ImageData = this.m_oImageData.Selected; break;
         default:
-        case EDrawingButtonState.Normal: ImageData = this.m_oImageData.Normal; break;
+        case EDrawingButtonState.Normal  : ImageData = this.m_oImageData.Normal; break;
     }
 
     Canvas.putImageData(ImageData, 0, 0);
@@ -594,4 +655,30 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.EditModeText   : return "Text labels (F8)";
         case EDrawingButtonType.EditModeNum    : return "Numeric labels (F9)";
     };
+};
+CDrawingButton.prototype.private_RegisterButton = function()
+{
+    if (this.m_oDrawing)
+    {
+        switch(this.m_nType)
+        {
+            case EDrawingButtonType.BackwardToStart: this.m_oDrawing.Register_BackwardToStartButton(this); break;
+            case EDrawingButtonType.Backward_5     : this.m_oDrawing.Register_Backward_5Button     (this); break;
+            case EDrawingButtonType.Backward       : this.m_oDrawing.Register_BackwardButton       (this); break;
+            case EDrawingButtonType.Forward        : this.m_oDrawing.Register_ForwardButton        (this); break;
+            case EDrawingButtonType.Forward_5      : this.m_oDrawing.Register_Forward_5Button      (this); break;
+            case EDrawingButtonType.ForwardToEnd   : this.m_oDrawing.Register_ForwardToEndButton   (this); break;
+            case EDrawingButtonType.NextVariant    : this.m_oDrawing.Register_NextVariantButton    (this); break;
+            case EDrawingButtonType.PrevVariant    : this.m_oDrawing.Register_PrevVariantButton    (this); break;
+            case EDrawingButtonType.EditModeMove   : this.m_oDrawing.Register_EditModeMoveButton   (this); break;
+            case EDrawingButtonType.EditModeScores : this.m_oDrawing.Register_EditModeScoresButton (this); break;
+            case EDrawingButtonType.EditModeAddRem : this.m_oDrawing.Register_EditModeAddRemButton (this); break;
+            case EDrawingButtonType.EditModeTr     : this.m_oDrawing.Register_EditModeTrButton     (this); break;
+            case EDrawingButtonType.EditModeSq     : this.m_oDrawing.Register_EditModeSqButton     (this); break;
+            case EDrawingButtonType.EditModeCr     : this.m_oDrawing.Register_EditModeCrButton     (this); break;
+            case EDrawingButtonType.EditModeX      : this.m_oDrawing.Register_EditModeXButton      (this); break;
+            case EDrawingButtonType.EditModeText   : this.m_oDrawing.Register_EditModeTextButton   (this); break;
+            case EDrawingButtonType.EditModeNum    : this.m_oDrawing.Register_EditModeNumButton    (this); break;
+        };
+    }
 };

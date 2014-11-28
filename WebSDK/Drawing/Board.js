@@ -370,6 +370,8 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
             this.m_oLogicBoard.Init_CountScores();
             this.m_oGameTree.Count_Scores();
         }
+
+        this.m_oGameTree.Update_IntrefaceState();
     }
 };
 CDrawingBoard.prototype.Get_Mode = function()
