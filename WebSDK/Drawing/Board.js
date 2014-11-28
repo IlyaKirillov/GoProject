@@ -165,6 +165,29 @@ function CDrawingBoard()
             oThis.private_OnResize();
         }, 20);
     };
+    this.private_OnDragover = function(e)
+    {
+        e.preventDefault();
+        return false;
+    };
+    this.private_OnDrop = function(e)
+    {
+        e.preventDefault();
+
+        if (e.dataTransfer.files.length > 0 && FileReader)
+        {
+            var oFile = e.dataTransfer.files[0];
+            var oReader = new FileReader();
+            oReader.onload = function(event)
+            {
+                oThis.m_oGameTree.Load_Sgf(event.target.result);
+            };
+
+            oReader.readAsText(oFile);
+
+            oThis.Focus();
+        }
+    };
 }
 
 CDrawingBoard.prototype.Init = function(sName, GameTree)
@@ -215,6 +238,8 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     oEventDiv.tabIndex        = -1;   // Этот параметр нужен, чтобы принимать сообщения клавиатуры (чтобы на этой div вставал фокус)
     oEventDiv.style.hidefocus = true; // Убираем рамку фокуса в IE
     oEventDiv.style.outline   = 0;    // Убираем рамку фокуса в остальных браузерах
+    oEventDiv['ondragover']   = this.private_OnDragover; // Эти события добавляем таким образом, чтобы
+    oEventDiv['ondrop']       = this.private_OnDrop;     // минимизатор не изменил названия.
 
     return oControl;
 };
