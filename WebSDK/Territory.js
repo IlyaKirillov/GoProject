@@ -46,7 +46,7 @@ CTerritory.prototype.Fill_PointsFromLogicBoard = function(LogicBoard)
     {
         for (var X = 1; X <= oBoardSize.X; X++)
         {
-            var Value = LogicBoard.Scores_Get( X, Y );
+            var Value = LogicBoard.Get_ScorePoint(X, Y);
             var Place = Common_XYtoValue(X, Y);
 
             if (BOARD_BLACK === Value || BOARD_WHITE === Value)

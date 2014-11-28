@@ -63,7 +63,8 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     oControl.AddControl(oToolbarControl);
 
     var oDrawingToolbar = new CDrawingToolbar();
-    oDrawingToolbar.Init(sToolbaDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant]});
+    oDrawingToolbar.Init(sToolbaDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
+        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum]});
 
     this.m_oControl = oMainControl;
     this.m_aElements.push(oDrawingBoard);
@@ -92,4 +93,24 @@ CDrawing.prototype.private_CreateDiv = function(oParent, sName)
     oElement.setAttribute("oncontextmenu", "return false;");
     oParent.appendChild(oElement);
     return oElement;
+};
+
+function CDrawingFullInfo()
+{
+    this.m_oGameTree = null;
+
+    this.HtmlElement =
+    {
+        Control : null
+
+    };
+}
+
+CDrawingFullInfo.prototype.Init = function()
+{
+
+};
+CDrawingFullInfo.prototype.Update_Size = function()
+{
+
 };

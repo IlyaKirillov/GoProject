@@ -130,28 +130,90 @@ CDeadGroupChecker.prototype.Is_StoneInSavedGroup = function(nX, nY)
     return false;
 };
 
+function CBoundaryScoreCounter()
+{
+    this.m_aPoints = {};
+}
+CBoundaryScoreCounter.prototype.Clear = function()
+{
+    this.m_aPoints = {};
+};
+CBoundaryScoreCounter.prototype.Is_PointIn = function(X, Y)
+{
+    var Place = Common_XYtoValue(X, Y);
+    if (undefined !== this.m_aPoints[Place])
+        return true;
+
+    this.m_aPoints[Place] = 1;
+    return false;
+};
+CBoundaryScoreCounter.prototype.Remove = function(X, Y)
+{
+    var Place = Common_XYtoValue(X, Y);
+    if (undefined !== this.m_aPoints[Place])
+        delete this.m_aPoints[Place];
+};
+
+function CAreaScoreCounter()
+{
+    this.m_oArea  = {};
+    this.m_nOwner = BOARD_EMPTY;
+};
+
+CAreaScoreCounter.prototype.Clear = function()
+{
+    this.m_oArea  = {};
+    this.m_nOwner = BOARD_EMPTY;
+};
+/**
+ * Проверяем находится ли заданный пункт в области. Если нет, тогда добавляем его туда.
+ * @param X
+ * @param Y
+ * @returns {boolean}
+ */
+CAreaScoreCounter.prototype.Is_PointIn = function(X, Y)
+{
+    var Place = Common_XYtoValue(X, Y);
+    if (undefined !== this.m_oArea[Place])
+        return true;
+
+    this.m_oArea[Place] = 1;
+    return false;
+};
+CAreaScoreCounter.prototype.Set_Owner = function(nValue)
+{
+    this.m_nOwner = nValue;
+};
+CAreaScoreCounter.prototype.Get_Owner = function()
+{
+    return this.m_nOwner;
+};
+CAreaScoreCounter.prototype.Update_Board = function(Board, nForceValue)
+{
+    var Value = (undefined === nForceValue ? this.m_nOwner : nForceValue);
+
+    for (var Place in this.m_oArea)
+    {
+        var Pos = Common_ValuetoXY(Place | 0);
+        Board.Set_ScorePoint(Pos.X, Pos.Y, Value);
+    }
+};
+
 function CLogicBoard(nW, nH)
 {
     this.m_nW = (undefined === nW ? 19 : nW); // количество пересечений по горизонтали
     this.m_nH = (undefined === nH ? 19 : nH); // количество пересечений по вертикали
 
     this.m_aBoard       = null; // Массив, в котором указаны значения пунктов на доске черный/белый/пустой
-    this.m_aBoardScores = null; // Массив с метками территории
     this.private_InitBoard();
 
     this.m_oKo = new CBoardKo();
+
+    this.m_aBoardScores = null; // Массив с метками территории
+    this.m_oArea        = new CAreaScoreCounter();
+    this.m_oBoundary    = new CBoundaryScoreCounter();
+
 }
-
-CLogicBoard.prototype.private_InitBoard = function()
-{
-    var nSize = this.m_nW * this.m_nH;
-
-    this.m_aBoard = new Array(nSize);
-    for (var nIndex = 0; nIndex < nSize; nIndex++)
-    {
-        this.m_aBoard[nIndex] = new CBoardPoint();
-    }
-};
 CLogicBoard.prototype.Clear = function()
 {
     var nSize = this.m_nW * this.m_nH;
@@ -172,11 +234,6 @@ CLogicBoard.prototype.Reset_Ko = function()
 {
     this.m_oKo.Reset();
 };
-CLogicBoard.prototype.private_GetPos = function(nX, nY)
-{
-    return (nY - 1) * this.m_nW + (nX - 1);
-};
-
 CLogicBoard.prototype.Reset_Size = function(nW, nH)
 {
     this.m_nW = nW;
@@ -186,12 +243,10 @@ CLogicBoard.prototype.Reset_Size = function(nW, nH)
 
     this.m_oKo.Reset();
 };
-
 CLogicBoard.prototype.Get_Size = function()
 {
     return {X : this.m_nW, Y : this.m_nH};
 };
-
 CLogicBoard.prototype.Set = function(nX, nY, eValue, nNum)
 {
     var nIndex = this.private_GetPos(nX, nY);
@@ -200,17 +255,14 @@ CLogicBoard.prototype.Set = function(nX, nY, eValue, nNum)
     if (undefined !== nNum && null !== nNum && -1 !== nNum)
         this.m_aBoard[nIndex].Set_Num(nNum);
 };
-
 CLogicBoard.prototype.Get = function(nX, nY)
 {
     return this.m_aBoard[this.private_GetPos(nX, nY)].Get_Value();
 };
-
 CLogicBoard.prototype.Get_Num = function(nX, nY)
 {
     return this.m_aBoard[this.private_GetPos(nX, nY)].Get_Num();
 };
-
 CLogicBoard.prototype.Check_Dead = function(nX, nY, eValue)
 {
     var oChecker = new CDeadGroupChecker();
@@ -221,7 +273,6 @@ CLogicBoard.prototype.Check_Dead = function(nX, nY, eValue)
     else
         return null;
 };
-
 CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue, bCheckKo)
 {
     var eOtherValue;
@@ -267,7 +318,32 @@ CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue, bCheckKo)
 
     return oChecker;
 };
+CLogicBoard.prototype.Get_Copy = function()
+{
+    var Board = new CLogicBoard(this.m_nW, this.m_nH);
 
+    var nSize = this.m_nW * this.m_nH;
+    for (var nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        this.m_aBoard[nIndex].Copy_To(Board.m_aBoard[nIndex]);
+    }
+
+    return Board;
+};
+CLogicBoard.prototype.private_InitBoard = function()
+{
+    var nSize = this.m_nW * this.m_nH;
+
+    this.m_aBoard = new Array(nSize);
+    for (var nIndex = 0; nIndex < nSize; nIndex++)
+    {
+        this.m_aBoard[nIndex] = new CBoardPoint();
+    }
+};
+CLogicBoard.prototype.private_GetPos = function(nX, nY)
+{
+    return (nY - 1) * this.m_nW + (nX - 1);
+};
 /**
  * Ищем дамэ начиная с данного пункта, если данный пункт занят камнем того же цвета, тогда смотрим на
  * дамэ данного камня, если данный пункт не занят вообще, значит мы нашли дамэ, в последнем случае, дамэ
@@ -292,7 +368,6 @@ CLogicBoard.prototype.private_IsDame = function(nX, nY, eValue, oChecker)
 
     return false;
 };
-
 CLogicBoard.prototype.private_CheckDame = function(nX, nY, eValue, oChecker)
 {
     if (true === oChecker.Is_StoneInCurrentGroup(nX, nY))
@@ -312,7 +387,6 @@ CLogicBoard.prototype.private_CheckDame = function(nX, nY, eValue, oChecker)
 
     return false;
 };
-
 CLogicBoard.prototype.private_CheckDead = function(nX, nY, eValue, oChecker)
 {
     if (nX > this.m_nW || nX < 1 || nY > this.m_nH || nY < 1)
@@ -332,29 +406,189 @@ CLogicBoard.prototype.private_CheckDead = function(nX, nY, eValue, oChecker)
         return true;
     }
 };
-
-CLogicBoard.prototype.Get_Copy = function()
+CLogicBoard.prototype.Init_CountScores = function()
 {
-    var Board = new CLogicBoard(this.m_nW, this.m_nH);
-
-    var nSize = this.m_nW * this.m_nH;
-    for (var nIndex = 0; nIndex < nSize; nIndex++)
+    this.m_aBoardScores = [];
+    for (var Y = 1; Y <= this.m_nH; Y++)
     {
-        this.m_aBoard[nIndex].Copy_To(Board.m_aBoard[nIndex]);
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            this.m_aBoardScores[this.private_GetPos(X, Y)] = BOARD_EMPTY;
+        }
     }
 
-    return Board;
+    this.private_CheckAllEmptyAreas(false);
 };
 CLogicBoard.prototype.Set_ScorePoint = function(nX, nY, eValue)
 {
+    this.m_aBoardScores[this.private_GetPos(nX, nY)] = eValue;
 };
-
 CLogicBoard.prototype.Get_ScorePoint = function(nX, nY)
 {
-    return BOARD_EMPTY;
+    return this.m_aBoardScores[this.private_GetPos(nX, nY)]
 };
-
-CLogicBoard.prototype.Count_Scores = function()
+CLogicBoard.prototype.Count_Scores = function(oDrawingBoard)
 {
-    return {Black : 0, White : 0};
+    var nBlackScores = 0;
+    var nWhiteScores = 0;
+
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            var oMark = null;
+            var nOwner = this.Get_ScorePoint(X, Y);
+
+            if (BOARD_BLACK === nOwner)
+            {
+                oMark = new CDrawingMark(X, Y, EDrawingMark.Tb, "");
+                if (BOARD_WHITE === this.Get(X, Y))
+                    nBlackScores += 2;
+                else
+                    nBlackScores++;
+            }
+            else if (BOARD_WHITE === nOwner)
+            {
+                oMark = new CDrawingMark(X, Y, EDrawingMark.Tw, "");
+                if (BOARD_BLACK === this.Get(X, Y))
+                    nWhiteScores += 2;
+                else
+                    nWhiteScores++;
+            }
+
+            if (null === oMark)
+                oDrawingBoard.Remove_Mark(X, Y);
+            else
+                oDrawingBoard.Add_Mark(oMark);
+        }
+    }
+
+    return {Black : nBlackScores, White : nWhiteScores};
+};
+CLogicBoard.prototype.Select_DeadGroup = function(X, Y)
+{
+    var Value = this.Get(X, Y);
+    if (BOARD_EMPTY === Value)
+        return;
+
+    this.m_oBoundary.Clear();
+    var nOwner = this.Get_ScorePoint(X, Y);
+    if (BOARD_BLACK !== nOwner && BOARD_WHITE !== nOwner)
+    {
+        // Сначала найдем область в которую мы заносим пустые пункты и пункты заданного цвета.
+        this.m_oArea.Clear();
+        this.private_CheckBoundary(X, Y, Value);
+
+        for (var Place in this.m_oBoundary.m_aPoints)
+        {
+            var Pos = Common_ValuetoXY(Place | 0);
+            this.m_oArea.Clear();
+            this.private_CheckEmptyAreaByXYAndValue(Pos.X, Pos.Y, BOARD_DRAW - Value);
+            this.m_oArea.Update_Board(this, BOARD_DRAW);
+        }
+
+        this.private_CheckAllEmptyAreas(true);
+
+        this.m_oArea.Clear();
+        this.private_CheckBoundary(X, Y, Value);
+        this.m_oArea.Update_Board(this, BOARD_DRAW - Value);
+    }
+    else
+    {
+        this.m_oArea.Clear();
+        this.private_CheckBoundary(X, Y, Value);
+        this.m_oArea.Update_Board(this, BOARD_DRAW);
+        this.private_CheckAllEmptyAreas(true);
+    }
+};
+CLogicBoard.prototype.private_CheckEmptyAreaByXY = function(X, Y)
+{
+    if (X > this.m_nW || X < 1 || Y > this.m_nH || Y < 1)
+        return;
+
+    var nCurValue = this.Get(X, Y);
+    if (BOARD_EMPTY !== this.Get(X, Y))
+    {
+        var nOwner = this.m_oArea.Get_Owner();
+        switch (nOwner)
+        {
+            case BOARD_EMPTY:
+            {
+                this.m_oArea.Set_Owner(nCurValue);
+                break;
+            }
+            case BOARD_BLACK:
+            case BOARD_WHITE:
+            {
+                if (nOwner !== nCurValue)
+                    this.m_oArea.Set_Owner(BOARD_DRAW);
+                break;
+            }
+            case BOARD_DRAW:
+                break;
+        }
+        return;
+    }
+
+    if (false === this.m_oArea.Is_PointIn(X, Y))
+    {
+        this.private_CheckEmptyAreaByXY(X + 1, Y);
+        this.private_CheckEmptyAreaByXY(X - 1, Y);
+        this.private_CheckEmptyAreaByXY(X, Y + 1);
+        this.private_CheckEmptyAreaByXY(X, Y - 1);
+    }
+};
+CLogicBoard.prototype.private_CheckBoundary = function(X, Y, Value)
+{
+    if (X > this.m_nW || X < 1 || Y > this.m_nH || Y < 1)
+        return;
+
+    if ((BOARD_DRAW - Value) === this.Get(X, Y))
+    {
+        if (Value === this.Get_ScorePoint(X, Y))
+            this.m_oBoundary.Is_PointIn(X, Y);
+
+        return;
+    }
+
+    if (true !== this.m_oArea.Is_PointIn(X, Y))
+    {
+        this.private_CheckBoundary(X + 1, Y, Value);
+        this.private_CheckBoundary(X - 1, Y, Value);
+        this.private_CheckBoundary(X, Y + 1, Value);
+        this.private_CheckBoundary(X, Y - 1, Value);
+    }
+};
+CLogicBoard.prototype.private_CheckEmptyAreaByXYAndValue = function(X, Y, Value)
+{
+    if (X > this.m_nW || X < 1 || Y > this.m_nH || Y < 1)
+        return;
+
+    if ((BOARD_DRAW - Value) === this.Get(X, Y))
+        return;
+    else if (Value === this.Get(X, Y))
+        this.m_oBoundary.Remove(X, Y);
+
+    if (true !== this.m_oArea.Is_PointIn(X, Y))
+    {
+        this.private_CheckEmptyAreaByXYAndValue(X + 1, Y, Value);
+        this.private_CheckEmptyAreaByXYAndValue(X - 1, Y, Value);
+        this.private_CheckEmptyAreaByXYAndValue(X, Y + 1, Value);
+        this.private_CheckEmptyAreaByXYAndValue(X, Y - 1, Value);
+    }
+};
+CLogicBoard.prototype.private_CheckAllEmptyAreas = function(bCheckDraw)
+{
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            if (BOARD_EMPTY === this.Get(X, Y) && (BOARD_EMPTY === this.Get_ScorePoint(X, Y) || (true === bCheckDraw && BOARD_DRAW === this.Get_ScorePoint(X, Y))))
+            {
+                this.m_oArea.Clear();
+                this.private_CheckEmptyAreaByXY( X, Y );
+                this.m_oArea.Update_Board(this);
+            }
+        }
+    }
 };

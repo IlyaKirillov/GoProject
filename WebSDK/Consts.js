@@ -10,6 +10,7 @@
 var BOARD_EMPTY = 0x00;
 var BOARD_BLACK = 0x01;
 var BOARD_WHITE = 0x02;
+var BOARD_DRAW  = 0x03; // Это только для подсчета очков, для обозначения нейтральных пунктов.
 
 var EShowVariants =
 {

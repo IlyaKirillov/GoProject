@@ -280,6 +280,9 @@ CDrawingBoard.prototype.On_Resize = function()
 };
 CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 {
+    if (!this.m_oImageData.Lines)
+        return;
+
     var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
     var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
 
@@ -357,8 +360,17 @@ CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 };
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
-    this.m_eMode = eMode;
-    this.private_UpdateTarget();
+    if (this.m_eMode !== eMode)
+    {
+        this.m_eMode = eMode;
+        this.private_UpdateTarget();
+
+        if (EBoardMode.CountScores === eMode)
+        {
+            this.m_oLogicBoard.Init_CountScores();
+            this.m_oGameTree.Count_Scores();
+        }
+    }
 };
 CDrawingBoard.prototype.Get_Mode = function()
 {
@@ -1155,7 +1167,7 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
 };
 CDrawingBoard.prototype.private_DrawTrueColorAllStones = function(OldLogicBoard)
 {
-    if (undefined === OldLogicBoard)
+    if (true || undefined === OldLogicBoard)
     {
         var W = this.m_oImageData.W;
         var H = this.m_oImageData.H;
@@ -1417,7 +1429,7 @@ CDrawingBoard.prototype.private_DrawEmptySquare = function(W, H, PenWidth, Color
 
     MarksCanvas.strokeStyle = Color.ToString();
     MarksCanvas.fillStyle   = Color.ToString();
-    MarksCanvas.lineWidth   = PenWidth;
+    MarksCanvas.lineWidth   = Math.floor(PenWidth + 0.5);
 
     var r     = W / 2;
     var shift = PenWidth;
@@ -1708,6 +1720,17 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 CDrawingBoard.prototype.private_CountScores = function(X, Y, event)
 {
     // TODO: CountScores
+    if (true === event.CtrlKey )
+    {
+        // Возвращаемся к режиму добавления ходов
+        this.m_oGameTree.Clear_TerritoryPoints();
+        this.Set_Mode(EBoardMode.Move);
+    }
+    else
+    {
+        this.m_oLogicBoard.Select_DeadGroup(X, Y);
+        this.m_oGameTree.Count_Scores();
+    }
 };
 CDrawingBoard.prototype.private_AddOrRemoveStones = function(X, Y, event)
 {
@@ -1979,9 +2002,41 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.m_oGameTree.GoTo_NextVariant();
     }
-    else if (192 === KeyCode) // ~ (Ё)
+    else if (112 === KeyCode) // F1
     {
-        this.Set_Rulers(true === this.m_bRulers ? false : true);
+        this.Set_Mode(EBoardMode.Move);
+    }
+    else if (113 === KeyCode) // F2
+    {
+        this.Set_Mode(EBoardMode.CountScores);
+    }
+    else if (114 === KeyCode) // F3
+    {
+        this.Set_Mode(EBoardMode.AddRemove);
+    }
+    else if (115 === KeyCode) // F4
+    {
+        this.Set_Mode(EBoardMode.AddMarkTr);
+    }
+    else if (116 === KeyCode) // F5
+    {
+        this.Set_Mode(EBoardMode.AddMarkSq);
+    }
+    else if (117 === KeyCode) // F6
+    {
+        this.Set_Mode(EBoardMode.AddMarkCr);
+    }
+    else if (118 === KeyCode) // F7
+    {
+        this.Set_Mode(EBoardMode.AddMarkX);
+    }
+    else if (119 === KeyCode) // F8
+    {
+        this.Set_Mode(EBoardMode.AddMarkTx);
+    }
+    else if (120 === KeyCode) // F9
+    {
+        this.Set_Mode(EBoardMode.AddMarkNum);
     }
     else if (189 === KeyCode) // -
     {
@@ -1993,10 +2048,8 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 
         this.m_oGameTree.Set_ShowVariants(eType);
     }
-    else if (49 === KeyCode)
+    else if (192 === KeyCode) // ~ (Ё)
     {
-        var CurMode = this.Get_Mode() + 1;
-        CurMode = CurMode > EBoardMode.AddMarkNum ? EBoardMode.Move : CurMode;
-        this.Set_Mode(CurMode);
+        this.Set_Rulers(true === this.m_bRulers ? false : true);
     }
 };

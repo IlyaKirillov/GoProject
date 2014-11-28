@@ -353,7 +353,16 @@ CGameTree.prototype.Update_TerritoryMarks = function()
 CGameTree.prototype.Clear_TerritoryPoints = function()
 {
     if (true === this.m_oCurNode.Is_TerritoryUse())
+    {
+        this.m_oCurNode.Set_TerritoryUse(false);
         this.m_oCurNode.Clear_TerritoryPoints();
+    }
+
+    if (this.m_oDrawingBoard)
+    {
+        this.m_oDrawingBoard.Remove_AllMarks();
+        this.m_oDrawingBoard.Draw_Marks();
+    }
 };
 CGameTree.prototype.Remove_CurNode = function()
 {
@@ -645,10 +654,17 @@ CGameTree.prototype.Show_Variants = function()
 };
 CGameTree.prototype.Count_Scores = function()
 {
-    var Scores = this.m_oBoard.Count_Scores(this.m_oMarks);
+    if (this.m_oDrawingBoard)
+    {
+        var Scores = this.m_oBoard.Count_Scores(this.m_oDrawingBoard);
+        this.m_oDrawingBoard.Draw_Marks();
+        this.Update_TerritoryMarks();
 
-    this.m_nBlackScores = Scores.Black + this.m_nBlackCapt;
-    this.m_nWhiteScores = Scores.White + this.m_nWhiteCapt + this.m_nKomi;
+        this.m_nBlackScores = Scores.Black + this.m_nBlackCapt;
+        this.m_nWhiteScores = Scores.White + this.m_nWhiteCapt + this.m_nKomi;
+
+        // TODO: Сделать обновление в панели информации
+    }
 };
 CGameTree.prototype.GoTo_Node = function(Node)
 {

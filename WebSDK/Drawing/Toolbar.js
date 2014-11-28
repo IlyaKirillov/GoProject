@@ -48,6 +48,15 @@ CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
             case EDrawingButtonType.ForwardToEnd:
             case EDrawingButtonType.NextVariant:
             case EDrawingButtonType.PrevVariant:
+            case EDrawingButtonType.EditModeMove   :
+            case EDrawingButtonType.EditModeScores :
+            case EDrawingButtonType.EditModeAddRem :
+            case EDrawingButtonType.EditModeTr     :
+            case EDrawingButtonType.EditModeSq     :
+            case EDrawingButtonType.EditModeCr     :
+            case EDrawingButtonType.EditModeX      :
+            case EDrawingButtonType.EditModeText   :
+            case EDrawingButtonType.EditModeNum    :
                 oControl = new CDrawingButton();
                 break;
         }
