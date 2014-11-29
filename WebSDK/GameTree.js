@@ -571,8 +571,8 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         this.m_oDrawingBoard.Draw_Marks();
     }
 
-    if (this.m_oDrawingComments)
-        this.m_oDrawingComments.Set(this.m_oCurNode.Get_Comment());
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_Comments(this.m_oCurNode.Get_Comment());
 
     this.Update_IntrefaceState();
 };

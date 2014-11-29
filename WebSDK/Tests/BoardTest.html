@@ -13,6 +13,7 @@
 <script type="text/javascript" language="JavaScript" src="../Drawing/Toolbar.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/Drawing.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/InterfaceState.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Comments.js"></script>
 
 <script type="text/javascript" language="JavaScript" src="../Command.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Consts.js"></script>
@@ -26,13 +27,28 @@
 <script type="text/javascript" language="JavaScript" src="../Api.js"></script>
 <body style="padding:0;margin:0;">
 
-<div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
+<div id="divId" style="position:relative; height: 500px;width: 500px"></div>
+<div id="div2" style="position:absolute;left:550px;top:0px; height: 500px;width: 500px"></div>
+<div id="div3" style="position:absolute;left:0px;top:510px; height: 50px;width: 1000px"></div>
+<div id="div4" style="position:absolute;left:1050px;top:0px; height: 500px;width: 500px"></div>
 
 <script>
 
     var oGameTree = GoBoardApi.Create_GameTree();
     GoBoardApi.Create_BoardWithNavigateButtons(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
+
+    var oComments = new CDrawingComments(oGameTree.m_oDrawing);
+    oComments.Init("div2", oGameTree);
+    oGameTree.m_oDrawing.m_aElements.push(oComments);
+
+    var oDrawingToolbar = new CDrawingToolbar(oGameTree.m_oDrawing);
+    oDrawingToolbar.Init("div3", oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
+        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum]});
+    oGameTree.m_oDrawing.m_aElements.push(oDrawingToolbar);
+
+
+    GoBoardApi.Update_Size(oGameTree);
 
     window.onresize = function()
     {

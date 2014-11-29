@@ -486,12 +486,12 @@ CSgfReader.prototype.private_ReadComments = function()
                 sComment += "]";
                 this.m_nPos++;
             }
-            else if (0x000D == this.m_sSGF[this.m_nPos].charCodeAt(0))
-                sComment += "<br>\n";
-            else if (0x000A == this.m_sSGF[this.m_nPos].charCodeAt(0))
-                sComment += "<br>\n";
-            else if (0x0085 == this.m_sSGF[this.m_nPos].charCodeAt(0))
-                sComment += "<br>\n";
+//            else if (0x000D == this.m_sSGF[this.m_nPos].charCodeAt(0))
+//                sComment += "<br>\n";
+//            else if (0x000A == this.m_sSGF[this.m_nPos].charCodeAt(0))
+//                sComment += "<br>\n";
+//            else if (0x0085 == this.m_sSGF[this.m_nPos].charCodeAt(0))
+//                sComment += "<br>\n";
             else
                 sComment += this.m_sSGF[this.m_nPos];
             this.m_nPos++;

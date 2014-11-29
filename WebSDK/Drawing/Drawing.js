@@ -19,6 +19,7 @@ function CDrawing(oGameTree)
     this.m_oControl = null;
     this.m_aElements = [];
 
+    // Массивы с ссылками на кнопки заданного типа
     this.m_oButtons =
     {
         BackwardToStart : [],
@@ -40,6 +41,9 @@ function CDrawing(oGameTree)
         BoardModeText   : [],
         BoardModeNum    : []
     };
+
+    // Массив ссылок на окна с комментариями
+    this.m_aComments = [];
 };
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {
@@ -64,8 +68,8 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     var oMainElement = oControl.HtmlElement;
     oMainControl.AddControl(oControl);
 
-    var sBoardDivId  = sDivId + "_Board";
-    var sToolbaDivId = sDivId + "_Toolbar";
+    var sBoardDivId    = sDivId + "_Board";
+    var sToolbaDivId   = sDivId + "_Toolbar";
 
     this.private_CreateDiv(oMainElement, sBoardDivId);
     this.private_CreateDiv(oMainElement, sToolbaDivId);
@@ -80,7 +84,7 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     oDrawingBoard.Focus();
 
     var oToolbarControl = CreateControlContainer(sToolbaDivId);
-    oToolbarControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1,H);
+    oToolbarControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, H);
     oToolbarControl.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
     oControl.AddControl(oToolbarControl);
 
@@ -184,6 +188,10 @@ CDrawing.prototype.Register_EditModeNumButton = function(oButton)
 {
     this.m_oButtons.BoardModeNum.push(oButton);
 };
+CDrawing.prototype.Register_Comments = function(oComments)
+{
+    this.m_aComments.push(oComments);
+};
 CDrawing.prototype.Update_IntrefaceState = function(oIState)
 {
     // Backward
@@ -242,6 +250,11 @@ CDrawing.prototype.Update_IntrefaceState = function(oIState)
     for (var Index = 0, Count = this.m_oButtons.BoardModeNum.length; Index < Count; Index++)
         this.m_oButtons.BoardModeNum[Index].Set_Selected(oIState.BoardMode === EBoardMode.AddMarkNum);
 };
+CDrawing.prototype.Update_Comments = function(sComment)
+{
+    for (var Index = 0, Count = this.m_aComments.length; Index < Count; Index++)
+        this.m_aComments[Index].Update_Comments(sComment);
+};
 
 
 function CDrawingFullInfo()
@@ -250,8 +263,7 @@ function CDrawingFullInfo()
 
     this.HtmlElement =
     {
-        Control : null
-
+        Control  : null
     };
 }
 

@@ -78,6 +78,7 @@ function CDrawingButton(oDrawing)
 
     this.private_OnMouseDown = function(e)
     {
+        oThis.private_OnFocus();
         if (EDrawingButtonState.Disabled !== oThis.m_nState)
         {
             oThis.m_nState = EDrawingButtonState.Active;
