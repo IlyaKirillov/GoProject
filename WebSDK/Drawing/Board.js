@@ -273,10 +273,10 @@ CDrawingBoard.prototype.Update_Size = function()
     this.private_UpdateKoeffs();
     this.private_OnResize();
 };
-CDrawingBoard.prototype.On_Resize = function()
+CDrawingBoard.prototype.On_Resize = function(bForce)
 {
     this.private_UpdateKoeffs();
-    this.private_OnResize();
+    this.private_OnResize(bForce);
 };
 CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 {
@@ -1234,8 +1234,11 @@ CDrawingBoard.prototype.private_UpdateTarget = function()
 };
 CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
 {
-    if (-1 === X || -1 === Y)
+    if (-1 === X || -1 === Y || 0 === X || 0 === Y)
+    {
+        this.private_HideTarget();
         return;
+    }
 
     if (null !== this.m_oCreateWoodyId || null === this.m_oImageData.Lines)
         return;
@@ -1576,6 +1579,12 @@ CDrawingBoard.prototype.private_SetMark = function(X, Y, Mark)
 };
 CDrawingBoard.prototype.private_SetLastMoveMark = function(X, Y)
 {
+    if (X <= 0 || Y <= 0)
+    {
+        this.m_oLastMoveMark = 0;
+        return;
+    }
+
     var Place = Common_XYtoValue(X, Y);
     if (undefined === this.m_oMarks["" + Place])
         this.m_oMarks["" + Place] = new CDrawingMark(X, Y, EDrawingMark.Lm, "");

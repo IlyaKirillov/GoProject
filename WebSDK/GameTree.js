@@ -563,10 +563,10 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
             var X = oMove.Get_X();
             var Y = oMove.Get_Y();
 
-            // У паса нет отметки
-            if (0 != X && 0 != Y)
-                this.m_oDrawingBoard.Set_LastMoveMark(X, Y);
+            this.m_oDrawingBoard.Set_LastMoveMark(X, Y);
         }
+        else
+            this.m_oDrawingBoard.Set_LastMoveMark(-1, -1);
 
         this.m_oDrawingBoard.Draw_Marks();
     }
@@ -964,7 +964,7 @@ CGameTree.prototype.Set_BoardSize = function(W, H)
     this.m_oBoard.Reset_Size(W, H);
 
     if (this.m_oDrawingBoard)
-        this.m_oDrawingBoard.On_Resize();
+        this.m_oDrawingBoard.On_Resize(true);
 };
 CGameTree.prototype.Init_Match = function()
 {
