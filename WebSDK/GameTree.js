@@ -9,7 +9,6 @@
 
 function CGameTree(Drawing, Navigator, Sound, Marks)
 {
-    this.m_oNavigator      = Navigator;
     this.m_oSound          = Sound;
     this.m_oDrawing        = Drawing;
     this.m_oMarks          = Marks;
@@ -18,6 +17,7 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
 
     this.m_oBoard          = new CLogicBoard();
     this.m_oDrawingBoard   = null;
+    this.m_oDrawingNavigator = null;
 
     this.m_aNodes          = [];                // Список со всеми нодами
     this.m_oFirstNode      = new CNode(this);   // Первая нода
@@ -70,6 +70,10 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_bEventEnable  = true;
     this.m_eShowVariants = EShowVariants.Next;
 };
+CGameTree.prototype.Set_DrawingNavigator = function(oDrawingNavigator)
+{
+    this.m_oDrawingNavigator = oDrawingNavigator;
+};
 CGameTree.prototype.Set_Drawing = function(oDrawing)
 {
     this.m_oDrawing = oDrawing;
@@ -92,6 +96,10 @@ CGameTree.prototype.Load_Sgf = function(sFile)
 {
     var oReader = new CSgfReader(this);
     oReader.Load(sFile);
+
+    if (this.m_oDrawingNavigator)
+        this.m_oDrawingNavigator.Create_FromGameTree();
+
     this.GoTo_Node(this.m_oFirstNode);
     this.m_oFirstNode.GoTo_MainVariant();
 };
@@ -261,9 +269,8 @@ CGameTree.prototype.Add_NewNode = function(bUpdateNavigator)
     this.m_oCurNode = oNewNode;
     this.m_nCurNodeDepth++;
 
-    // TODO: Обновляем визуальное дерево вариантов
-    if (true === bUpdateNavigator)
-        this.m_oDrawing.Update_Navigator();
+    if (true === bUpdateNavigator && this.m_oDrawingNavigator)
+        this.m_oDrawingNavigator.Update();
 };
 CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
 {
@@ -284,7 +291,7 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
             if (false)
             {
                 // TODO: Обновляем текущую позицию в визуальном дереве вариантов
-                this.m_oDrawing.Update_NavigatorCurrent(true);
+                this.m_oDrawing.Update_Current(true);
             }
             return;
         }
@@ -294,11 +301,10 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
     this.Add_NewNode(false);
     this.m_oCurNode.Add_Move(X, Y, Value);
 
-    if (this.false)
+    if (this.m_oDrawingNavigator)
     {
-        // TODO: Обновляем визуальное дерево вариантов
-        this.m_oNavigator.Create_From_GameTree();
-        this.m_oDrawing.Update_Navigator();
+        this.m_oDrawingNavigator.Create_FromGameTree();
+        this.m_oDrawingNavigator.Update();
     }
 };
 CGameTree.prototype.Add_MoveNumber = function(MoveNumber)
@@ -574,6 +580,9 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
     if (this.m_oDrawing)
         this.m_oDrawing.Update_Comments(this.m_oCurNode.Get_Comment());
 
+    if (this.m_oDrawingNavigator)
+        this.m_oDrawingNavigator.Update_Current(true);
+
     this.Update_IntrefaceState();
 };
 CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
@@ -754,6 +763,9 @@ CGameTree.prototype.GoTo_Node = function(Node)
 
     // У последней ноды выполняем команды в нормальном режиме
     this.Execute_CurNodeCommands();
+
+    if (this.m_oDrawingNavigator)
+        this.m_oDrawingNavigator.Update();
 
     // Включаем звук
     if (this.m_oSound)

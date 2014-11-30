@@ -26,6 +26,10 @@ CNode.prototype.Get_Id = function()
 {
     return this.m_nId;
 };
+CNode.prototype.Is_Node = function()
+{
+    return true;
+};
 CNode.prototype.Get_Next = function(Index)
 {
     return (undefined !== this.m_aNext[Index] ? this.m_aNext[Index] : this.m_aNext[this.m_nNextCur]);
@@ -215,7 +219,7 @@ CNode.prototype.Is_OnCurrentVariant = function()
         if (PrevNode.Get_Next(PrevNode.Get_NextCur()) != CurrNode)
             return false;
 
-        CurrNode = ParentNode;
+        CurrNode = PrevNode;
     }
 
     return true;
