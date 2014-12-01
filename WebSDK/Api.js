@@ -43,6 +43,11 @@ CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDiv
     oDrawing.Create_BoardWithNavigateButtons(sDivId);
 };
 
+CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator = function(oGameTree, sDivId)
+{
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_BoardCommentsButtonsNavigator(sDivId);
+};
 /*
  Загружаем Sgf в GameTree.
  */
@@ -60,8 +65,9 @@ CGoBoardApi.prototype.Update_Size = function(oGameTree)
 };
 
 window['GoBoardApi'] = new CGoBoardApi();
-CGoBoardApi.prototype['Create_GameTree']                 = CGoBoardApi.prototype.Create_GameTree;
-CGoBoardApi.prototype['Create_SimpleBoard']              = CGoBoardApi.prototype.Create_SimpleBoard;
-CGoBoardApi.prototype['Create_BoardWithNavigateButtons'] = CGoBoardApi.prototype.Create_BoardWithNavigateButtons;
-CGoBoardApi.prototype['Load_Sgf']                        = CGoBoardApi.prototype.Load_Sgf;
-CGoBoardApi.prototype['Update_Size']                     = CGoBoardApi.prototype.Update_Size;
+CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
+CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
+CGoBoardApi.prototype['Create_BoardWithNavigateButtons']      = CGoBoardApi.prototype.Create_BoardWithNavigateButtons;
+CGoBoardApi.prototype['Create_BoardCommentsButtonsNavigator'] = CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator;
+CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
+CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;

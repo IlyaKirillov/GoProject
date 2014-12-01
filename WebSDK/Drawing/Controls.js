@@ -60,14 +60,18 @@ function CControlContainer()
     this.AbsolutePosition = new CControlBounds();
 
     this.Controls       = new Array();
-}
 
+    this.Type           = 0;
+}
+CControlContainer.prototype.Set_Type = function(Type)
+{
+    this.Type = Type;
+};
 CControlContainer.prototype.AddControl = function(ctrl)
 {
     ctrl.Parent = this;
     this.Controls[this.Controls.length] = ctrl;
 };
-
 CControlContainer.prototype.Resize = function(_width,_height)
 {
     if (null == this.Parent)
@@ -77,13 +81,9 @@ CControlContainer.prototype.Resize = function(_width,_height)
         this.AbsolutePosition.R = _width;
         this.AbsolutePosition.B = _height;
 
-        if (null != this.HtmlElement)
+        if (null !== this.HtmlElement)
         {
-            var lCount = this.Controls.length;
-            for (var i = 0; i < lCount; i++)
-            {
-                this.Controls[i].Resize(_width,_height);
-            }
+            this.private_ResizeControls(_width, _height);
         }
         return;
     }
@@ -223,10 +223,42 @@ CControlContainer.prototype.Resize = function(_width,_height)
     this.HtmlElement.width 	= parseInt((_r - _x) + 0.5);
     this.HtmlElement.height = parseInt((_b - _y) + 0.5);
 
+    this.private_ResizeControls(_r - _x, _b - _y);
+};
+CControlContainer.prototype.private_ResizeControls = function(_w, _h)
+{
     var lCount = this.Controls.length;
+    if (1 === this.Type && 2 === lCount)
+    {
+        // Специальный случай, слева место под доску, справа что останется с заданным минимумом.
+        var ControlL = this.Controls[0];
+        var ControlR = this.Controls[1];
+
+        var _rMin = 400;
+
+        var rValue = _w - _rMin >= _h ? _w - _h : _rMin;
+
+        ControlL.Bounds.SetParams(0, 0, rValue, 1000, false, false, true, false, -1, -1);
+        ControlL.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_top);
+        ControlR.Bounds.SetParams(_w - rValue, 0, 1000, 1000, true, false, false, false, -1, -1);
+        ControlR.Anchor = (g_anchor_right | g_anchor_bottom | g_anchor_top);
+    }
+    else if (2 === this.Type && 1 === lCount)
+    {
+        // Специальный случай квадратный элемент по центру данного элемента
+        var Control = this.Controls[0];
+
+        var min = Math.min(_w, _h);
+        var _x = (_w - min) / 2;
+        var _y = (_h - min) / 2;
+
+        Control.Bounds.SetParams(_x, _y, 1000, 1000, true, true, true, false, min, min);
+        Control.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_top);
+    }
+
     for (var i = 0; i < lCount; i++)
     {
-        this.Controls[i].Resize(_r - _x,_b - _y);
+        this.Controls[i].Resize(_w, _h);
     }
 };
 

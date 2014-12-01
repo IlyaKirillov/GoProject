@@ -47,7 +47,7 @@ CDrawingComments.prototype.Init = function(sDivId, oGameTree)
     var oDivControl = this.HtmlElement.Control;
     this.HtmlElement.TextArea.Control = CreateControlContainer(sAreaName);
     var oTextAreaControl = this.HtmlElement.TextArea.Control;
-    oTextAreaControl.Bounds.SetParams(1, 1, 1, 1, true, true, true, true, -1,-1);
+    oTextAreaControl.Bounds.SetParams(0, 0, 2, 2, true, true, true, true, -1,-1);
     oTextAreaControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     oDivControl.AddControl(oTextAreaControl);
 

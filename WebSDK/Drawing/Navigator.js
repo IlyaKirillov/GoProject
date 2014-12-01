@@ -468,7 +468,7 @@ CDrawingNavigator.prototype.private_FillHtmlElement = function(oElement, oParent
 CDrawingNavigator.prototype.private_OnResize = function(W, H, bForce)
 {
     this.private_DrawBackground(W, H, bForce);
-    this.private_DrawMap();
+    this.Update();
 };
 CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
 {

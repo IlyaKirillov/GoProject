@@ -70,6 +70,13 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_bEventEnable  = true;
     this.m_eShowVariants = EShowVariants.Next;
 };
+CGameTree.prototype.On_EndLoadDrawing = function()
+{
+    if (this.m_oDrawingNavigator)
+        this.m_oDrawingNavigator.Create_FromGameTree();
+
+    this.Update_IntrefaceState();
+};
 CGameTree.prototype.Set_DrawingNavigator = function(oDrawingNavigator)
 {
     this.m_oDrawingNavigator = oDrawingNavigator;

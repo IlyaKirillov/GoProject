@@ -121,6 +121,94 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 
     this.Update_Size();
 };
+CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
+{
+    var oGameTree = this.m_oGameTree;
+
+    var oParentControl = CreateControlContainer(sDivId);
+    var sMainDivId = sDivId + "GoBoard";
+    this.private_CreateDiv(oParentControl.HtmlElement, sMainDivId);
+    var oMainControl = CreateControlContainer(sMainDivId);
+    oMainControl.Bounds.SetParams(0, 0, 1, 1, false, false, true, true, -1, -1);
+    oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oParentControl.AddControl(oMainControl);
+
+    oMainControl.Set_Type(1);
+
+    var sBoardDivId = sDivId + "_Board";
+    var sPanelDivId = sDivId + "_Panel";
+
+    this.private_CreateDiv(oMainControl.HtmlElement, sBoardDivId);
+    this.private_CreateDiv(oMainControl.HtmlElement, sPanelDivId);
+
+    var oBoardControl = CreateControlContainer(sBoardDivId);
+    var oPanelControl = CreateControlContainer(sPanelDivId);
+    oMainControl.AddControl(oBoardControl);
+    oMainControl.AddControl(oPanelControl);
+
+    var sBoardCenterDivId = sBoardDivId + "_Centred";
+    this.private_CreateDiv(oBoardControl.HtmlElement, sBoardCenterDivId);
+    var oBoardCenterControl = CreateControlContainer(sBoardDivId);
+    oBoardControl.Set_Type(2);
+    oBoardControl.AddControl(oBoardCenterControl);
+
+    var oDrawingBoard = new CDrawingBoard(this);
+    oDrawingBoard.Init(sBoardDivId, oGameTree);
+    oDrawingBoard.Focus();
+
+    var sCaTDivId       = sPanelDivId + "_CaT";
+    var sNavigatorDivId = sPanelDivId + "_Navigator";
+    this.private_CreateDiv(oPanelControl.HtmlElement, sCaTDivId);
+    this.private_CreateDiv(oPanelControl.HtmlElement, sNavigatorDivId);
+
+    var oCaTControl = CreateControlContainer(sCaTDivId);
+    oCaTControl.Bounds.SetParams(0, 0, 1000, 500, false, false, false, false, -1, -1);
+    oCaTControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oPanelControl.AddControl(oCaTControl);
+
+    var oNavigatorControl = CreateControlContainer(sNavigatorDivId);
+    oNavigatorControl.Bounds.SetParams(0, 500, 1000, 1000, false, false, false, false, -1, -1);
+    oNavigatorControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oPanelControl.AddControl(oNavigatorControl);
+
+    var oDrawingNavigator = new CDrawingNavigator(this);
+    oDrawingNavigator.Init(sNavigatorDivId, oGameTree);
+
+    var sCommentsDivId = sCaTDivId + "_Comments";
+    var sToolsDivId    = sCaTDivId + "_Toolbar";
+    this.private_CreateDiv(oCaTControl.HtmlElement, sCommentsDivId);
+    this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId);
+
+    var ToolbarH = 25;
+
+    var oCommentsControl = CreateControlContainer(sCommentsDivId);
+    oCommentsControl.Bounds.SetParams(0, 0, 1000, ToolbarH, false, false, false, true, -1, ToolbarH);
+    oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaTControl.AddControl(oCommentsControl);
+
+    var oToolsControl = CreateControlContainer(sToolsDivId);
+    oToolsControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, ToolbarH);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaTControl.AddControl(oToolsControl);
+
+    var oDrawingComents = new CDrawingComments(this);
+    oDrawingComents.Init(sCommentsDivId, oGameTree);
+
+    var oDrawingToolbar = new CDrawingToolbar(this);
+    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
+        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum]});
+
+    this.m_aElements.push(oDrawingBoard);
+    this.m_aElements.push(oDrawingNavigator);
+    this.m_aElements.push(oDrawingComents);
+    this.m_aElements.push(oDrawingToolbar);
+
+    this.m_oControl = oParentControl;
+
+    this.Update_Size();
+
+    oGameTree.On_EndLoadDrawing();
+};
 CDrawing.prototype.Update_Size = function()
 {
     if (this.m_oControl)
