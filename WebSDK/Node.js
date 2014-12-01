@@ -17,7 +17,7 @@ function CNode(oGameTree)
     this.m_oMove      = new CMove(0, BOARD_EMPTY); // Основной ход данной ноды (если он есть)
     this.m_sComment   = "";                        // Комментарий
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
-    this.m_oNavInfo   = {X : -1, Y : -1};          // Позиция данной ноды в навигаторе
+    this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
 
     oGameTree.Add_Node(this);
 }
@@ -52,7 +52,7 @@ CNode.prototype.Add_Next = function(Node, bSetCur)
 {
     this.m_aNext.push(Node);
 
-    if (true === bSetCur)
+    if (true === bSetCur || -1 === this.m_nNextCur)
         this.m_nNextCur = this.m_aNext.length - 1;
 };
 CNode.prototype.Remove_Next = function(Index)
@@ -224,10 +224,11 @@ CNode.prototype.Is_OnCurrentVariant = function()
 
     return true;
 };
-CNode.prototype.Set_NavigatorInfo = function(X,Y)
+CNode.prototype.Set_NavigatorInfo = function(X, Y, Num)
 {
-    this.m_oNavInfo.X = X;
-    this.m_oNavInfo.Y = Y;
+    this.m_oNavInfo.X   = X;
+    this.m_oNavInfo.Y   = Y;
+    this.m_oNavInfo.Num = Num;
 };
 CNode.prototype.Get_NavigatorInfo = function()
 {

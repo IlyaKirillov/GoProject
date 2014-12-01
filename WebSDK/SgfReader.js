@@ -92,7 +92,7 @@ CSgfReader.prototype.private_Parse = function()
             {
                 // Первая нода создается автоматически
                 if (1 != this.m_nPos)
-                    this.m_oGameTree.Add_NewNode(false);
+                    this.m_oGameTree.Add_NewNode(false, false);
                 else
                     this.m_oGameTree.Set_CurNode(this.m_oGameTree.Get_FirstNode());
 
@@ -481,7 +481,7 @@ CSgfReader.prototype.private_ReadComments = function()
     {
         while (']' !== this.m_sSGF[this.m_nPos] || '\\' === this.m_sSGF[this.m_nPos - 1])
         {
-            if (']' ==- this.m_sSGF[this.m_nPos + 1] && '\\' === this.m_sSGF[this.m_nPos])
+            if (']' === this.m_sSGF[this.m_nPos + 1] && '\\' === this.m_sSGF[this.m_nPos])
             {
                 sComment += "]";
                 this.m_nPos++;

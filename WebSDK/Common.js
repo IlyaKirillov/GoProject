@@ -224,3 +224,120 @@ function Common_EncodeString(string, Encoding)
 
     return Bytes;
 }
+
+var Common_DragHandler =
+{
+    Obj : null,
+
+    Init : function(o, oRoot, minX, maxX, minY, maxY, bSwapHorzRef, bSwapVertRef, fXMapper, fYMapper)
+    {
+        o.onmousedown   = Common_DragHandler.Start;
+
+        o.hmode         = bSwapHorzRef ? false : true ;
+        o.vmode         = bSwapVertRef ? false : true ;
+
+        o.root = oRoot && oRoot != null ? oRoot : o ;
+
+        if (o.hmode  && isNaN(parseInt(o.root.style.left  ))) o.root.style.left   = "0px";
+        if (o.vmode  && isNaN(parseInt(o.root.style.top   ))) o.root.style.top    = "350px";
+        if (!o.hmode && isNaN(parseInt(o.root.style.right ))) o.root.style.right  = "0px";
+        if (!o.vmode && isNaN(parseInt(o.root.style.bottom))) o.root.style.bottom = "0px";
+
+        o.minX  = typeof minX != 'undefined' ? minX : null;
+        o.minY  = typeof minY != 'undefined' ? minY : null;
+        o.maxX  = typeof maxX != 'undefined' ? maxX : null;
+        o.maxY  = typeof maxY != 'undefined' ? maxY : null;
+
+        o.xMapper = fXMapper ? fXMapper : null;
+        o.yMapper = fYMapper ? fYMapper : null;
+
+        o.root.onDragStart  = new Function();
+        o.root.onDragEnd    = new Function();
+        o.root.onDrag       = new Function();
+    },
+
+    Start : function(e)
+    {
+        var o = Common_DragHandler.Obj = this;
+        e = Common_DragHandler.FixE(e);
+        var y = parseInt(o.vmode ? o.root.style.top  : o.root.style.bottom);
+        var x = parseInt(o.hmode ? o.root.style.left : o.root.style.right );
+        o.root.onDragStart(x, y);
+
+        o.lastMouseX    = e.clientX;
+        o.lastMouseY    = e.clientY;
+
+        if (o.hmode) {
+            if (o.minX != null) o.minMouseX = e.clientX - x + o.minX;
+            if (o.maxX != null) o.maxMouseX = o.minMouseX + o.maxX - o.minX;
+        } else {
+            if (o.minX != null) o.maxMouseX = -o.minX + e.clientX + x;
+            if (o.maxX != null) o.minMouseX = -o.maxX + e.clientX + x;
+        }
+
+        if (o.vmode) {
+            if (o.minY != null) o.minMouseY = e.clientY - y + o.minY;
+            if (o.maxY != null) o.maxMouseY = o.minMouseY + o.maxY - o.minY;
+        } else {
+            if (o.minY != null) o.maxMouseY = -o.minY + e.clientY + y;
+            if (o.maxY != null) o.minMouseY = -o.maxY + e.clientY + y;
+        }
+
+        document.onmousemove = Common_DragHandler.Drag;
+        document.onmouseup   = Common_DragHandler.End;
+
+        return false;
+    },
+
+    Drag : function(e)
+    {
+        e = Common_DragHandler.FixE(e);
+        var o = Common_DragHandler.Obj;
+
+        var ey  = e.clientY;
+        var ex  = e.clientX;
+        var y = parseInt(o.vmode ? o.root.style.top  : o.root.style.bottom);
+        var x = parseInt(o.hmode ? o.root.style.left : o.root.style.right );
+        var nx, ny;
+
+        if (o.minX != null) ex = o.hmode ? Math.max(ex, o.minMouseX) : Math.min(ex, o.maxMouseX);
+        if (o.maxX != null) ex = o.hmode ? Math.min(ex, o.maxMouseX) : Math.max(ex, o.minMouseX);
+        if (o.minY != null) ey = o.vmode ? Math.max(ey, o.minMouseY) : Math.min(ey, o.maxMouseY);
+        if (o.maxY != null) ey = o.vmode ? Math.min(ey, o.maxMouseY) : Math.max(ey, o.minMouseY);
+
+        nx = x + ((ex - o.lastMouseX) * (o.hmode ? 1 : -1));
+        ny = y + ((ey - o.lastMouseY) * (o.vmode ? 1 : -1));
+
+        if (o.xMapper)      nx = o.xMapper(y)
+        else if (o.yMapper) ny = o.yMapper(x)
+
+        if (o.minX != null) nx = Math.max( nx, o.minX );
+        if (o.maxX != null) nx = Math.min( nx, o.maxX );
+        if (o.minY != null) ny = Math.max( ny, o.minY );
+        if (o.maxY != null) ny = Math.min( ny, o.maxY );
+
+        Common_DragHandler.Obj.root.style[o.hmode ? "left" : "right"] = nx + "px";
+        Common_DragHandler.Obj.root.style[o.vmode ? "top" : "bottom"] = ny + "px";
+        Common_DragHandler.Obj.lastMouseX = ex;
+        Common_DragHandler.Obj.lastMouseY = ey;
+        Common_DragHandler.Obj.root.onDrag(nx, ny);
+
+        return false;
+    },
+
+    End : function()
+    {
+        document.onmousemove = null;
+        document.onmouseup   = null;
+        Common_DragHandler.Obj.root.onDragEnd(parseInt(Common_DragHandler.Obj.root.style[Common_DragHandler.Obj.hmode ? "left" : "right"]), parseInt(Common_DragHandler.Obj.root.style[Common_DragHandler.Obj.vmode ? "top" : "bottom"]));
+        Common_DragHandler.Obj = null;
+    },
+
+    FixE : function(e)
+    {
+        if (typeof e == 'undefined') e = window.event;
+        if (typeof e.layerX == 'undefined') e.layerX = e.offsetX;
+        if (typeof e.layerY == 'undefined') e.layerY = e.offsetY;
+        return e;
+    }
+};

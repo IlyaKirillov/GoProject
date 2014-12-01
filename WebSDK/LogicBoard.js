@@ -71,11 +71,6 @@ CBoardPoint.prototype.Get_Num = function()
 {
     return this.m_nNum;
 };
-CBoardPoint.prototype.Copy_To = function(OtherPoint)
-{
-    OtherPoint.m_eValue = this.m_eValue;
-    OtherPoint.m_nNum   = this.m_nNum;
-};
 
 function CDeadGroupChecker()
 {
@@ -317,18 +312,6 @@ CLogicBoard.prototype.Check_Kill = function(nX, nY, eValue, bCheckKo)
         return null;
 
     return oChecker;
-};
-CLogicBoard.prototype.Get_Copy = function()
-{
-    var Board = new CLogicBoard(this.m_nW, this.m_nH);
-
-    var nSize = this.m_nW * this.m_nH;
-    for (var nIndex = 0; nIndex < nSize; nIndex++)
-    {
-        this.m_aBoard[nIndex].Copy_To(Board.m_aBoard[nIndex]);
-    }
-
-    return Board;
 };
 CLogicBoard.prototype.private_InitBoard = function()
 {

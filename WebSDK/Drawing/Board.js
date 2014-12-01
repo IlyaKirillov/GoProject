@@ -23,10 +23,13 @@ var EBoardMode =
 
 };
 
-function CDrawingBoard()
+function CDrawingBoard(oDrawing)
 {
+    this.m_oDrawing    = oDrawing;
     this.m_oGameTree   = null;
     this.m_oLogicBoard = null;
+
+    this.m_bNeedRedraw = true;
 
     this.m_eMode       = EBoardMode.Move;
     this.m_bRulers     = false;
@@ -192,6 +195,9 @@ function CDrawingBoard()
 
 CDrawingBoard.prototype.Init = function(sName, GameTree)
 {
+    if (this.m_oDrawing)
+        this.m_oDrawing.Register_Board(this);
+
     this.m_oGameTree   = GameTree;
     this.m_oLogicBoard = GameTree.Get_Board();
     this.m_oGameTree.Set_DrawingBoard(this);
@@ -352,11 +358,20 @@ CDrawingBoard.prototype.Draw_Marks = function()
 };
 CDrawingBoard.prototype.Draw_AllStones = function(OldLogicBoard)
 {
-    this.private_DrawTrueColorAllStones(OldLogicBoard);
+    this.m_bNeedRedraw = true;
+};
+CDrawingBoard.prototype.Draw_AllStones2 = function()
+{
+    this.private_DrawTrueColorAllStones();
+    this.m_bNeedRedraw = false;
 };
 CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 {
     this.private_SetLastMoveMark(X, Y);
+};
+CDrawingBoard.prototype.Need_Redraw = function()
+{
+    return this.m_bNeedRedraw;
 };
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
@@ -1167,37 +1182,20 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
         }
     }
 };
-CDrawingBoard.prototype.private_DrawTrueColorAllStones = function(OldLogicBoard)
+CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
 {
-    if (true || undefined === OldLogicBoard)
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    this.HtmlElement.Stones.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+
+    var oSize = this.m_oLogicBoard.Get_Size();
+    for (var Y = 1; Y <= oSize.Y; Y++)
     {
-        var W = this.m_oImageData.W;
-        var H = this.m_oImageData.H;
-
-        this.HtmlElement.Stones.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
-        this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
-
-        var oSize = this.m_oLogicBoard.Get_Size();
-        for (var Y = 1; Y <= oSize.Y; Y++)
+        for (var X = 1; X <= oSize.X; X++)
         {
-            for (var X = 1; X <= oSize.X; X++)
-            {
-                this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
-            }
-        }
-    }
-    else
-    {
-        var oSize = this.m_oLogicBoard.Get_Size();
-        for (var Y = 1; Y <= oSize.Y; Y++)
-        {
-            for (var X = 1; X <= oSize.X; X++)
-            {
-                var Value = this.m_oLogicBoard.Get(X, Y);
-
-                if (Value !== OldLogicBoard.Get(X, Y))
-                    this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
-            }
+            this.Draw_Sector(X, Y, this.m_oLogicBoard.Get(X, Y));
         }
     }
 };
@@ -1751,7 +1749,7 @@ CDrawingBoard.prototype.private_AddOrRemoveStones = function(X, Y, event)
     if (true === this.m_oGameTree.Get_CurNode().Have_Move())
     {
         // Добавляем новую ноду
-        this.m_oGameTree.Add_NewNode();
+        this.m_oGameTree.Add_NewNode(true, true);
         this.m_oGameTree.Execute_CurNodeCommands();
     }
 

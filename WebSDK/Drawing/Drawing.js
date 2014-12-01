@@ -42,12 +42,35 @@ function CDrawing(oGameTree)
         BoardModeNum    : []
     };
 
+    this.m_oBoard     = null;
+    this.m_oNavigator = null;
+
     // Массив ссылок на окна с комментариями
     this.m_aComments = [];
+
+    this.m_nDrawTimerInterval = 40;
+    this.m_nDrawTimerId = setTimeout(function(){oThis.private_OnTimerDraw();}, this.m_nDrawTimerInterval);
+
+    var oThis = this;
+
+    this.private_OnTimerDraw = function()
+    {
+        if (this.m_oBoard && this.m_oBoard.Need_Redraw())
+        {
+            this.m_oBoard.Draw_AllStones2();
+        }
+
+        if (this.m_oNavigator && this.m_oNavigator.Need_Redraw())
+        {
+            this.m_oNavigator.Draw();
+        }
+
+        this.m_nDrawTimerId = setTimeout(function(){oThis.private_OnTimerDraw();}, oThis.m_nDrawTimerInterval);
+    };
 };
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {
-    var DrawingBoard = new CDrawingBoard();
+    var DrawingBoard = new CDrawingBoard(this);
     DrawingBoard.Init(sDivId, this.m_oGameTree);
     DrawingBoard.Focus();
 
@@ -79,7 +102,7 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oControl.AddControl(oBoardControl);
 
-    var oDrawingBoard = new CDrawingBoard();
+    var oDrawingBoard = new CDrawingBoard(this);
     oDrawingBoard.Init(sBoardDivId, oGameTree);
     oDrawingBoard.Focus();
 
@@ -191,6 +214,14 @@ CDrawing.prototype.Register_EditModeNumButton = function(oButton)
 CDrawing.prototype.Register_Comments = function(oComments)
 {
     this.m_aComments.push(oComments);
+};
+CDrawing.prototype.Register_Board = function(oBoard)
+{
+    this.m_oBoard = oBoard;
+};
+CDrawing.prototype.Register_Navigator = function(oNavigator)
+{
+    this.m_oNavigator = oNavigator;
 };
 CDrawing.prototype.Update_IntrefaceState = function(oIState)
 {

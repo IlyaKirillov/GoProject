@@ -75,6 +75,7 @@ function CNavigatorMap()
 {
     this.m_oMap      = [];
     this.m_oGameTree = null;
+    this.m_nMove     = 0;
 };
 CNavigatorMap.prototype.Set_GameTree = function(oGameTree)
 {
@@ -82,7 +83,8 @@ CNavigatorMap.prototype.Set_GameTree = function(oGameTree)
 };
 CNavigatorMap.prototype.Clear = function()
 {
-    this.m_oMap = [];
+    this.m_oMap  = [];
+    this.m_nMove = 0;
 };
 CNavigatorMap.prototype.Create_FromGameTree = function()
 {
@@ -112,9 +114,12 @@ CNavigatorMap.prototype.Create_FromCurNode = function(Node, X, Y)
     while (true)
     {
         var OldY = Y;
+        var StartMoveNumber = this.m_nMove;
         var NextsCount = CurNode.Get_NextsCount();
         for (var Index = 1; Index < NextsCount; Index++)
         {
+            this.m_nMove = StartMoveNumber;
+
             var OldY2 = Y;
             var ResY = this.Create_FromCurNode(CurNode.Get_Next(Index), X + 1, Y + 1);
             Y = ResY.Y;
@@ -137,8 +142,13 @@ CNavigatorMap.prototype.Create_FromCurNode = function(Node, X, Y)
             }
         }
 
+        this.m_nMove = StartMoveNumber;
+
         if (CurNode === Node)
             break;
+
+        if (CurNode.Have_Move())
+            this.m_nMove--;
 
         CurNode = CurNode.Get_Prev();
         X--;
@@ -159,6 +169,17 @@ CNavigatorMap.prototype.Set = function(X, Y, Value)
 {
     if (undefined === this.m_oMap[Y])
         this.m_oMap[Y] = [];
+
+    if (Value.Is_Node())
+    {
+        if (Value.Have_Move())
+        {
+            this.m_nMove++;
+            Value.Set_NavigatorInfo(X, Y, this.m_nMove);
+        }
+        else
+            Value.Set_NavigatorInfo(X, Y, -1);
+    }
 
     this.m_oMap[Y][X] = Value;
 };
@@ -183,14 +204,12 @@ CNavigatorMap.prototype.private_FillNodeMainVariant = function(Node, X, Y)
 {
     var CurNode = Node;
     this.Set(X, Y, Node);
-    Node.Set_NavigatorInfo(X, Y);
 
     while (CurNode.Get_NextsCount() > 0)
     {
         X++;
         CurNode = CurNode.Get_Next(0);
         this.Set(X, Y, CurNode);
-        CurNode.Set_NavigatorInfo(X, Y);
     }
 };
 CNavigatorMap.prototype.Get_Height = function()

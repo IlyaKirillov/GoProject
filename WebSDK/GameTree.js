@@ -101,7 +101,6 @@ CGameTree.prototype.Load_Sgf = function(sFile)
         this.m_oDrawingNavigator.Create_FromGameTree();
 
     this.GoTo_Node(this.m_oFirstNode);
-    this.m_oFirstNode.GoTo_MainVariant();
 };
 CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {
@@ -261,16 +260,19 @@ CGameTree.prototype.Add_Move = function(X, Y, Value)
 {
     this.m_oCurNode.Add_Move(X, Y, Value);
 };
-CGameTree.prototype.Add_NewNode = function(bUpdateNavigator)
+CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
 {
     var oNewNode = new CNode(this);
     oNewNode.Set_Prev(this.m_oCurNode);
-    this.m_oCurNode.Add_Next(oNewNode, true);
+    this.m_oCurNode.Add_Next(oNewNode, bSetCur);
     this.m_oCurNode = oNewNode;
     this.m_nCurNodeDepth++;
 
     if (true === bUpdateNavigator && this.m_oDrawingNavigator)
+    {
+        this.m_oDrawingNavigator.Create_FromGameTree();
         this.m_oDrawingNavigator.Update();
+    }
 };
 CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
 {
@@ -288,17 +290,15 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
             this.m_oCurNode = oNode;
             this.m_nCurNodeDepth++;
 
-            if (false)
-            {
-                // TODO: Обновляем текущую позицию в визуальном дереве вариантов
-                this.m_oDrawing.Update_Current(true);
-            }
+            if (this.m_oDrawingNavigator)
+                this.m_oDrawingNavigator.Update();
+
             return;
         }
     }
 
     // Если мы попали сюда, значит данного хода нет среди следующих у текущей ноды.
-    this.Add_NewNode(false);
+    this.Add_NewNode(false, true);
     this.m_oCurNode.Add_Move(X, Y, Value);
 
     if (this.m_oDrawingNavigator)
@@ -390,6 +390,11 @@ CGameTree.prototype.Remove_CurNode = function()
             // удаляем, потом что придется пересчитывать номера всех нод, что очень затратно
             PrevNode.Remove_Next(Index);
             this.m_oCurNode = PrevNode;
+
+            // Перестраиваем визуальное дерево вариантов
+            if (this.m_oDrawingNavigator)
+                this.m_oDrawingNavigator.Create_FromGameTree();
+
             this.GoTo_Node(PrevNode);
             return;
         }
@@ -681,8 +686,6 @@ CGameTree.prototype.Count_Scores = function()
 };
 CGameTree.prototype.GoTo_Node = function(Node)
 {
-    var OldLogicBoard = this.m_oBoard.Get_Copy();
-
     this.Init_Match();
     this.m_oBoard.Clear();
 
@@ -759,7 +762,7 @@ CGameTree.prototype.GoTo_Node = function(Node)
     // TODO: Здесь нужно оптимизировать отрисовку всех камней
     // Отрисовываем текущую позицию
     if (this.m_oDrawingBoard)
-        this.m_oDrawingBoard.Draw_AllStones(OldLogicBoard);
+        this.m_oDrawingBoard.Draw_AllStones();
 
     // У последней ноды выполняем команды в нормальном режиме
     this.Execute_CurNodeCommands();
@@ -985,6 +988,7 @@ CGameTree.prototype.Init_Match = function()
     this.m_nWhiteCapt    = 0;
     this.m_nMovesCount   = 0;
     this.m_nCurNodeDepth = 0;
+    this.m_nNextMove     = BOARD_BLACK;
 };
 CGameTree.prototype.private_UpdateNextMove = function(CurMoveValue)
 {

@@ -9,21 +9,31 @@
  * Time     0:52
  */
 
-function CDrawingNavigator()
+function CDrawingNavigator(oDrawing)
 {
+    this.m_oDrawing  = oDrawing;
     this.m_oGameTree = null;
     this.m_oMap      = new CNavigatorMap();
 
+    this.m_bNeedRedrawCurrent = true;
+    this.m_bNeedRedrawMap     = true;
+
     this.HtmlElement =
     {
-        Control : null,
+        Control     : null,
 
-        Board     : {Control : null},
-        Selection : {Control : null},
-        Current   : {Control : null},
-        Lines     : {Control : null},
-        Nodes     : {Control : null},
-        Events    : {Control : null}
+        Board       : {Control : null},
+        Selection   : {Control : null},
+        Current     : {Control : null},
+        Lines       : {Control : null},
+        Nodes       : {Control : null},
+        Events      : {Control : null},
+        HorScroll   : null,
+        VerScroll   : null,
+        HorScrollBG : null,
+        VerScrollBG : null,
+        ScrollW     : 0,
+        ScrollH     : 0
     };
 
     this.m_oBoardColor    = new CColor(231, 188, 95, 255);
@@ -62,11 +72,14 @@ function CDrawingNavigator()
         Ver2_T_3      : null,
         Ver3_T        : null,
         Triangle      : null,
-        Triangle_T    : null
+        Triangle_T    : null,
+        Target        : null,
+        Current       : null
     };
 
     this.m_oOffset = {X : 0, Y : 0};
-    this.m_bMouseLock = false;
+    this.m_bMouseLock       = false;
+    this.m_bNavigatorScroll = true;
 
     var oThis = this;
 
@@ -80,19 +93,36 @@ function CDrawingNavigator()
 
     this.private_OnMouseDown = function(e)
     {
+        if (oThis.m_bMouseLock)
+            return;
+
         if (oThis.m_oGameTree)
             oThis.m_oGameTree.Focus_DrawingBoard();
 
+        check_MouseDownEvent(e, true);
+        var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
+
+        var Value = oThis.m_oMap.Get(oPos.X, oPos.Y);
+        if (Value.Is_Node() && oThis.m_oGameTree)
+            oThis.m_oGameTree.GoTo_Node(Value);
     };
 
     this.private_OnMouseMove = function(e)
     {
+        if (oThis.m_bMouseLock)
+            return;
 
+        check_MouseMoveEvent(e);
+        var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
+        oThis.private_UpdateTarget(oPos.X, oPos.Y);
     };
 
     this.private_OnMouseOut = function(e)
     {
+        if (oThis.m_bMouseLock)
+            return;
 
+        oThis.private_UpdateTarget(-1, -1);
     };
 
     this.private_OnMouseWheel = function(Event)
@@ -121,14 +151,83 @@ function CDrawingNavigator()
 
         oThis.private_DrawMap();
         oThis.private_OnMouseMove(Event);
-        //oThis.Update_NavigatorScrolls();
+        oThis.private_UpdateScrollsPos();
 
         return false;
+    };
+
+    this.private_OnFocus = function()
+    {
+        if (oThis.m_oGameTree)
+            oThis.m_oGameTree.Focus_DrawingBoard();
+    };
+
+    this.private_OnMouseOverHorScroll = function()
+    {
+        oThis.HtmlElement.HorScroll.style.opacity   = 0.7;
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
+    };
+
+    this.private_OnMouseOutHorScroll = function()
+    {
+        oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+    };
+
+    this.private_OnMouseOverVerScroll = function()
+    {
+        oThis.HtmlElement.VerScroll.style.opacity   = 0.7;
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.VerScrollBG.style.display = "block";
+    };
+
+    this.private_OnMouseOutVerScroll = function()
+    {
+        oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
+        oThis.HtmlElement.VerScrollBG.style.display = "none";
+    };
+
+    this.private_OnDragStartScroll = function()
+    {
+        oThis.m_bMouseLock = true;
+    };
+
+    this.private_OnDragEndScroll = function()
+    {
+        oThis.m_bMouseLock = false;
+    };
+
+    this.private_OnDragHorScroll = function(X, Y)
+    {
+        X -= 2;
+        var LogicXMax = oThis.m_oMap.Get_Width() + 1;
+        var ScrollW   = oThis.HtmlElement.ScrollW;
+        var NavW      = oThis.m_oImageData.W;
+
+        var XOffset = (20 + LogicXMax * 24 - NavW) * (X / (NavW - 4 - ScrollW));
+        oThis.m_oOffset.X = -XOffset;
+        oThis.private_DrawMap();
+    };
+
+    this.private_OnDragVerScroll = function(X, Y)
+    {
+        Y -= 2;
+        var LogicYMax = oThis.m_oMap.Get_Height() + 1;
+        var ScrollH   = oThis.HtmlElement.ScrollH;
+        var NavH      = oThis.m_oImageData.H;
+
+        var YOffset = (20 + LogicYMax * 24 - NavH) * (Y / (NavH - 4 - ScrollH));
+        oThis.m_oOffset.Y = -YOffset;
+        oThis.private_DrawMap();
     };
 }
 
 CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
 {
+    if (this.m_oDrawing)
+        this.m_oDrawing.Register_Navigator(this);
+
     this.m_oGameTree = oGameTree;
     this.m_oGameTree.Set_DrawingNavigator(this);
     this.m_oMap.Set_GameTree(oGameTree);
@@ -151,11 +250,30 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.private_CreateCanvasElement(oMainElement, sNodesName);
     var oEventDiv = this.private_CreateDivElement(oMainElement, sEventsName);
 
-//                                <div id=\"id_navigator_horscroll_back\"></div>\
-//                                    <div id=\"id_navigator_horscroll\"></div>\
-//                                        <div id=\"id_navigator_verscroll_back\"></div>\
-//                                            <div id=\"id_navigator_verscroll\"></div>\
-//                                            </div>\
+    this.HtmlElement.HorScrollBG = this.private_CreateDivElement(oMainElement, sDivId + "HorScroll_BG");
+    this.HtmlElement.HorScroll   = this.private_CreateDivElement(oMainElement, sDivId + "HorScroll");
+    this.HtmlElement.VerScrollBG = this.private_CreateDivElement(oMainElement, sDivId + "VerScroll_BG");
+    this.HtmlElement.VerScroll   = this.private_CreateDivElement(oMainElement, sDivId + "VerScroll");
+
+    this.HtmlElement.HorScrollBG.style.background = "rgb(0,0,0)";
+    this.HtmlElement.HorScrollBG.style.display = "none";
+    this.HtmlElement.VerScrollBG.style.background = "rgb(0,0,0)";
+    this.HtmlElement.VerScrollBG.style.display = "none";
+
+    this.HtmlElement.HorScroll['onmouseover'] = this.private_OnMouseOverHorScroll;
+    this.HtmlElement.HorScroll['onmouseout']  = this.private_OnMouseOutHorScroll;
+    this.HtmlElement.VerScroll['onmouseover'] = this.private_OnMouseOverVerScroll;
+    this.HtmlElement.VerScroll['onmouseout']  = this.private_OnMouseOutVerScroll;
+
+    var oHorScroll = CreateControlContainer(sDivId + "HorScroll_BG");
+    oHorScroll.Bounds.SetParams(2, 0, 2, 2, true, false, true, true, -1, 12);
+    oHorScroll.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oHorScroll);
+
+    var oVerScroll = CreateControlContainer(sDivId + "VerScroll_BG");
+    oVerScroll.Bounds.SetParams(0, 2, 2, 2, false, true, true, true, 12, -1);
+    oVerScroll.Anchor = (g_anchor_top | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oVerScroll);
 
     this.private_FillHtmlElement(this.HtmlElement.Board,     oMainControl, sBoardName);
     this.private_FillHtmlElement(this.HtmlElement.Selection, oMainControl, sSelectionName);
@@ -168,10 +286,15 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     oEventDiv.onmousemove     = this.private_OnMouseMove;
     oEventDiv.onmouseout      = this.private_OnMouseOut;
     oEventDiv['onmousewheel'] = this.private_OnMouseWheel;
+    oEventDiv['onfocus']      = this.private_OnFocus;
+    oEventDiv.tabIndex        = -1;   // Этот параметр нужен, чтобы принимать сообщения клавиатуры (чтобы на этой div вставал фокус)
+    oEventDiv.style.hidefocus = true; // Убираем рамку фокуса в IE
+    oEventDiv.style.outline   = 0;    // Убираем рамку фокуса в остальных браузерах
 
     // Сразу создаем камни и линии, потому что они у нас не зависят от размера Div.
     this.private_CreateGlassStones();
     this.private_CreateLines();
+    this.private_CreateTarget();
 };
 CDrawingNavigator.prototype.Update_Size = function(bForce)
 {
@@ -184,18 +307,126 @@ CDrawingNavigator.prototype.Update_Size = function(bForce)
 };
 CDrawingNavigator.prototype.Update = function()
 {
+    if (this.m_oImageData.W <= 0 || this.m_oImageData.H <= 0)
+        return;
+
     var LogicXMax = this.m_oMap.Get_Width() + 1;
     var LogicYMax = this.m_oMap.Get_Height() + 1;
 
-    this.private_DrawMap();
-};
-CDrawingNavigator.prototype.Update_Current = function(bCheck)
-{
+    var NavW = this.m_oImageData.W;
+    var NavH = this.m_oImageData.H;
 
+    var _NavW = 20 + LogicXMax * 24;
+    var _NavH = 20 + LogicYMax * 24;
+    if (_NavW > NavW)
+    {
+        this.HtmlElement.ScrollW                    = Math.max(50, NavW * NavW / _NavW);
+        this.HtmlElement.HorScroll.style.width      = Math.max(50, NavW * NavW / _NavW) + "px";
+        this.HtmlElement.HorScroll.style.display    = "block";
+        this.HtmlElement.HorScroll.style.position   = "absolute";
+        this.HtmlElement.HorScroll.style.top        = NavH - 14 + "px";
+        this.HtmlElement.HorScroll.style.height     = 12 + "px";
+        this.HtmlElement.HorScroll.style.background = "rgb(0,0,0)";
+        this.HtmlElement.HorScroll.style.opacity    = 0.5;
+
+        Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 14, NavH - 14);
+
+        this.HtmlElement.HorScroll.onDrag         = this.private_OnDragHorScroll;
+        this.HtmlElement.HorScroll.onDragStart    = this.private_OnDragStartScroll;
+        this.HtmlElement.HorScroll.onDragEnd      = this.private_OnDragEndScroll;
+    }
+    else
+    {
+        this.HtmlElement.HorScroll.style.display = "none";
+    }
+
+    if (_NavH > NavH)
+    {
+        this.HtmlElement.ScrollH                    = Math.max(50, NavH * NavH / _NavH);
+        this.HtmlElement.VerScroll.style.height     = Math.max(50, NavH * NavH / _NavH) + "px";
+        this.HtmlElement.VerScroll.style.display    = "block";
+        this.HtmlElement.VerScroll.style.position   = "absolute";
+        this.HtmlElement.VerScroll.style.left       = NavW - 14 + "px";
+        this.HtmlElement.VerScroll.style.width      = 12 + "px";
+        this.HtmlElement.VerScroll.style.background = "rgb(0,0,0)";
+        this.HtmlElement.VerScroll.style.opacity    = 0.5;
+
+        Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 14, NavW - 14, 2, NavH - this.HtmlElement.ScrollH - 2);
+
+        this.HtmlElement.VerScroll.onDrag         = this.private_OnDragVerScroll;
+        this.HtmlElement.VerScroll.onDragStart    = this.private_OnDragStartScroll;
+        this.HtmlElement.VerScroll.onDragEnd      = this.private_OnDragEndScroll;
+    }
+    else
+    {
+        this.HtmlElement.VerScroll.style.display = "none";
+    }
+
+    this.private_DrawMap();
+    this.private_UpdateScrollsPos();
 };
 CDrawingNavigator.prototype.Create_FromGameTree = function()
 {
     this.m_oMap.Create_FromGameTree();
+};
+CDrawingNavigator.prototype.Update_Current = function(bScrollToCurPos)
+{
+    this.m_bNeedRedrawCurrent = true;
+
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    if (W <= 0 || H <= 0)
+        return;
+
+    var oCurNodePos = this.m_oGameTree.Get_CurNode().Get_NavigatorInfo();
+    var X = oCurNodePos.X, Y = oCurNodePos.Y;
+
+    var RealX = 10 + this.m_oOffset.X + X * 24;
+    var RealY = 10 + this.m_oOffset.Y + Y * 24;
+
+    if (false != bScrollToCurPos && true === this.m_bNavigatorScroll && (RealX <= 10 || RealX >= W - 10 || RealY <= 10 || RealY >= H - 10))
+    {
+        var LogicYMax  = this.m_oMap.Get_Height() + 1;
+        var YMaxOffset = (20 + LogicYMax * 24 - H);
+
+        var LogicXMax  = this.m_oMap.Get_Width() + 1;
+        var XMaxOffset = (20 + LogicXMax * 24 - W);
+
+        if (RealX <= 10)
+        {
+            this.m_oOffset.X = -X * 24;
+        }
+        else if (RealX >= W - 10)
+        {
+            this.m_oOffset.X = W - 24 - 10 - 10 - X * 24;
+        }
+
+        if (RealY <= 10)
+            this.m_oOffset.Y = -Y * 24;
+        else if (RealY >= H - 10)
+            this.m_oOffset.Y = H - 24 - 10 - 10 - Y * 24;
+
+        this.m_oOffset.X = Math.min(0, Math.max(this.m_oOffset.X, -XMaxOffset));
+        this.m_oOffset.Y = Math.min(0, Math.max(this.m_oOffset.Y, -YMaxOffset));
+
+        this.private_UpdateScrollsPos();
+        this.private_DrawMap();
+    }
+};
+CDrawingNavigator.prototype.Draw = function()
+{
+    if (this.m_bNeedRedrawCurrent)
+        this.private_DrawCurrentOnTimer();
+    if (this.m_bNeedRedrawMap)
+        this.private_DrawMapOnTimer();
+};
+CDrawingNavigator.prototype.Need_Redraw = function()
+{
+    if (this.m_bNeedRedrawCurrent || this.m_bNeedRedrawMap)
+        return true;
+
+    return false;
 };
 CDrawingNavigator.prototype.private_CreateCanvasElement = function(oParentElement, sName)
 {
@@ -737,6 +968,70 @@ CDrawingNavigator.prototype.private_CreateLines = function()
     this.m_oImageData.Triangle   = this.private_DrawTriangle(20, 20, 20 * 0.07, Color);
     this.m_oImageData.Triangle_T = this.private_DrawTriangle(20, 20, 20 * 0.07, Color_Transparent);
 };
+CDrawingNavigator.prototype.private_CreateTarget = function()
+{
+    var Size = 24;
+    var Canvas = this.HtmlElement.Selection.Control.HtmlElement.getContext("2d");
+
+    this.m_oImageData.Target  = Canvas.createImageData(Size, Size);
+    this.m_oImageData.Current = Canvas.createImageData(Size, Size);
+    var TargetBitmap  = this.m_oImageData.Target.data;
+    var CurrentBitmap = this.m_oImageData.Current.data;
+
+    for (var Y = 0; Y < Size; Y++)
+    {
+        for (var X = 0; X < Size; X++)
+        {
+            var Index = (X + Y * Size) * 4;
+
+            TargetBitmap[Index + 3] = 255;
+            CurrentBitmap[Index + 3] = 255;
+            if ((0 === X && Size - 1 === Y) || (Size - 1 === X && 0 === Y))
+            {
+                TargetBitmap[Index + 0] = 135;
+                TargetBitmap[Index + 1] = 125;
+                TargetBitmap[Index + 2] = 135;
+
+                CurrentBitmap[Index + 0] = 216;
+                CurrentBitmap[Index + 1] = 0;
+                CurrentBitmap[Index + 2] = 0;
+            }
+            else if (Size - 1 === X || Size - 1 === Y)
+            {
+                TargetBitmap[Index + 0] = 89;
+                TargetBitmap[Index + 1] = 89;
+                TargetBitmap[Index + 2] = 89;
+
+                CurrentBitmap[Index + 0] = 178;
+                CurrentBitmap[Index + 1] = 0;
+                CurrentBitmap[Index + 2] = 0;
+            }
+            else if (0 === Y || 0 === X)
+            {
+                TargetBitmap[Index + 0] = 182;
+                TargetBitmap[Index + 1] = 182;
+                TargetBitmap[Index + 2] = 182;
+
+                CurrentBitmap[Index + 0] = 255;
+                CurrentBitmap[Index + 1] = 0;
+                CurrentBitmap[Index + 2] = 0;
+            }
+            else
+            {
+                TargetBitmap[Index + 0] = 128;
+                TargetBitmap[Index + 1] = 128;
+                TargetBitmap[Index + 2] = 128;
+
+                CurrentBitmap[Index + 0] = 255;
+                CurrentBitmap[Index + 1] = 0;
+                CurrentBitmap[Index + 2] = 0;
+            }
+        }
+    }
+
+    Canvas.putImageData(this.m_oImageData.Target, 0, 0);
+    Canvas.putImageData(this.m_oImageData.Current, 0, 30);
+};
 CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha)
 {
     if (undefined === Alpha)
@@ -768,16 +1063,69 @@ CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Colo
 };
 CDrawingNavigator.prototype.private_DrawMap = function()
 {
+    this.m_bNeedRedrawMap = true;
+    this.Update_Current(false);
+};
+CDrawingNavigator.prototype.private_UpdateMousePos = function(X, Y)
+{
+    var oPos = Common_FindPosition(this.HtmlElement.Board.Control.HtmlElement);
+    var _X = ((X - oPos.X - 10 - this.m_oOffset.X) / 24) | 0;
+    var _Y = ((Y - oPos.Y - 10 - this.m_oOffset.Y) / 24) | 0;
+    return {X : _X, Y : _Y};
+};
+CDrawingNavigator.prototype.private_UpdateTarget = function(X, Y)
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    if (W <= 0 || H <= 0)
+        return;
+
+    var Canvas = this.HtmlElement.Selection.Control.HtmlElement.getContext("2d");
+    Canvas.clearRect(0, 0, W, H);
+    if (X >= 0 && Y >= 0)
+    {
+        var RealX = 10 + this.m_oOffset.X + X * 24;
+        var RealY = 10 + this.m_oOffset.Y + Y * 24;
+
+        var Value = this.m_oMap.Get(X, Y);
+        if (Value.Is_Node())
+            Canvas.putImageData(this.m_oImageData.Target, RealX, RealY);
+    }
+};
+CDrawingNavigator.prototype.private_UpdateScrollsPos = function()
+{
+    var XOffset   = -this.m_oOffset.X;
+    var LogicXMax =  this.m_oMap.Get_Width() + 1;
+    var ScrollW   =  this.HtmlElement.ScrollW;
+    var NavW      =  this.m_oImageData.W;
+
+    var X = XOffset / (20 + LogicXMax * 24 - NavW) * (NavW - 4 - ScrollW) + 2;
+
+    var YOffset   = -this.m_oOffset.Y;
+    var LogicYMax =  this.m_oMap.Get_Height() + 1;
+    var ScrollH   =  this.HtmlElement.ScrollH;
+    var NavH      =  this.m_oImageData.H;
+
+    var Y = YOffset / (20 + LogicYMax * 24 - NavH) * (NavH - 4 - ScrollH) + 2;
+
+    this.HtmlElement.HorScroll.style.left = X + "px";
+    this.HtmlElement.VerScroll.style.top  = Y + "px";
+};
+CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
+{
     var W = this.m_oImageData.W;
     var H = this.m_oImageData.H;
 
     if (0 === W || 0 === H)
         return;
 
-    var Lines = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
-    var Nodes = this.HtmlElement.Nodes.Control.HtmlElement.getContext("2d");
+    var Lines     = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
+    var Nodes     = this.HtmlElement.Nodes.Control.HtmlElement.getContext("2d");
+    var Selection = this.HtmlElement.Selection.Control.HtmlElement.getContext("2d");
     Nodes.clearRect(0, 0, W, H);
     Lines.clearRect(0, 0, W, H);
+    Selection.clearRect(0, 0, W, H);
 
     var x = 10 + this.m_oOffset.X;
     var y = 10 + this.m_oOffset.Y;
@@ -850,22 +1198,23 @@ CDrawingNavigator.prototype.private_DrawMap = function()
                         // Value - нода
                         var oMove = Value.Get_Move();
                         var nMoveType = oMove.Get_Type();
-                        //var sMove = "" +  oMove.Get_Num(X, Y);
-                        //var nTextW = Nodes.measureText(sMove).width;
+                        var sMove = "" +  Value.Get_NavigatorInfo().Num;
+                        var nTextW = Nodes.measureText(sMove).width;
 
                         if (BOARD_BLACK === nMoveType)
                         {
                             Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
-                            //Nodes.font = "bold 10px sans-serif";
-                            //Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
-                            //Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+
+                            Nodes.font = "bold 10px sans-serif";
+                            Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
+                            Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
                         }
                         else if (BOARD_WHITE === nMoveType)
                         {
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
-                            //Nodes.font = "bold 10px sans-serif";
-                            //Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
-                            //Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                            Nodes.font = "bold 10px sans-serif";
+                            Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
+                            Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
                         }
                         else // if (BOARD_EMPTY === nMoveType)
                         {
@@ -928,9 +1277,41 @@ CDrawingNavigator.prototype.private_DrawMap = function()
                             }
                         }
 
+                        // TODO: Это можно заменить дополнительно созданными картинками с вырезынными частями.
+                        if (BOARD_BLACK === nMoveType || BOARD_WHITE === nMoveType)
+                            Lines.clearRect(_x + 3, _y + 3, 18, 18);
                     }
                 }
             }
         }
     }
+
+    this.m_bNeedRedrawMap = false;
+};
+CDrawingNavigator.prototype.private_DrawCurrentOnTimer = function()
+{
+    if (!this.m_oGameTree)
+        return;
+
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    if (W <= 0 || H <= 0)
+        return;
+
+    var oCurNodePos = this.m_oGameTree.Get_CurNode().Get_NavigatorInfo();
+    var X = oCurNodePos.X, Y = oCurNodePos.Y;
+
+    var RealX = 10 + this.m_oOffset.X + X * 24;
+    var RealY = 10 + this.m_oOffset.Y + Y * 24;
+
+    var Canvas = this.HtmlElement.Current.Control.HtmlElement.getContext("2d");
+    Canvas.clearRect(0, 0, W, H);
+
+    if (RealX  >= -24 && RealX <= W + 24 && RealY >= -24 && RealY <= H + 24)
+    {
+        Canvas.putImageData(this.m_oImageData.Current, RealX, RealY);
+    }
+
+    this.m_bNeedRedrawCurrent = false;
 };

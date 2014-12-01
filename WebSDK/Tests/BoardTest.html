@@ -48,7 +48,7 @@
         EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum]});
     oGameTree.m_oDrawing.m_aElements.push(oDrawingToolbar);
 
-    var oDrawingNavigator = new CDrawingNavigator();
+    var oDrawingNavigator = new CDrawingNavigator(oGameTree.m_oDrawing);
     oDrawingNavigator.Init("div4", oGameTree);
     oGameTree.m_oDrawing.m_aElements.push(oDrawingNavigator);
 
