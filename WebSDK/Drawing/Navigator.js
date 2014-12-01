@@ -26,6 +26,7 @@ function CDrawingNavigator(oDrawing)
         Selection   : {Control : null},
         Current     : {Control : null},
         Lines       : {Control : null},
+        Shadows     : {Control : null},
         Nodes       : {Control : null},
         Events      : {Control : null},
         HorScroll   : null,
@@ -73,8 +74,14 @@ function CDrawingNavigator(oDrawing)
         Ver3_T        : null,
         Triangle      : null,
         Triangle_T    : null,
+        Triangle_B    : null,
+        Triangle_W    : null,
+        Triangle_BT   : null,
+        Triangle_WT   : null,
         Target        : null,
-        Current       : null
+        Current       : null,
+        Shadow        : null,
+        ShadowOff     : 0
     };
 
     this.m_oOffset = {X : 0, Y : 0};
@@ -240,6 +247,7 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     var sSelectionName = sDivId + "_Selection";
     var sCurrentName   = sDivId + "_Current";
     var sLinesName     = sDivId + "_Lines";
+    var sShadowsName   = sDivId + "_Shadows";
     var sNodesName     = sDivId + "_Nodes";
     var sEventsName    = sDivId + "_Events";
 
@@ -247,6 +255,7 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.private_CreateCanvasElement(oMainElement, sSelectionName);
     this.private_CreateCanvasElement(oMainElement, sCurrentName);
     this.private_CreateCanvasElement(oMainElement, sLinesName);
+    this.private_CreateCanvasElement(oMainElement, sShadowsName);
     this.private_CreateCanvasElement(oMainElement, sNodesName);
     var oEventDiv = this.private_CreateDivElement(oMainElement, sEventsName);
 
@@ -279,6 +288,7 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.private_FillHtmlElement(this.HtmlElement.Selection, oMainControl, sSelectionName);
     this.private_FillHtmlElement(this.HtmlElement.Current,   oMainControl, sCurrentName);
     this.private_FillHtmlElement(this.HtmlElement.Lines,     oMainControl, sLinesName);
+    this.private_FillHtmlElement(this.HtmlElement.Shadows,   oMainControl, sShadowsName);
     this.private_FillHtmlElement(this.HtmlElement.Nodes,     oMainControl, sNodesName);
     this.private_FillHtmlElement(this.HtmlElement.Events,    oMainControl, sEventsName);
 
@@ -295,6 +305,7 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.private_CreateGlassStones();
     this.private_CreateLines();
     this.private_CreateTarget();
+    this.private_CreateShadows();
 };
 CDrawingNavigator.prototype.Update_Size = function(bForce)
 {
@@ -964,9 +975,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
         }
     }
 
-    var Color_Transparent = new CColor(28, 28, 28, nTransAlpha);
-    this.m_oImageData.Triangle   = this.private_DrawTriangle(20, 20, 20 * 0.07, Color);
-    this.m_oImageData.Triangle_T = this.private_DrawTriangle(20, 20, 20 * 0.07, Color_Transparent);
+    this.m_oImageData.Triangle    = this.private_DrawTriangle(20, 20, 20 * 0.07, Color, 1, null);
+    this.m_oImageData.Triangle_T  = this.private_DrawTriangle(20, 20, 20 * 0.07, new CColor(28, 28, 28, nTransAlpha), 1, null);
+    this.m_oImageData.Triangle_B  = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(255, 255, 255, 255), 1, this.m_oImageData.Black);
+    this.m_oImageData.Triangle_W  = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(0, 0, 0, 255), 1, this.m_oImageData.White);
+    this.m_oImageData.Triangle_BT = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(255, 255, 255, nTransAlpha), 1, this.m_oImageData.BlackT);
+    this.m_oImageData.Triangle_WT = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(0, 0, 0, nTransAlpha), 1, this.m_oImageData.WhiteT);
 };
 CDrawingNavigator.prototype.private_CreateTarget = function()
 {
@@ -1032,13 +1046,16 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
     Canvas.putImageData(this.m_oImageData.Target, 0, 0);
     Canvas.putImageData(this.m_oImageData.Current, 0, 30);
 };
-CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha)
+CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha, oStoneImageData)
 {
     if (undefined === Alpha)
         Alpha = 1;
 
     var Canvas = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
     Canvas.clearRect(0, 0, W, H);
+
+    if (null !== oStoneImageData)
+        Canvas.putImageData(oStoneImageData, 0, 0);
 
     Canvas.globalAlpha = Alpha;
     Canvas.strokeStyle = Color.ToString();
@@ -1052,14 +1069,58 @@ CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Colo
     var _x1 =  Math.sqrt(r * r - (_y - r) * (_y - r)) + r;
     var _x2 = -Math.sqrt(r * r - (_y - r) * (_y - r)) + r;
 
+    var x1 = _x1 - shift;
+    var x2 = _x2 + shift;
+    var y1 = shift;
+    var y2 = _y;
+
+    if (null !== oStoneImageData)
+    {
+        x1 = Math.floor(x1 - 0.5);
+        x2 = Math.ceil(x2 + 0.5);
+        y1 = Math.ceil(y1 + 0.5);
+        y2 = Math.floor(y2 - 0.5);
+    }
+
+
     Canvas.beginPath();
-    Canvas.moveTo(W / 2, shift);
-    Canvas.lineTo(_x1 - shift, _y);
-    Canvas.lineTo(_x2 + shift, _y);
+    Canvas.moveTo(W / 2, y1);
+    Canvas.lineTo(x1, y2);
+    Canvas.lineTo(x2, y2);
     Canvas.closePath();
     Canvas.stroke();
 
-    return Canvas.getImageData(0, 0, W, H);
+    var data = Canvas.getImageData(0, 0, W, H);
+
+    Canvas.putImageData(data, 0, 0);
+    return data;
+};
+CDrawingNavigator.prototype.private_CreateShadows = function()
+{
+    var ShadowCanvas = this.HtmlElement.Shadows.Control.HtmlElement.getContext("2d");
+    var d = 20;
+    this.m_oImageData.Shadow = ShadowCanvas.createImageData(d, d);
+    var Shadow = this.m_oImageData.Shadow.data;
+    this.m_oImageData.ShadowOff = Math.max(parseInt(d * 0.15), 3);
+
+    var r = (d - 5) / 2 + 1;
+    for (var i = 0; i < d; i++)
+    {
+        for (var j = 0; j < d; j++)
+        {
+            var y = Math.abs(i - r);
+            var x = Math.abs(j - r);
+            var dist = Math.sqrt(x * x + y * y) / r;
+
+            var f = ( dist < 1.0 ? 0.15 + 0.75 * ( 1 - dist ) : 0 );
+
+            var Index = (d * i + j) * 4;
+            Shadow[Index + 0] = 0;
+            Shadow[Index + 1] = 0;
+            Shadow[Index + 2] = 0;
+            Shadow[Index + 3] = parseInt( 255 * f );
+        }
+    }
 };
 CDrawingNavigator.prototype.private_DrawMap = function()
 {
@@ -1121,9 +1182,11 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
         return;
 
     var Lines     = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
+    var Shadows   = this.HtmlElement.Shadows.Control.HtmlElement.getContext("2d");
     var Nodes     = this.HtmlElement.Nodes.Control.HtmlElement.getContext("2d");
     var Selection = this.HtmlElement.Selection.Control.HtmlElement.getContext("2d");
     Nodes.clearRect(0, 0, W, H);
+    Shadows.clearRect(0, 0, W, H);
     Lines.clearRect(0, 0, W, H);
     Selection.clearRect(0, 0, W, H);
 
@@ -1200,21 +1263,43 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         var nMoveType = oMove.Get_Type();
                         var sMove = "" +  Value.Get_NavigatorInfo().Num;
                         var nTextW = Nodes.measureText(sMove).width;
+                        var sComment = Value.Get_Comment();
 
                         if (BOARD_BLACK === nMoveType)
                         {
+                            if (bCurVariant)
+                                Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+
                             Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
 
-                            Nodes.font = "bold 10px sans-serif";
-                            Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
-                            Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                            if ("" === sComment)
+                            {
+                                Nodes.font = "bold 10px sans-serif";
+                                Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
+                                Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                            }
+                            else
+                            {
+                                Nodes.putImageData((bCurVariant ?  this.m_oImageData.Triangle_B : this.m_oImageData.Triangle_BT) , _x + 2, _y + 2);
+                            }
                         }
                         else if (BOARD_WHITE === nMoveType)
                         {
+                            if (bCurVariant)
+                                Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
-                            Nodes.font = "bold 10px sans-serif";
-                            Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
-                            Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+
+                            if ("" === sComment)
+                            {
+                                Nodes.font = "bold 10px sans-serif";
+                                Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
+                                Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                            }
+                            else
+                            {
+                                Nodes.putImageData((bCurVariant ?  this.m_oImageData.Triangle_W : this.m_oImageData.Triangle_WT) , _x + 2, _y + 2);
+                            }
                         }
                         else // if (BOARD_EMPTY === nMoveType)
                         {
