@@ -88,6 +88,15 @@ function CDrawingNavigator(oDrawing)
     this.m_bMouseLock       = false;
     this.m_bNavigatorScroll = true;
 
+
+    this.m_oLastDrawMap =
+    {
+        W : 0,
+        H : 0,
+        X : 0,
+        Y : 0
+    };
+
     var oThis = this;
 
     this.private_StartDrawingTimer = function()
@@ -373,12 +382,20 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.display = "none";
     }
 
+    // Этими строками мы сбрасываем последнее состояние отрисовщика, чтобы перерисовка точно состоялась
+    this.m_oLastDrawMap.H = -1;
+    this.m_oLastDrawMap.W = -1;
+
     this.private_DrawMap();
     this.private_UpdateScrollsPos();
 };
 CDrawingNavigator.prototype.Create_FromGameTree = function()
 {
     this.m_oMap.Create_FromGameTree();
+
+    // Этими строками мы сбрасываем последнее состояние отрисовщика, чтобы перерисовка точно состоялась
+    this.m_oLastDrawMap.H = -1;
+    this.m_oLastDrawMap.W = -1;
 };
 CDrawingNavigator.prototype.Update_Current = function(bScrollToCurPos)
 {
@@ -1180,6 +1197,17 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
     if (0 === W || 0 === H)
         return;
+
+    if (this.m_oLastDrawMap.W === W && this.m_oLastDrawMap.H === H && Math.abs(this.m_oOffset.X - this.m_oLastDrawMap.X) < 1 && Math.abs(this.m_oOffset.Y - this.m_oLastDrawMap.Y) < 1)
+    {
+        this.m_bNeedRedrawMap = false;
+        return;
+    }
+
+    this.m_oLastDrawMap.W = W;
+    this.m_oLastDrawMap.H = H;
+    this.m_oLastDrawMap.X = this.m_oOffset.X;
+    this.m_oLastDrawMap.Y = this.m_oOffset.Y;
 
     var Lines     = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
     var Shadows   = this.HtmlElement.Shadows.Control.HtmlElement.getContext("2d");

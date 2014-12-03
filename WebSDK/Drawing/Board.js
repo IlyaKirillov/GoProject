@@ -29,8 +29,6 @@ function CDrawingBoard(oDrawing)
     this.m_oGameTree   = null;
     this.m_oLogicBoard = null;
 
-    this.m_bNeedRedraw = true;
-
     this.m_eMode       = EBoardMode.Move;
     this.m_bRulers     = false;
 
@@ -39,6 +37,8 @@ function CDrawingBoard(oDrawing)
     this.m_dKoeffCellW   = 0;
     this.m_dKoeffCellH   = 0;
     this.m_dKoeffDiam    = 0;
+
+    this.m_oBoardPosition = {};
 
     this.m_oCreateWoodyId = null; // Id таймера по которому рисуется красивая доска.
 
@@ -289,6 +289,9 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
     if (!this.m_oImageData.Lines)
         return;
 
+    if (Value === this.m_oBoardPosition[Common_XYtoValue(X, Y)])
+        return;
+
     var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
     var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
 
@@ -324,6 +327,8 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
         }
     }
 
+    this.m_oBoardPosition[Common_XYtoValue(X, Y)] = Value;
+
     if (X === this.m_oLastTargetPos.X && Y === this.m_oLastTargetPos.Y)
     {
         if (BOARD_BLACK === Value || BOARD_WHITE === Value)
@@ -358,20 +363,11 @@ CDrawingBoard.prototype.Draw_Marks = function()
 };
 CDrawingBoard.prototype.Draw_AllStones = function(OldLogicBoard)
 {
-    this.m_bNeedRedraw = true;
-};
-CDrawingBoard.prototype.Draw_AllStones2 = function()
-{
     this.private_DrawTrueColorAllStones();
-    this.m_bNeedRedraw = false;
 };
 CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 {
     this.private_SetLastMoveMark(X, Y);
-};
-CDrawingBoard.prototype.Need_Redraw = function()
-{
-    return this.m_bNeedRedraw;
 };
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
@@ -689,7 +685,7 @@ CDrawingBoard.prototype.private_DrawTrueColorFullBoard = function()
     this.private_DrawTrueColorBoard();
     this.private_DrawRulers();
     this.private_DrawTrueColorLines();
-    this.private_DrawTrueColorAllStones();
+    this.private_RedrawTrueColorAllStones();
     this.private_DrawMarks();
 };
 CDrawingBoard.prototype.private_DrawTrueColorBoard = function()
@@ -1182,7 +1178,7 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
         }
     }
 };
-CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
+CDrawingBoard.prototype.private_RedrawTrueColorAllStones = function()
 {
     var W = this.m_oImageData.W;
     var H = this.m_oImageData.H;
@@ -1190,6 +1186,12 @@ CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
     this.HtmlElement.Stones.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
 
+    this.m_oBoardPosition = {};
+
+    this.private_DrawTrueColorAllStones();
+};
+CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
+{
     var oSize = this.m_oLogicBoard.Get_Size();
     for (var Y = 1; Y <= oSize.Y; Y++)
     {

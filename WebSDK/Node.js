@@ -172,6 +172,7 @@ CNode.prototype.Is_First = function()
 };
 CNode.prototype.Make_ThisNodeCurrent = function()
 {
+    var bResult = false;
     var CurrNode = this.Get_Prev();
     var NextNode = this;
     while (null != CurrNode)
@@ -181,6 +182,9 @@ CNode.prototype.Make_ThisNodeCurrent = function()
         {
             if (NextNode === CurrNode.Get_Next(Index))
             {
+                if (Index !== CurrNode.Get_NextCur())
+                    bResult = true;
+
                 CurrNode.Set_NextCur(Index);
                 bFind = true;
                 break;
@@ -194,7 +198,7 @@ CNode.prototype.Make_ThisNodeCurrent = function()
         CurrNode = CurrNode.Get_Prev();
     }
 
-    return true;
+    return bResult;
 };
 CNode.prototype.Is_OnMainVariant = function()
 {

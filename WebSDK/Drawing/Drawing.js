@@ -55,11 +55,6 @@ function CDrawing(oGameTree)
 
     this.private_OnTimerDraw = function()
     {
-        if (this.m_oBoard && this.m_oBoard.Need_Redraw())
-        {
-            this.m_oBoard.Draw_AllStones2();
-        }
-
         if (this.m_oNavigator && this.m_oNavigator.Need_Redraw())
         {
             this.m_oNavigator.Draw();

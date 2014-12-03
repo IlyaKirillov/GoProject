@@ -293,11 +293,13 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
 
         if (Pos === oMove.Get_Value() && (Value === nType && (BOARD_BLACK === Value || BOARD_WHITE === Value)))
         {
+            var OldNextCur = this.m_oCurNode.Get_NextCur();
+
             this.m_oCurNode.Set_NextCur(Index);
             this.m_oCurNode = oNode;
             this.m_nCurNodeDepth++;
 
-            if (this.m_oDrawingNavigator)
+            if (this.m_oDrawingNavigator && OldNextCur !== Index)
                 this.m_oDrawingNavigator.Update();
 
             return;
@@ -701,8 +703,7 @@ CGameTree.prototype.GoTo_Node = function(Node)
         this.m_oSound.Off();
 
     // Делаем вариант с данной нодой текущим
-    if (!Node.Make_ThisNodeCurrent())
-        return;
+    var bUpdateNavigator = Node.Make_ThisNodeCurrent();
 
     this.m_oCurNode = this.m_oFirstNode;
     while (this.m_oCurNode != Node && this.m_oCurNode.Get_NextsCount() > 0)
@@ -774,7 +775,7 @@ CGameTree.prototype.GoTo_Node = function(Node)
     // У последней ноды выполняем команды в нормальном режиме
     this.Execute_CurNodeCommands();
 
-    if (this.m_oDrawingNavigator)
+    if (this.m_oDrawingNavigator && true === bUpdateNavigator)
         this.m_oDrawingNavigator.Update();
 
     // Включаем звук
