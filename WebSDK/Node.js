@@ -267,8 +267,8 @@ CNode.prototype.Add_Mark = function(MarkType, arrPos)
         case EDrawingMark.Lm: CommandType = ECommand.LM; break;
         case EDrawingMark.Sq: CommandType = ECommand.SQ; break;
         case EDrawingMark.Tr: CommandType = ECommand.TR; break;
-        case EDrawingMark.Tx: CommandType = ECommand.Tx; break;
-        case EDrawingMark.X : CommandType = ECommand.X;  break;
+        case EDrawingMark.Tx: CommandType = ECommand.LB; break;
+        case EDrawingMark.X : CommandType = ECommand.MA;  break;
     }
 
     this.Add_Command(new CCommand(CommandType, Common_CopyArray(arrPos), arrPos.length));
@@ -313,6 +313,19 @@ CNode.prototype.Show_Variants = function(eType, oDrawingBoard)
         default:
             return;
     }
+};
+CNode.prototype.Count_NodeNumber = function()
+{
+    var Counter  = 1;
+    var CurrNode = this;
+    var PrevNode = null;
+    while (null !== (PrevNode = CurrNode.Get_Prev()))
+    {
+        Counter++;
+        CurrNode = PrevNode;
+    }
+
+    return Counter;
 };
 CNode.prototype.private_ShowNextVariants = function(oDrawingBoard, ExceptionalValue)
 {

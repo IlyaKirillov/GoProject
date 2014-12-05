@@ -20,7 +20,6 @@ var EBoardMode =
     AddMarkX    : 6,
     AddMarkTx   : 7,
     AddMarkNum  : 8
-
 };
 
 function CDrawingBoard(oDrawing)
@@ -103,6 +102,8 @@ function CDrawingBoard(oDrawing)
 
     this.m_oMarks = {};
     this.m_oLastMoveMark = -1;
+
+    this.m_oPresentation = null;
 
     var oThis = this;
 
@@ -279,10 +280,22 @@ CDrawingBoard.prototype.Update_Size = function()
     this.private_UpdateKoeffs();
     this.private_OnResize();
 };
+CDrawingBoard.prototype.Set_Presentation = function(oPresentation)
+{
+    this.m_oPresentation = oPresentation;
+};
 CDrawingBoard.prototype.On_Resize = function(bForce)
 {
     this.private_UpdateKoeffs();
     this.private_OnResize(bForce);
+};
+CDrawingBoard.prototype.On_EndLoadSgf = function()
+{
+    if (null !== this.m_oPresentation)
+    {
+        if (this.m_oGameTree.Get_CurNode().Count_NodeNumber() >= this.m_oPresentation.Get_NodesCountInSlide())
+            this.m_oPresentation.On_EndSgfSlide();
+    }
 };
 CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 {
@@ -313,7 +326,7 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
         }
         case BOARD_WHITE:
         {
-            var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * 19];
+            var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * this.m_oLogicBoard.Get_Size().X];
             StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y );
             ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off );
             break;
@@ -371,6 +384,9 @@ CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 };
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
+    if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE))
+        return;
+
     if (this.m_eMode !== eMode)
     {
         this.m_eMode = eMode;
@@ -382,7 +398,7 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
             this.m_oGameTree.Count_Scores();
         }
 
-        this.m_oGameTree.Update_IntrefaceState();
+        this.m_oGameTree.Update_InterfaceState();
     }
 };
 CDrawingBoard.prototype.Get_Mode = function()
@@ -489,6 +505,8 @@ CDrawingBoard.prototype.private_OnResize = function(bForce)
 
         // Стартуем таймер с отрисовкой красивой доски
         this.m_oCreateWoodyId = this.private_StartDrawingTimer();
+
+        this.private_CreateLines();
 
         // Пока рисуем простой вариант
         this.private_DrawSimpleBoard(W, H);
@@ -917,6 +935,9 @@ CDrawingBoard.prototype.private_PutVerLine = function(ImageData, y1, y2,alpha, x
 };
 CDrawingBoard.prototype.private_CreateTrueColorStones = function()
 {
+    if (!this.m_oImageData.Lines)
+        return;
+
     var W = this.HtmlElement.Board.Control.HtmlElement.width;
     var H = this.HtmlElement.Board.Control.HtmlElement.height;
 
@@ -1058,12 +1079,13 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
     this.private_CreateSlateWhiteStones(WhiteStones2, W, H, d, d);
     this.m_oImageData.WhiteStones  = WhiteStones;
 
-    for (var Y = 0; Y < 19; Y++)
+    var oSize = this.m_oLogicBoard.Get_Size();
+    for (var Y = 0; Y < oSize.Y; Y++)
     {
-        for (var X = 0; X < 19; X++)
+        for (var X = 0; X < oSize.X; X++)
         {
             var Rand = Math.floor(Math.random() * (this.m_oImageData.WhiteStones.length - 1));
-            this.m_oImageData.WhiteStones2[X + Y * 19] = Rand;
+            this.m_oImageData.WhiteStones2[X + Y * oSize.X] = Rand;
         }
     }
 };
@@ -1104,6 +1126,8 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
         }
     }
 
+    var oSize = this.m_oLogicBoard.Get_Size().X;
+
     var Lines = this.m_oImageData.Lines;
     var Rad   = (this.m_oImageData.StoneDiam - 1) / 2;
     var Count = ImageDatas.length;
@@ -1114,7 +1138,20 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
         var __x = 0;
         var __y = 0;
 
-        switch (Index)
+        var _Index = Index;
+        if (9 === oSize)
+        {
+            if (1 === Index || 9 === Index || 13 === Index || 11 === Index || 21 === Index || 23 === Index || 25 === Index)
+                _Index = Index - 1;
+        }
+        else if (13 === oSize)
+        {
+            if (3 === Index || 7 === Index || 11 === Index || 15 === Index || 23 === Index || 27 === Index)
+                _Index = Index - 1;
+        }
+
+
+        switch (_Index)
         {
             /*
              case  0: __x =  5; __y =  7; break;
@@ -1203,6 +1240,9 @@ CDrawingBoard.prototype.private_DrawTrueColorAllStones = function()
 };
 CDrawingBoard.prototype.private_CreateShadows = function()
 {
+    if (!this.m_oImageData.Lines)
+        return;
+
     var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
     var d = this.m_oImageData.StoneDiam;
     this.m_oImageData.Shadow = ShadowCanvas.createImageData(d, d);
@@ -1367,6 +1407,9 @@ CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
 };
 CDrawingBoard.prototype.private_CreateMarks = function()
 {
+    if (!this.m_oImageData.Lines)
+        return;
+
     var d = this.m_oImageData.StoneDiam;
     this.m_oImageData.X_Black   = this.private_DrawX           (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.X_White   = this.private_DrawX           (d, d, d * 0.05, new CColor(255, 255, 255, 255));
@@ -1726,6 +1769,12 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
     else
     {
         this.private_MakeMove(X, Y);
+
+        if (null !== this.m_oPresentation)
+        {
+            if (this.m_oGameTree.Get_CurNode().Count_NodeNumber() >= this.m_oPresentation.Get_NodesCountInSlide())
+                this.m_oPresentation.On_EndSgfSlide();
+        }
     }
 };
 CDrawingBoard.prototype.private_CountScores = function(X, Y, event)

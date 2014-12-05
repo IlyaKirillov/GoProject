@@ -7,6 +7,17 @@
  * Time     23:56
  */
 
+var EDITINGFLAGS_MASK      = 0xFFFFFFFF; // 4 байта
+var EDITINGFLAGS_NEWNODE   = 0x00000001; // Можно ли добавлять новую ноду, или ходить можно только по уже имеющимся.
+var EDITINGFLAGS_MOVE      = 0x00000002; // Можно ли свободно передвигаться по нодам
+var EDITINGFLAGS_BOARDMODE = 0x00000004; // Можно ли изменять тип редактирования на доске
+var EDITINGFLAGS_LOADFILE  = 0x00000008; // Можно ли загружать файлы
+
+var EDITINGFLAGS_NEWNODE_NON   = EDITINGFLAGS_MASK ^ EDITINGFLAGS_NEWNODE;
+var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
+var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
+var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
+
 function CGameTree(Drawing, Navigator, Sound, Marks)
 {
     this.m_oSound          = Sound;
@@ -69,13 +80,15 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
 
     this.m_bEventEnable  = true;
     this.m_eShowVariants = EShowVariants.Next;
+
+    this.m_nEditingFlags = 0xFFFFFFFF;
 };
 CGameTree.prototype.On_EndLoadDrawing = function()
 {
     if (this.m_oDrawingNavigator)
         this.m_oDrawingNavigator.Create_FromGameTree();
 
-    this.Update_IntrefaceState();
+    this.Update_InterfaceState();
 };
 CGameTree.prototype.Set_DrawingNavigator = function(oDrawingNavigator)
 {
@@ -101,13 +114,23 @@ CGameTree.prototype.Focus_DrawingBoard = function()
 };
 CGameTree.prototype.Load_Sgf = function(sFile)
 {
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_LOADFILE))
+        return;
+
     var oReader = new CSgfReader(this);
+    var nEditingFlags = this.m_nEditingFlags;
+    this.Reset_EditingFlags();
     oReader.Load(sFile);
 
     if (this.m_oDrawingNavigator)
         this.m_oDrawingNavigator.Create_FromGameTree();
 
     this.GoTo_Node(this.m_oFirstNode);
+
+    this.m_nEditingFlags = nEditingFlags;
+
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.On_EndLoadSgf();
 };
 CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {
@@ -128,6 +151,8 @@ CGameTree.prototype.Reset = function()
     this.m_sWhiteRating  = "";
     this.m_sResult       = "";
     this.m_sRules        = "";
+
+    this.m_eShowVariants = EShowVariants.None;
 
     this.Init_Match();
 };
@@ -269,6 +294,9 @@ CGameTree.prototype.Add_Move = function(X, Y, Value)
 };
 CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
 {
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_NEWNODE))
+        return;
+
     var oNewNode = new CNode(this);
     oNewNode.Set_Prev(this.m_oCurNode);
     this.m_oCurNode.Add_Next(oNewNode, bSetCur);
@@ -306,6 +334,9 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
         }
     }
 
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_NEWNODE))
+        return;
+
     // Если мы попали сюда, значит данного хода нет среди следующих у текущей ноды.
     this.Add_NewNode(false, true);
     this.m_oCurNode.Add_Move(X, Y, Value);
@@ -326,11 +357,19 @@ CGameTree.prototype.AddOrRemove_Stones = function(Value, arrPos)
 };
 CGameTree.prototype.Add_Comment = function(sComment)
 {
+    var sOldComment = this.m_oCurNode.Get_Comment();
     this.m_oCurNode.Add_Comment(sComment);
+
+    if (this.m_oDrawingNavigator && "" === sOldComment && "" !== sComment)
+        this.m_oDrawingNavigator.Update();
 };
 CGameTree.prototype.Set_Comment = function(sComment)
 {
+    var sOldComment = this.m_oCurNode.Get_Comment();
     this.m_oCurNode.Set_Comment(sComment);
+
+    if (this.m_oDrawingNavigator && (("" === sOldComment && "" !== sComment) || ("" !== sOldComment && "" === sComment)))
+        this.m_oDrawingNavigator.Update();
 };
 CGameTree.prototype.Add_Mark = function(Type, arrPos)
 {
@@ -574,9 +613,6 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
 
     if (this.m_oDrawingBoard)
     {
-        if (this.m_oCurNode.Is_TerritoryUse())
-            this.m_oDrawingBoard.Set_Mode(EBoardMode.CountScores);
-
         if (this.m_oCurNode.Have_Move())
         {
             var oMove = this.m_oCurNode.Get_Move();
@@ -588,6 +624,9 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         else
             this.m_oDrawingBoard.Set_LastMoveMark(-1, -1);
 
+        if (this.m_oCurNode.Is_TerritoryUse())
+            this.m_oDrawingBoard.Set_Mode(EBoardMode.CountScores);
+
         this.m_oDrawingBoard.Draw_Marks();
     }
 
@@ -597,7 +636,7 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
     if (this.m_oDrawingNavigator)
         this.m_oDrawingNavigator.Update_Current(true);
 
-    this.Update_IntrefaceState();
+    this.Update_InterfaceState();
 };
 CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 {
@@ -666,6 +705,9 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 };
 CGameTree.prototype.GoTo_Next = function()
 {
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE))
+        return false;
+
     if (0 === this.m_oCurNode.Get_NextsCount() || -1 === this.m_oCurNode.Get_NextCur())
         return false;
 
@@ -695,6 +737,9 @@ CGameTree.prototype.Count_Scores = function()
 };
 CGameTree.prototype.GoTo_Node = function(Node)
 {
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE))
+        return;
+
     this.Init_Match();
     this.m_oBoard.Clear();
 
@@ -984,10 +1029,15 @@ CGameTree.prototype.Set_WhiteTeam = function(sWhiteTeam)
 };
 CGameTree.prototype.Set_BoardSize = function(W, H)
 {
-    this.m_oBoard.Reset_Size(W, H);
+    var OldSize = this.m_oBoard.Get_Size();
 
-    if (this.m_oDrawingBoard)
-        this.m_oDrawingBoard.On_Resize(true);
+    if (W !== OldSize.X || H !== OldSize.Y)
+    {
+        this.m_oBoard.Reset_Size(W, H);
+
+        if (this.m_oDrawingBoard)
+            this.m_oDrawingBoard.On_Resize(true);
+    }
 };
 CGameTree.prototype.Init_Match = function()
 {
@@ -1018,7 +1068,7 @@ CGameTree.prototype.private_SetNextMove = function(Value)
 {
     this.m_nNextMove = Value;
 };
-CGameTree.prototype.Update_IntrefaceState = function()
+CGameTree.prototype.Update_InterfaceState = function()
 {
     if (this.m_oDrawing)
     {
@@ -1044,7 +1094,36 @@ CGameTree.prototype.Update_IntrefaceState = function()
         if (this.m_oDrawingBoard)
             oIState.BoardMode = this.m_oDrawingBoard.Get_Mode();
 
-        this.m_oDrawing.Update_IntrefaceState(oIState);
+        this.m_oDrawing.Update_InterfaceState(oIState);
     }
 
+};
+CGameTree.prototype.Set_EditingFlags = function(oFlags)
+{
+    if (!oFlags)
+        return;
+
+    if (true === oFlags.NewNode)
+        this.m_nEditingFlags |= EDITINGFLAGS_NEWNODE;
+    else if (false === oFlags.NewNode)
+        this.m_nEditingFlags &= EDITINGFLAGS_NEWNODE_NON;
+
+    if (true === oFlags.Move)
+        this.m_nEditingFlags |= EDITINGFLAGS_MOVE;
+    else if (false === oFlags.Move)
+        this.m_nEditingFlags &= EDITINGFLAGS_MOVE_NON;
+
+    if (true === oFlags.ChangeBoardMode)
+        this.m_nEditingFlags |= EDITINGFLAGS_BOARDMODE;
+    else if (false === oFlags.ChangeBoardMode)
+        this.m_nEditingFlags &= EDITINGFLAGS_BOARDMODE_NON;
+
+    if (true === oFlags.LoadFile)
+        this.m_nEditingFlags |= EDITINGFLAGS_LOADFILE;
+    else if (false === oFlags.LoadFile)
+        this.m_nEditingFlags &= EDITINGFLAGS_LOADFILE_NON;
+};
+CGameTree.prototype.Reset_EditingFlags = function()
+{
+    this.m_nEditingFlags = EDITINGFLAGS_MASK;
 };

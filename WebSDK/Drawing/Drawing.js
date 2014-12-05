@@ -306,7 +306,7 @@ CDrawing.prototype.Register_Navigator = function(oNavigator)
 {
     this.m_oNavigator = oNavigator;
 };
-CDrawing.prototype.Update_IntrefaceState = function(oIState)
+CDrawing.prototype.Update_InterfaceState = function(oIState)
 {
     // Backward
     for (var Index = 0, Count = this.m_oButtons.BackwardToStart.length; Index < Count; Index++)
@@ -369,7 +369,6 @@ CDrawing.prototype.Update_Comments = function(sComment)
     for (var Index = 0, Count = this.m_aComments.length; Index < Count; Index++)
         this.m_aComments[Index].Update_Comments(sComment);
 };
-
 
 function CDrawingFullInfo()
 {

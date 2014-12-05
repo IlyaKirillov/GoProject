@@ -11,6 +11,7 @@
     var oGameTree = GoBoardApi.Create_GameTree();
     GoBoardApi.Create_BoardWithNavigateButtons(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
+    GoBoardApi.Set_Permissions(oGameTree, {NewNode : false, Move : false, ChangeBoardMode : false, LoadFile : false});
 
     window.onresize = function()
     {
