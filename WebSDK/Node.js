@@ -18,8 +18,6 @@ function CNode(oGameTree)
     this.m_sComment   = "";                        // Комментарий
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
-
-    oGameTree.Add_Node(this);
 }
 
 CNode.prototype.Get_Id = function()
@@ -29,6 +27,15 @@ CNode.prototype.Get_Id = function()
 CNode.prototype.Is_Node = function()
 {
     return true;
+};
+CNode.prototype.Clear = function()
+{
+    this.m_aNext      = [];
+    this.m_nNextCur   = - 1;
+    this.m_aCommands  = [];
+    this.m_oMove      = new CMove(0, BOARD_EMPTY);
+    this.m_sComment   = "";
+    this.m_oTerritory = new CTerritory(false, {});
 };
 CNode.prototype.Get_Next = function(Index)
 {

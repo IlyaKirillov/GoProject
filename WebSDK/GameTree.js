@@ -18,11 +18,10 @@ var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
 var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
 var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
 
-function CGameTree(Drawing, Sound, Marks)
+function CGameTree(Drawing, Sound)
 {
     this.m_oSound          = Sound;
     this.m_oDrawing        = Drawing;
-    this.m_oMarks          = Marks;
 
     this.m_oInterfaceState = new CInterfaceState();
 
@@ -30,7 +29,6 @@ function CGameTree(Drawing, Sound, Marks)
     this.m_oDrawingBoard   = null;
     this.m_oDrawingNavigator = null;
 
-    this.m_aNodes          = [];                // Список со всеми нодами
     this.m_oFirstNode      = new CNode(this);   // Первая нода
     this.m_nNodesIdCounter = 0;                 // Счетчик нод
     this.m_oCurNode        = this.m_oFirstNode; // Текущая нода
@@ -178,7 +176,6 @@ CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 };
 CGameTree.prototype.Reset = function()
 {
-    this.m_aNodes        = [];
     this.m_oFirstNode    = new CNode(this);
 
     this.m_sApplication  = "";
@@ -306,10 +303,6 @@ CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
 CGameTree.prototype.Get_NewNodeId = function()
 {
     return ++this.m_nNodesIdCounter;
-};
-CGameTree.prototype.Add_Node = function(oNode)
-{
-    this.m_aNodes[oNode.Get_Id()] = oNode;
 };
 CGameTree.prototype.Set_NextMove = function(Value)
 {
@@ -464,18 +457,28 @@ CGameTree.prototype.Remove_CurNode = function()
 {
     var PrevNode = this.m_oCurNode.Get_Prev();
 
-    // Первую ноду удалить нельзя
-    // TODO: Но ее можно почистить
+    // Первую ноду удалить нельзя, поэтому мы просто чистим её
     if (null === PrevNode)
+    {
+        this.m_oCurNode.Clear();
+
+        // Перестраиваем визуальное дерево вариантов
+        if (this.m_oDrawingNavigator)
+        {
+            this.m_oDrawingNavigator.Create_FromGameTree();
+            this.m_oDrawingNavigator.Update();
+        }
+
+        this.GoTo_Node(this.m_oCurNode);
+
         return;
+    }
 
     // Ищем позицию, в которой записана текующая нода у родительской
     for (var Index = 0, NextsCount = PrevNode.Get_NextsCount(); Index < NextsCount; Index++)
     {
         if (this.m_oCurNode === PrevNode.Get_Next(Index))
         {
-            // TODO: Заметим, что саму ноду и всех ее потомков из массива this.m_aNodes мы не
-            // удаляем, потом что придется пересчитывать номера всех нод, что очень затратно
             PrevNode.Remove_Next(Index);
             this.m_oCurNode = PrevNode;
 
