@@ -18,7 +18,7 @@ var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
 var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
 var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
 
-function CGameTree(Drawing, Navigator, Sound, Marks)
+function CGameTree(Drawing, Sound, Marks)
 {
     this.m_oSound          = Sound;
     this.m_oDrawing        = Drawing;
@@ -82,6 +82,43 @@ function CGameTree(Drawing, Navigator, Sound, Marks)
     this.m_eShowVariants = EShowVariants.Next;
 
     this.m_nEditingFlags = 0xFFFFFFFF;
+
+    this.m_nAutoPlayTimer = null;
+};
+CGameTree.prototype.Start_AutoPlay = function(dSpeed)
+{
+    if (!(EDITINGFLAGS_MOVE & this.m_nEditingFlags))
+        return;
+
+    this.Stop_AutoPlay();
+
+    var nMinInterval = 250;   // 0.25 секунды
+    var nMaxInterval = 20000; // 20 секунд
+
+    var dInterval = nMinInterval + (nMaxInterval - nMinInterval) * (1 - dSpeed);
+
+    var oThis = this;
+
+    var PlayingFunction = function()
+    {
+        if (oThis.Get_CurNode().Get_NextsCount() > 0)
+        {
+            oThis.Step_Forward(1);
+            oThis.m_nAutoPlayTimer = setTimeout(PlayingFunction, dInterval);
+        }
+        else
+            oThis.m_nAutoPlayTimer = null;
+    };
+
+    this.m_nAutoPlayTimer = setTimeout(PlayingFunction, dInterval);
+};
+CGameTree.prototype.Stop_AutoPlay = function()
+{
+    if (null !== this.m_nAutoPlayTimer)
+    {
+        clearTimeout(this.m_nAutoPlayTimer);
+        this.m_nAutoPlayTimer = null;
+    }
 };
 CGameTree.prototype.On_EndLoadDrawing = function()
 {
@@ -123,7 +160,10 @@ CGameTree.prototype.Load_Sgf = function(sFile)
     oReader.Load(sFile);
 
     if (this.m_oDrawingNavigator)
+    {
         this.m_oDrawingNavigator.Create_FromGameTree();
+        this.m_oDrawingNavigator.Update();
+    }
 
     this.GoTo_Node(this.m_oFirstNode);
 
@@ -441,7 +481,10 @@ CGameTree.prototype.Remove_CurNode = function()
 
             // Перестраиваем визуальное дерево вариантов
             if (this.m_oDrawingNavigator)
+            {
                 this.m_oDrawingNavigator.Create_FromGameTree();
+                this.m_oDrawingNavigator.Update();
+            }
 
             this.GoTo_Node(PrevNode);
             return;
@@ -739,6 +782,8 @@ CGameTree.prototype.GoTo_Node = function(Node)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE))
         return;
+
+    this.Stop_AutoPlay();
 
     this.Init_Match();
     this.m_oBoard.Clear();

@@ -2112,4 +2112,8 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.Set_Rulers(true === this.m_bRulers ? false : true);
     }
+    else if (80 === KeyCode)
+    {
+        this.m_oGameTree.Start_AutoPlay(1);
+    }
 };

@@ -10,61 +10,61 @@
 <script>
     var aSlides = [];
 
-//    aSlides.push(
-//            {
-//                Message : "Начать изучение правил игры Го",
-//                Sgf     : null,
-//                SgfPr   : null
-//            });
-//
-//    aSlides.push(
-//            {
-//                Message : 'В го играют на прямоугольном поле, называемом доска или \<strong\>гобан\<\/strong\>, расчерченном вертикальными и горизонтальными линиями. Стандартная доска имеет разлиновку 19×19 линий.',
-//                Sgf     : "(;SZ[19])",
-//                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {NewNode : false, Move : false, ChangeBoardMode : false, LoadFile : false}}
-//            });
-//
-//    aSlides.push(
-//            {
-//                Message : "Для обучения и коротких неофициальных игр могут применяться доски меньших размеров: обычно 13×13 или 9×9 линий",
-//                Sgf     : "(;SZ[13])",
-//                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
-//            });
-//
-//    aSlides.push(
-//            {
-//                Message : null,
-//                Sgf     : "(;SZ[9])",
-//                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
-//            });
-//
-//    aSlides.push(
-//            {
-//                Message : 'Но, ничто не мешает использовать произвольную прямоугольную доску. Также для игры необходимы \<b\>камни\<\/b\> — специальные фишки двух контрастных цветов, чаще всего — чёрные и белые. Полный комплект для игры должен содержать 361 камень — 180 белых и 181 чёрный.',
-//                Sgf     : "(;SZ[19]AB[aa][ab][ac][ba][bb][bc][bd][bs][as][br][ar][aq][bq][jj][ji][jh][jg][jf][je][jd][jc][jb][ja][ia][ib][ic][id][ie][if][ig][ih][ii][ij][ik][il][im][in][ip][iq][ir][is][io][ho][hp][db][hr][hs][gs][gq][gp][gr][fs][fr][fq][fp][ep][eq][er][es][ds][cr][cs][cq][dq][dr][dp][cp][bp][ap][ao][bo][co][do][eo][fo][go][hn][gn][fn][en][ca][da][ea][fa][ga][ha][hb][gb][eb][ag][cb][cc][dc][ec][fc][fb][gc][hc][gd][hd][ge][he][gf][gg][hf][hg][hh][hi][hj][hk][hl][hm][gm][gl][gk][gj][gh][fh][eh][dh][ch][bh][ah][ai][bi][ci][di][ei][fi][gi][fj][ej][bj][aj][ak][am][an][al][bl][bm][bn][cn][cm][cl][ck][bk][dj][cj][dk][dm][dn][dl][el][em][fm][fl][fk][ek][dg][df][de][dd][ed][fd][fe][ee][ef][ff][fg][eg][cg][cf][ce][cd][be][ae][ad][af][bf][bg]AW[sa][jk][jl][kl][kk][lk][ll][ml][mk][nk][nl][ol][ok][pk][pl][ql][qk][rk][rl][sl][sk][sm][rm][qm][km][jm][jn][jo][jp][jq][jr][js][ks][ls][ms][ns][os][ps][qs][rs][ss][sr][sq][sp][so][sn][rn][qn][pn][on][nn][mn][ln][kn][lm][mm][nm][om][pm][no][np][nq][nr][mr][lr][kr][kq][lq][mq][mp][lp][kp][ko][lo][mo][po][oo][op][or][oq][pq][pr][qr][qq][rq][rr][rp][qp][pp][qo][ro][kj][ki][kh][kg][kf][ke][kd][kc][kb][ka][la][lb][lc][ld][le][lf][lg][lh][li][lj][mj][mh][mi][nh][og][pf][qe][qd][rc][rb][ra][qa][pa][oa][na][ma][mb][nb][nc][mc][md][nd][ne][me][mf][nf][ng][mg][of][oe][pe][pd][od][oc][pc][qc][qb][pb][ob][ni][nj][oj][oi][oh][ph][qj][pi][pj][qi][qh][qg][pg][qf][rf][rg][rh][sj][rj][ri][si][sh][sg][sf][se][re][rd][sd][sc][sb]AB[hq])",
-//                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
-//            });
+    aSlides.push(
+            {
+                Message : "Начать изучение правил игры Го",
+                Sgf     : null,
+                SgfPr   : null
+            });
 
-//    aSlides.push(
-//            {
-//                Message : "Перейдем к основным правилам игры. Перед началом игры доска пуста. Первыми ходят чёрные. Затем белые. Далее ходы делаются по очереди. Делая ход, игрок выставляет один свой камень на доску в любую не занятую точку пересечения линий (пересечения называют пунктами). Камни, однажды размещённые на доске, не перемещаются, но могут быть захвачены противником и сняты с неё.\<br\/\>\<strong\>Задание:\<\/strong\> Попробуйте сделать по несколько ходов за обоих игроков.",
-//                Sgf     : "(;SZ[19])",
-//                SgfPr   : {Count : 5, WaitOnEnd : true, Flags : {Move : false, NewNode : true, ChangeBoardMode : false, LoadFile : false}}
-//            });
-//
-//    aSlides.push(
-//            {
-//                Message : "У каждого камня есть, так называемые, \<b\>дамэ\<\/b\> (точка свободы, дыхательный пункт) — соседние по вертикали или горизонтали (но не по диагонали!) незанятые пункты.",
-//                Sgf     : "(;SZ[19]AB[ea][cd][aa]MA[da][eb][ba][ab][ce][cc][bd][dd][fa])",
-//                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
-//            });
-//
-//    aSlides.push(
-//            {
-//                Message : "Соседние либо связанные непрерывной цепочкой соседей камни образуют \<b\>группу\<\/b\> и делят дамэ между собой (то есть любое дамэ любого камня в группе относится одновременно ко всем камням этой группы).",
-//                Sgf     : "(;SZ[19]AB[hg][hi][aa][ab][bg][ea][fb][ga][bf][hf][cg][hh]MA[bb][ac][be][af][ag][bh][dg][cf][ch][gf][he][if][ig][ih][ii][hj][gi][gh][gg][fc][eb][da][gb][ha][ba]AB[fa])",
-//                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
-//            });
+    aSlides.push(
+            {
+                Message : 'В го играют на прямоугольном поле, называемом доска или \<strong\>гобан\<\/strong\>, расчерченном вертикальными и горизонтальными линиями. Стандартная доска имеет разлиновку 19×19 линий.',
+                Sgf     : "(;SZ[19])",
+                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {NewNode : false, Move : false, ChangeBoardMode : false, LoadFile : false}}
+            });
+
+    aSlides.push(
+            {
+                Message : "Для обучения и коротких неофициальных игр могут применяться доски меньших размеров: обычно 13×13 или 9×9 линий",
+                Sgf     : "(;SZ[13])",
+                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
+            });
+
+    aSlides.push(
+            {
+                Message : null,
+                Sgf     : "(;SZ[9])",
+                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
+            });
+
+    aSlides.push(
+            {
+                Message : 'Но, ничто не мешает использовать произвольную прямоугольную доску. Также для игры необходимы \<b\>камни\<\/b\> — специальные фишки двух контрастных цветов, чаще всего — чёрные и белые. Полный комплект для игры должен содержать 361 камень — 180 белых и 181 чёрный.',
+                Sgf     : "(;SZ[19]AB[aa][ab][ac][ba][bb][bc][bd][bs][as][br][ar][aq][bq][jj][ji][jh][jg][jf][je][jd][jc][jb][ja][ia][ib][ic][id][ie][if][ig][ih][ii][ij][ik][il][im][in][ip][iq][ir][is][io][ho][hp][db][hr][hs][gs][gq][gp][gr][fs][fr][fq][fp][ep][eq][er][es][ds][cr][cs][cq][dq][dr][dp][cp][bp][ap][ao][bo][co][do][eo][fo][go][hn][gn][fn][en][ca][da][ea][fa][ga][ha][hb][gb][eb][ag][cb][cc][dc][ec][fc][fb][gc][hc][gd][hd][ge][he][gf][gg][hf][hg][hh][hi][hj][hk][hl][hm][gm][gl][gk][gj][gh][fh][eh][dh][ch][bh][ah][ai][bi][ci][di][ei][fi][gi][fj][ej][bj][aj][ak][am][an][al][bl][bm][bn][cn][cm][cl][ck][bk][dj][cj][dk][dm][dn][dl][el][em][fm][fl][fk][ek][dg][df][de][dd][ed][fd][fe][ee][ef][ff][fg][eg][cg][cf][ce][cd][be][ae][ad][af][bf][bg]AW[sa][jk][jl][kl][kk][lk][ll][ml][mk][nk][nl][ol][ok][pk][pl][ql][qk][rk][rl][sl][sk][sm][rm][qm][km][jm][jn][jo][jp][jq][jr][js][ks][ls][ms][ns][os][ps][qs][rs][ss][sr][sq][sp][so][sn][rn][qn][pn][on][nn][mn][ln][kn][lm][mm][nm][om][pm][no][np][nq][nr][mr][lr][kr][kq][lq][mq][mp][lp][kp][ko][lo][mo][po][oo][op][or][oq][pq][pr][qr][qq][rq][rr][rp][qp][pp][qo][ro][kj][ki][kh][kg][kf][ke][kd][kc][kb][ka][la][lb][lc][ld][le][lf][lg][lh][li][lj][mj][mh][mi][nh][og][pf][qe][qd][rc][rb][ra][qa][pa][oa][na][ma][mb][nb][nc][mc][md][nd][ne][me][mf][nf][ng][mg][of][oe][pe][pd][od][oc][pc][qc][qb][pb][ob][ni][nj][oj][oi][oh][ph][qj][pi][pj][qi][qh][qg][pg][qf][rf][rg][rh][sj][rj][ri][si][sh][sg][sf][se][re][rd][sd][sc][sb]AB[hq])",
+                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
+            });
+
+    aSlides.push(
+            {
+                Message : "Перейдем к основным правилам игры. Перед началом игры доска пуста. Первыми ходят чёрные. Затем белые. Далее ходы делаются по очереди. Делая ход, игрок выставляет один свой камень на доску в любую не занятую точку пересечения линий (пересечения называют пунктами). Камни, однажды размещённые на доске, не перемещаются, но могут быть захвачены противником и сняты с неё.\<br\/\>\<strong\>Задание:\<\/strong\> Попробуйте сделать по несколько ходов за обоих игроков.",
+                Sgf     : "(;SZ[19])",
+                SgfPr   : {Count : 5, WaitOnEnd : true, Flags : {Move : false, NewNode : true, ChangeBoardMode : false, LoadFile : false}}
+            });
+
+    aSlides.push(
+            {
+                Message : "У каждого камня есть, так называемые, \<b\>дамэ\<\/b\> (точка свободы, дыхательный пункт) — соседние по вертикали или горизонтали (но не по диагонали!) незанятые пункты.",
+                Sgf     : "(;SZ[19]AB[ea][cd][aa]MA[da][eb][ba][ab][ce][cc][bd][dd][fa])",
+                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
+            });
+
+    aSlides.push(
+            {
+                Message : "Соседние либо связанные непрерывной цепочкой соседей камни образуют \<b\>группу\<\/b\> и делят дамэ между собой (то есть любое дамэ любого камня в группе относится одновременно ко всем камням этой группы).",
+                Sgf     : "(;SZ[19]AB[hg][hi][aa][ab][bg][ea][fb][ga][bf][hf][cg][hh]MA[bb][ac][be][af][ag][bh][dg][cf][ch][gf][he][if][ig][ih][ii][hj][gi][gh][gg][fc][eb][da][gb][ha][ba]AB[fa])",
+                SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
+            });
 
     aSlides.push(
             {

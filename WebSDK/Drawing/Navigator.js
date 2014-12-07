@@ -182,12 +182,14 @@ function CDrawingNavigator(oDrawing)
     {
         oThis.HtmlElement.HorScroll.style.opacity   = 0.7;
         oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.HorScrollBG.style.display = "block";
     };
 
     this.private_OnMouseOutHorScroll = function()
     {
         oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
         oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+        oThis.HtmlElement.HorScrollBG.style.display = "none";
     };
 
     this.private_OnMouseOverVerScroll = function()
@@ -284,12 +286,12 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.VerScroll['onmouseout']  = this.private_OnMouseOutVerScroll;
 
     var oHorScroll = CreateControlContainer(sDivId + "HorScroll_BG");
-    oHorScroll.Bounds.SetParams(2, 0, 2, 2, true, false, true, true, -1, 12);
+    oHorScroll.Bounds.SetParams(2, 0, 2, 4, true, false, true, true, -1, 8);
     oHorScroll.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oHorScroll);
 
     var oVerScroll = CreateControlContainer(sDivId + "VerScroll_BG");
-    oVerScroll.Bounds.SetParams(0, 2, 2, 2, false, true, true, true, 12, -1);
+    oVerScroll.Bounds.SetParams(0, 2, 4, 2, false, true, true, true, 8, -1);
     oVerScroll.Anchor = (g_anchor_top | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oVerScroll);
 
@@ -344,12 +346,12 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.HorScroll.style.width      = Math.max(50, NavW * NavW / _NavW) + "px";
         this.HtmlElement.HorScroll.style.display    = "block";
         this.HtmlElement.HorScroll.style.position   = "absolute";
-        this.HtmlElement.HorScroll.style.top        = NavH - 14 + "px";
-        this.HtmlElement.HorScroll.style.height     = 12 + "px";
+        this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
+        this.HtmlElement.HorScroll.style.height     = 8 + "px";
         this.HtmlElement.HorScroll.style.background = "rgb(0,0,0)";
         this.HtmlElement.HorScroll.style.opacity    = 0.5;
 
-        Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 14, NavH - 14);
+        Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 12, NavH - 12);
 
         this.HtmlElement.HorScroll.onDrag         = this.private_OnDragHorScroll;
         this.HtmlElement.HorScroll.onDragStart    = this.private_OnDragStartScroll;
@@ -366,12 +368,12 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.height     = Math.max(50, NavH * NavH / _NavH) + "px";
         this.HtmlElement.VerScroll.style.display    = "block";
         this.HtmlElement.VerScroll.style.position   = "absolute";
-        this.HtmlElement.VerScroll.style.left       = NavW - 14 + "px";
-        this.HtmlElement.VerScroll.style.width      = 12 + "px";
+        this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
+        this.HtmlElement.VerScroll.style.width      = 8 + "px";
         this.HtmlElement.VerScroll.style.background = "rgb(0,0,0)";
         this.HtmlElement.VerScroll.style.opacity    = 0.5;
 
-        Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 14, NavW - 14, 2, NavH - this.HtmlElement.ScrollH - 2);
+        Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 12, NavW - 12, 2, NavH - this.HtmlElement.ScrollH - 2);
 
         this.HtmlElement.VerScroll.onDrag         = this.private_OnDragVerScroll;
         this.HtmlElement.VerScroll.onDragStart    = this.private_OnDragStartScroll;
