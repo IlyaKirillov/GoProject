@@ -58,6 +58,7 @@ CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
             case EDrawingButtonType.EditModeX      :
             case EDrawingButtonType.EditModeText   :
             case EDrawingButtonType.EditModeNum    :
+            case EDrawingButtonType.AutoPlay       :
                 oControl = new CDrawingButton(this.m_oDrawing);
                 break;
         }

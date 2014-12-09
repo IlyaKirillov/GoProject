@@ -11,9 +11,11 @@
 
 function CInterfaceState()
 {
-    this.Backward    = true;
-    this.Forward     = true;
-    this.NextVariant = true;
-    this.PrevVariant = true;
-    this.BoardMode   = EBoardMode.Move;
+    this.Backward      = true;
+    this.Forward       = true;
+    this.NextVariant   = true;
+    this.PrevVariant   = true;
+    this.BoardMode     = EBoardMode.Move;
+    this.TimelinePos   = 0;
+    this.AutoPlaySpeed = null;
 };

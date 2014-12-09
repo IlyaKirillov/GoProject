@@ -30,7 +30,6 @@ function CGameTree(Drawing, Sound)
     this.m_oDrawingNavigator = null;
 
     this.m_oFirstNode      = new CNode(this);   // Первая нода
-    this.m_nNodesIdCounter = 0;                 // Счетчик нод
     this.m_oCurNode        = this.m_oFirstNode; // Текущая нода
 
     this.m_nBlackCapt      = 0; // количество пленников черного игрока
@@ -82,18 +81,17 @@ function CGameTree(Drawing, Sound)
     this.m_nEditingFlags = 0xFFFFFFFF;
 
     this.m_nAutoPlayTimer = null;
+    this.m_dAutoPlaySpeed = 0.75;
 };
-CGameTree.prototype.Start_AutoPlay = function(dSpeed)
+CGameTree.prototype.Start_AutoPlay = function()
 {
     if (!(EDITINGFLAGS_MOVE & this.m_nEditingFlags))
         return;
 
     this.Stop_AutoPlay();
 
-    var nMinInterval = 250;   // 0.25 секунды
-    var nMaxInterval = 20000; // 20 секунд
-
-    var dInterval = nMinInterval + (nMaxInterval - nMinInterval) * (1 - dSpeed);
+    if (this.m_oDrawing)
+        this.m_oDrawing.On_StartAutoPlay();
 
     var oThis = this;
 
@@ -102,28 +100,110 @@ CGameTree.prototype.Start_AutoPlay = function(dSpeed)
         if (oThis.Get_CurNode().Get_NextsCount() > 0)
         {
             oThis.Step_Forward(1);
-            oThis.m_nAutoPlayTimer = setTimeout(PlayingFunction, dInterval);
+        }
+
+        if (oThis.Get_CurNode().Get_NextsCount() > 0)
+        {
+            oThis.m_nAutoPlayTimer = setTimeout(PlayingFunction, oThis.Get_AutoPlayInterval());
         }
         else
+        {
             oThis.m_nAutoPlayTimer = null;
+
+            if (oThis.m_oDrawing)
+                oThis.m_oDrawing.On_StopAutoPlay();
+        }
     };
 
-    this.m_nAutoPlayTimer = setTimeout(PlayingFunction, dInterval);
+    this.m_nAutoPlayTimer = setTimeout(PlayingFunction, this.Get_AutoPlayInterval());
+};
+CGameTree.prototype.Get_AutoPlayInterval = function()
+{
+    var nMinInterval = 100;   // 0.1 секунды
+    var nMaxInterval = 20000; // 20 секунд
+    return nMinInterval + (nMaxInterval - nMinInterval) * (1 - this.m_dAutoPlaySpeed);
 };
 CGameTree.prototype.Stop_AutoPlay = function()
 {
+    if (this.m_oDrawing)
+        this.m_oDrawing.On_StopAutoPlay();
+
     if (null !== this.m_nAutoPlayTimer)
     {
         clearTimeout(this.m_nAutoPlayTimer);
         this.m_nAutoPlayTimer = null;
     }
 };
+CGameTree.prototype.Set_AutoPlaySpeed = function(dSpeed)
+{
+    this.m_dAutoPlaySpeed = dSpeed;
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_AutoPlaySpeed(dSpeed);
+
+    // Перестартовываем с новой скоростью, чтобы не ждать старый таймер.
+    if (null !== this.m_nAutoPlayTimer)
+    {
+        this.Start_AutoPlay();
+    }
+};
+CGameTree.prototype.GoTo_NodeByTimeLine = function(dPos)
+{
+    // Сначала посчитаем количество ходов в текущем варианте
+    var MovesCount = this.private_GetMovesCountInCurVariant();
+
+    var CurMove = dPos * (MovesCount - 1);
+
+    var CurNode = this.m_oFirstNode;
+    while (CurNode.Get_NextsCount() > 0 && CurMove > 0)
+    {
+        CurMove--;
+        CurNode = CurNode.Get_Next();
+    }
+
+    this.GoTo_Node(CurNode);
+};
+CGameTree.prototype.private_GetTimeLinePos = function()
+{
+    var CurNode = this.m_oFirstNode;
+    var Count = 1;
+    var CurPos = 1;
+    while (CurNode.Get_NextsCount() > 0)
+    {
+        Count++;
+        CurNode = CurNode.Get_Next();
+
+        if (CurNode === this.m_oCurNode)
+            CurPos = Count;
+    }
+
+    if (Count > 0)
+        return (CurPos - 1) / (Count - 1);
+
+    return 1;
+};
+CGameTree.prototype.private_GetMovesCountInCurVariant = function()
+{
+    var CurNode = this.m_oFirstNode;
+    var Count = 1;
+    while (CurNode.Get_NextsCount() > 0)
+    {
+        Count++;
+        CurNode = CurNode.Get_Next();
+    }
+
+    return Count;
+};
 CGameTree.prototype.On_EndLoadDrawing = function()
 {
     if (this.m_oDrawingNavigator)
         this.m_oDrawingNavigator.Create_FromGameTree();
 
-    this.Update_InterfaceState();
+    if (this.m_oDrawing)
+    {
+        this.Update_InterfaceState();
+        this.m_oDrawing.Update_AutoPlaySpeed(this.m_dAutoPlaySpeed);
+    }
 };
 CGameTree.prototype.Set_DrawingNavigator = function(oDrawingNavigator)
 {
@@ -299,10 +379,6 @@ CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
 
     if (this.m_oSound)
         this.m_oSound.Set_Silence( false );
-};
-CGameTree.prototype.Get_NewNodeId = function()
-{
-    return ++this.m_nNodesIdCounter;
 };
 CGameTree.prototype.Set_NextMove = function(Value)
 {
@@ -1141,6 +1217,8 @@ CGameTree.prototype.Update_InterfaceState = function()
 
         if (this.m_oDrawingBoard)
             oIState.BoardMode = this.m_oDrawingBoard.Get_Mode();
+
+        oIState.TimelinePos = this.private_GetTimeLinePos();
 
         this.m_oDrawing.Update_InterfaceState(oIState);
     }

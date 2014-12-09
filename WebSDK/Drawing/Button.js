@@ -28,16 +28,23 @@ var EDrawingButtonType =
     EditModeCr      : 14,
     EditModeX       : 15,
     EditModeText    : 16,
-    EditModeNum     : 17
+    EditModeNum     : 17,
+    AutoPlay        : 18
 };
 
 var EDrawingButtonState =
 {
-    Normal   : 0,
-    Active   : 1,
-    Hover    : 2,
-    Disabled : 3,
-    Selected : 4
+    Normal   : 0x0,
+    Active   : 0x1,
+    Hover    : 0x2,
+    Disabled : 0x4,
+    Selected : 0x8
+};
+
+var EDrawingButtonState2 =
+{
+    AutoPlayPlaying : 0x00,
+    AutoPlayStopped : 0x10
 };
 
 function CDrawingButton(oDrawing)
@@ -46,6 +53,7 @@ function CDrawingButton(oDrawing)
     this.m_oGameTree = null;
     this.m_nType     = EDrawingButtonType.Unknown;
     this.m_nState    = EDrawingButtonState.Normal;
+    this.m_nState2   = EDrawingButtonState2.AutoPlayStopped;
 
     this.m_bSelected = false;
 
@@ -175,6 +183,15 @@ CDrawingButton.prototype.Set_Enabled = function(Value)
     {
         this.m_nState = EDrawingButtonState.Disabled;
         this.private_UpdateState();
+    }
+};
+CDrawingButton.prototype.Set_State2 = function(State2)
+{
+    if (this.m_nState2 !== State2)
+    {
+        this.m_nState2 = State2;
+        this.private_OnResize();
+        this.HtmlElement.Control.HtmlElement.setAttribute("title", this.private_GetHint());
     }
 };
 CDrawingButton.prototype.Set_Selected = function(Value)
@@ -560,6 +577,39 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
             Canvas.fillText(Text, X, Y);
             break;
         }
+        case EDrawingButtonType.AutoPlay:
+        {
+            if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2)
+                this.private_DrawTriangle(Size, X_off, Y_off, Canvas, 1);
+            else
+            {
+                var X_1_5 = Math.floor(X_off +   Size / 5   + Size / 20 + 0.5);
+                var X_4_5 = Math.ceil(X_off + 4 * Size / 5 - Size / 20 + 0.5);
+                var Y_1_5 = Math.ceil(Y_off +     Size / 5 + 0.5);
+                var Y_4_5 = Math.ceil(Y_off + 4 * Size / 5 + 0.5);
+
+                var X_1_5_S = Math.ceil(X_1_5 + Size / 5);
+                var X_4_5_S = Math.floor(X_4_5 - Size / 5);
+
+                Canvas.beginPath();
+                Canvas.moveTo(X_1_5, Y_1_5);
+                Canvas.lineTo(X_1_5_S, Y_1_5);
+                Canvas.lineTo(X_1_5_S, Y_4_5);
+                Canvas.lineTo(X_1_5, Y_4_5);
+                Canvas.closePath();
+                Canvas.fill();
+
+                Canvas.beginPath();
+                Canvas.moveTo(X_4_5, Y_1_5);
+                Canvas.lineTo(X_4_5_S, Y_1_5);
+                Canvas.lineTo(X_4_5_S, Y_4_5);
+                Canvas.lineTo(X_4_5, Y_4_5);
+                Canvas.closePath();
+                Canvas.fill();
+            }
+
+            break;
+        }
     };
 
     return Canvas.getImageData(0, 0, W, H);
@@ -632,6 +682,7 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.EditModeX      : this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkX); break;
         case EDrawingButtonType.EditModeText   : this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkTx); break;
         case EDrawingButtonType.EditModeNum    : this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkNum); break;
+        case EDrawingButtonType.AutoPlay       : if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2) this.m_oGameTree.Start_AutoPlay(); else this.m_oGameTree.Stop_AutoPlay(); break;
     };
 };
 CDrawingButton.prototype.private_GetHint = function()
@@ -655,6 +706,7 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.EditModeX      : return "X marks (F7)";
         case EDrawingButtonType.EditModeText   : return "Text labels (F8)";
         case EDrawingButtonType.EditModeNum    : return "Numeric labels (F9)";
+        case EDrawingButtonType.AutoPlay       : if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2) return "Autoplay start"; else return "Autoplay stop";
     };
 };
 CDrawingButton.prototype.private_RegisterButton = function()
@@ -680,6 +732,7 @@ CDrawingButton.prototype.private_RegisterButton = function()
             case EDrawingButtonType.EditModeX      : this.m_oDrawing.Register_EditModeXButton      (this); break;
             case EDrawingButtonType.EditModeText   : this.m_oDrawing.Register_EditModeTextButton   (this); break;
             case EDrawingButtonType.EditModeNum    : this.m_oDrawing.Register_EditModeNumButton    (this); break;
+            case EDrawingButtonType.AutoPlay       : this.m_oDrawing.Register_AutoPlayButton       (this); break;
         };
     }
 };

@@ -9,7 +9,6 @@
 
 function CNode(oGameTree)
 {
-    this.m_nId        = oGameTree.Get_NewNodeId(); // Id ноды
     this.m_aNext      = [];                        // Массив следующих нод
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
     this.m_oPrev      = null;                      // Родительская нода
@@ -20,10 +19,6 @@ function CNode(oGameTree)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
 }
 
-CNode.prototype.Get_Id = function()
-{
-    return this.m_nId;
-};
 CNode.prototype.Is_Node = function()
 {
     return true;

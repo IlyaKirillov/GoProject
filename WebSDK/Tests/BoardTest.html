@@ -16,6 +16,7 @@
 <script type="text/javascript" language="JavaScript" src="../Drawing/Comments.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/Navigator.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/NavigatorMap.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Slider.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Drawing/Presentation.js"></script>
 
 <script type="text/javascript" language="JavaScript" src="../Command.js"></script>
@@ -37,7 +38,6 @@
         var oGameTree = GoBoardApi.Create_GameTree();
         GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
         GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
-        //GoBoardApi.Set_Permissions(oGameTree, {NewNode : false, Move : false, ChangeBoardMode : false, LoadFile : false});
 
         window.onresize = function()
         {

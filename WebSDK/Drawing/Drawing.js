@@ -44,6 +44,10 @@ function CDrawing(oGameTree)
 
     this.m_oBoard     = null;
     this.m_oNavigator = null;
+    this.m_oTimeLine  = null;
+
+    this.m_oAutoPlayButton = null;
+    this.m_oAutoPlaySlider = null;
 
     // Массив ссылок на окна с комментариями
     this.m_aComments = [];
@@ -171,17 +175,46 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 
     var sCommentsDivId = sCaTDivId + "_Comments";
     var sToolsDivId    = sCaTDivId + "_Toolbar";
+    var sTools2DivId    = sCaTDivId + "_ToolbarAutoPlay";
+    var sTools3DivId    = sCaTDivId + "_ToolbarTimeLine";
     this.private_CreateDiv(oCaTControl.HtmlElement, sCommentsDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId);
+    var oTools2Element = this.private_CreateDiv(oCaTControl.HtmlElement, sTools2DivId);
+    this.private_CreateDiv(oCaTControl.HtmlElement, sTools3DivId);
+
+    var sAutoPlaySlider = sTools2DivId + "_Slider";
+    var sAutoPlayButton = sTools2DivId + "_Button";
+    this.private_CreateDiv(oTools2Element, sAutoPlayButton);
+    this.private_CreateDiv(oTools2Element, sAutoPlaySlider);
 
     var ToolbarH = 25;
 
     var oCommentsControl = CreateControlContainer(sCommentsDivId);
-    oCommentsControl.Bounds.SetParams(0, 0, 1000, ToolbarH, false, false, false, true, -1, ToolbarH);
+    oCommentsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 3, false, false, false, true, -1, ToolbarH);
     oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oCommentsControl);
 
     var oToolsControl = CreateControlContainer(sToolsDivId);
+    oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 2, false, false, false, true, -1, ToolbarH);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaTControl.AddControl(oToolsControl);
+
+    oToolsControl = CreateControlContainer(sTools2DivId);
+    oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH, false, false, false, true, -1, ToolbarH);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaTControl.AddControl(oToolsControl);
+
+    var oAutoControl = CreateControlContainer(sAutoPlayButton);
+    oAutoControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, ToolbarH, -1);
+    oAutoControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
+    oToolsControl.AddControl(oAutoControl);
+
+    oAutoControl = CreateControlContainer(sAutoPlaySlider);
+    oAutoControl.Bounds.SetParams(ToolbarH, 0, 1000, 1000, true, false, false, false, -1, ToolbarH);
+    oAutoControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oToolsControl.AddControl(oAutoControl);
+
+    oToolsControl = CreateControlContainer(sTools3DivId);
     oToolsControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, ToolbarH);
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oToolsControl);
@@ -193,10 +226,22 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
         EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum]});
 
+    var oDrawingTimeLineSlider = new CDrawingSlider(this);
+    oDrawingTimeLineSlider.Init(sTools3DivId, oGameTree, EDrawingSliderType.Timeline, 0);
+
+    var oDrawingAutoPlayButton = new CDrawingButton(this);
+    oDrawingAutoPlayButton.Init(sAutoPlayButton, oGameTree, EDrawingButtonType.AutoPlay);
+
+    var oDrawingAutoPlaySlider = new CDrawingSlider(this);
+    oDrawingAutoPlaySlider.Init(sAutoPlaySlider, oGameTree, EDrawingSliderType.AutoPlaySpeed, 0);
+
     this.m_aElements.push(oDrawingBoard);
     this.m_aElements.push(oDrawingNavigator);
     this.m_aElements.push(oDrawingComents);
     this.m_aElements.push(oDrawingToolbar);
+    this.m_aElements.push(oDrawingTimeLineSlider);
+    this.m_aElements.push(oDrawingAutoPlayButton);
+    this.m_aElements.push(oDrawingAutoPlaySlider);
 
     this.m_oControl = oParentControl;
 
@@ -306,6 +351,34 @@ CDrawing.prototype.Register_Navigator = function(oNavigator)
 {
     this.m_oNavigator = oNavigator;
 };
+CDrawing.prototype.Register_TimeLine = function(oTimeLine)
+{
+    this.m_oTimeLine = oTimeLine;
+};
+CDrawing.prototype.Register_AutoPlaySpeed = function(oAutoPlay)
+{
+    this.m_oAutoPlaySlider = oAutoPlay;
+};
+CDrawing.prototype.Register_AutoPlayButton = function(oAutoPlayButton)
+{
+    this.m_oAutoPlayButton = oAutoPlayButton;
+};
+CDrawing.prototype.On_StartAutoPlay = function()
+{
+    if (this.m_oAutoPlayButton)
+        this.m_oAutoPlayButton.Set_State2(EDrawingButtonState2.AutoPlayPlaying);
+};
+CDrawing.prototype.On_StopAutoPlay = function()
+{
+    if (this.m_oAutoPlayButton)
+        this.m_oAutoPlayButton.Set_State2(EDrawingButtonState2.AutoPlayStopped);
+};
+
+CDrawing.prototype.Update_AutoPlaySpeed = function(dPos)
+{
+    if (this.m_oAutoPlaySlider)
+        this.m_oAutoPlaySlider.Update_Pos(dPos);
+};
 CDrawing.prototype.Update_InterfaceState = function(oIState)
 {
     // Backward
@@ -363,6 +436,10 @@ CDrawing.prototype.Update_InterfaceState = function(oIState)
 
     for (var Index = 0, Count = this.m_oButtons.BoardModeNum.length; Index < Count; Index++)
         this.m_oButtons.BoardModeNum[Index].Set_Selected(oIState.BoardMode === EBoardMode.AddMarkNum);
+
+    // TimeLine
+    if (this.m_oTimeLine)
+        this.m_oTimeLine.Update_Pos(oIState.TimelinePos);
 };
 CDrawing.prototype.Update_Comments = function(sComment)
 {
