@@ -124,6 +124,7 @@ CDrawingSlider.prototype.Update_Size = function()
     this.HtmlElement.Control.Resize(W, H);
 
     this.private_OnResize(W, H);
+    this.private_UpdatePos(this.m_dPos, true);
 };
 CDrawingSlider.prototype.Update_Pos = function(dPos)
 {
