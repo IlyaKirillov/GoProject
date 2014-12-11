@@ -49,6 +49,9 @@ function CDrawing(oGameTree)
     this.m_oAutoPlayButton = null;
     this.m_oAutoPlaySlider = null;
 
+    this.m_oBlackInfo      = null;
+    this.m_oWhiteInfo      = null;
+
     // Массив ссылок на окна с комментариями
     this.m_aComments = [];
 
@@ -173,10 +176,12 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     var oDrawingNavigator = new CDrawingNavigator(this);
     oDrawingNavigator.Init(sNavigatorDivId, oGameTree);
 
+    var sInfoDivId     = sCaTDivId + "_Info";
     var sCommentsDivId = sCaTDivId + "_Comments";
     var sToolsDivId    = sCaTDivId + "_Toolbar";
-    var sTools2DivId    = sCaTDivId + "_ToolbarAutoPlay";
-    var sTools3DivId    = sCaTDivId + "_ToolbarTimeLine";
+    var sTools2DivId   = sCaTDivId + "_ToolbarAutoPlay";
+    var sTools3DivId   = sCaTDivId + "_ToolbarTimeLine";
+    this.private_CreateDiv(oCaTControl.HtmlElement, sInfoDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sCommentsDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId);
     var oTools2Element = this.private_CreateDiv(oCaTControl.HtmlElement, sTools2DivId);
@@ -188,9 +193,38 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.private_CreateDiv(oTools2Element, sAutoPlaySlider);
 
     var ToolbarH = 25;
+    var InfoH    = 40;
+
+    // INFO
+    var oInfoControl = CreateControlContainer(sInfoDivId);
+    oInfoControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, InfoH);
+    oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oCaTControl.AddControl(oInfoControl);
+
+    var sWhiteInfo = sInfoDivId + "_White";
+    var sBlackInfo = sInfoDivId + "_Black";
+    this.private_CreateDiv(oInfoControl.HtmlElement, sWhiteInfo);
+    this.private_CreateDiv(oInfoControl.HtmlElement, sBlackInfo);
+
+    var oInfoWhiteControl = CreateControlContainer(sWhiteInfo);
+    oInfoWhiteControl.Bounds.SetParams(0, 0, 500, 1000, false, false, false, false, -1, -1);
+    oInfoWhiteControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oInfoControl.AddControl(oInfoWhiteControl);
+
+    var oInfoBlackControl = CreateControlContainer(sBlackInfo);
+    oInfoBlackControl.Bounds.SetParams(500, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oInfoBlackControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oInfoControl.AddControl(oInfoBlackControl);
+
+    var oDrawingWhiteInfo = new CDrawingPlayerInfo(this);
+    oDrawingWhiteInfo.Init(sWhiteInfo, oGameTree, BOARD_WHITE);
+    var oDrawingBlackInfo = new CDrawingPlayerInfo(this);
+    oDrawingBlackInfo.Init(sBlackInfo, oGameTree, BOARD_BLACK);
+
+    // END INFO
 
     var oCommentsControl = CreateControlContainer(sCommentsDivId);
-    oCommentsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 3, false, false, false, true, -1, ToolbarH);
+    oCommentsControl.Bounds.SetParams(0, InfoH, 1000, ToolbarH * 3, false, true, false, true, -1, ToolbarH);
     oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oCommentsControl);
 
@@ -242,6 +276,8 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.m_aElements.push(oDrawingTimeLineSlider);
     this.m_aElements.push(oDrawingAutoPlayButton);
     this.m_aElements.push(oDrawingAutoPlaySlider);
+    this.m_aElements.push(oDrawingBlackInfo);
+    this.m_aElements.push(oDrawingWhiteInfo);
 
     this.m_oControl = oParentControl;
 
@@ -378,6 +414,50 @@ CDrawing.prototype.Update_AutoPlaySpeed = function(dPos)
 {
     if (this.m_oAutoPlaySlider)
         this.m_oAutoPlaySlider.Update_Pos(dPos);
+};
+CDrawing.prototype.Register_BlackInfo = function(oInfo)
+{
+    this.m_oBlackInfo = oInfo;
+};
+CDrawing.prototype.Register_WhiteInfo = function(oInfo)
+{
+    this.m_oWhiteInfo = oInfo;
+};
+CDrawing.prototype.Update_BlackName = function(sName)
+{
+    if (this.m_oBlackInfo)
+        this.m_oBlackInfo.Update_Name(sName);
+};
+CDrawing.prototype.Update_BlackRank = function(sRank)
+{
+    if (this.m_oBlackInfo)
+        this.m_oBlackInfo.Update_Rank(sRank);
+};
+CDrawing.prototype.Update_WhiteName = function(sName)
+{
+    if (this.m_oWhiteInfo)
+        this.m_oWhiteInfo.Update_Name(sName);
+};
+CDrawing.prototype.Update_WhiteRank = function(sRank)
+{
+    if (this.m_oWhiteInfo)
+        this.m_oWhiteInfo.Update_Rank(sRank);
+};
+CDrawing.prototype.Update_Captured = function(dBlack, dWhite)
+{
+    if (this.m_oBlackInfo)
+        this.m_oBlackInfo.Update_Captured(dBlack);
+
+    if (this.m_oWhiteInfo)
+        this.m_oWhiteInfo.Update_Captured(dWhite);
+};
+CDrawing.prototype.Update_Scores = function(dBlack, dWhite)
+{
+    if (this.m_oBlackInfo)
+        this.m_oBlackInfo.Update_Scores(dBlack);
+
+    if (this.m_oWhiteInfo)
+        this.m_oWhiteInfo.Update_Scores(dWhite);
 };
 CDrawing.prototype.Update_InterfaceState = function(oIState)
 {

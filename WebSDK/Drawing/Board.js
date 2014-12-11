@@ -389,6 +389,9 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
 
     if (this.m_eMode !== eMode)
     {
+        if (EBoardMode.CountScores === this.m_eMode)
+            this.m_oGameTree.Clear_TerritoryPoints();
+
         this.m_eMode = eMode;
         this.private_UpdateTarget();
 
@@ -1779,11 +1782,9 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 };
 CDrawingBoard.prototype.private_CountScores = function(X, Y, event)
 {
-    // TODO: CountScores
     if (true === event.CtrlKey )
     {
         // Возвращаемся к режиму добавления ходов
-        this.m_oGameTree.Clear_TerritoryPoints();
         this.Set_Mode(EBoardMode.Move);
     }
     else

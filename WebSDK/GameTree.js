@@ -80,8 +80,9 @@ function CGameTree(Drawing, Sound)
 
     this.m_nEditingFlags = 0xFFFFFFFF;
 
-    this.m_nAutoPlayTimer = null;
-    this.m_dAutoPlaySpeed = 0.75;
+    this.m_nAutoPlayTimer   = null;
+    this.m_dAutoPlaySpeed   = 0.75;
+    this.m_nAutoPlayOldTime = -1;
 };
 CGameTree.prototype.Start_AutoPlay = function()
 {
@@ -104,6 +105,7 @@ CGameTree.prototype.Start_AutoPlay = function()
 
         if (oThis.Get_CurNode().Get_NextsCount() > 0)
         {
+            oThis.m_nAutoPlayOldTime = new Date().getTime();
             oThis.m_nAutoPlayTimer = setTimeout(PlayingFunction, oThis.Get_AutoPlayInterval());
         }
         else
@@ -115,7 +117,16 @@ CGameTree.prototype.Start_AutoPlay = function()
         }
     };
 
-    this.m_nAutoPlayTimer = setTimeout(PlayingFunction, this.Get_AutoPlayInterval());
+    var CurTime = new Date().getTime();
+    var CurInterval = CurTime - this.m_nAutoPlayOldTime;
+    var AutoPlayInterval = this.Get_AutoPlayInterval();
+
+    var NewInterval = AutoPlayInterval - CurInterval;
+
+    if (NewInterval <= 0)
+        PlayingFunction();
+    else
+        this.m_nAutoPlayTimer = setTimeout(PlayingFunction, NewInterval);
 };
 CGameTree.prototype.Get_AutoPlayInterval = function()
 {
@@ -258,16 +269,16 @@ CGameTree.prototype.Reset = function()
 {
     this.m_oFirstNode    = new CNode(this);
 
-    this.m_sApplication  = "";
-    this.m_sAuthor       = "";
-    this.m_sBlackRating  = "";
-    this.m_sEvent        = "";
-    this.m_sTimeSettings = "";
-    this.m_sBlack        = "Black";
-    this.m_sWhite        = "White";
-    this.m_sWhiteRating  = "";
-    this.m_sResult       = "";
-    this.m_sRules        = "";
+    this.Set_Application("");
+    this.Set_Author("");
+    this.Set_Event("");
+    this.Set_TimeSettings("");
+    this.Set_Black("Black");
+    this.Set_White("White");
+    this.Set_BlackRating("");
+    this.Set_WhiteRating("");
+    this.Set_Result("");
+    this.Set_Rules("");
 
     this.m_eShowVariants = EShowVariants.None;
 
@@ -753,7 +764,9 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
     }
 
     if (this.m_oDrawing)
+    {
         this.m_oDrawing.Update_Comments(this.m_oCurNode.Get_Comment());
+    }
 
     if (this.m_oDrawingNavigator)
         this.m_oDrawingNavigator.Update_Current(true);
@@ -854,7 +867,7 @@ CGameTree.prototype.Count_Scores = function()
         this.m_nBlackScores = Scores.Black + this.m_nBlackCapt;
         this.m_nWhiteScores = Scores.White + this.m_nWhiteCapt + this.m_nKomi;
 
-        // TODO: Сделать обновление в панели информации
+        this.Update_InterfaceState();
     }
 };
 CGameTree.prototype.GoTo_Node = function(Node)
@@ -936,7 +949,6 @@ CGameTree.prototype.GoTo_Node = function(Node)
             break;
     }
 
-    // TODO: Здесь нужно оптимизировать отрисовку всех камней
     // Отрисовываем текущую позицию
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Draw_AllStones();
@@ -1023,6 +1035,10 @@ CGameTree.prototype.Get_Application = function()
 {
     return this.m_sApplication;
 };
+CGameTree.prototype.Set_Author = function(sAuthor)
+{
+    this.m_sAuthor = sAuthor;
+};
 CGameTree.prototype.Set_Charset = function(sCharset)
 {
     this.m_sCharset = sCharset;
@@ -1054,10 +1070,8 @@ CGameTree.prototype.Get_Annotator = function()
 CGameTree.prototype.Set_BlackRating = function(sRating)
 {
     this.m_sBlackRating = sRating;
-};
-CGameTree.prototype.Get_BlackRating = function()
-{
-    return this.m_sBlackRating
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_BlackRank(this.m_sBlackRating);
 };
 CGameTree.prototype.Set_BlackTeam = function(sTeam)
 {
@@ -1110,6 +1124,8 @@ CGameTree.prototype.Set_OverTime = function(sOverTime)
 CGameTree.prototype.Set_Black = function(sBlack)
 {
     this.m_sBlack = sBlack;
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_BlackName(this.m_sBlack);
 };
 CGameTree.prototype.Set_Place = function(sPlace)
 {
@@ -1118,6 +1134,8 @@ CGameTree.prototype.Set_Place = function(sPlace)
 CGameTree.prototype.Set_White = function(sWhite)
 {
     this.m_sWhite = sWhite;
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_WhiteName(this.m_sWhite);
 };
 CGameTree.prototype.Set_Result = function(sResult)
 {
@@ -1139,6 +1157,10 @@ CGameTree.prototype.Set_TimeLimit = function(sTimeLimit)
 {
     this.m_nTimeLimit = sTimeLimit;
 };
+CGameTree.prototype.Set_TimeSettings = function(sTimeSettings)
+{
+    this.m_sTimeSettings = sTimeSettings;
+};
 CGameTree.prototype.Set_Transcriber = function(sTranscribber)
 {
     this.m_sTranscriber = sTranscribber;
@@ -1146,6 +1168,8 @@ CGameTree.prototype.Set_Transcriber = function(sTranscribber)
 CGameTree.prototype.Set_WhiteRating = function(sWhiteRating)
 {
     this.m_sWhiteRating = sWhiteRating;
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_WhiteRank(this.m_sWhiteRating);
 };
 CGameTree.prototype.Set_WhiteTeam = function(sWhiteTeam)
 {
@@ -1221,6 +1245,11 @@ CGameTree.prototype.Update_InterfaceState = function()
         oIState.TimelinePos = this.private_GetTimeLinePos();
 
         this.m_oDrawing.Update_InterfaceState(oIState);
+
+        if (this.m_oDrawingBoard && EBoardMode.CountScores === this.m_oDrawingBoard.Get_Mode())
+            this.m_oDrawing.Update_Scores(this.Get_BlackScores(), this.Get_WhiteScores());
+        else
+            this.m_oDrawing.Update_Captured(this.Get_BlackCapt(), this.Get_WhiteCapt());
     }
 
 };
