@@ -29,7 +29,9 @@ var EDrawingButtonType =
     EditModeX       : 15,
     EditModeText    : 16,
     EditModeNum     : 17,
-    AutoPlay        : 18
+    AutoPlay        : 18,
+    WindowClose     : 19,
+    GameInfo        : 20
 };
 
 var EDrawingButtonState =
@@ -75,6 +77,7 @@ function CDrawingButton(oDrawing)
     this.m_oNormaBColor    = new CColor(217, 217, 217, 255);
     this.m_oNormaFColor    = new CColor(  0,   0,   0, 255);
     this.m_oHoverBColor    = new CColor( 54, 101, 179, 255);
+    this.m_oActiveFColor   = new CColor(255, 255, 255, 255);
     this.m_oHoverFColor    = new CColor(255, 255, 255, 255);
     this.m_oDisabledFColor = new CColor(140, 140, 140, 255);
     this.m_oSelectedBColor = new CColor(  0, 175, 240, 255);
@@ -89,9 +92,11 @@ function CDrawingButton(oDrawing)
         oThis.private_OnFocus();
         if (EDrawingButtonState.Disabled !== oThis.m_nState)
         {
+            check_MouseDownEvent(e, true);
             oThis.m_nState = EDrawingButtonState.Active;
             oThis.private_UpdateState();
-            oThis.private_HandleMouseDown();
+            //oThis.private_HandleMouseDown();
+            e.stopImmediatePropagation();
         }
     };
 
@@ -99,8 +104,13 @@ function CDrawingButton(oDrawing)
     {
         if (EDrawingButtonState.Disabled !== oThis.m_nState)
         {
+            if (global_mouseEvent.Sender !== e.target)
+                return;
+
             oThis.m_nState = EDrawingButtonState.Hover;
             oThis.private_UpdateState();
+            oThis.private_HandleMouseDown();
+            e.stopImmediatePropagation();
         }
     };
 
@@ -127,7 +137,7 @@ function CDrawingButton(oDrawing)
     {
         // При нажатии на кнопки выставляем фокус на доску, к которой привязаны кнопки.
         if (oThis.m_oGameTree)
-            oThis.m_oGameTree.Focus_DrawingBoard();
+            oThis.m_oGameTree.Focus();
     };
 }
 CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
@@ -160,6 +170,7 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     oDivElement.onmouseout  = this.private_OnMouseOut;
     oDivElement.onfocus     = this.private_OnFocus;
     oDivElement.tabIndex    = -1;
+    oDivElement.style.outline = "none";
 
     this.Update_Size();
 };
@@ -220,10 +231,10 @@ CDrawingButton.prototype.private_OnResize = function()
     if (0 === W || 0 === H)
         return;
 
-    this.m_oImageData.Active   = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor, W, H);
-    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor, W, H);
-    this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor,    this.m_oNormaFColor, W, H);
-    this.m_oImageData.Disabled = this.private_Draw(this.m_oNormaBColor,    this.m_oDisabledFColor, W, H);
+    this.m_oImageData.Active   = this.private_Draw(this.m_oHoverBColor, this.m_oActiveFColor, W, H);
+    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
+    this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor, this.m_oNormaFColor, W, H);
+    this.m_oImageData.Disabled = this.private_Draw(this.m_oNormaBColor, this.m_oDisabledFColor, W, H);
     this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
 
     this.private_UpdateState();
@@ -329,7 +340,6 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
 
             break;
         }
-
         case EDrawingButtonType.PrevVariant:
         {
             var X0 = Math.ceil(X_off + 0.20 * Size + 0.5);
@@ -359,7 +369,6 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
 
             break;
         }
-
         case EDrawingButtonType.EditModeMove:
         {
             var X = Math.ceil(X_off + 0.5 * Size - Size / 10 + 0.5);
@@ -610,6 +619,54 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
 
             break;
         }
+        case EDrawingButtonType.WindowClose:
+        {
+            var oImageData = Canvas.createImageData(W, H);
+            var oBitmap = oImageData.data;
+
+            var X_off = (W - 8) / 2 | 0;
+            var Y_off = (H - 8) / 2 | 0;
+
+            for (var Y = 0; Y < H; Y++)
+            {
+                for (var X = 0; X < W; X++)
+                {
+                    var Index = (X + Y * W) * 4;
+
+                    var r = FillColor.r;
+                    var g = FillColor.g;
+                    var b = FillColor.b;
+
+                    var y = Y - Y_off;
+                    var x = X - X_off;
+                    if ((0 === y && (0 === x || 1 === x || 6 === x || 7 === x)) ||
+                        (1 === y && (1 === x || 2 === x || 5 === x || 6 === x)) ||
+                        (2 === y && (2 === x || 3 === x || 4 === x || 5 === x)) ||
+                        (3 === y && (3 === x || 4 === x)) ||
+                        (4 === y && (3 === x || 4 === x)) ||
+                        (5 === y && (2 === x || 3 === x || 4 === x || 5 === x)) ||
+                        (6 === y && (1 === x || 2 === x || 5 === x || 6 === x)) ||
+                        (7 === y && (0 === x || 1 === x || 6 === x || 7 === x)))
+                    {
+                        r = 255;
+                        g = 255;
+                        b = 255;
+                    }
+
+                    oBitmap[Index + 0] = r;
+                    oBitmap[Index + 1] = g;
+                    oBitmap[Index + 2] = b;
+                    oBitmap[Index + 3] = 255;
+                }
+            }
+
+            return oImageData;
+        }
+        case EDrawingButtonType.GameInfo:
+        {
+
+            break;
+        }
     };
 
     return Canvas.getImageData(0, 0, W, H);
@@ -683,6 +740,8 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.EditModeText   : this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkTx); break;
         case EDrawingButtonType.EditModeNum    : this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkNum); break;
         case EDrawingButtonType.AutoPlay       : if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2) this.m_oGameTree.Start_AutoPlay(); else this.m_oGameTree.Stop_AutoPlay(); break;
+        case EDrawingButtonType.WindowClose    : this.m_oGameTree.Close(); break;
+        case EDrawingButtonType.GameInfo       : break;
     };
 };
 CDrawingButton.prototype.private_GetHint = function()
@@ -707,6 +766,8 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.EditModeText   : return "Text labels (F8)";
         case EDrawingButtonType.EditModeNum    : return "Numeric labels (F9)";
         case EDrawingButtonType.AutoPlay       : if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2) return "Autoplay start"; else return "Autoplay stop";
+        case EDrawingButtonType.WindowClose    : return "Close";
+        case EDrawingButtonType.GameInfo       : return "Game info";
     };
 };
 CDrawingButton.prototype.private_RegisterButton = function()
@@ -736,3 +797,4 @@ CDrawingButton.prototype.private_RegisterButton = function()
         };
     }
 };
+

@@ -396,7 +396,29 @@ CSgfReader.prototype.private_ReadAddOrRemoveStone = function(Value)
         var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
         var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
 
-        arrPos.push(Common_XYtoValue(X, Y));
+        // Возможны 2 варианта [aa] и [aa:bb]
+        if (':' === this.m_sSGF[this.m_nPos])
+        {
+            this.m_nPos++;
+
+            sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
+            sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
+
+            var X1 = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var Y1 = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+
+            for (var _Y = Y; _Y <= Y1; _Y++)
+            {
+                for (var _X = X; _X <= X1; _X++)
+                {
+                    arrPos.push(Common_XYtoValue(_X, _Y));
+                }
+            }
+        }
+        else
+        {
+            arrPos.push(Common_XYtoValue(X, Y));
+        }
 
         if (']' !== this.m_sSGF[this.m_nPos])
         {
@@ -523,8 +545,6 @@ CSgfReader.prototype.private_ReadCP = function()
 };
 CSgfReader.prototype.private_ReadMark = function(Type)
 {
-    var Count = 0;
-
     this.m_nPos += 3;
     var arrPos = [];
 
@@ -540,8 +560,29 @@ CSgfReader.prototype.private_ReadMark = function(Type)
         var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
         var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
 
-        arrPos[Count] = Common_XYtoValue(X, Y);
-        Count++;
+        // Возможны 2 варианта [aa] и [aa:bb]
+        if (':' === this.m_sSGF[this.m_nPos])
+        {
+            this.m_nPos++;
+
+            sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
+            sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
+
+            var X1 = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var Y1 = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+
+            for (var _Y = Y; _Y <= Y1; _Y++)
+            {
+                for (var _X = X; _X <= X1; _X++)
+                {
+                    arrPos.push(Common_XYtoValue(_X, _Y));
+                }
+            }
+        }
+        else
+        {
+            arrPos.push(Common_XYtoValue(X, Y));
+        }
 
         if (']' !== this.m_sSGF[this.m_nPos])
         {
@@ -710,8 +751,6 @@ CSgfReader.prototype.private_ReadTM = function()
 };
 CSgfReader.prototype.private_ReadTerritory = function(Value)
 {
-    var Count = 0;
-
     this.m_nPos += 3;
     var arrPos = [];
 
@@ -727,8 +766,29 @@ CSgfReader.prototype.private_ReadTerritory = function(Value)
         var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
         var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
 
-        arrPos[Count] = Common_XYtoValue(X, Y);
-        Count++;
+        // Возможны 2 варианта [aa] и [aa:bb]
+        if (':' === this.m_sSGF[this.m_nPos])
+        {
+            this.m_nPos++;
+
+            sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
+            sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
+
+            var X1 = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var Y1 = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+
+            for (var _Y = Y; _Y <= Y1; _Y++)
+            {
+                for (var _X = X; _X <= X1; _X++)
+                {
+                    arrPos.push(Common_XYtoValue(_X, _Y));
+                }
+            }
+        }
+        else
+        {
+            arrPos.push(Common_XYtoValue(X, Y));
+        }
 
         if (']' !== this.m_sSGF[this.m_nPos])
         {

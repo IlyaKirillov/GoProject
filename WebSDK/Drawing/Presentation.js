@@ -349,7 +349,7 @@ CPresentation.prototype.private_GoToStep = function(nSlide, nStep)
             this.m_oGameTree.Reset_EditingFlags();
             this.m_oGameTree.Load_Sgf(sSgf);
             this.m_oGameTree.Set_EditingFlags(oSgfPr.Flags);
-            this.m_oGameTree.Focus_DrawingBoard();
+            this.m_oGameTree.Focus();
         }
         else
             this.private_NextStep();

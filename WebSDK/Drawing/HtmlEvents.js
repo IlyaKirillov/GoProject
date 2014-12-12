@@ -278,13 +278,15 @@ function Window_OnMouseUp(e)
     if (false === window.g_bIsMouseUpLockedSend)
     {
         window.g_bIsMouseUpLockedSend = true;
-        if (global_mouseEvent.IsLocked)
+        if (global_mouseEvent.IsLocked && global_mouseEvent.Sender)
         {
             if (undefined != global_mouseEvent.Sender.onmouseup && null != global_mouseEvent.Sender.onmouseup)
             {
                 global_mouseEvent.Sender.onmouseup(e, true);
             }
         }
+
+        global_mouseEvent.Sender = null;
     }
 }
 

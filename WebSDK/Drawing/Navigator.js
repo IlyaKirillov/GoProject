@@ -113,7 +113,7 @@ function CDrawingNavigator(oDrawing)
             return;
 
         if (oThis.m_oGameTree)
-            oThis.m_oGameTree.Focus_DrawingBoard();
+            oThis.m_oGameTree.Focus();
 
         check_MouseDownEvent(e, true);
         var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
@@ -175,7 +175,7 @@ function CDrawingNavigator(oDrawing)
     this.private_OnFocus = function()
     {
         if (oThis.m_oGameTree)
-            oThis.m_oGameTree.Focus_DrawingBoard();
+            oThis.m_oGameTree.Focus();
     };
 
     this.private_OnMouseOverHorScroll = function()
