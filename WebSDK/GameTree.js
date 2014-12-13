@@ -271,18 +271,27 @@ CGameTree.prototype.Reset = function()
 {
     this.m_oFirstNode    = new CNode(this);
 
-    this.Set_Application("");
-    this.Set_Author("");
-    this.Set_GameEvent("");
-    this.Set_GamePlace("");
+    this.Set_GameName("");
+    this.Set_Result("");
+    this.Set_Rules("");
+    this.Set_Komi(0);
+    this.Set_Handicap("0");
     this.Set_TimeLimit("");
     this.Set_OverTime("");
     this.Set_Black("Black");
-    this.Set_White("White");
     this.Set_BlackRating("");
+    this.Set_White("White");
     this.Set_WhiteRating("");
-    this.Set_Result("");
-    this.Set_Rules("");
+    this.Set_Copyright("");
+    this.Set_GameInfo("");
+    this.Set_DateTime("");
+    this.Set_GameEvent("");
+    this.Set_GameRound("");
+    this.Set_GamePlace("");
+    this.Set_GameAnnotator("");
+    this.Set_GameFuseki("");
+    this.Set_GameSource("");
+    this.Set_GameTranscriber("");
 
     this.m_eShowVariants = EShowVariants.None;
 
