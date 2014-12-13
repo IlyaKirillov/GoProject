@@ -439,7 +439,7 @@ CSgfReader.prototype.private_ReadAddOrRemoveStone = function(Value)
 CSgfReader.prototype.private_ReadAN = function()
 {
     this.m_nPos += 3;
-    this.m_oGameTree.Set_Annotator(this.private_ReadSimpleText());
+    this.m_oGameTree.Set_GameAnnotator(this.private_ReadSimpleText());
 };
 CSgfReader.prototype.private_ReadAP = function()
 {
@@ -607,7 +607,7 @@ CSgfReader.prototype.private_ReadDT = function()
 CSgfReader.prototype.private_ReadEV = function()
 {
     this.m_nPos += 3;
-    this.m_oGameTree.Set_Event(this.private_ReadSimpleText());
+    this.m_oGameTree.Set_GameEvent(this.private_ReadSimpleText());
 };
 CSgfReader.prototype.private_ReadFF = function()
 {
@@ -696,7 +696,7 @@ CSgfReader.prototype.private_ReadPB = function()
 CSgfReader.prototype.private_ReadPC = function()
 {
     this.m_nPos += 3;
-    this.m_oGameTree.Set_Place(this.private_ReadSimpleText());
+    this.m_oGameTree.Set_GamePlace(this.private_ReadSimpleText());
 };
 CSgfReader.prototype.private_ReadPW = function()
 {
@@ -711,7 +711,7 @@ CSgfReader.prototype.private_ReadRE = function()
 CSgfReader.prototype.private_ReadRO = function()
 {
     this.m_nPos += 3;
-    this.m_oGameTree.Set_Round(this.private_ReadSimpleText());
+    this.m_oGameTree.Set_GameRound(this.private_ReadSimpleText());
 };
 CSgfReader.prototype.private_ReadRU = function()
 {
@@ -809,7 +809,7 @@ CSgfReader.prototype.private_ReadTerritory = function(Value)
 CSgfReader.prototype.private_ReadUS = function()
 {
     this.m_nPos += 3;
-    this.m_oGameTree.Set_Transcriber(this.private_ReadSimpleText());
+    this.m_oGameTree.Set_GameTranscriber(this.private_ReadSimpleText());
 };
 CSgfReader.prototype.private_ReadWR = function()
 {

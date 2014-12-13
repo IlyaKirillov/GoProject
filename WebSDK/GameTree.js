@@ -12,64 +12,66 @@ var EDITINGFLAGS_NEWNODE   = 0x00000001; // Можно ли добавлять �
 var EDITINGFLAGS_MOVE      = 0x00000002; // Можно ли свободно передвигаться по нодам
 var EDITINGFLAGS_BOARDMODE = 0x00000004; // Можно ли изменять тип редактирования на доске
 var EDITINGFLAGS_LOADFILE  = 0x00000008; // Можно ли загружать файлы
+var EDITINGFLAGS_GAMEINFO  = 0x00000010; // Можно ли редактировать информацию об игре
 
 var EDITINGFLAGS_NEWNODE_NON   = EDITINGFLAGS_MASK ^ EDITINGFLAGS_NEWNODE;
 var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
 var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
 var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
+var EDITINGFLAGS_GAMEINFO_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_GAMEINFO;
 
 function CGameTree(Drawing, Sound)
 {
-    this.m_oSound          = Sound;
-    this.m_oDrawing        = Drawing;
+    this.m_oSound            = Sound;
+    this.m_oDrawing          = Drawing;
 
-    this.m_oInterfaceState = new CInterfaceState();
+    this.m_oInterfaceState   = new CInterfaceState();
 
-    this.m_oBoard          = new CLogicBoard();
-    this.m_oDrawingBoard   = null;
+    this.m_oBoard            = new CLogicBoard();
+    this.m_oDrawingBoard     = null;
     this.m_oDrawingNavigator = null;
 
-    this.m_oFirstNode      = new CNode(this);   // Первая нода
-    this.m_oCurNode        = this.m_oFirstNode; // Текущая нода
+    this.m_oFirstNode        = new CNode(this);   // Первая нода
+    this.m_oCurNode          = this.m_oFirstNode; // Текущая нода
 
-    this.m_nBlackCapt      = 0; // количество пленников черного игрока
-    this.m_nWhiteCapt      = 0; // количество пленников белого игрока
+    this.m_nBlackCapt        = 0; // количество пленников черного игрока
+    this.m_nWhiteCapt        = 0; // количество пленников белого игрока
 
-    this.m_nNextMove       = BOARD_BLACK;
+    this.m_nNextMove         = BOARD_BLACK;
 
-    this.m_nKomi           = 0;
-    this.m_nHandicap       = 0;
+    this.m_nKomi             = 0;
+    this.m_nHandicap         = 0;
 
-    this.m_nBlackScores    = 0;
-    this.m_nWhiteScores    = 0;
+    this.m_nBlackScores      = 0;
+    this.m_nWhiteScores      = 0;
 
-    this.m_nMovesCount     = 0; // Количество ходов (не путать с нодами!)
-    this.m_nCurNodeDepth   = 0; // Глубина текущей ноды
+    this.m_nMovesCount       = 0; // Количество ходов (не путать с нодами!)
+    this.m_nCurNodeDepth     = 0; // Глубина текущей ноды
 
-    this.m_sApplication    = ""; // "AP"
-    this.m_sCharset        = ""; // "CA"
+    this.m_sApplication      = ""; // "AP"
+    this.m_sCharset          = ""; // "CA"
 
-    this.m_sAnnotator      = ""; // "AN"
-    this.m_sBlackRating    = ""; // "BR"
-    this.m_sBlackTeam      = ""; // "BT"
-    this.m_sCopyright      = ""; // "CP"
-    this.m_sDateTime       = ""; // "DT"
-    this.m_sEvent          = ""; // "EV"
-    this.m_sGameName       = ""; // "GN"
-    this.m_sGameInfo       = ""; // "GC"
-    this.m_sGameFuseki     = ""; // "ON"
-    this.m_sOverTime       = ""; // "OT"
-    this.m_sBlack          = "Black"; // "PB"
-    this.m_sPlace          = ""; // "PC"
-    this.m_sWhite          = "White"; // "PW"
-    this.m_sResult         = ""; // "RE"
-    this.m_sRound          = ""; // "RO"
-    this.m_sRules          = ""; // "RU"
-    this.m_sGameSource     = ""; // "SO"
-    this.m_nTimeLimit      = 0;  // "TM"
-    this.m_sTranscriber    = ""; // "US"
-    this.m_sWhiteRating    = ""; // "WR"
-    this.m_sWhiteTeam      = ""; // "WT"
+    this.m_sGameAnnotator    = ""; // "AN"
+    this.m_sBlackRating      = ""; // "BR"
+    this.m_sBlackTeam        = ""; // "BT"
+    this.m_sCopyright        = ""; // "CP"
+    this.m_sDateTime         = ""; // "DT"
+    this.m_sGameEvent        = ""; // "EV"
+    this.m_sGameName         = ""; // "GN"
+    this.m_sGameInfo         = ""; // "GC"
+    this.m_sGameFuseki       = ""; // "ON"
+    this.m_sOverTime         = ""; // "OT"
+    this.m_sBlack            = "Black"; // "PB"
+    this.m_sGamePlace        = ""; // "PC"
+    this.m_sWhite            = "White"; // "PW"
+    this.m_sResult           = ""; // "RE"
+    this.m_sGameRound        = ""; // "RO"
+    this.m_sRules            = ""; // "RU"
+    this.m_sGameSource       = ""; // "SO"
+    this.m_nTimeLimit        = 0;  // "TM"
+    this.m_sGameTranscriber  = ""; // "US"
+    this.m_sWhiteRating      = ""; // "WR"
+    this.m_sWhiteTeam        = ""; // "WT"
 
 
     // TODO: В будушем надо будет добавить обработку элементов:
@@ -271,8 +273,10 @@ CGameTree.prototype.Reset = function()
 
     this.Set_Application("");
     this.Set_Author("");
-    this.Set_Event("");
-    this.Set_TimeSettings("");
+    this.Set_GameEvent("");
+    this.Set_GamePlace("");
+    this.Set_TimeLimit("");
+    this.Set_OverTime("");
     this.Set_Black("Black");
     this.Set_White("White");
     this.Set_BlackRating("");
@@ -1059,13 +1063,13 @@ CGameTree.prototype.Get_ShowVariants = function()
 {
     return this.m_eShowVariants;
 };
-CGameTree.prototype.Set_Annotator = function(sAnnotator)
+CGameTree.prototype.Set_GameAnnotator = function(sAnnotator)
 {
-    this.m_sAnnotator = sAnnotator;
+    this.m_sGameAnnotator = sAnnotator;
 };
-CGameTree.prototype.Get_Annotator = function()
+CGameTree.prototype.Get_GameAnnotator = function()
 {
-    return this.m_sAnnotator;
+    return this.m_sGameAnnotator;
 };
 CGameTree.prototype.Set_BlackRating = function(sRating)
 {
@@ -1097,29 +1101,45 @@ CGameTree.prototype.Get_DateTime = function()
 {
     return this.m_sDateTime;
 };
-CGameTree.prototype.Set_Event = function(sEvent)
+CGameTree.prototype.Set_GameEvent = function(sEvent)
 {
-    this.m_sEvent = sEvent;
+    this.m_sGameEvent = sEvent;
 };
-CGameTree.prototype.Get_Event = function()
+CGameTree.prototype.Get_GameEvent = function()
 {
-    return this.m_sEvent;
+    return this.m_sGameEvent;
 };
 CGameTree.prototype.Set_GameName = function(sGameName)
 {
     this.m_sGameName = sGameName;
 };
+CGameTree.prototype.Get_GameName = function()
+{
+    return this.m_sGameName;
+};
 CGameTree.prototype.Set_GameInfo = function(sGameInfo)
 {
     this.m_sGameInfo = sGameInfo;
+};
+CGameTree.prototype.Get_GameInfo = function()
+{
+    return this.m_sGameInfo;
 };
 CGameTree.prototype.Set_GameFuseki = function(sFuseki)
 {
     this.m_sGameFuseki = sFuseki;
 };
+CGameTree.prototype.Get_GameFuseki = function()
+{
+    return this.m_sGameFuseki;
+};
 CGameTree.prototype.Set_OverTime = function(sOverTime)
 {
     this.m_sOverTime = sOverTime;
+};
+CGameTree.prototype.Get_OverTime = function()
+{
+    return this.m_sOverTime;
 };
 CGameTree.prototype.Set_Black = function(sBlack)
 {
@@ -1127,9 +1147,13 @@ CGameTree.prototype.Set_Black = function(sBlack)
     if (this.m_oDrawing)
         this.m_oDrawing.Update_BlackName(this.m_sBlack);
 };
-CGameTree.prototype.Set_Place = function(sPlace)
+CGameTree.prototype.Set_GamePlace = function(sPlace)
 {
-    this.m_sPlace = sPlace;
+    this.m_sGamePlace = sPlace;
+};
+CGameTree.prototype.Get_GamePlace = function()
+{
+    return this.m_sGamePlace;
 };
 CGameTree.prototype.Set_White = function(sWhite)
 {
@@ -1141,29 +1165,49 @@ CGameTree.prototype.Set_Result = function(sResult)
 {
     this.m_sResult = sResult;
 };
-CGameTree.prototype.Set_Round = function(sRound)
+CGameTree.prototype.Get_Result = function()
 {
-    this.m_sRound = sRound;
+    return this.m_sResult;
+};
+CGameTree.prototype.Set_GameRound = function(sRound)
+{
+    this.m_sGameRound = sRound;
+};
+CGameTree.prototype.Get_GameRound = function()
+{
+    return this.m_sGameRound;
 };
 CGameTree.prototype.Set_Rules = function(sRules)
 {
     this.m_sRules = sRules;
 };
+CGameTree.prototype.Get_Rules = function()
+{
+    return this.m_sRules;
+};
 CGameTree.prototype.Set_GameSource = function(sGameSource)
 {
     this.m_sGameSource = sGameSource;
+};
+CGameTree.prototype.Get_GameSource = function()
+{
+    return this.m_sGameSource;
 };
 CGameTree.prototype.Set_TimeLimit = function(sTimeLimit)
 {
     this.m_nTimeLimit = sTimeLimit;
 };
-CGameTree.prototype.Set_TimeSettings = function(sTimeSettings)
+CGameTree.prototype.Get_TimeLimit = function()
 {
-    this.m_sTimeSettings = sTimeSettings;
+    return this.m_nTimeLimit;
 };
-CGameTree.prototype.Set_Transcriber = function(sTranscribber)
+CGameTree.prototype.Set_GameTranscriber = function(sTranscribber)
 {
-    this.m_sTranscriber = sTranscribber;
+    this.m_sGameTranscriber = sTranscribber;
+};
+CGameTree.prototype.Get_GameTranscriber = function()
+{
+    return this.m_sGameTranscriber;
 };
 CGameTree.prototype.Set_WhiteRating = function(sWhiteRating)
 {
@@ -1177,6 +1221,10 @@ CGameTree.prototype.Set_WhiteTeam = function(sWhiteTeam)
 };
 CGameTree.prototype.Set_BoardSize = function(W, H)
 {
+    // TODO: Пока мы работаем только с квадратными досками размера >= 2 (доска размером 1х1 бессмысленна)
+    var W = Math.max(W, H, 2);
+    var H = W;
+
     var OldSize = this.m_oBoard.Get_Size();
 
     if (W !== OldSize.X || H !== OldSize.Y)
@@ -1277,8 +1325,17 @@ CGameTree.prototype.Set_EditingFlags = function(oFlags)
         this.m_nEditingFlags |= EDITINGFLAGS_LOADFILE;
     else if (false === oFlags.LoadFile)
         this.m_nEditingFlags &= EDITINGFLAGS_LOADFILE_NON;
+
+    if (true === oFlags.GameInfo)
+        this.m_nEditingFlags |= EDITINGFLAGS_GAMEINFO;
+    else if (false === oFlags.GameInfo)
+        this.m_nEditingFlags &= EDITINGFLAGS_GAMEINFO_NON;
 };
 CGameTree.prototype.Reset_EditingFlags = function()
 {
     this.m_nEditingFlags = EDITINGFLAGS_MASK;
+};
+CGameTree.prototype.Can_EditGameInfo = function()
+{
+    return (this.m_nEditingFlags & EDITINGFLAGS_GAMEINFO ? true : false);
 };

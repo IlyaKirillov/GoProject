@@ -31,7 +31,9 @@ var EDrawingButtonType =
     EditModeNum     : 17,
     AutoPlay        : 18,
     WindowClose     : 19,
-    GameInfo        : 20
+    GameInfo        : 20,
+    WindowOK        : 21,
+    WindowCancel    : 22
 };
 
 var EDrawingButtonState =
@@ -77,8 +79,10 @@ function CDrawingButton(oDrawing)
     this.m_oNormaBColor    = new CColor(217, 217, 217, 255);
     this.m_oNormaFColor    = new CColor(  0,   0,   0, 255);
     this.m_oHoverBColor    = new CColor( 54, 101, 179, 255);
-    this.m_oActiveFColor   = new CColor(255, 255, 255, 255);
     this.m_oHoverFColor    = new CColor(255, 255, 255, 255);
+    this.m_oActiveBColor   = new CColor( 54, 101, 179, 255);
+    this.m_oActiveFColor   = new CColor(255, 255, 255, 255);
+    this.m_oDisabledBColor = new CColor(217, 217, 217, 255);
     this.m_oDisabledFColor = new CColor(140, 140, 140, 255);
     this.m_oSelectedBColor = new CColor(  0, 175, 240, 255);
 
@@ -231,11 +235,11 @@ CDrawingButton.prototype.private_OnResize = function()
     if (0 === W || 0 === H)
         return;
 
-    this.m_oImageData.Active   = this.private_Draw(this.m_oHoverBColor, this.m_oActiveFColor, W, H);
-    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
-    this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor, this.m_oNormaFColor, W, H);
-    this.m_oImageData.Disabled = this.private_Draw(this.m_oNormaBColor, this.m_oDisabledFColor, W, H);
-    this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor, this.m_oHoverFColor, W, H);
+    this.m_oImageData.Active   = this.private_Draw(this.m_oActiveBColor,   this.m_oActiveFColor,   W, H);
+    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H);
+    this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor,    this.m_oNormaFColor,    W, H);
+    this.m_oImageData.Disabled = this.private_Draw(this.m_oDisabledBColor, this.m_oDisabledFColor, W, H);
+    this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H);
 
     this.private_UpdateState();
 };
@@ -564,10 +568,11 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
             var FontFamily = "Arial";
             var sFont      = FontSize + "px " + FontFamily;
 
+            Canvas.font = sFont;
+
             var Y = Y_off + Size / 2 + FontSize / 3;
             var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
 
-            Canvas.font = sFont;
             Canvas.fillText(Text, X, Y);
 
             break;
@@ -579,10 +584,11 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
             var FontFamily = "Helvetica, Arial, Verdana";
             var sFont      = FontSize + "px " + FontFamily;
 
+            Canvas.font = sFont;
+
             var Y = Y_off + Size / 2 + FontSize / 3;
             var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
 
-            Canvas.font = sFont;
             Canvas.fillText(Text, X, Y);
             break;
         }
@@ -664,6 +670,77 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
         }
         case EDrawingButtonType.GameInfo:
         {
+            var PenWidth = 0.02 * Size;
+            var r     = Size / 2;
+            var shift = PenWidth * 4;
+
+            Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
+            Canvas.beginPath();
+            Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
+            Canvas.stroke();
+
+            var Text       = "i";
+            var FontSize   = Size * 0.9;
+            var FontFamily = "Times New Roman, Sans serif";
+            var sFont      = FontSize + "px " + FontFamily;
+
+
+            Canvas.font = sFont;
+
+            var Y = Y_off + Size / 2 + FontSize / 3;
+            var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+
+            Canvas.fillText(Text, X, Y);
+
+            break;
+        }
+        case EDrawingButtonType.WindowOK:
+        {
+            Canvas.lineWidth = 1;
+            Canvas.moveTo(0, 0)
+            Canvas.lineTo(0, H);
+            Canvas.lineTo(W, H);
+            Canvas.lineTo(W, 0);
+            Canvas.lineTo(0, 0);
+            Canvas.stroke();
+
+            var Text       = "OK";
+            var FontSize   = Size * 0.6;
+            var FontFamily = "Tahoma, Sans serif";
+            var sFont      = FontSize + "px " + FontFamily;
+
+            Canvas.fillStyle = (new CColor(0, 0, 0, 255)).ToString();
+            Canvas.font = sFont;
+
+            var Y = Y_off + Size / 2 + FontSize / 3;
+            var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+
+            Canvas.fillText(Text, X, Y);
+
+            break;
+        }
+        case EDrawingButtonType.WindowCancel:
+        {
+            Canvas.lineWidth = 1;
+            Canvas.moveTo(0, 0)
+            Canvas.lineTo(0, H);
+            Canvas.lineTo(W, H);
+            Canvas.lineTo(W, 0);
+            Canvas.lineTo(0, 0);
+            Canvas.stroke();
+
+            var Text       = "Cancel";
+            var FontSize   = Size * 0.6;
+            var FontFamily = "Tahoma, Sans serif";
+            var sFont      = FontSize + "px " + FontFamily;
+
+            Canvas.fillStyle = (new CColor(0, 0, 0, 255)).ToString();
+            Canvas.font = sFont;
+
+            var Y = Y_off + Size / 2 + FontSize / 3;
+            var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+
+            Canvas.fillText(Text, X, Y);
 
             break;
         }
@@ -713,7 +790,8 @@ CDrawingButton.prototype.private_UpdateState = function()
         case EDrawingButtonState.Normal  : ImageData = this.m_oImageData.Normal; break;
     }
 
-    Canvas.putImageData(ImageData, 0, 0);
+    if (ImageData)
+        Canvas.putImageData(ImageData, 0, 0);
 };
 CDrawingButton.prototype.private_HandleMouseDown = function()
 {
@@ -741,7 +819,50 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.EditModeNum    : this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkNum); break;
         case EDrawingButtonType.AutoPlay       : if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2) this.m_oGameTree.Start_AutoPlay(); else this.m_oGameTree.Stop_AutoPlay(); break;
         case EDrawingButtonType.WindowClose    : this.m_oGameTree.Close(); break;
-        case EDrawingButtonType.GameInfo       : break;
+        case EDrawingButtonType.GameInfo       :
+        {
+            var sId = this.HtmlElement.Control.HtmlElement.id + "GameInfo";
+
+            var oDiv = document.getElementById(sId);
+            if (oDiv)
+            {
+                oDiv.style.left = "100px";
+                oDiv.style.top  = "100px";
+            }
+            else
+            {
+                oDiv = document.createElement("div");
+                oDiv.setAttribute("id", sId);
+                oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:500px;height: 500px; left : 100px; top:100px;");
+                oDiv.setAttribute("oncontextmenu", "return false;");
+                var aBody = document.getElementsByTagName('body');
+
+                if (aBody.length > 0)
+                {
+                    var oBody = aBody[0];
+                    oBody.appendChild(oDiv);
+
+                    var oWindow = new CDrawingInfoWindow();
+                    oWindow.Init(sId, this.m_oGameTree);
+                }
+            }
+
+            break;
+        }
+        case EDrawingButtonType.WindowOK:
+        {
+            if (this.m_oGameTree)
+                this.m_oGameTree.Handle_OK();
+
+            break;
+        }
+        case EDrawingButtonType.WindowCancel:
+        {
+            if (this.m_oGameTree)
+                this.m_oGameTree.Handle_Cancel();
+
+            break;
+        }
     };
 };
 CDrawingButton.prototype.private_GetHint = function()
@@ -768,6 +889,8 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.AutoPlay       : if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2) return "Autoplay start"; else return "Autoplay stop";
         case EDrawingButtonType.WindowClose    : return "Close";
         case EDrawingButtonType.GameInfo       : return "Game info";
+        case EDrawingButtonType.WindowCancel   : return "Cancel";
+        case EDrawingButtonType.WindowOK       : return "OK";
     };
 };
 CDrawingButton.prototype.private_RegisterButton = function()

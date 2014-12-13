@@ -69,6 +69,7 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
     _Flags.Move            = oFlags['Move'];
     _Flags.ChangeBoardMode = oFlags['ChangeBoardMode'];
     _Flags.LoadFile        = oFlags['LoadFile'];
+    _Flags.GameInfo        = oFlags['GameInfo'];
 
     oGameTree.Set_EditingFlags(_Flags);
 };

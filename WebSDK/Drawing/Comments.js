@@ -34,12 +34,14 @@ CDrawingComments.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.Control = CreateControlContainer(sDivId);
     var oDivElement = this.HtmlElement.Control.HtmlElement;
 
+    oDivElement.style.background = new CColor(217, 217, 217, 255).ToString();
+
     var sAreaName = sDivId + "_TextArea";
 
     // Создаем TextArea
     var oAreaElement = document.createElement("textarea");
     oAreaElement.setAttribute("id", sAreaName);
-    oAreaElement.setAttribute("style", "position:absolute;padding:0;margin:0;resize:none;outline: none;-moz-appearance: none;");
+    oAreaElement.setAttribute("style", "position:absolute;padding:0;margin:0;resize:none;outline: none;-moz-appearance: none;padding:2px;");
     oDivElement.appendChild(oAreaElement);
 
     oAreaElement['onchange'] = this.private_OnValueChange;
@@ -48,7 +50,7 @@ CDrawingComments.prototype.Init = function(sDivId, oGameTree)
     var oDivControl = this.HtmlElement.Control;
     this.HtmlElement.TextArea.Control = CreateControlContainer(sAreaName);
     var oTextAreaControl = this.HtmlElement.TextArea.Control;
-    oTextAreaControl.Bounds.SetParams(0, 0, 2, 2, true, true, true, true, -1,-1);
+    oTextAreaControl.Bounds.SetParams(8, 0, 10, 6, true, true, true, true, -1,-1);
     oTextAreaControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     oDivControl.AddControl(oTextAreaControl);
 

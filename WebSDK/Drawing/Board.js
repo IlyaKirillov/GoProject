@@ -1134,6 +1134,10 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
     var Lines = this.m_oImageData.Lines;
     var Rad   = (this.m_oImageData.StoneDiam - 1) / 2;
     var Count = ImageDatas.length;
+
+    if (9 !== oSize && 13 !== oSize && 19 !== oSize)
+        return;
+
     for (var Index = 0; Index < Count; Index++)
     {
         var ImageData = ImageDatas[Index];
