@@ -1805,8 +1805,8 @@ CDrawingBoard.prototype.private_AddOrRemoveStones = function(X, Y, event)
     if (true === this.m_oGameTree.Get_CurNode().Have_Move())
     {
         // Добавляем новую ноду
-        this.m_oGameTree.Add_NewNode(true, true);
-        this.m_oGameTree.Execute_CurNodeCommands();
+        if (true === this.m_oGameTree.Add_NewNode(true, true))
+            this.m_oGameTree.Execute_CurNodeCommands();
     }
 
     var Value = BOARD_BLACK;
@@ -1902,7 +1902,26 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
         {
             var MoveNum = this.m_oLogicBoard.Get_Num(X, Y);
             if (-1 == MoveNum)
+            {
                 return alert("Sorry, no move has been made at that location, so you can't mark it with the move number!");
+                var sId = "tesetste";
+                var oDiv = document.createElement("div");
+                oDiv.setAttribute("id", sId);
+                oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:300px;height:200px; left : 100px; top:100px;");
+                oDiv.setAttribute("oncontextmenu", "return false;");
+                var aBody = document.getElementsByTagName('body');
+
+                if (aBody.length > 0)
+                {
+                    var oBody = aBody[0];
+                    oBody.appendChild(oDiv);
+
+                    var oWindow = new CDrawingErrorWindow();
+                    oWindow.Init(sId, "Sorry, no move has been made at that location, so you can't mark it with the move number!");
+                }
+
+                return;
+            }
             else
                 sText = "" + MoveNum;
         }
@@ -2020,8 +2039,8 @@ CDrawingBoard.prototype.private_MakeMove = function(X, Y)
 
         if (true == bMove)
         {
-            this.m_oGameTree.Add_NewNodeByPos(X, Y, Value);
-            this.m_oGameTree.Execute_CurNodeCommands();
+            if (true === this.m_oGameTree.Add_NewNodeByPos(X, Y, Value))
+                this.m_oGameTree.Execute_CurNodeCommands();
         }
     }
 };

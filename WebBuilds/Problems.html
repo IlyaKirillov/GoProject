@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Problems</title>
+    <script type="text/javascript" language="JavaScript" src="goboardmin.js"></script>
+</head>
+<body style="position:absolute;padding:0;margin:0;">
+<div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
+<script>
+    var oGameTree = GoBoardApi.Create_GameTree();
+    GoBoardApi.Create_Problems(oGameTree, "divId", {TutorColor : "Black", TutorTime : 0.2, NewNode : ""});
+    GoBoardApi.Load_Sgf(oGameTree, "(;GE[life and death]DI[7k]DP[40]SO[caocao]CO[6]GM[1]FF[4]CA[UTF-8]AP[CGoban:2]ST[2]RU[Japanese]SZ[9]KM[0.00]TM[]PW[White]PB[Black]AW[bd][be][cf][df][ef][eg][fh][gh][ei]AB[bf][bg][cg][dg][bh][dh][eh]C[White to Play\nAssume white wins kos.  Stylized from a complicated full-board position.]PL[W](;W[ci]CR[ci];B[di]CR[di];W[bi]CR[bi];B[af]CR[af];W[ah]CR[ah]C[RIGHT White gets a gote seki.])(;W[di]CR[di];B[ci]CR[ci]C[One point in gote satisfies you? I hope you aren't this timid with girls!])        (;W[af]CR[af]        ;B[ci]CR[ci]C[Ooh -- two points in sente -- unless you prefer to play a3 for a third in gote?  You can do better!]))");
+
+    window.onresize = function()
+    {
+        GoBoardApi.Update_Size(oGameTree);
+    };
+</script>
+</body>
+</html>

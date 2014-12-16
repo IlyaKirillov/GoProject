@@ -85,6 +85,25 @@ function CGameTree(Drawing, Sound)
     this.m_nAutoPlayTimer   = null;
     this.m_dAutoPlaySpeed   = 0.75;
     this.m_nAutoPlayOldTime = -1;
+
+    this.m_nTutorMode       = BOARD_EMPTY;
+    this.m_nTutorInterval   = 300;
+    this.m_sTutorText       = "";
+    this.m_nTutorId         = null;
+};
+CGameTree.prototype.Set_TutorMode = function(nMode, nInterval)
+{
+    this.m_nTutorMode = nMode;
+
+    if (undefined !== nInterval)
+        this.m_nTutorInterval = nInterval * 1000;
+};
+CGameTree.prototype.Set_TutorNewNodeText = function(sText)
+{
+    if (!sText || "" === sText)
+        sText = "Wrong.\nOut of variants."
+
+    this.m_sTutorText = sText;
 };
 CGameTree.prototype.Start_AutoPlay = function()
 {
@@ -299,7 +318,14 @@ CGameTree.prototype.Reset = function()
 };
 CGameTree.prototype.Step_BackwardToStart = function()
 {
+    var nOldFlag = this.m_nEditingFlags;
+    // Если у нас TutorMode, то даем перемещаться в начало, даже с запрещающим флагом перемещения
+    if (BOARD_EMPTY !== this.m_nTutorMode)
+        this.Set_EditingFlags({Move : true});
+
     this.GoTo_Node(this.m_oFirstNode);
+
+    this.m_nEditingFlags = nOldFlag;
 };
 CGameTree.prototype.Step_Backward = function(Count)
 {
@@ -428,7 +454,7 @@ CGameTree.prototype.Add_Move = function(X, Y, Value)
 CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_NEWNODE))
-        return;
+        return false;
 
     var oNewNode = new CNode(this);
     oNewNode.Set_Prev(this.m_oCurNode);
@@ -441,6 +467,8 @@ CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
         this.m_oDrawingNavigator.Create_FromGameTree();
         this.m_oDrawingNavigator.Update();
     }
+
+    return true;
 };
 CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
 {
@@ -463,12 +491,12 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
             if (this.m_oDrawingNavigator && OldNextCur !== Index)
                 this.m_oDrawingNavigator.Update();
 
-            return;
+            return true;
         }
     }
 
     if (!(this.m_nEditingFlags & EDITINGFLAGS_NEWNODE))
-        return;
+        return false;
 
     // Если мы попали сюда, значит данного хода нет среди следующих у текущей ноды.
     this.Add_NewNode(false, true);
@@ -479,6 +507,11 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
         this.m_oDrawingNavigator.Create_FromGameTree();
         this.m_oDrawingNavigator.Update();
     }
+
+    if (BOARD_EMPTY !== this.m_nTutorMode && "" !== this.m_sTutorText)
+        this.m_oCurNode.Set_Comment(this.m_sTutorText);
+
+    return true;
 };
 CGameTree.prototype.Add_MoveNumber = function(MoveNumber)
 {
@@ -785,6 +818,28 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         this.m_oDrawingNavigator.Update_Current(true);
 
     this.Update_InterfaceState();
+
+    if (this.m_nNextMove === this.m_nTutorMode)
+    {
+        if (null !== this.m_nTutorId)
+            return;
+
+        if (this.m_oCurNode.Get_NextsCount() >= 0)
+        {
+            var nOldFlags = this.m_nEditingFlags;
+            var oThis = this;
+
+            this.m_nTutorId = setTimeout(function()
+            {
+                oThis.Reset_EditingFlags();
+                oThis.Step_Forward(1);
+                oThis.m_nEditingFlags = nOldFlags;
+                oThis.m_nTutorId = null;
+            }, this.m_nTutorInterval);
+
+            this.Forbid_All();
+        }
+    }
 };
 CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 {
@@ -1343,6 +1398,10 @@ CGameTree.prototype.Set_EditingFlags = function(oFlags)
 CGameTree.prototype.Reset_EditingFlags = function()
 {
     this.m_nEditingFlags = EDITINGFLAGS_MASK;
+};
+CGameTree.prototype.Forbid_All = function()
+{
+    this.m_nEditingFlags = 0;
 };
 CGameTree.prototype.Can_EditGameInfo = function()
 {

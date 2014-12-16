@@ -140,8 +140,13 @@ function CDrawingButton(oDrawing)
     this.private_OnFocus = function()
     {
         // При нажатии на кнопки выставляем фокус на доску, к которой привязаны кнопки.
-        if (oThis.m_oGameTree)
+        if (oThis.m_oGameTree && oThis.m_nType !== EDrawingButtonType.GameInfo)
             oThis.m_oGameTree.Focus();
+    };
+    this.private_OnDragStart = function(e)
+    {
+        e.dataTransfer.effectAllowed = "all";
+        e.dataTransfer.setData("text/sgf", "(;SZ[19];)");
     };
 }
 CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
@@ -175,17 +180,25 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     oDivElement.onfocus     = this.private_OnFocus;
     oDivElement.tabIndex    = -1;
     oDivElement.style.outline = "none";
+    oDivElement.draggable   = "true";
+    oDivElement.ondragstart = this.private_OnDragStart;
 
     this.Update_Size();
 };
 CDrawingButton.prototype.Update_Size = function()
 {
-    this.m_nW = this.HtmlElement.Control.HtmlElement.clientWidth;
-    this.m_nH = this.HtmlElement.Control.HtmlElement.clientHeight;
+    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
+    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
 
-    this.HtmlElement.Control.Resize(this.m_nW, this.m_nH);
+    if (W !== this.m_nW || H !== this.m_nH)
+    {
+        this.m_nW = W;
+        this.m_nH = H;
 
-    this.private_OnResize();
+        this.HtmlElement.Control.Resize(this.m_nW, this.m_nH);
+
+        this.private_OnResize();
+    }
 };
 CDrawingButton.prototype.Set_Enabled = function(Value)
 {

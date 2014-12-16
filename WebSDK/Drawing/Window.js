@@ -34,6 +34,9 @@ function CDrawingWindow()
     this.m_oInnerBorderColor = new CColor(185, 185, 185, 255);
     this.m_oBackColor        = new CColor(217, 217, 217, 255);
 
+    this.m_nW = -1;
+    this.m_nH = -1;
+
     var oThis = this;
 
     this.private_OnDragLeftHandler = function()
@@ -282,7 +285,7 @@ CDrawingWindow.prototype.Init = function(sDivId)
     oCaptionTextControl.Bounds.SetParams(15, 0, 55, 1000, true, false, true, false, -1, 30);
     oCaptionTextControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaptionControl.AddControl(oCaptionTextControl);
-    oCaptionTextElement.innerText = "Captiofrt uwieutowei urt";
+    oCaptionTextElement.innerText = "Caption";
     oCaptionTextElement.style.fontFamily          = "Tahoma, Sans serif";
     oCaptionTextElement.style.fontSize            = "13pt";
     oCaptionTextElement.style.textAlign           = "center";
@@ -417,26 +420,16 @@ CDrawingWindow.prototype.Init = function(sDivId)
 
     this.HtmlElement.CloseButton = oCloseButton;
 
-    this.Update_Size();
-};
-CDrawingWindow.prototype.Update_Size = function()
-{
-    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
-    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
-    this.HtmlElement.Control.Resize(W, H);
-
-    this.HtmlElement.CloseButton.Update_Size();
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerL,  null, null, (W < 59 ? 0 : null), null, null);
+    Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
     this.HtmlElement.HandlerL.onDrag = this.private_OnDragLeftHandler;
 
-    Common_DragHandler.Init(this.HtmlElement.HandlerR,  null, null, null, null, null);
+    Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
     this.HtmlElement.HandlerR.onDrag = this.private_OnDragRightHandler;
 
-    Common_DragHandler.Init(this.HtmlElement.HandlerT,  null, null, null, null, null);
+    Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
     this.HtmlElement.HandlerT.onDrag = this.private_OnDragTopHandler;
 
-    Common_DragHandler.Init(this.HtmlElement.HandlerB,  null, null, null, null, null);
+    Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
     this.HtmlElement.HandlerB.onDrag = this.private_OnDragBottomHandler;
 
     Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
@@ -450,6 +443,46 @@ CDrawingWindow.prototype.Update_Size = function()
 
     Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
     this.HtmlElement.HandlerRB.onDrag = this.private_OnDragRightBottomHandler;
+
+    this.Update_Size(true);
+};
+CDrawingWindow.prototype.Update_Size = function(bForce)
+{
+    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
+    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
+
+    if (W !== this.m_nW || H !== this.m_nH || true === bForce)
+    {
+        this.m_nW = W;
+        this.m_nH = H;
+
+        this.HtmlElement.Control.Resize(W, H);
+        this.HtmlElement.CloseButton.Update_Size();
+
+//        Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
+//        this.HtmlElement.HandlerL.onDrag = this.private_OnDragLeftHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
+//        this.HtmlElement.HandlerR.onDrag = this.private_OnDragRightHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
+//        this.HtmlElement.HandlerT.onDrag = this.private_OnDragTopHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
+//        this.HtmlElement.HandlerB.onDrag = this.private_OnDragBottomHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
+//        this.HtmlElement.HandlerLT.onDrag = this.private_OnDragLeftTopHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerRT, null, null, null, null, null);
+//        this.HtmlElement.HandlerRT.onDrag = this.private_OnDragRightTopHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerLB, null, null, null, null, null);
+//        this.HtmlElement.HandlerLB.onDrag = this.private_OnDragLeftBottomHandler;
+//
+//        Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
+//        this.HtmlElement.HandlerRB.onDrag = this.private_OnDragRightBottomHandler;
+    }
 };
 CDrawingWindow.prototype.Close = function()
 {
@@ -463,6 +496,7 @@ CDrawingWindow.prototype.Focus = function()
 CDrawingWindow.prototype.Set_Caption = function(sCaption)
 {
     this.HtmlElement.CaptionText.innerText = sCaption;
+    this.HtmlElement.CaptionText.innerHTML = sCaption;
 };
 CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, sName)
 {
@@ -628,11 +662,11 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oGameTree)
     BottomControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
     oMainControl.AddControl(BottomControl);
 
-    this.Update_Size();
+    this.Update_Size(true);
 };
-CDrawingInfoWindow.prototype.Update_Size = function()
+CDrawingInfoWindow.prototype.Update_Size = function(bForce)
 {
-    CDrawingInfoWindow.superclass.Update_Size.call(this);
+    CDrawingInfoWindow.superclass.Update_Size.call(this, bForce);
 
     if (this.HtmlElement.OKButton)
         this.HtmlElement.OKButton.Update_Size();
@@ -721,6 +755,7 @@ CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMai
     oNameControl.Anchor = (g_anchor_left | g_anchor_top);
     oMainControl.AddControl(oNameControl);
     oNameElement.innerText = sName;
+    oNameElement.innerHTML = sName;
 
     var sValueId      = sNameId + "Value";
     var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId, bCanEdit);
@@ -731,4 +766,25 @@ CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMai
     oValueElement.value = sValue;
 
     return oValueElement;
+};
+
+function CDrawingErrorWindow()
+{
+    CDrawingErrorWindow.superclass.constructor.call(this);
+}
+
+CommonExtend(CDrawingErrorWindow, CDrawingWindow);
+
+CDrawingErrorWindow.prototype.Init = function(_sDivId, sText)
+{
+    CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+
+    oMainDiv.style.fontFamily = "Tahoma, Sans serif";
+    oMainDiv.style.fontSize   = 16 + "px";
+
+    oMainDiv.innerHTML = sText;
+    oMainDiv.innerText = sText;
 };

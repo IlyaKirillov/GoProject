@@ -215,13 +215,13 @@ CControlContainer.prototype.Resize = function(_width,_height)
     this.AbsolutePosition.R = _r;
     this.AbsolutePosition.B = _b;
 
-    this.HtmlElement.style.left 	= parseInt(_x + 0.5) + "px";
-    this.HtmlElement.style.top 		= parseInt(_y + 0.5) + "px";
-    this.HtmlElement.style.width 	= parseInt((_r - _x) + 0.5) + "px";
-    this.HtmlElement.style.height 	= parseInt((_b - _y) + 0.5) + "px";
+    this.HtmlElement.style.left 	= ((_x + 0.5) | 0) + "px";
+    this.HtmlElement.style.top 		= ((_y + 0.5) | 0) + "px";
+    this.HtmlElement.style.width 	= (((_r - _x) + 0.5) | 0) + "px";
+    this.HtmlElement.style.height 	= (((_b - _y) + 0.5) | 0) + "px";
 
-    this.HtmlElement.width 	= parseInt((_r - _x) + 0.5);
-    this.HtmlElement.height = parseInt((_b - _y) + 0.5);
+    this.HtmlElement.width 	= ((_r - _x) + 0.5) | 0;
+    this.HtmlElement.height = ((_b - _y) + 0.5) | 0;
 
     this.private_ResizeControls(_r - _x, _b - _y);
 };

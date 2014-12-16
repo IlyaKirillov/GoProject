@@ -46,11 +46,14 @@ CDrawingComments.prototype.Init = function(sDivId, oGameTree)
 
     oAreaElement['onchange'] = this.private_OnValueChange;
     oAreaElement['onblur']   = this.private_OnValueChange;
+    oAreaElement.style.outline = "none";
+    oAreaElement.style.margin  = "0px";
+    oAreaElement.style.border  = "1px solid rgb(172,172,172)";
 
     var oDivControl = this.HtmlElement.Control;
     this.HtmlElement.TextArea.Control = CreateControlContainer(sAreaName);
     var oTextAreaControl = this.HtmlElement.TextArea.Control;
-    oTextAreaControl.Bounds.SetParams(8, 0, 10, 6, true, true, true, true, -1,-1);
+    oTextAreaControl.Bounds.SetParams(6, 0, 12, 6, true, true, true, true, -1,-1);
     oTextAreaControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     oDivControl.AddControl(oTextAreaControl);
 
@@ -216,7 +219,9 @@ CDrawingPlayerInfo.prototype.private_Update = function()
     var sScoresText = (true === this.m_bScores ? "Scores " : "Captured ") + this.m_dScores;
 
     oNameDiv.innerText   = sNameText;
+    oNameDiv.innerHTML   = sNameText;
     oScoresDiv.innerText = sScoresText;
+    oScoresDiv.innerHTML = sScoresText;
 
     var Canvas = document.createElement("canvas").getContext("2d");
     Canvas.font = "14pt Times New Roman";

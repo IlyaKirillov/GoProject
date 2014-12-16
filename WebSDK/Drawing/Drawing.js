@@ -193,7 +193,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.private_CreateDiv(oTools2Element, sAutoPlaySlider);
 
     var ToolbarH = 25;
-    var InfoH    = 40;
+    var InfoH    = 50;
 
     // INFO
     var oInfoControl = CreateControlContainer(sInfoDivId);
@@ -278,6 +278,74 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.m_aElements.push(oDrawingAutoPlaySlider);
     this.m_aElements.push(oDrawingBlackInfo);
     this.m_aElements.push(oDrawingWhiteInfo);
+
+    this.m_oControl = oParentControl;
+
+    this.Update_Size();
+
+    oGameTree.On_EndLoadDrawing();
+};
+CDrawing.prototype.Create_Problems = function(sDivId)
+{
+    var oGameTree = this.m_oGameTree;
+
+    var oParentControl = CreateControlContainer(sDivId);
+    var sMainDivId = sDivId + "GoBoard";
+    this.private_CreateDiv(oParentControl.HtmlElement, sMainDivId);
+    var oMainControl = CreateControlContainer(sMainDivId);
+    oMainControl.Bounds.SetParams(0, 0, 1, 1, false, false, true, true, -1, -1);
+    oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oParentControl.AddControl(oMainControl);
+
+    oMainControl.Set_Type(1);
+
+    var sBoardDivId = sDivId + "_Board";
+    var sPanelDivId = sDivId + "_Panel";
+
+    this.private_CreateDiv(oMainControl.HtmlElement, sBoardDivId);
+    this.private_CreateDiv(oMainControl.HtmlElement, sPanelDivId);
+
+    var oBoardControl = CreateControlContainer(sBoardDivId);
+    var oPanelControl = CreateControlContainer(sPanelDivId);
+    oMainControl.AddControl(oBoardControl);
+    oMainControl.AddControl(oPanelControl);
+
+    var sBoardCenterDivId = sBoardDivId + "_Centred";
+    this.private_CreateDiv(oBoardControl.HtmlElement, sBoardCenterDivId);
+    var oBoardCenterControl = CreateControlContainer(sBoardDivId);
+    oBoardControl.Set_Type(2);
+    oBoardControl.AddControl(oBoardCenterControl);
+
+    var oDrawingBoard = new CDrawingBoard(this);
+    oDrawingBoard.Init(sBoardDivId, oGameTree);
+    oDrawingBoard.Focus();
+
+    var sToolsDivId    = sPanelDivId + "_Toolbar";
+    var sCommentsDivId = sPanelDivId + "_Comments";
+    this.private_CreateDiv(oPanelControl.HtmlElement, sCommentsDivId);
+    this.private_CreateDiv(oPanelControl.HtmlElement, sToolsDivId);
+
+    var ToolbarH = 25;
+
+    var oCommentsControl = CreateControlContainer(sCommentsDivId);
+    oCommentsControl.Bounds.SetParams(0, ToolbarH, 1000, 1000, false, true, false, false, -1, -1);
+    oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oPanelControl.AddControl(oCommentsControl);
+
+    var oToolsControl = CreateControlContainer(sToolsDivId);
+    oToolsControl.Bounds.SetParams(0, 0, 1000, 1000, true, true, false, true, -1, ToolbarH);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top);
+    oPanelControl.AddControl(oToolsControl);
+
+    var oDrawingComments = new CDrawingComments(this);
+    oDrawingComments.Init(sCommentsDivId, oGameTree);
+
+    var oDrawingToolbar = new CDrawingToolbar(this);
+    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart]});
+
+    this.m_aElements.push(oDrawingBoard);
+    this.m_aElements.push(oDrawingComments);
+    this.m_aElements.push(oDrawingToolbar);
 
     this.m_oControl = oParentControl;
 

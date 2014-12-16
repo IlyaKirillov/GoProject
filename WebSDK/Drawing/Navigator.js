@@ -307,6 +307,9 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     oEventDiv.onmousemove     = this.private_OnMouseMove;
     oEventDiv.onmouseout      = this.private_OnMouseOut;
     oEventDiv['onmousewheel'] = this.private_OnMouseWheel;
+    if (oEventDiv.addEventListener)
+        oEventDiv.addEventListener("DOMMouseScroll", this.private_OnMouseWheel, false);
+
     oEventDiv['onfocus']      = this.private_OnFocus;
     oEventDiv.tabIndex        = -1;   // Этот параметр нужен, чтобы принимать сообщения клавиатуры (чтобы на этой div вставал фокус)
     oEventDiv.style.hidefocus = true; // Убираем рамку фокуса в IE

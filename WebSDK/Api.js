@@ -59,6 +59,32 @@ CGoBoardApi.prototype.Create_Presentation = function(oGameTree, sDivId, aSlides)
 };
 
 /*
+ Создаем вариант для задачек
+ */
+CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
+{
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_Problems(sDivId);
+
+    var dTutorTime = 0.3;
+    if (oPr['TutorTime'])
+        dTutorTime = parseFloat(oPr['TutorTime']);
+
+    if (oPr['TutorColor'] && "Black" === oPr['TutorColor'])
+        oGameTree.Set_TutorMode(BOARD_BLACK, dTutorTime);
+    else
+        oGameTree.Set_TutorMode(BOARD_WHITE, dTutorTime);
+
+    oGameTree.Forbid_All();
+
+    if (undefined !== oPr['NewNode'])
+    {
+        oGameTree.Set_EditingFlags({NewNode : true});
+        oGameTree.Set_TutorNewNodeText(oPr['NewNode']);
+    }
+};
+
+/*
  Накладываем ограничения на редактирование.
  */
 CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
@@ -79,7 +105,11 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
  */
 CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile)
 {
+    // Через апи мы всегда даем грузить сгф
+    var nOldFlags = oGameTree.m_nEditingFlags;
+    oGameTree.Reset_EditingFlags();
     oGameTree.Load_Sgf(sSgfFile);
+    oGameTree.m_nEditingFlags = nOldFlags;
 };
 
 /*
@@ -96,6 +126,7 @@ CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prot
 CGoBoardApi.prototype['Create_BoardWithNavigateButtons']      = CGoBoardApi.prototype.Create_BoardWithNavigateButtons;
 CGoBoardApi.prototype['Create_BoardCommentsButtonsNavigator'] = CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator;
 CGoBoardApi.prototype['Create_Presentation']                  = CGoBoardApi.prototype.Create_Presentation;
+CGoBoardApi.prototype['Create_Problems']                      = CGoBoardApi.prototype.Create_Problems;
 CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prototype.Set_Permissions;
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;

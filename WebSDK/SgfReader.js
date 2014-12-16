@@ -260,6 +260,7 @@ CSgfReader.prototype.private_ReadNode = function()
                     case 'B': this.private_ReadPB(); break;
                     case 'C': this.private_ReadPC(); break;
                     case 'W': this.private_ReadPW(); break;
+                    case 'L': this.private_ReadPL(); break;
                     default : this.private_ReadUnknown(); break;
                 }
                 break;
@@ -697,6 +698,15 @@ CSgfReader.prototype.private_ReadPC = function()
 {
     this.m_nPos += 3;
     this.m_oGameTree.Set_GamePlace(this.private_ReadSimpleText());
+};
+CSgfReader.prototype.private_ReadPL = function()
+{
+    this.m_nPos += 3;
+
+    if ("W" === this.private_ReadSimpleText())
+        this.m_oGameTree.Set_NextMove(BOARD_WHITE);
+    else
+        this.m_oGameTree.Set_NextMove(BOARD_BLACK);
 };
 CSgfReader.prototype.private_ReadPW = function()
 {
