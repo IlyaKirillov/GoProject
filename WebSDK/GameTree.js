@@ -318,7 +318,7 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
         this.m_oDrawingBoard.On_EndLoadSgf();
 
     if (this.m_oDrawing)
-        this.m_oDrawing.Update_Size();
+        this.m_oDrawing.Update_Size(true);
 };
 CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {

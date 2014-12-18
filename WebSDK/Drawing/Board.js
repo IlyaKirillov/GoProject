@@ -278,7 +278,7 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
         this.On_Resize(true);
     }
 };
-CDrawingBoard.prototype.Update_Size = function()
+CDrawingBoard.prototype.Update_Size = function(bForce)
 {
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
@@ -295,7 +295,7 @@ CDrawingBoard.prototype.Update_Size = function()
     this.HtmlElement.Control.Resize(W, H);
 
     this.private_UpdateKoeffs();
-    this.private_OnResize();
+    this.private_OnResize(bForce);
 };
 CDrawingBoard.prototype.Set_Presentation = function(oPresentation)
 {
@@ -915,10 +915,13 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
 
         for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
         {
-            var dX = Lines[aPoints[nPointIndex][0]].X - nRad;
-            var dY = Lines[aPoints[nPointIndex][1]].Y - nRad;
+            if (true === this.private_IsPointInViewPort(aPoints[nPointIndex][0], aPoints[nPointIndex][1]))
+            {
+                var dX = Lines[aPoints[nPointIndex][0]].X - nRad;
+                var dY = Lines[aPoints[nPointIndex][1]].Y - nRad;
 
-            LinesCanvas.putImageData(Handi, dX, dY);
+                LinesCanvas.putImageData(Handi, dX, dY);
+            }
         }
     }
 

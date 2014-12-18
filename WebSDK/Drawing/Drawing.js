@@ -342,7 +342,7 @@ CDrawing.prototype.Create_Problems = function(sDivId)
 
     oGameTree.On_EndLoadDrawing();
 };
-CDrawing.prototype.Update_Size = function()
+CDrawing.prototype.Update_Size = function(bForce)
 {
     if (this.m_oControl)
     {
@@ -353,7 +353,7 @@ CDrawing.prototype.Update_Size = function()
     }
 
     for (var Index = 0, Count = this.m_aElements.length; Index < Count; Index++)
-        this.m_aElements[Index].Update_Size();
+        this.m_aElements[Index].Update_Size(bForce);
 };
 CDrawing.prototype.private_CreateDiv = function(oParent, sName)
 {
