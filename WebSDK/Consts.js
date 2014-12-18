@@ -28,3 +28,7 @@ var g_dBoard_H         = 460;
 var g_dBoard_W         = g_dBoard_H;//430;
 var g_dVerOff_2_Cell_H = 17.51 / 23.61;
 var g_dHorOff_2_Cell_W = g_dVerOff_2_Cell_H;//17.54 / 21.94;
+
+var g_dBoardCellW     = 23.61;
+var g_dBoardHorOffset = 17.51;
+var g_dBoardCellW_2   = g_dBoardCellW / 2;

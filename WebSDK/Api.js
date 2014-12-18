@@ -71,9 +71,11 @@ CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
         dTutorTime = parseFloat(oPr['TutorTime']);
 
     if (oPr['TutorColor'] && "Black" === oPr['TutorColor'])
-        oGameTree.Set_TutorMode(BOARD_BLACK, dTutorTime);
+        oGameTree.Set_TutorMode(false, BOARD_BLACK, dTutorTime);
+    else if (oPr['TutorColor'] && "White" === oPr['TutorColor'])
+        oGameTree.Set_TutorMode(false, BOARD_WHITE, dTutorTime);
     else
-        oGameTree.Set_TutorMode(BOARD_WHITE, dTutorTime);
+        oGameTree.Set_TutorMode(true, BOARD_EMPTY, dTutorTime);
 
     oGameTree.Forbid_All();
 
@@ -82,6 +84,10 @@ CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
         oGameTree.Set_EditingFlags({NewNode : true});
         oGameTree.Set_TutorNewNodeText(oPr['NewNode']);
     }
+
+    var pRightCallback = (undefined !== oPr['RightCallback'] ? oPr['RightCallback'] : null);
+    var pWrongCallback = (undefined !== oPr['WrongCallback'] ? oPr['WrongCallback'] : null);
+    oGameTree.Set_TutorCallbacks(pRightCallback, pWrongCallback);
 };
 
 /*
@@ -103,12 +109,31 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
 /*
  Загружаем Sgf в GameTree.
  */
-CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile)
+CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
 {
+    var oViewPort = {};
+
+    if (_oViewPort && true === _oViewPort['Auto'])
+    {
+        oViewPort.Auto = true;
+    }
+    else if (_oViewPort && undefined !== _oViewPort['X0'] && undefined !== _oViewPort['X1'] && undefined !== _oViewPort['Y0'] && undefined !== _oViewPort['Y1'])
+    {
+        oViewPort.Auto = false;
+        oViewPort.X0 = _oViewPort['X0'];
+        oViewPort.X1 = _oViewPort['X1'];
+        oViewPort.Y0 = _oViewPort['Y0'];
+        oViewPort.Y1 = _oViewPort['Y1'];
+    }
+    else
+    {
+        oViewPort = null;
+    }
+
     // Через апи мы всегда даем грузить сгф
     var nOldFlags = oGameTree.m_nEditingFlags;
     oGameTree.Reset_EditingFlags();
-    oGameTree.Load_Sgf(sSgfFile);
+    oGameTree.Load_Sgf(sSgfFile, oViewPort);
     oGameTree.m_nEditingFlags = nOldFlags;
 };
 

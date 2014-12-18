@@ -60,12 +60,19 @@ function CControlContainer()
     this.AbsolutePosition = new CControlBounds();
 
     this.Controls       = new Array();
+    this.width          = 0;
+    this.height         = 0;
 
     this.Type           = 0;
+    this.DrawingElement = null;
 }
-CControlContainer.prototype.Set_Type = function(Type)
+CControlContainer.prototype.Set_Type = function(Type, DrawingElement)
 {
     this.Type = Type;
+    this.DrawingElement = DrawingElement;
+
+    if (DrawingElement && DrawingElement.Add_LinkedControl)
+        DrawingElement.Add_LinkedControl(this);
 };
 CControlContainer.prototype.AddControl = function(ctrl)
 {
@@ -74,6 +81,9 @@ CControlContainer.prototype.AddControl = function(ctrl)
 };
 CControlContainer.prototype.Resize = function(_width,_height)
 {
+    this.width  = _width;
+    this.height = _height;
+
     if (null == this.Parent)
     {
         this.AbsolutePosition.L = 0;
@@ -230,30 +240,90 @@ CControlContainer.prototype.private_ResizeControls = function(_w, _h)
     var lCount = this.Controls.length;
     if (1 === this.Type && 2 === lCount)
     {
+        var dKoef = (this.DrawingElement ? this.DrawingElement.Get_AspectRatio() : 1);
+
         // Специальный случай, слева место под доску, справа что останется с заданным минимумом.
         var ControlL = this.Controls[0];
         var ControlR = this.Controls[1];
 
         var _rMin = 400;
 
-        var rValue = _w - _rMin >= _h ? _w - _h : _rMin;
+        var W = _w;
+        var H = _h;
 
-        ControlL.Bounds.SetParams(0, 0, rValue, 1000, false, false, true, false, -1, -1);
-        ControlL.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_top);
-        ControlR.Bounds.SetParams(_w - rValue, 0, 1000, 1000, true, false, false, false, -1, -1);
+        W -= _rMin;
+
+        var __w = H * dKoef;
+        var __h = W / dKoef;
+
+        var w, h, x, y;
+        if (__w <= W)
+        {
+            h = H;
+            w = __w;
+
+            y = 0;
+            x = 0;
+        }
+        else
+        {
+            w = W;
+            h = __h;
+
+            x = 0;
+            y = (H - h) / 2;
+        }
+
+        ControlL.Bounds.SetParams(x, y, 1000, 1000, true, true, false, false, w, h);
+        ControlL.Anchor = (g_anchor_left | g_anchor_top);
+        ControlR.Bounds.SetParams(w, 0, 1000, 1000, true, false, false, false, -1, -1);
         ControlR.Anchor = (g_anchor_right | g_anchor_bottom | g_anchor_top);
     }
     else if (2 === this.Type && 1 === lCount)
     {
-        // Специальный случай квадратный элемент по центру данного элемента
-        var Control = this.Controls[0];
+        // Если не задан элемент, который мы должны расположить, тогда считаем, что он должен быть квадратным
+        if (!this.DrawingElement)
+        {
+            var Control = this.Controls[0];
 
-        var min = Math.min(_w, _h);
-        var _x = (_w - min) / 2;
-        var _y = (_h - min) / 2;
+            var min = Math.min(_w, _h);
+            var _x = (_w - min) / 2;
+            var _y = (_h - min) / 2;
 
-        Control.Bounds.SetParams(_x, _y, 1000, 1000, true, true, true, false, min, min);
-        Control.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_top);
+            Control.Bounds.SetParams(_x, _y, 1000, 1000, true, true, true, false, min, min);
+            Control.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_top);
+        }
+        else
+        {
+            var dKoef = this.DrawingElement.Get_AspectRatio();
+
+            var Control = this.Controls[0];
+
+            var __w = _h * dKoef;
+            var __h = _w / dKoef;
+
+            var w, h, x, y;
+            if (__w <= _w)
+            {
+                h = _h;
+                w = __w;
+
+                y = 0;
+                x = (_w - w) / 2;
+            }
+            else
+            {
+                w = _w;
+                h = __h;
+
+                x = 0;
+                y = (_h - h) / 2;
+            }
+
+            Control.Bounds.SetParams(x, y, 1000, 1000, true, true, false, false, w, h);
+            Control.Anchor = (g_anchor_left | g_anchor_top);
+
+        }
     }
 
     for (var i = 0; i < lCount; i++)

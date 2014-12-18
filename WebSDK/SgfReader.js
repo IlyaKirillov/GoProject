@@ -19,6 +19,7 @@ function CSgfReader(oGameTree)
     this.m_arrVariant    = [];
     this.m_bValidNode    = true;
     this.m_nLength       = 0;
+    this.m_oViewPort     = {X0 : 100, Y0 : 100, X1 : -1, Y1 : -1};
 }
 
 CSgfReader.prototype.Load = function(SGF)
@@ -412,12 +413,14 @@ CSgfReader.prototype.private_ReadAddOrRemoveStone = function(Value)
             {
                 for (var _X = X; _X <= X1; _X++)
                 {
+                    this.private_RegisterPoint(_X, _Y);
                     arrPos.push(Common_XYtoValue(_X, _Y));
                 }
             }
         }
         else
         {
+            this.private_RegisterPoint(X, Y);
             arrPos.push(Common_XYtoValue(X, Y));
         }
 
@@ -468,6 +471,7 @@ CSgfReader.prototype.private_ReadMove = function(Value)
             var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
             var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
 
+            this.private_RegisterPoint(X, Y);
             this.m_oGameTree.Add_Move(X, Y, Value);
 
             if (']' !== this.m_sSGF[this.m_nPos])
@@ -576,12 +580,14 @@ CSgfReader.prototype.private_ReadMark = function(Type)
             {
                 for (var _X = X; _X <= X1; _X++)
                 {
+                    this.private_RegisterPoint(_X, _Y);
                     arrPos.push(Common_XYtoValue(_X, _Y));
                 }
             }
         }
         else
         {
+            this.private_RegisterPoint(X, Y);
             arrPos.push(Common_XYtoValue(X, Y));
         }
 
@@ -664,6 +670,7 @@ CSgfReader.prototype.private_ReadLB = function()
             this.m_nPos++;
         }
 
+        this.private_RegisterPoint(X, Y);
         this.m_oGameTree.Add_TextMark(sText, Common_XYtoValue(X, Y));
 
         if (']' !== this.m_sSGF[this.m_nPos])
@@ -835,4 +842,18 @@ CSgfReader.prototype.private_ReadWL = function()
 {
     this.m_nPos += 3;
     this.m_oGameTree.Add_WhiteTimeLeft(this.private_ReadReal());
+};
+CSgfReader.prototype.private_RegisterPoint = function(X, Y)
+{
+    if (X < this.m_oViewPort.X0)
+        this.m_oViewPort.X0 = X;
+
+    if (X > this.m_oViewPort.X1)
+        this.m_oViewPort.X1 = X;
+
+    if (Y < this.m_oViewPort.Y0)
+        this.m_oViewPort.Y0 = Y;
+
+    if (Y > this.m_oViewPort.Y1)
+        this.m_oViewPort.Y1 = Y;
 };

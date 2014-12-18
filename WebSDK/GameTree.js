@@ -86,14 +86,26 @@ function CGameTree(Drawing, Sound)
     this.m_dAutoPlaySpeed   = 0.75;
     this.m_nAutoPlayOldTime = -1;
 
-    this.m_nTutorMode       = BOARD_EMPTY;
-    this.m_nTutorInterval   = 300;
-    this.m_sTutorText       = "";
-    this.m_nTutorId         = null;
+    this.m_bTutorModeAuto      = false;
+    this.m_nTutorMode          = BOARD_EMPTY;
+    this.m_nTutorInterval      = 300;
+    this.m_sTutorText          = "";
+    this.m_nTutorId            = null;
+    this.m_pTutorRightCallback = null;
+    this.m_pTutorWrongCallback = null;
 };
-CGameTree.prototype.Set_TutorMode = function(nMode, nInterval)
+CGameTree.prototype.Set_TutorMode = function(bAuto, nMode, nInterval)
 {
-    this.m_nTutorMode = nMode;
+    if (true === bAuto)
+    {
+        this.m_bTutorModeAuto = true;
+        this.m_nTutorMode     = BOARD_EMPTY;
+    }
+    else
+    {
+        this.m_bTutorModeAuto = false;
+        this.m_nTutorMode     = nMode;
+    }
 
     if (undefined !== nInterval)
         this.m_nTutorInterval = nInterval * 1000;
@@ -101,9 +113,14 @@ CGameTree.prototype.Set_TutorMode = function(nMode, nInterval)
 CGameTree.prototype.Set_TutorNewNodeText = function(sText)
 {
     if (!sText || "" === sText)
-        sText = "Wrong.\nOut of variants."
+        sText = "Wrong.\nOut of variants.";
 
     this.m_sTutorText = sText;
+};
+CGameTree.prototype.Set_TutorCallbacks = function(pRightCallBack, pWrongCallback)
+{
+    this.m_pTutorRightCallback = pRightCallBack;
+    this.m_pTutorWrongCallback = pWrongCallback;
 };
 CGameTree.prototype.Start_AutoPlay = function()
 {
@@ -259,7 +276,7 @@ CGameTree.prototype.Focus = function()
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Focus();
 };
-CGameTree.prototype.Load_Sgf = function(sFile)
+CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_LOADFILE))
         return;
@@ -268,6 +285,24 @@ CGameTree.prototype.Load_Sgf = function(sFile)
     var nEditingFlags = this.m_nEditingFlags;
     this.Reset_EditingFlags();
     oReader.Load(sFile);
+
+    if (this.m_bTutorModeAuto)
+        this.m_nTutorMode = this.Get_NextMove() === BOARD_BLACK ? BOARD_WHITE : BOARD_BLACK;
+
+    if (this.m_oDrawingBoard && oViewPort)
+    {
+        if (true === oViewPort.Auto)
+        {
+            var nSize = this.m_oBoard.Get_Size().X;
+            var X0 = (oReader.m_oViewPort.X0 <= 4 ? 0 : oReader.m_oViewPort.X0 - 2);
+            var X1 = (nSize - oReader.m_oViewPort.X1 <= 3 ? nSize - 1 : oReader.m_oViewPort.X1);
+            var Y0 = (oReader.m_oViewPort.Y0 <= 4 ? 0 : oReader.m_oViewPort.Y0 - 2);
+            var Y1 = (nSize - oReader.m_oViewPort.Y1 <= 3 ? nSize - 1 : oReader.m_oViewPort.Y1);
+            this.m_oDrawingBoard.Set_ViewPort(X0, Y0, X1, Y1);
+        }
+        else
+            this.m_oDrawingBoard.Set_ViewPort(oViewPort.X0, oViewPort.Y0, oViewPort.X1, oViewPort.Y1);
+    }
 
     if (this.m_oDrawingNavigator)
     {
@@ -281,6 +316,9 @@ CGameTree.prototype.Load_Sgf = function(sFile)
 
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.On_EndLoadSgf();
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_Size();
 };
 CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {
@@ -811,7 +849,32 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
 
     if (this.m_oDrawing)
     {
-        this.m_oDrawing.Update_Comments(this.m_oCurNode.Get_Comment());
+        var sComment = this.m_oCurNode.Get_Comment();
+
+        var bNeedUpdateComment = true;
+        if (BOARD_EMPTY !== this.m_nTutorMode)
+        {
+            if (this.m_oCurNode.Get_NextsCount() <= 0)
+            {
+                if (-1 !== sComment.indexOf("RIGHT") && null !== this.m_pTutorRightCallback)
+                {
+                    this.m_oDrawing.Update_Comments(sComment.replace("RIGHT", ""));
+                    this.m_pTutorRightCallback();
+                    bNeedUpdateComment = false;
+                }
+                else if (-1 === sComment.indexOf("RIGHT") && null !== this.m_pTutorWrongCallback)
+                {
+                    this.m_oDrawing.Update_Comments(sComment);
+                    this.m_pTutorWrongCallback();
+                    bNeedUpdateComment = false;
+                }
+            }
+
+            if (bNeedUpdateComment)
+                this.m_oDrawing.Update_Comments(sComment);
+        }
+        else
+            this.m_oDrawing.Update_Comments(sComment);
     }
 
     if (this.m_oDrawingNavigator)

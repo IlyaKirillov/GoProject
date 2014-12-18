@@ -95,13 +95,18 @@ function CDrawingBoard(oDrawing)
         Variants : {Control : null}, // Канва для отрисовки вариантов.
         Marks    : {Control : null}, // Канва для отрисовки отметок
         Target   : {Control : null}, // Канва для отрисовки курсора в виде камня.
-        Event    : {Control : null}  // Div для обработки сообщений мыши и клавиатуры.
+        Event    : {Control : null}, // Div для обработки сообщений мыши и клавиатуры.
+
+        LinkedControls : []          // Контролы, которые нужно ресайзить из-за внутренних изменений доски
     };
 
     this.m_oLastTargetPos = { X : -1, Y : -1 };
 
     this.m_oMarks = {};
     this.m_oLastMoveMark = -1;
+
+    // Параметры, которые контролируют, какую часть доски мы отрисовываем
+    this.m_oViewPort = {X0 : 0, Y0 : 0, X1 : 18, Y1 : 18};
 
     this.m_oPresentation = null;
 
@@ -250,6 +255,10 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
 
     return oControl;
 };
+CDrawingBoard.prototype.Add_LinkedControl = function(oControl)
+{
+    this.HtmlElement.LinkedControls.push(oControl);
+};
 CDrawingBoard.prototype.Focus = function()
 {
     this.HtmlElement.Event.Control.HtmlElement.focus();
@@ -260,8 +269,13 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
     {
         this.m_bRulers = bRulers;
 
-        this.private_UpdateKoeffs();
-        this.private_OnResize(true);
+        for (var Index = 0, Count = this.HtmlElement.LinkedControls.length; Index < Count; Index++)
+        {
+            var Control = this.HtmlElement.LinkedControls[Index];
+            Control.Resize(Control.width, Control.height);
+        }
+
+        this.On_Resize(true);
     }
 };
 CDrawingBoard.prototype.Update_Size = function()
@@ -269,11 +283,14 @@ CDrawingBoard.prototype.Update_Size = function()
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
 
-    if (W !== H)
-    {
-        W = Math.min(W, H);
-        H = W;
-    }
+    var dKoef = this.Get_AspectRatio();
+    var _W = H * dKoef;
+    var _H = W / dKoef;
+
+    if (_W <= W)
+        W = _W;
+    else
+        H = _H;
 
     this.HtmlElement.Control.Resize(W, H);
 
@@ -297,6 +314,30 @@ CDrawingBoard.prototype.On_EndLoadSgf = function()
             this.m_oPresentation.On_EndSgfSlide();
     }
 };
+CDrawingBoard.prototype.Set_ViewPort = function(X0, Y0, X1, Y1)
+{
+    var oSize = this.m_oLogicBoard.Get_Size();
+    var nW = oSize.X, nH = oSize.Y;
+
+    var nSize = Math.min(nW, nH);
+
+    this.m_oViewPort.X0 = Math.max(0, Math.min(nSize - 1, X0));
+    this.m_oViewPort.Y0 = Math.max(0, Math.min(nSize - 1, Y0));
+    this.m_oViewPort.X1 = Math.max(0, Math.min(nSize - 1, X1));
+    this.m_oViewPort.Y1 = Math.max(0, Math.min(nSize - 1, Y1));
+
+    if (this.m_oViewPort.X1 <= this.m_oViewPort.X0)
+    {
+        this.m_oViewPort.X0 = 0;
+        this.m_oViewPort.X1 = nSize - 1;
+    }
+
+    if (this.m_oViewPort.Y1 <= this.m_oViewPort.Y0)
+    {
+        this.m_oViewPort.Y0 = 0;
+        this.m_oViewPort.Y1 = nSize - 1;
+    }
+};
 CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 {
     if (!this.m_oImageData.Lines)
@@ -313,30 +354,33 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
     var Lines = this.m_oImageData.Lines;
     var Off = this.m_oImageData.ShadowOff;
 
-    var _X = Lines[X - 1].X - Rad;
-    var _Y = Lines[Y - 1].Y - Rad;
-
-    switch( Value )
+    if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
     {
-        case BOARD_BLACK:
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
+
+        switch (Value)
         {
-            StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y );
-            ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off );
-            break;
-        }
-        case BOARD_WHITE:
-        {
-            var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * this.m_oLogicBoard.Get_Size().X];
-            StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y );
-            ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off );
-            break;
-        }
-        case BOARD_EMPTY:
-        default:
-        {
-            StonesCanvas.clearRect(_X, _Y, d, d);
-            ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
-            break;
+            case BOARD_BLACK:
+            {
+                StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y);
+                ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                break;
+            }
+            case BOARD_WHITE:
+            {
+                var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * this.m_oLogicBoard.Get_Size().X];
+                StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y);
+                ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                break;
+            }
+            case BOARD_EMPTY:
+            default:
+            {
+                StonesCanvas.clearRect(_X, _Y, d, d);
+                ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
+                break;
+            }
         }
     }
 
@@ -416,19 +460,58 @@ CDrawingBoard.prototype.Draw_Variant = function(X, Y)
     var d     = this.m_oImageData.StoneDiam / 2;
     var Rad   = (d - 1) / 2;
     var Lines = this.m_oImageData.Lines;
-    var _X = Lines[X - 1].X;
-    var _Y = Lines[Y - 1].Y;
 
-    var VairantsCanvas = this.HtmlElement.Variants.Control.HtmlElement.getContext("2d");
-    VairantsCanvas.fillStyle   = this.m_oVariantsColor.ToString();
-    VairantsCanvas.beginPath();
-    VairantsCanvas.arc(_X, _Y, Rad, 0, 2 * Math.PI, false);
-    VairantsCanvas.fill();
+    if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
+    {
+        var _X = Lines[X - 1].X;
+        var _Y = Lines[Y - 1].Y;
+
+        var VairantsCanvas = this.HtmlElement.Variants.Control.HtmlElement.getContext("2d");
+        VairantsCanvas.fillStyle = this.m_oVariantsColor.ToString();
+        VairantsCanvas.beginPath();
+        VairantsCanvas.arc(_X, _Y, Rad, 0, 2 * Math.PI, false);
+        VairantsCanvas.fill();
+    }
 };
 CDrawingBoard.prototype.Clear_Variants = function()
 {
     var VairantsCanvas = this.HtmlElement.Variants.Control.HtmlElement.getContext("2d");
     VairantsCanvas.clearRect(0, 0, this.m_oImageData.W, this.m_oImageData.H);
+};
+CDrawingBoard.prototype.Get_AspectRatio = function()
+{
+    var oSize = this.m_oLogicBoard.Get_Size();
+    var nW = oSize.X, nH = oSize.Y;
+
+    // Работаем только с квадратными досками
+    var nSize = Math.min(nW, nH);
+
+    // Высчитаем суммарный абсолютный размер доски и абсолютные сдвиги до начала сетки
+    var dAbsBoardW = (this.m_oViewPort.X1 - this.m_oViewPort.X0) * g_dBoardCellW + 2 * g_dBoardHorOffset;
+    var dAbsBoardH = (this.m_oViewPort.Y1 - this.m_oViewPort.Y0) * g_dBoardCellW + 2 * g_dBoardHorOffset;
+
+    // Под линейки доски мы оставляем по половине клеточки с каждой стороны, т.е. суммарно
+    // это как будто логическая доска размером на 1 больше.
+    if (true === this.m_bRulers)
+    {
+        dAbsBoardW += g_dBoardCellW;
+        dAbsBoardH += g_dBoardCellW;
+    }
+
+    // Если доска рисуется не целиком, тогда добавляем полклетки под продолжение сетки
+    if (this.m_oViewPort.X0 > 0)
+        dAbsBoardW += g_dBoardCellW_2 / 2;
+
+    if (this.m_oViewPort.X1 < nSize - 1)
+        dAbsBoardW += g_dBoardCellW_2 / 2;
+
+    if (this.m_oViewPort.Y0 > 0)
+        dAbsBoardH += g_dBoardCellW_2 / 2;
+
+    if (this.m_oViewPort.Y1 < nSize - 1)
+        dAbsBoardH += g_dBoardCellW_2 / 2;
+
+    return (dAbsBoardW / dAbsBoardH);
 };
 CDrawingBoard.prototype.private_CreateCanvasElement = function(oParentElement, sName)
 {
@@ -465,35 +548,68 @@ CDrawingBoard.prototype.private_UpdateKoeffs = function()
 {
     var oSize = this.m_oLogicBoard.Get_Size();
     var nW = oSize.X, nH = oSize.Y;
+
+    // Работаем только с квадратными досками
+    var nSize = Math.min(nW, nH);
+
+    // Сначала скоректируем ViewPort
+    this.m_oViewPort.X0 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.X0));
+    this.m_oViewPort.Y0 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.Y0));
+    this.m_oViewPort.X1 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.X1));
+    this.m_oViewPort.Y1 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.Y1));
+
+    if (this.m_oViewPort.X1 <= this.m_oViewPort.X0)
+    {
+        this.m_oViewPort.X0 = 0;
+        this.m_oViewPort.X1 = nSize - 1;
+    }
+
+    if (this.m_oViewPort.Y1 <= this.m_oViewPort.Y0)
+    {
+        this.m_oViewPort.Y0 = 0;
+        this.m_oViewPort.Y1 = nSize - 1;
+    }
+
+    // Высчитаем суммарный абсолютный размер доски и абсолютные сдвиги до начала сетки
+    var dAbsBoardW = (this.m_oViewPort.X1 - this.m_oViewPort.X0) * g_dBoardCellW + 2 * g_dBoardHorOffset;
+    var dAbsBoardH = (this.m_oViewPort.Y1 - this.m_oViewPort.Y0) * g_dBoardCellW + 2 * g_dBoardHorOffset;
+    var dAbsHorOff = g_dBoardHorOffset;
+    var dAbsVerOff = g_dBoardHorOffset;
+
+    // Под линейки доски мы оставляем по половине клеточки с каждой стороны, т.е. суммарно
+    // это как будто логическая доска размером на 1 больше.
     if (true === this.m_bRulers)
     {
-        var dAbsCellW   = g_dBoard_W / (2 * g_dHorOff_2_Cell_W + nW);
-        var dAbdOffsetX = (g_dBoard_W - (nW) * dAbsCellW) / 2;
-
-        var dAbsCellH   = g_dBoard_H / (2 * g_dVerOff_2_Cell_H + nH);
-        var dAbsOffsetY = (g_dBoard_H - (nH) * dAbsCellH) / 2;
-
-        this.m_dKoeffOffsetY = (dAbsOffsetY + dAbsCellH / 2) / g_dBoard_H;
-        this.m_dKoeffOffsetX = (dAbdOffsetX + dAbsCellW / 2) / g_dBoard_W;
-        this.m_dKoeffCellW   = dAbsCellW / g_dBoard_W;
-        this.m_dKoeffCellH   = dAbsCellH / g_dBoard_H;
-        this.m_dKoeffDiam    = 4 / g_dBoard_W;
+        dAbsBoardW += g_dBoardCellW;
+        dAbsBoardH += g_dBoardCellW;
+        dAbsHorOff += g_dBoardCellW_2;
+        dAbsVerOff += g_dBoardCellW_2;
     }
-    else
+
+    // Если доска рисуется не целиком, тогда добавляем полклетки под продолжение сетки
+    if (this.m_oViewPort.X0 > 0)
     {
-        var dAbsCellW   = g_dBoard_W / (2 * g_dHorOff_2_Cell_W + nW - 1);
-        var dAbdOffsetX = (g_dBoard_W - (nW - 1) * dAbsCellW) / 2;
-
-        var dAbsCellH   = g_dBoard_H / (2 * g_dVerOff_2_Cell_H + nH - 1);
-        var dAbsOffsetY = (g_dBoard_H - (nH - 1) * dAbsCellH) / 2;
-
-        this.m_dKoeffOffsetY = dAbsOffsetY / g_dBoard_H;
-        this.m_dKoeffOffsetX = dAbdOffsetX / g_dBoard_W;
-        this.m_dKoeffCellW   = dAbsCellW / g_dBoard_W;
-        this.m_dKoeffCellH   = dAbsCellH / g_dBoard_H;
-        this.m_dKoeffDiam    = 4 / g_dBoard_W;
+        dAbsBoardW += g_dBoardCellW_2 / 2;
+        dAbsHorOff += g_dBoardCellW_2 / 2;
     }
 
+    if (this.m_oViewPort.X1 < nSize - 1)
+        dAbsBoardW += g_dBoardCellW_2 / 2;
+
+    if (this.m_oViewPort.Y0 > 0)
+    {
+        dAbsBoardH += g_dBoardCellW_2 / 2;
+        dAbsVerOff += g_dBoardCellW_2 / 2;
+    }
+
+    if (this.m_oViewPort.Y1 < nSize - 1)
+        dAbsBoardH += g_dBoardCellW_2 / 2;
+
+    this.m_dKoeffCellH   = g_dBoardCellW / dAbsBoardH;
+    this.m_dKoeffCellW   = g_dBoardCellW / dAbsBoardW;
+    this.m_dKoeffOffsetX = dAbsHorOff / dAbsBoardW;
+    this.m_dKoeffOffsetY = dAbsVerOff / dAbsBoardH;
+    this.m_dKoeffDiam    = 4 / dAbsBoardW;
 };
 CDrawingBoard.prototype.private_OnResize = function(bForce)
 {
@@ -724,23 +840,35 @@ CDrawingBoard.prototype.private_CreateLines = function()
 
     var dHorOff = this.m_dKoeffOffsetX * W;
     var dVerOff = this.m_dKoeffOffsetY * H;
-    var dCellH  = this.m_dKoeffCellH * H;
-    var dCellW  = this.m_dKoeffCellW * W;
-
-    var oSize = this.m_oLogicBoard.Get_Size();
+    var dCellH  = this.m_dKoeffCellH   * H;
+    var dCellW  = this.m_dKoeffCellW   * W;
 
     // TODO: Пока мы реализуем для случая oSize.X == oSize.Y
+    var oSize = this.m_oLogicBoard.Get_Size();
+    var nSize = Math.min(oSize.X, oSize.Y);
+
     var Lines = new Array(oSize.X);
-    var X = dHorOff;
-    var Y = dVerOff;
-    for (var Index = 0; Index < oSize.X; Index++)
+
+    var X_startoffset = dHorOff - dCellW * this.m_oViewPort.X0;
+    var Y_startoffset = dVerOff - dCellH * this.m_oViewPort.Y0;
+
+    var X, Y, X_G, Y_G, X_L, Y_L;
+    for (var Index = 0; Index < nSize; Index++)
     {
-        X = dHorOff + Index * dCellW;
-        Y = dVerOff + Index * dCellH;
+        X   = X_startoffset + Index * dCellW;
+        X_G = X_startoffset + Index * dCellW + 0.6 * dCellW;
+        X_L = X_startoffset + Index * dCellW - 0.6 * dCellW;
+        Y   = Y_startoffset + Index * dCellH;
+        Y_G = Y_startoffset + Index * dCellH + 0.6 * dCellH;
+        Y_L = Y_startoffset + Index * dCellH - 0.6 * dCellH;
         Lines[Index] =
         {
-            X : Math.floor(X + 0.5),
-            Y : Math.floor(Y + 0.5)
+            X   : Math.floor(X   + 0.5),
+            X_G : Math.floor(X_G + 0.5),
+            X_L : Math.floor(X_L + 0.5),
+            Y   : Math.floor(Y   + 0.5),
+            Y_G : Math.floor(Y_G + 0.5),
+            Y_L : Math.floor(Y_L + 0.5)
         };
     }
 
@@ -795,38 +923,49 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
     }
 
     // Рисуем сетку
-    var X_0 = Lines[0].X;
-    var X_1 = Lines[Lines.length - 1].X;
+    var X_0 =           0 === this.m_oViewPort.X0 ? Lines[this.m_oViewPort.X0].X : Lines[this.m_oViewPort.X0].X_L;
+    var X_1 = oSize.X - 1 === this.m_oViewPort.X1 ? Lines[this.m_oViewPort.X1].X : Lines[this.m_oViewPort.X1].X_G;
 
-    var Y_0 = Lines[0].Y;
-    var Y_1 = Lines[Lines.length - 1].Y;
+    var Y_0 =           0 === this.m_oViewPort.Y0 ? Lines[this.m_oViewPort.Y0].Y : Lines[this.m_oViewPort.Y0].Y_L;
+    var Y_1 = oSize.X - 1 === this.m_oViewPort.Y1 ? Lines[this.m_oViewPort.Y1].Y : Lines[this.m_oViewPort.Y1].Y_G;
 
-    var VerLine = LinesCanvas.createImageData(1, Y_1 - Y_0);
-    var HorLine = LinesCanvas.createImageData(X_1 - X_0, 1);
+    var VerLine = LinesCanvas.createImageData(1, H);
+    var HorLine = LinesCanvas.createImageData(W, 1);
 
     var LineColor = this.m_oLinesColor;
-    for (var i = 0; i < Y_1 - Y_0; i++)
+    for (var i = 0; i < H; i++)
     {
         var Index = i * 4;
-        VerLine.data[Index + 0] = LineColor.r;
-        VerLine.data[Index + 1] = LineColor.g;
-        VerLine.data[Index + 2] = LineColor.b;
-        VerLine.data[Index + 3] = LineColor.a;
+
+        if (i >= Y_0 && i <= Y_1)
+        {
+            VerLine.data[Index + 0] = LineColor.r;
+            VerLine.data[Index + 1] = LineColor.g;
+            VerLine.data[Index + 2] = LineColor.b;
+            VerLine.data[Index + 3] = LineColor.a;
+        }
     }
 
-    for (var i = 0; i < X_1 - X_0; i++)
+    for (var i = 0; i < W; i++)
     {
         var Index = i * 4;
-        HorLine.data[Index + 0] = LineColor.r;
-        HorLine.data[Index + 1] = LineColor.g;
-        HorLine.data[Index + 2] = LineColor.b;
-        HorLine.data[Index + 3] = LineColor.a;
+
+        if (X_0 <= i && i <= X_1)
+        {
+            HorLine.data[Index + 0] = LineColor.r;
+            HorLine.data[Index + 1] = LineColor.g;
+            HorLine.data[Index + 2] = LineColor.b;
+            HorLine.data[Index + 3] = LineColor.a;
+        }
     }
 
     for (var i = 0; i < oSize.X; i++)
     {
-        LinesCanvas.putImageData(VerLine, Lines[i].X, Lines[0].Y);
-        LinesCanvas.putImageData(HorLine, Lines[0].X, Lines[i].Y);
+        if (true === this.private_IsVerLineInViewPort(i))
+            LinesCanvas.putImageData(VerLine, Lines[i].X, 0);
+
+        if (true === this.private_IsHorLineInViewPort(i))
+            LinesCanvas.putImageData(HorLine, 0, Lines[i].Y);
     }
 
     // Пересечения на доске, которые мы не отрисовываем из-за текстовых отметок
@@ -839,17 +978,20 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
         var clear_w = Lines[1].X - Lines[0].X + 2;
         var clear_h = Lines[1].Y - Lines[0].Y + 2;
 
-        for ( var Index = 0; Index < Exclude.length; Index++ )
+        for (var Index = 0, Count = Exclude.length; Index < Count; Index++)
         {
             var X = Exclude[Index].X;
             var Y = Exclude[Index].Y;
 
-            if (BOARD_EMPTY === this.m_oLogicBoard.Get(X,Y) )
+            if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
             {
-                var _X = Lines[X - 1].X - Rad;
-                var _Y = Lines[Y - 1].Y - Rad;
+                if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
+                {
+                    var _X = Lines[X - 1].X - Rad;
+                    var _Y = Lines[Y - 1].Y - Rad;
 
-                LinesCanvas.clearRect( _X, _Y, clear_w, clear_h );
+                    LinesCanvas.clearRect(_X, _Y, clear_w, clear_h);
+                }
             }
         }
     }
@@ -1135,7 +1277,7 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
     var Rad   = (this.m_oImageData.StoneDiam - 1) / 2;
     var Count = ImageDatas.length;
 
-    if (9 !== oSize && 13 !== oSize && 19 !== oSize)
+    if ((9 !== oSize && 13 !== oSize && 19 !== oSize) || 0 !== this.m_oViewPort.X0 || oSize - 1 !== this.m_oViewPort.X1 || 0 !== this.m_oViewPort.Y0 || oSize - 1 !== this.m_oViewPort.Y1)
         return;
 
     for (var Index = 0; Index < Count; Index++)
@@ -1304,61 +1446,64 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
         var TargetCanvas = this.HtmlElement.Target.Control.HtmlElement.getContext("2d");
         TargetCanvas.clearRect(0, 0, W, H);
 
-        var d = this.m_oImageData.StoneDiam;
-        var Rad = (d - 1) / 2;
-        var Lines = this.m_oImageData.Lines;
-
-        var _X = Lines[X - 1].X - Rad;
-        var _Y = Lines[Y - 1].Y - Rad;
-
-        var Value = this.m_oLogicBoard.Get(X, Y);
-        switch(this.m_eMode)
+        if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
         {
-            case EBoardMode.Move:
+            var d = this.m_oImageData.StoneDiam;
+            var Rad = (d - 1) / 2;
+            var Lines = this.m_oImageData.Lines;
+
+            var _X = Lines[X - 1].X - Rad;
+            var _Y = Lines[Y - 1].Y - Rad;
+
+            var Value = this.m_oLogicBoard.Get(X, Y);
+            switch (this.m_eMode)
             {
-                if (BOARD_EMPTY === Value)
+                case EBoardMode.Move:
                 {
-                    if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
-                        TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
-                    else
-                        TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
+                    if (BOARD_EMPTY === Value)
+                    {
+                        if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
+                            TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
+                        else
+                            TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
+                    }
+
+                    break;
                 }
-
-                break;
-            }
-            case EBoardMode.CountScores:
-            {
-                if (BOARD_BLACK === Value)
-                    TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                else if (BOARD_WHITE === Value)
-                    TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
-
-                break;
-            }
-            case EBoardMode.AddRemove:
-            {
-                if (BOARD_BLACK === Value)
-                    TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                else if (BOARD_WHITE === Value)
-                    TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
-                else
+                case EBoardMode.CountScores:
                 {
-                    if (e.ShiftKey)
-                        TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
-                    else
-                        TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
+                    if (BOARD_BLACK === Value)
+                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
+                    else if (BOARD_WHITE === Value)
+                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
+
+                    break;
                 }
+                case EBoardMode.AddRemove:
+                {
+                    if (BOARD_BLACK === Value)
+                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
+                    else if (BOARD_WHITE === Value)
+                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
+                    else
+                    {
+                        if (e.ShiftKey)
+                            TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
+                        else
+                            TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
+                    }
 
-                break;
-            }
-            default:
-            {
-                if (BOARD_BLACK === Value)
-                    TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                else
-                    TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
+                    break;
+                }
+                default:
+                {
+                    if (BOARD_BLACK === Value)
+                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
+                    else
+                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
 
-                break;
+                    break;
+                }
             }
         }
     }
@@ -1381,10 +1526,10 @@ CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
     var W = this.m_oImageData.W;
     var H = this.m_oImageData.H;
 
-    var dHorOff = this.m_dKoeffOffsetX * W;
-    var dVerOff = this.m_dKoeffOffsetY * H;
     var dCellH  = this.m_dKoeffCellH * H;
     var dCellW  = this.m_dKoeffCellW * W;
+    var dHorOff = this.m_dKoeffOffsetX * W - dCellH * this.m_oViewPort.X0;
+    var dVerOff = this.m_dKoeffOffsetY * H - dCellW * this.m_oViewPort.Y0;
 
     var Y = 0;
 
@@ -1409,6 +1554,9 @@ CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
             break;
         }
     }
+
+    X = Math.max(this.m_oViewPort.X0, Math.min(this.m_oViewPort.X1, X));
+    Y = Math.max(this.m_oViewPort.Y0, Math.min(this.m_oViewPort.Y1, Y));
 
     return {X : X + 1, Y : Y + 1};
 };
@@ -1560,32 +1708,32 @@ CDrawingBoard.prototype.private_DrawRulers = function()
         var W = this.m_oImageData.W;
         var H = this.m_oImageData.H;
         var oSize = this.m_oLogicBoard.Get_Size();
-        for (var X = 0; X < oSize.X; X++)
+        for (var X = this.m_oViewPort.X0; X <= this.m_oViewPort.X1; X++)
         {
-            var d     = 2 * this.m_oImageData.StoneDiam / 3;
-            var Rad   = (d - 1) / 2;
+            var d = 2 * this.m_oImageData.StoneDiam / 3;
+            var Rad = (d - 1) / 2;
             var Lines = this.m_oImageData.Lines;
-            var _X    = Lines[X].X - Rad;
-            var _Y    = this.m_dKoeffOffsetY * H / 3 - Rad;
+            var _X = Lines[X].X - Rad;
+            var _Y = this.m_dKoeffOffsetY * H / 3 - Rad;
 
-            var Text       = Common_X_to_String(X + 1);
-            var FontSize   =  2 * d / 3;
+            var Text = Common_X_to_String(X + 1);
+            var FontSize = 2 * d / 3;
             var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-            var sFont      = FontSize + "px " + FontFamily;
+            var sFont = FontSize + "px " + FontFamily;
 
             BoardCanvas.fillStyle = "rgb(0,0,0)";
-            BoardCanvas.font      = sFont;
+            BoardCanvas.font = sFont;
 
             var y_offset = d / 2 + FontSize / 3;
             var x_offset = (d - BoardCanvas.measureText(Text).width) / 2;
 
-            BoardCanvas.fillText( Text, _X + x_offset, _Y + y_offset );
+            BoardCanvas.fillText(Text, _X + x_offset, _Y + y_offset);
 
             _Y = H - this.m_dKoeffOffsetY * H / 3 - Rad;
-            BoardCanvas.fillText( Text, _X + x_offset, _Y + y_offset );
+            BoardCanvas.fillText(Text, _X + x_offset, _Y + y_offset);
         }
 
-        for (var Y = 0; Y < oSize.Y; Y++)
+        for (var Y = this.m_oViewPort.Y0; Y <= this.m_oViewPort.Y1; Y++)
         {
             var d     = 2 * this.m_oImageData.StoneDiam / 3;
             var Rad   = (d - 1) / 2;
@@ -1672,39 +1820,56 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
 
     var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
 
-    var d     = this.m_oImageData.StoneDiam;
-    var Rad   = (d - 1) / 2;
-    var Lines = this.m_oImageData.Lines;
-    var _X    = Lines[X - 1].X - Rad;
-    var _Y    = Lines[Y - 1].Y - Rad;
-
-    var Value = this.m_oLogicBoard.Get(X, Y);
-
-    switch (nType)
+    if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
     {
-        case EDrawingMark.Tb: MarksCanvas.putImageData(this.m_oImageData.Ter_Black, _X, _Y ); break;
-        case EDrawingMark.Tw: MarksCanvas.putImageData(this.m_oImageData.Ter_White, _X, _Y ); break;
-        case EDrawingMark.Lm: MarksCanvas.putImageData(this.m_oImageData.LastMove,  _X, _Y ); break;
-        case EDrawingMark.Cr: MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y ); break;
-        case EDrawingMark.Sq: MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y ); break;
-        case EDrawingMark.Tr: MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y ); break;
-        case EDrawingMark.X : MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.X_White  : this.m_oImageData.X_Black,  _X, _Y ); break;
-        case EDrawingMark.Tx:
+        var d = this.m_oImageData.StoneDiam;
+        var Rad = (d - 1) / 2;
+        var Lines = this.m_oImageData.Lines;
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
+
+        var Value = this.m_oLogicBoard.Get(X, Y);
+
+        switch (nType)
         {
-            var Text       = Mark.Get_Text();
-            var FontSize   = (Text.length <= 2 ? 2 * d / 3 : d / 2);
-            var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-            var sFont      = FontSize + "px " + FontFamily;
+            case EDrawingMark.Tb:
+                MarksCanvas.putImageData(this.m_oImageData.Ter_Black, _X, _Y);
+                break;
+            case EDrawingMark.Tw:
+                MarksCanvas.putImageData(this.m_oImageData.Ter_White, _X, _Y);
+                break;
+            case EDrawingMark.Lm:
+                MarksCanvas.putImageData(this.m_oImageData.LastMove, _X, _Y);
+                break;
+            case EDrawingMark.Cr:
+                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
+                break;
+            case EDrawingMark.Sq:
+                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
+                break;
+            case EDrawingMark.Tr:
+                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
+                break;
+            case EDrawingMark.X :
+                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
+                break;
+            case EDrawingMark.Tx:
+            {
+                var Text = Mark.Get_Text();
+                var FontSize = (Text.length <= 2 ? 2 * d / 3 : d / 2);
+                var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
+                var sFont = FontSize + "px " + FontFamily;
 
-            MarksCanvas.fillStyle = Value === BOARD_BLACK ? "rgb(255,255,255)" : "rgb(0,0,0)";
-            MarksCanvas.font      = sFont;
+                MarksCanvas.fillStyle = Value === BOARD_BLACK ? "rgb(255,255,255)" : "rgb(0,0,0)";
+                MarksCanvas.font = sFont;
 
-            var y_offset = d / 2 + FontSize / 3;
-            var x_offset = (d - MarksCanvas.measureText(Text).width) / 2;
+                var y_offset = d / 2 + FontSize / 3;
+                var x_offset = (d - MarksCanvas.measureText(Text).width) / 2;
 
-            MarksCanvas.fillText(Text, _X + x_offset, _Y + y_offset);
+                MarksCanvas.fillText(Text, _X + x_offset, _Y + y_offset);
 
-            break;
+                break;
+            }
         }
     }
 };
@@ -1713,20 +1878,23 @@ CDrawingBoard.prototype.private_ClearMark = function(X, Y)
     if (!this.m_oImageData.Lines)
         return;
 
-    var d     = this.m_oImageData.StoneDiam;
-    var Rad   = (d - 1) / 2;
-    var Lines = this.m_oImageData.Lines;
-    var _X = Lines[X - 1].X - Rad;
-    var _Y = Lines[Y - 1].Y - Rad;
-
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
-    MarksCanvas.clearRect(_X, _Y, Rad * 2, Rad * 2);
-
-    var LastMoveMarkPos = Common_ValuetoXY(this.m_oLastMoveMark);
-    if (X === LastMoveMarkPos.X && Y === LastMoveMarkPos.Y)
+    if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
     {
-        this.private_SetLastMoveMark(X, Y);
-        this.private_DrawMark(this.private_GetMark(X, Y));
+        var d = this.m_oImageData.StoneDiam;
+        var Rad = (d - 1) / 2;
+        var Lines = this.m_oImageData.Lines;
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
+
+        var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+        MarksCanvas.clearRect(_X, _Y, Rad * 2, Rad * 2);
+
+        var LastMoveMarkPos = Common_ValuetoXY(this.m_oLastMoveMark);
+        if (X === LastMoveMarkPos.X && Y === LastMoveMarkPos.Y)
+        {
+            this.private_SetLastMoveMark(X, Y);
+            this.private_DrawMark(this.private_GetMark(X, Y));
+        }
     }
 };
 CDrawingBoard.prototype.private_HandleMouseDown = function(X, Y, event)
@@ -2136,4 +2304,25 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.Set_Rulers(true === this.m_bRulers ? false : true);
     }
+};
+CDrawingBoard.prototype.private_IsPointInViewPort = function(X, Y)
+{
+    if (X >= this.m_oViewPort.X0 && X <= this.m_oViewPort.X1 && Y >= this.m_oViewPort.Y0 && Y <= this.m_oViewPort.Y1)
+        return true;
+
+    return false;
+};
+CDrawingBoard.prototype.private_IsHorLineInViewPort = function(Y)
+{
+    if (Y >= this.m_oViewPort.Y0 && Y <= this.m_oViewPort.Y1)
+        return true;
+
+    return false;
+};
+CDrawingBoard.prototype.private_IsVerLineInViewPort = function(X)
+{
+    if (X >= this.m_oViewPort.X0 && X <= this.m_oViewPort.X1)
+        return true;
+
+    return false;
 };

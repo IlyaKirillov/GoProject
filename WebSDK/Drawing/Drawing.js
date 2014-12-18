@@ -126,6 +126,7 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 {
     var oGameTree = this.m_oGameTree;
+    var oDrawingBoard = new CDrawingBoard(this);
 
     var oParentControl = CreateControlContainer(sDivId);
     var sMainDivId = sDivId + "GoBoard";
@@ -135,7 +136,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oParentControl.AddControl(oMainControl);
 
-    oMainControl.Set_Type(1);
+    oMainControl.Set_Type(1, oDrawingBoard);
 
     var sBoardDivId = sDivId + "_Board";
     var sPanelDivId = sDivId + "_Panel";
@@ -148,13 +149,6 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oMainControl.AddControl(oBoardControl);
     oMainControl.AddControl(oPanelControl);
 
-    var sBoardCenterDivId = sBoardDivId + "_Centred";
-    this.private_CreateDiv(oBoardControl.HtmlElement, sBoardCenterDivId);
-    var oBoardCenterControl = CreateControlContainer(sBoardDivId);
-    oBoardControl.Set_Type(2);
-    oBoardControl.AddControl(oBoardCenterControl);
-
-    var oDrawingBoard = new CDrawingBoard(this);
     oDrawingBoard.Init(sBoardDivId, oGameTree);
     oDrawingBoard.Focus();
 
@@ -289,6 +283,8 @@ CDrawing.prototype.Create_Problems = function(sDivId)
 {
     var oGameTree = this.m_oGameTree;
 
+    var oDrawingBoard = new CDrawingBoard(this);
+
     var oParentControl = CreateControlContainer(sDivId);
     var sMainDivId = sDivId + "GoBoard";
     this.private_CreateDiv(oParentControl.HtmlElement, sMainDivId);
@@ -297,7 +293,7 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oParentControl.AddControl(oMainControl);
 
-    oMainControl.Set_Type(1);
+    oMainControl.Set_Type(1, oDrawingBoard);
 
     var sBoardDivId = sDivId + "_Board";
     var sPanelDivId = sDivId + "_Panel";
@@ -310,13 +306,6 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     oMainControl.AddControl(oBoardControl);
     oMainControl.AddControl(oPanelControl);
 
-    var sBoardCenterDivId = sBoardDivId + "_Centred";
-    this.private_CreateDiv(oBoardControl.HtmlElement, sBoardCenterDivId);
-    var oBoardCenterControl = CreateControlContainer(sBoardDivId);
-    oBoardControl.Set_Type(2);
-    oBoardControl.AddControl(oBoardCenterControl);
-
-    var oDrawingBoard = new CDrawingBoard(this);
     oDrawingBoard.Init(sBoardDivId, oGameTree);
     oDrawingBoard.Focus();
 
