@@ -284,6 +284,7 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     var oGameTree = this.m_oGameTree;
 
     var oDrawingBoard = new CDrawingBoard(this);
+    oDrawingBoard.Set_ShellWhiteStones(false);
 
     var oParentControl = CreateControlContainer(sDivId);
     var sMainDivId = sDivId + "GoBoard";

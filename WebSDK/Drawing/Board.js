@@ -70,19 +70,22 @@ function CDrawingBoard(oDrawing)
         Cr_White    : null
     };
 
-    this.m_oBoardColor    = new CColor(231, 188, 95, 255);
-    this.m_oLinesColor    = new CColor(0, 0, 0, 255);
-    this.m_oVariantsColor = new CColor(255,0,0, 128);
+    this.m_bTrueColorBoard   = true;
+    this.m_bTrueColorStones  = true;
+    this.m_bShellWhiteStones = true;
+    this.m_bShadows          = true;
 
-    this.m_oSimpleBoardPr =
-    {
-        BoardColor        : new CColor(0xE8, 0xC4, 0x73, 255),
-        WhiteStoneColor   : new CColor(0xFF, 0xFF, 0xFF, 255),
-        BlackStoneColor   : new CColor(0x00, 0x00, 0x00, 255),
-        StoneContourColor : new CColor( 141,  141,  141, 255),
-        HandiPointsColor  : new CColor( 112,   95,   54, 255),
-        LineColor         : new CColor( 112,   95,   54, 255)
-    };
+    this.m_oBoardColor      = new CColor(231, 188, 95, 255);
+    //this.m_oBoardColor      = new CColor(255, 255, 255, 255);
+    this.m_oLinesColor      = new CColor(0, 0, 0, 255);
+
+    this.m_bDarkBoard       = false;
+
+//    this.m_oBoardColor      = new CColor(0, 0, 0, 255);
+//    this.m_oLinesColor      = new CColor(255, 255, 255, 255);
+//    this.m_bDarkBoard       = true;
+
+    this.m_oVariantsColor   = new CColor(255,0,0, 128);
 
     this.HtmlElement =
     {
@@ -278,6 +281,10 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
         this.On_Resize(true);
     }
 };
+CDrawingBoard.prototype.Set_ShellWhiteStones = function(Value)
+{
+    this.m_bShellWhiteStones = Value;
+};
 CDrawingBoard.prototype.Update_Size = function(bForce)
 {
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
@@ -364,21 +371,24 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
             case BOARD_BLACK:
             {
                 StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y);
-                ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                if (true === this.m_bShadows)
+                    ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
             case BOARD_WHITE:
             {
                 var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * this.m_oLogicBoard.Get_Size().X];
                 StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y);
-                ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                if (true === this.m_bShadows)
+                    ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
             case BOARD_EMPTY:
             default:
             {
                 StonesCanvas.clearRect(_X, _Y, d, d);
-                ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
+                if (true === this.m_bShadows)
+                    ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
                 break;
             }
         }
@@ -642,23 +652,23 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
 
     // Доска
     var Board = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
-    Board.fillStyle = this.m_oSimpleBoardPr.BoardColor.ToString();
+    Board.fillStyle = this.m_oBoardColor.ToString();
     Board.fillRect(0, 0, W, H);
 
     // Разлиновка
     var LinesCanvas = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
 
-    var dOffX  = this.m_dKoeffOffsetX * W;
-    var dOffY  = this.m_dKoeffOffsetY * H;
     var dCellW = this.m_dKoeffCellW * W;
     var dCellH = this.m_dKoeffCellH * H;
+    var dOffX  = this.m_dKoeffOffsetX * W - this.m_oViewPort.X0 * dCellW;
+    var dOffY  = this.m_dKoeffOffsetY * H - this.m_oViewPort.Y0 * dCellH;
 
     var oSize = this.m_oLogicBoard.Get_Size();
 
     LinesCanvas.clearRect(0, 0, W, H);
-    LinesCanvas.strokeStyle = this.m_oSimpleBoardPr.LineColor.ToString();
+    LinesCanvas.strokeStyle = this.m_oLinesColor.ToString();
 
-    var X0 = dOffX, X1 = W - dOffX;
+    var X0 = dOffX, X1 = X0 + (oSize.X - 1) * dCellW;
     for (var nY = 0; nY < oSize.Y; nY++)
     {
         var VerY = dOffY + nY * dCellH;
@@ -668,7 +678,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
         LinesCanvas.stroke();
     }
 
-    var Y0 = dOffY, Y1 = H - dOffY;
+    var Y0 = dOffY, Y1 = Y0 + (oSize.Y - 1) * dCellH;
     for (var nX = 0; nX < oSize.X; nX++)
     {
         var HorX = dOffX + nX * dCellW;
@@ -681,7 +691,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     // Форовые точки
     if (oSize.X === oSize.Y && (9 === oSize.X || 13 === oSize.X || 19 === oSize.X))
     {
-        LinesCanvas.fillStyle = this.m_oSimpleBoardPr.HandiPointsColor.ToString();
+        LinesCanvas.fillStyle = this.m_oLinesColor.ToString();
 
         // Радиус делаем минимум 2 пикселя, чтобы форовая отметка всегда выделялась на
         // фоне сетки доски.
@@ -708,11 +718,11 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     // Рисуем все камни
     var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
     StonesCanvas.clearRect(0, 0, W, H);
-    StonesCanvas.strokeStyle = this.m_oSimpleBoardPr.StoneContourColor.ToString();
+    StonesCanvas.strokeStyle = this.m_oLinesColor.ToString();
     StonesCanvas.lineWidth   = 1;
 
-    var ColorB = this.m_oSimpleBoardPr.BlackStoneColor.ToString();
-    var ColorW = this.m_oSimpleBoardPr.WhiteStoneColor.ToString();
+    var ColorB = (new CColor(0,0,0,255)).ToString();
+    var ColorW = (new CColor(255,255,255,255)).ToString();
 
     for (var nY = 1; nY <= oSize.Y; nY++)
     {
@@ -773,41 +783,72 @@ CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
     }
 
     var r, g, b;
-    for (var i = 0; i < H; i++)
+
+    if (true === this.m_bTrueColorBoard)
     {
-        for (var j = 0; j < W; j++)
+        for (var i = 0; i < H; i++)
         {
-            f = ( dCoffWf[j] + dCoffHf[i] ) * 40 + 0.5;
-            f = f - Math.floor(f);
-
-            if ( f < 2e-1 )
-                f = 1 - f / 2;
-            else if ( f < 4e-1 )
-                f = 1 - ( 4e-1 - f ) / 2;
-            else
-                f = 1;
-
-            if (i == H - 1 || (i == H - 2 && j < W - 2) || j >= W - 1 || (j == W - 2 && i < H - 1))
-                f = f / 2;
-
-            if (i == 0 || (i == 1 && j > 1) || j == 0 || (j == 1 && i > 1))
+            for (var j = 0; j < W; j++)
             {
-                r = 128 + Red   * f / 2;
-                g = 128 + Green * f / 2;
-                b = 128 + Blue  * f / 2;
-            }
-            else
-            {
-                r = Red   * f;
-                g = Green * f;
-                b = Blue  * f;
-            }
+                f = ( dCoffWf[j] + dCoffHf[i] ) * 40 + 0.5;
+                f = f - Math.floor(f);
 
-            var Index = (j + i * W) * 4;
-            ImageData.data[Index + 0] = r;
-            ImageData.data[Index + 1] = g;
-            ImageData.data[Index + 2] = b;
-            ImageData.data[Index + 3] = 255;
+                if (f < 2e-1)
+                    f = 1 - f / 2;
+                else if (f < 4e-1)
+                    f = 1 - ( 4e-1 - f ) / 2;
+                else
+                    f = 1;
+
+                if (i == H - 1 || (i == H - 2 && j < W - 2) || j >= W - 1 || (j == W - 2 && i < H - 1))
+                    f = f / 2;
+
+                if (i == 0 || (i == 1 && j > 1) || j == 0 || (j == 1 && i > 1))
+                {
+                    r = 128 + Red * f / 2;
+                    g = 128 + Green * f / 2;
+                    b = 128 + Blue * f / 2;
+                }
+                else
+                {
+                    r = Red * f;
+                    g = Green * f;
+                    b = Blue * f;
+                }
+
+                var Index = (j + i * W) * 4;
+                ImageData.data[Index + 0] = r;
+                ImageData.data[Index + 1] = g;
+                ImageData.data[Index + 2] = b;
+                ImageData.data[Index + 3] = 255;
+            }
+        }
+    }
+    else
+    {
+        for (var i = 0; i < H; i++)
+        {
+            for (var j = 0; j < W; j++)
+            {
+                if (i == 0 || (i == 1 && j > 1) || j == 0 || (j == 1 && i > 1))
+                {
+                    r = 128 + Red / 2;
+                    g = 128 + Green / 2;
+                    b = 128 + Blue / 2;
+                }
+                else
+                {
+                    r = Red;
+                    g = Green;
+                    b = Blue;
+                }
+
+                var Index = (j + i * W) * 4;
+                ImageData.data[Index + 0] = r;
+                ImageData.data[Index + 1] = g;
+                ImageData.data[Index + 2] = b;
+                ImageData.data[Index + 3] = 255;
+            }
         }
     }
 
@@ -852,23 +893,32 @@ CDrawingBoard.prototype.private_CreateLines = function()
     var X_startoffset = dHorOff - dCellW * this.m_oViewPort.X0;
     var Y_startoffset = dVerOff - dCellH * this.m_oViewPort.Y0;
 
-    var X, Y, X_G, Y_G, X_L, Y_L;
+    var X, Y, X_G, Y_G, X_L, Y_L, X_G2, Y_G2, X_L2, Y_L2;
     for (var Index = 0; Index < nSize; Index++)
     {
-        X   = X_startoffset + Index * dCellW;
-        X_G = X_startoffset + Index * dCellW + 0.6 * dCellW;
-        X_L = X_startoffset + Index * dCellW - 0.6 * dCellW;
-        Y   = Y_startoffset + Index * dCellH;
-        Y_G = Y_startoffset + Index * dCellH + 0.6 * dCellH;
-        Y_L = Y_startoffset + Index * dCellH - 0.6 * dCellH;
+        X    = X_startoffset + Index * dCellW;
+        X_G  = X_startoffset + Index * dCellW + 0.6 * dCellW;
+        X_L  = X_startoffset + Index * dCellW - 0.6 * dCellW;
+        X_G2 = X_startoffset + Index * dCellW + 0.5 * dCellW;
+        X_L2 = X_startoffset + Index * dCellW - 0.5 * dCellW;
+        Y    = Y_startoffset + Index * dCellH;
+        Y_G  = Y_startoffset + Index * dCellH + 0.6 * dCellH;
+        Y_L  = Y_startoffset + Index * dCellH - 0.6 * dCellH;
+        Y_G2 = Y_startoffset + Index * dCellH + 0.5 * dCellH;
+        Y_L2 = Y_startoffset + Index * dCellH - 0.5 * dCellH;
+
         Lines[Index] =
         {
-            X   : Math.floor(X   + 0.5),
-            X_G : Math.floor(X_G + 0.5),
-            X_L : Math.floor(X_L + 0.5),
-            Y   : Math.floor(Y   + 0.5),
-            Y_G : Math.floor(Y_G + 0.5),
-            Y_L : Math.floor(Y_L + 0.5)
+            X    : Math.floor(X    + 0.5),
+            X_G  : Math.floor(X_G  + 0.5),
+            X_L  : Math.floor(X_L  + 0.5),
+            X_G2 : Math.floor(X_G2 + 0.5),
+            X_L2 : Math.floor(X_L2 + 0.5),
+            Y    : Math.floor(Y    + 0.5),
+            Y_G  : Math.floor(Y_G  + 0.5),
+            Y_L  : Math.floor(Y_L  + 0.5),
+            Y_G2 : Math.floor(Y_G2 + 0.5),
+            Y_L2 : Math.floor(Y_L2 + 0.5)
         };
     }
 
@@ -876,13 +926,13 @@ CDrawingBoard.prototype.private_CreateLines = function()
 
     var dRad = this.m_dKoeffDiam * W / 2;
     var nRad = Math.max(2, Math.ceil(dRad)); // Минимальный радиус пункта должен быть 2 пикселя.
-    var Diam = nRad * 2 + 1;
+    var Diam = nRad * 2 + 1; // + 1 для нечетности, чтобы точка распологалась по центру линии
     var _x   = nRad;
     var _y   = nRad;
 
     var HandiColor = this.m_oLinesColor;
-    this.m_oImageData.Handi = this.private_DrawHandiMark(_x, _y, nRad, Diam, Diam, HandiColor);
-    this.m_oImageData.HandiRad = nRad;
+    this.m_oImageData.Handi = this.private_DrawHandiMark(_x, _y, nRad, Diam + 2, Diam + 2, HandiColor);
+    this.m_oImageData.HandiRad = nRad + 1;
 };
 CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
 {
@@ -974,10 +1024,6 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
     // Пересечения на доске, которые мы не отрисовываем из-за текстовых отметок
     if (undefined !== Exclude)
     {
-        var DWidth = parseInt(this.m_dKoeffCellH * W);
-        var d = Math.floor(DWidth / 2) * 2 + 1;
-        var Rad = (d - 1) / 2;
-
         var clear_w = Lines[1].X - Lines[0].X + 2;
         var clear_h = Lines[1].Y - Lines[0].Y + 2;
 
@@ -990,8 +1036,8 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
             {
                 if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
                 {
-                    var _X = Lines[X - 1].X - Rad;
-                    var _Y = Lines[Y - 1].Y - Rad;
+                    var _X = Lines[X - 1].X_L2;
+                    var _Y = Lines[Y - 1].Y_L2;
 
                     LinesCanvas.clearRect(_X, _Y, clear_w, clear_h);
                 }
@@ -1001,6 +1047,51 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
 };
 CDrawingBoard.prototype.private_DrawHandiMark = function(x, y, radius, w, h, Color)
 {
+    var Canvas = document.createElement("canvas").getContext("2d");
+    var ImageData = Canvas.createImageData(w, h);
+    var Bitmap = ImageData.data;
+
+    var pixel = 0.8;
+    var d = w;
+    var d_2 = Math.max(d / 2.0, 2);
+    var d2 = d / 2.0 - 5e-1;
+    var r = d2 - 2e-1;
+
+    for (var i = 0; i < d; i++)
+    {
+        for (var j = 0; j < d; j++)
+        {
+            var di = i - d2;
+            var dj = j - d2;
+            var hh = r - Math.sqrt(di * di + dj * dj);
+            var Index = (i * d + d - j - 1) * 4;
+            if (hh >= 0)
+            {
+                var alpha = 255;
+
+                if (hh <= pixel)
+                {
+                    var _hh = (pixel - hh) / pixel;
+                    alpha = parseInt((1 - _hh) * 255);
+                }
+
+                Bitmap[Index + 0] = Color.r;
+                Bitmap[Index + 1] = Color.g;
+                Bitmap[Index + 2] = Color.b;
+                Bitmap[Index + 3] = alpha;
+            }
+            else
+            {
+                Bitmap[Index + 0] = 0;
+                Bitmap[Index + 1] = 0;
+                Bitmap[Index + 2] = 0;
+                Bitmap[Index + 3] = 0;
+            }
+        }
+    }
+
+    return ImageData;
+
     var Canv   = document.createElement("canvas");
     var Canvas = Canv.getContext("2d");
 
@@ -1108,95 +1199,233 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
     var BlackTarget = this.m_oImageData.BlackTarget.data;
     var WhiteTarget = this.m_oImageData.WhiteTarget.data;
 
-    var d2 = d / 2.0 - 5e-1;
-    var r = d2 - 2e-1;
-    var f = Math.sqrt(3);
-
-    for (var i = 0; i < d; i++)
+    if (true === this.m_bTrueColorStones)
     {
-        for (var j = 0; j < d; j++)
+        var d2 = d / 2.0 - 5e-1;
+        var r = d2 - 2e-1;
+        var f = Math.sqrt(3);
+
+        for (var i = 0; i < d; i++)
         {
-            var di = i - d2;
-            var dj = j - d2;
-            var hh = r - Math.sqrt( di * di + dj * dj );
-            var Index = (i * d + d - j - 1) * 4;
-            if (hh >= 0)
+            for (var j = 0; j < d; j++)
             {
-                var z = r * r - di * di - dj * dj;
-
-                if (z > 0)
-                    z = Math.sqrt(z) * f;
-                else
-                    z = 0;
-
-                var x = di;
-                var y = dj;
-
-                var xr = Math.sqrt( 6 * ( x * x + y * y + z * z ) );
-                xr = (2 * z - x + y) / xr;
-
-                var xg = 0;
-
-                if (xr > 0.9)
-                    xg = (xr - 0.9) * 10;
-
-                var alpha = 255;
-
-                if ( hh <= pixel )
+                var di = i - d2;
+                var dj = j - d2;
+                var hh = r - Math.sqrt(di * di + dj * dj);
+                var Index = (i * d + d - j - 1) * 4;
+                if (hh >= 0)
                 {
-                    hh = (pixel - hh) / pixel;
-                    var shade = shadow;
-                    if (di - dj < r/3)
-                        shade = 1;
+                    var z = r * r - di * di - dj * dj;
 
-                    alpha = parseInt((1 - hh * shade ) * 255);
+                    if (z > 0)
+                        z = Math.sqrt(z) * f;
+                    else
+                        z = 0;
+
+                    var x = di;
+                    var y = dj;
+
+                    var xr = Math.sqrt(6 * ( x * x + y * y + z * z ));
+                    xr = (2 * z - x + y) / xr;
+
+                    var xg = 0;
+
+                    if (xr > 0.9)
+                        xg = (xr - 0.9) * 10;
+
+                    var alpha = 255;
+
+                    if (hh <= pixel)
+                    {
+                        hh = (pixel - hh) / pixel;
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+
+                        alpha = parseInt((1 - hh * shade ) * 255);
+                    }
+
+                    var g = parseInt(10 + 10 * xr + xg * 140);
+
+                    BlackBitmap[Index + 0] = g;
+                    BlackBitmap[Index + 1] = g;
+                    BlackBitmap[Index + 2] = g;
+                    BlackBitmap[Index + 3] = alpha;
+
+                    BlackTarget[Index + 0] = g;
+                    BlackTarget[Index + 1] = g;
+                    BlackTarget[Index + 2] = g;
+                    BlackTarget[Index + 3] = parseInt(alpha / 2);
+
+                    g = parseInt(200 + 10 * xr + xg * 45);
+
+                    WhiteBitmap[Index + 0] = g;
+                    WhiteBitmap[Index + 1] = g;
+                    WhiteBitmap[Index + 2] = g;
+                    WhiteBitmap[Index + 3] = alpha;
+
+                    WhiteTarget[Index + 0] = g;
+                    WhiteTarget[Index + 1] = g;
+                    WhiteTarget[Index + 2] = g;
+                    WhiteTarget[Index + 3] = parseInt(alpha / 2);
                 }
+                else
+                {
+                    BlackBitmap[Index + 0] = 0;
+                    BlackBitmap[Index + 1] = 0;
+                    BlackBitmap[Index + 2] = 0;
+                    BlackBitmap[Index + 3] = 0;
 
-                var g = parseInt(10 + 10 * xr + xg * 140);
+                    BlackTarget[Index + 0] = 0;
+                    BlackTarget[Index + 1] = 0;
+                    BlackTarget[Index + 2] = 0;
+                    BlackTarget[Index + 3] = 0;
 
-                BlackBitmap[Index + 0] = g;
-                BlackBitmap[Index + 1] = g;
-                BlackBitmap[Index + 2] = g;
-                BlackBitmap[Index + 3] = alpha;
+                    WhiteBitmap[Index + 0] = 0;
+                    WhiteBitmap[Index + 1] = 0;
+                    WhiteBitmap[Index + 2] = 0;
+                    WhiteBitmap[Index + 3] = 0;
 
-                BlackTarget[Index + 0] = g;
-                BlackTarget[Index + 1] = g;
-                BlackTarget[Index + 2] = g;
-                BlackTarget[Index + 3] = parseInt(alpha / 2);
-
-                g = parseInt(200 + 10 * xr + xg * 45);
-
-                WhiteBitmap[Index + 0] = g;
-                WhiteBitmap[Index + 1] = g;
-                WhiteBitmap[Index + 2] = g;
-                WhiteBitmap[Index + 3] = alpha;
-
-                WhiteTarget[Index + 0] = g;
-                WhiteTarget[Index + 1] = g;
-                WhiteTarget[Index + 2] = g;
-                WhiteTarget[Index + 3] = parseInt(alpha / 2);
+                    WhiteTarget[Index + 0] = 0;
+                    WhiteTarget[Index + 1] = 0;
+                    WhiteTarget[Index + 2] = 0;
+                    WhiteTarget[Index + 3] = 0;
+                }
             }
-            else
+        }
+    }
+    else
+    {
+        var d2 = d / 2.0 - 5e-1;
+        var r = d2 - 2e-1;
+
+        for (var i = 0; i < d; i++)
+        {
+            for (var j = 0; j < d; j++)
             {
-                BlackBitmap[Index + 0] = 0;
-                BlackBitmap[Index + 1] = 0;
-                BlackBitmap[Index + 2] = 0;
-                BlackBitmap[Index + 3] = 0;
+                var di = i - d2;
+                var dj = j - d2;
+                var hh = r - Math.sqrt(di * di + dj * dj);
+                var Index = (i * d + d - j - 1) * 4;
+                if (hh >= 0)
+                {
+                    var alpha = 255;
 
-                BlackTarget[Index + 0] = 0;
-                BlackTarget[Index + 1] = 0;
-                BlackTarget[Index + 2] = 0;
-                BlackTarget[Index + 3] = 0;
+                    if (hh <= pixel)
+                    {
+                        var _hh = (pixel - hh) / pixel;
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
 
-                WhiteBitmap[Index + 0] = 0;
-                WhiteBitmap[Index + 1] = 0;
-                WhiteBitmap[Index + 2] = 0;
-                WhiteBitmap[Index + 3] = 0;
+                        alpha = parseInt((1 - _hh * shade ) * 255);
+                    }
+                    else if (hh <= 2 *pixel && hh >= pixel && true === this.m_bDarkBoard)
+                    {
+                        var _hh = (2 * pixel - hh) / (pixel);
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+                        alpha = parseInt(_hh * shade * 255);
+                    }
 
-                WhiteTarget[Index + 0] = 0;
-                WhiteTarget[Index + 1] = 0;
-                WhiteTarget[Index + 2] = 0;
-                WhiteTarget[Index + 3] = 0;
+                    var bBorder = false;
+                    if (hh <= 2 *pixel)
+                    {
+                        bBorder = true;
+                    }
+
+                    if (false === bBorder || false === this.m_bDarkBoard)
+                    {
+                        BlackBitmap[Index + 0] = 0;
+                        BlackBitmap[Index + 1] = 0;
+                        BlackBitmap[Index + 2] = 0;
+                        BlackBitmap[Index + 3] = alpha;
+
+                        BlackTarget[Index + 0] = 0;
+                        BlackTarget[Index + 1] = 0;
+                        BlackTarget[Index + 2] = 0;
+                        BlackTarget[Index + 3] = parseInt(alpha / 2);
+                    }
+                    else
+                    {
+                        BlackBitmap[Index + 0] = 255;
+                        BlackBitmap[Index + 1] = 255;
+                        BlackBitmap[Index + 2] = 255;
+                        BlackBitmap[Index + 3] = alpha;
+
+                        BlackTarget[Index + 0] = 255;
+                        BlackTarget[Index + 1] = 255;
+                        BlackTarget[Index + 2] = 255;
+                        BlackTarget[Index + 3] = alpha;
+                    }
+
+                    alpha = 255;
+                    if (hh <= pixel)
+                    {
+                        var _hh = (pixel - hh) / pixel;
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+
+                        alpha = parseInt((1 - _hh * shade ) * 255);
+                    }
+                    else if (hh <= 2 *pixel && hh >= pixel && false === this.m_bDarkBoard)
+                    {
+                        var _hh = (2 * pixel - hh) / (pixel);
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+                        alpha = parseInt(_hh * shade * 255);
+                    }
+
+                    if (false === bBorder || true === this.m_bDarkBoard)
+                    {
+                        WhiteBitmap[Index + 0] = 255;
+                        WhiteBitmap[Index + 1] = 255;
+                        WhiteBitmap[Index + 2] = 255;
+                        WhiteBitmap[Index + 3] = alpha;
+
+                        WhiteTarget[Index + 0] = 255;
+                        WhiteTarget[Index + 1] = 255;
+                        WhiteTarget[Index + 2] = 255;
+                        WhiteTarget[Index + 3] = parseInt(alpha / 2);
+                    }
+                    else
+                    {
+                        WhiteBitmap[Index + 0] = 0;
+                        WhiteBitmap[Index + 1] = 0;
+                        WhiteBitmap[Index + 2] = 0;
+                        WhiteBitmap[Index + 3] = alpha;
+
+                        WhiteTarget[Index + 0] = 0;
+                        WhiteTarget[Index + 1] = 0;
+                        WhiteTarget[Index + 2] = 0;
+                        WhiteTarget[Index + 3] = alpha;
+                    }
+                }
+                else
+                {
+                    BlackBitmap[Index + 0] = 0;
+                    BlackBitmap[Index + 1] = 0;
+                    BlackBitmap[Index + 2] = 0;
+                    BlackBitmap[Index + 3] = 0;
+
+                    BlackTarget[Index + 0] = 0;
+                    BlackTarget[Index + 1] = 0;
+                    BlackTarget[Index + 2] = 0;
+                    BlackTarget[Index + 3] = 0;
+
+                    WhiteBitmap[Index + 0] = 0;
+                    WhiteBitmap[Index + 1] = 0;
+                    WhiteBitmap[Index + 2] = 0;
+                    WhiteBitmap[Index + 3] = 0;
+
+                    WhiteTarget[Index + 0] = 0;
+                    WhiteTarget[Index + 1] = 0;
+                    WhiteTarget[Index + 2] = 0;
+                    WhiteTarget[Index + 3] = 0;
+                }
             }
         }
     }
@@ -1224,7 +1453,9 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
     WhiteStones2.push(WhiteTarget);
     WhiteStones2.push(WhiteBitmap);
 
-    this.private_CreateSlateWhiteStones(WhiteStones2, W, H, d, d);
+    if (true === this.m_bShellWhiteStones)
+        this.private_CreateShellWhiteStones(WhiteStones2, d, d);
+
     this.m_oImageData.WhiteStones  = WhiteStones;
 
     var oSize = this.m_oLogicBoard.Get_Size();
@@ -1237,8 +1468,11 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
         }
     }
 };
-CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w, h, _w, _h)
+CDrawingBoard.prototype.private_CreateShellWhiteStones = function(ImageDatas, _w, _h)
 {
+    var w = (_w / 51 * 978) | 0;
+    var h = w;
+
     var f = 9e-1;
 
     var dCoffWf = new Array( w );
@@ -1260,7 +1494,7 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
     {
         for (var j = 0; j < w; j++)
         {
-            f = ( dCoffWf[j] + dCoffHf[i] ) * 75 + 0.5;
+            f = ( dCoffWf[j] + dCoffHf[i] ) * 90 + 0.5;
             f = f - Math.floor(f);
 
             if ( f < 2e-1 )
@@ -1274,84 +1508,50 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
         }
     }
 
-    var oSize = this.m_oLogicBoard.Get_Size().X;
+    var dColorDepth = 0.8;
 
-    var Lines = this.m_oImageData.Lines;
-    var Rad   = (this.m_oImageData.StoneDiam - 1) / 2;
     var Count = ImageDatas.length;
-
-    if ((9 !== oSize && 13 !== oSize && 19 !== oSize) || 0 !== this.m_oViewPort.X0 || oSize - 1 !== this.m_oViewPort.X1 || 0 !== this.m_oViewPort.Y0 || oSize - 1 !== this.m_oViewPort.Y1)
-        return;
 
     for (var Index = 0; Index < Count; Index++)
     {
         var ImageData = ImageDatas[Index];
 
-        var __x = 0;
-        var __y = 0;
+        var x, y;
 
-        var _Index = Index;
-        if (9 === oSize)
+        switch (Index)
         {
-            if (1 === Index || 9 === Index || 13 === Index || 11 === Index || 21 === Index || 23 === Index || 25 === Index)
-                _Index = Index - 1;
-        }
-        else if (13 === oSize)
-        {
-            if (3 === Index || 7 === Index || 11 === Index || 15 === Index || 23 === Index || 27 === Index)
-                _Index = Index - 1;
-        }
-
-
-        switch (_Index)
-        {
-            /*
-             case  0: __x =  5; __y =  7; break;
-             case  1: __x =  5; __y =  8; break;
-             case  2: __x = 10; __y =  8; break;
-             case  3: __x = 10; __y =  9; break;
-             case  4: __x = 10; __y = 10; break;
-             case  5: __x = 11; __y =  7; break;
-             case  6: __x = 12; __y =  7; break;
-             case  7: __x =  5; __y =  5; break;
-             case  8: __x =  4; __y =  4; break;
-             case  9: __x =  6; __y =  3; break;
-             case 10: __x =  5; __y = 18; break;
-             case 11: __x =  6; __y = 18; break;
-             */
-
-            case  0: __x =  0; __y =  3; break;
-            case  1: __x =  0; __y =  4; break;
-            case  2: __x =  0; __y =  5; break;
-            case  3: __x =  0; __y =  6; break;
-            case  4: __x =  1; __y =  3; break;
-            case  5: __x =  1; __y =  4; break;
-            case  6: __x =  1; __y =  5; break;
-            case  7: __x =  1; __y =  6; break;
-            case  8: __x =  2; __y =  3; break;
-            case  9: __x =  2; __y =  4; break;
-            case 10: __x =  2; __y =  5; break;
-            case 11: __x =  2; __y =  6; break;
-            case 12: __x =  3; __y =  3; break;
-            case 13: __x =  3; __y =  4; break;
-            case 14: __x =  3; __y =  5; break;
-            case 15: __x =  3; __y =  6; break;
-            case 16: __x =  4; __y =  3; break;
-            case 17: __x =  4; __y =  4; break;
-            case 18: __x =  4; __y =  5; break;
-            case 19: __x =  4; __y =  6; break;
-            case 20: __x =  5; __y =  3; break;
-            case 21: __x =  5; __y =  4; break;
-            case 22: __x =  5; __y =  5; break;
-            case 23: __x =  5; __y =  6; break;
-            case 24: __x =  6; __y =  3; break;
-            case 25: __x =  6; __y =  4; break;
-            case 26: __x =  6; __y =  5; break;
-            case 27: __x =  6; __y =  6; break;
+            case 0 : x = ( 12 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 1 : x = ( 12 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 2 : x = ( 12 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 3 : x = ( 12 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 4 : x = ( 62 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 5 : x = ( 62 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 6 : x = ( 62 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 7 : x = ( 62 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 8 : x = (113 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 9 : x = (113 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 10: x = (113 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 11: x = (113 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 12: x = (163 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 13: x = (163 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 14: x = (163 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 15: x = (163 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 16: x = (213 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 17: x = (213 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 18: x = (213 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 19: x = (213 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 20: x = (263 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 21: x = (263 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 22: x = (263 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 23: x = (263 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 24: x = (313 * w / 978) | 0; y = (163 * w / 978) | 0; break;
+            case 25: x = (313 * w / 978) | 0; y = (213 * w / 978) | 0; break;
+            case 26: x = (313 * w / 978) | 0; y = (263 * w / 978) | 0; break;
+            case 27: x = (313 * w / 978) | 0; y = (313 * w / 978) | 0; break;
+            case 28: x = ( 12 * w / 978) | 0; y = ( 12 * w / 978) | 0; break;
+            case 29: x = ( 12 * w / 978) | 0; y = ( 12 * w / 978) | 0; break;
         }
 
-        var x = Lines[__x].X - Rad;
-        var y = Lines[__y].Y - Rad;
 
         for (var i = 0; i < _h; i++)
         {
@@ -1360,9 +1560,9 @@ CDrawingBoard.prototype.private_CreateSlateWhiteStones = function(ImageDatas, w,
                 f = aKoefs[x + j + (y + i) * w];
 
                 var ImageDataIndex = (j + i * _w) * 4;
-                ImageData[ImageDataIndex + 0] *= f;
-                ImageData[ImageDataIndex + 1] *= f;
-                ImageData[ImageDataIndex + 2] *= f;
+                ImageData[ImageDataIndex + 0] *= Math.pow(f, dColorDepth);
+                ImageData[ImageDataIndex + 1] *= Math.pow(f, dColorDepth);
+                ImageData[ImageDataIndex + 2] *= Math.pow(f, dColorDepth);
             }
         }
     }
@@ -1500,7 +1700,7 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
                 }
                 default:
                 {
-                    if (BOARD_BLACK === Value)
+                    if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.m_bDarkBoard))
                         TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
                     else
                         TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
@@ -1575,8 +1775,8 @@ CDrawingBoard.prototype.private_CreateMarks = function()
     this.m_oImageData.Tr_White  = this.private_DrawTriangle    (d, d, d * 0.05, new CColor(255, 255, 255, 255));
     this.m_oImageData.Sq_Black  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Sq_White  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(255, 255, 255, 255));
-    this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, new CColor(0, 0, 0, 255));
-    this.m_oImageData.Ter_White = this.private_DrawFilledSquare(d, d, d * 0.05, new CColor(255, 255, 255, 255));
+    this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, new CColor(  0,   0,   0, 255), this.m_bTrueColorBoard ? new CColor(  0,   0,   0, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_White = this.private_DrawFilledSquare(d, d, d * 0.05, new CColor(255, 255, 255, 255), this.m_bTrueColorBoard ? new CColor(255, 255, 255, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
     this.m_oImageData.LastMove  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 0, 0, 255));
     this.m_oImageData.Cr_Black  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Cr_White  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 255, 255, 255));
@@ -1643,27 +1843,14 @@ CDrawingBoard.prototype.private_DrawEmptySquare = function(W, H, PenWidth, Color
     var _y1  = -H / 2 * Math.sqrt(2) / 2 + H / 2;
     var _y2  =  H / 2 * Math.sqrt(2) / 2 + H / 2;
 
-    var _x1 =  Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
-    var _x2 = -Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
+    var _x1 = -Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
+    var _x2 = +Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
 
-    var x1 = Math.floor(_x1 - shift);
-    var x2 = Math.ceil(_x2 + shift);
-    var y1 = Math.ceil(_y1 + shift);
-    var y2 = Math.floor(_y2 - shift);
-
-    MarksCanvas.beginPath();
-    MarksCanvas.moveTo(x1, y1);
-    MarksCanvas.lineTo(x2, y1);
-    MarksCanvas.lineTo(x2, y2);
-    MarksCanvas.lineTo(x1, y2);
-    MarksCanvas.closePath();
-    MarksCanvas.stroke();
-
-    return MarksCanvas.getImageData(0, 0, W, H);
-};
-CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, Color)
-{
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+    var x1 = Math.floor(_x1);
+    var x2 = Math.ceil(_x2);
+    var y1 = Math.ceil(_y1);
+    var y2 = Math.floor(_y2);
+    var width = Math.floor(PenWidth);
 
     var ImageData = MarksCanvas.createImageData(W, H);
     for (var i = 0; i < H; i++)
@@ -1672,7 +1859,8 @@ CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, Colo
         {
             var Index = (i * W + j) * 4;
 
-            if ( i >= H / 3 && i <= H * 2 / 3 && j >= W / 3 && j <= W * 2 / 3 )
+            if ( (((x1 <= j && j <= x1 + width) || (x2 - width <= j && j <= x2)) && y1 <= i && i <= y2) ||
+                 (((y1 <= i && i <= y1 + width) || (y2 - width <= i && i <= y2)) && x1 <= j && j <= x2) )
             {
                 ImageData.data[Index + 0] = Color.r;
                 ImageData.data[Index + 1] = Color.g;
@@ -1680,6 +1868,80 @@ CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, Colo
                 ImageData.data[Index + 3] = 255;
             }
             else
+            {
+                ImageData.data[Index + 0] = 0;
+                ImageData.data[Index + 1] = 0;
+                ImageData.data[Index + 2] = 0;
+                ImageData.data[Index + 3] = 0;
+            }
+        }
+    }
+
+
+    return ImageData;
+
+//    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+//    MarksCanvas.clearRect(0, 0, W, H);
+//
+//    MarksCanvas.strokeStyle = Color.ToString();
+//    MarksCanvas.fillStyle   = Color.ToString();
+//    MarksCanvas.lineWidth   = Math.floor(Math.floor(PenWidth + 0.5));
+//
+//    var r     = W / 2;
+//    var shift = PenWidth;
+//
+//    var _y1  = -H / 2 * Math.sqrt(2) / 2 + H / 2;
+//    var _y2  =  H / 2 * Math.sqrt(2) / 2 + H / 2;
+//
+//    var _x1 =  Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
+//    var _x2 = -Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
+//
+//    var x1 = Math.floor(_x1 - shift);
+//    var x2 = Math.ceil(_x2 + shift);
+//    var y1 = Math.ceil(_y1 + shift);
+//    var y2 = Math.floor(_y2 - shift);
+//
+//    MarksCanvas.beginPath();
+//    MarksCanvas.moveTo(x1, y1);
+//    MarksCanvas.lineTo(x2, y1);
+//    MarksCanvas.lineTo(x2, y2);
+//    MarksCanvas.lineTo(x1, y2);
+//    MarksCanvas.closePath();
+//    MarksCanvas.stroke();
+//
+//    return MarksCanvas.getImageData(0, 0, W, H);
+};
+CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, Color, BorderColor)
+{
+    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+
+    var ImageData = MarksCanvas.createImageData(W, H);
+
+    var H_3   = H / 3 | 0;
+    var H_2_3 = H * 2 / 3 | 0;
+    var W_3   = W / 3 | 0;
+    var W_2_3 = W * 2 / 3 | 0;
+
+    for (var i = 0; i < H; i++)
+    {
+        for (var j = 0; j < W; j++)
+        {
+            var Index = (i * W + j) * 4;
+
+            if (((i === H_3 || i === H_2_3) && j >= W_3 && j <= W_2_3) || ((j === W_3 || j === W_2_3) && i >= H_3 && i <= H_2_3))
+            {
+                ImageData.data[Index + 0] = BorderColor.r;
+                ImageData.data[Index + 1] = BorderColor.g;
+                ImageData.data[Index + 2] = BorderColor.b;
+                ImageData.data[Index + 3] = 255;
+            }
+            else if (i > H_3 && i < H_2_3 && j > W_3 && j < W_2_3)
+            {
+                ImageData.data[Index + 0] = Color.r;
+                ImageData.data[Index + 1] = Color.g;
+                ImageData.data[Index + 2] = Color.b;
+                ImageData.data[Index + 3] = 255;
+            }            else
                 ImageData.data[Index + 3] = 0;
         }
     }
@@ -1845,16 +2107,16 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 MarksCanvas.putImageData(this.m_oImageData.LastMove, _X, _Y);
                 break;
             case EDrawingMark.Cr:
-                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
                 break;
             case EDrawingMark.Sq:
-                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
                 break;
             case EDrawingMark.Tr:
-                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
                 break;
             case EDrawingMark.X :
-                MarksCanvas.putImageData(Value === BOARD_BLACK ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
                 break;
             case EDrawingMark.Tx:
             {
@@ -1863,7 +2125,7 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
                 var sFont = FontSize + "px " + FontFamily;
 
-                MarksCanvas.fillStyle = Value === BOARD_BLACK ? "rgb(255,255,255)" : "rgb(0,0,0)";
+                MarksCanvas.fillStyle = Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? "rgb(255,255,255)" : "rgb(0,0,0)";
                 MarksCanvas.font = sFont;
 
                 var y_offset = d / 2 + FontSize / 3;

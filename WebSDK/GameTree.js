@@ -289,11 +289,11 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
     if (this.m_bTutorModeAuto)
         this.m_nTutorMode = this.Get_NextMove() === BOARD_BLACK ? BOARD_WHITE : BOARD_BLACK;
 
+    var nSize = this.m_oBoard.Get_Size().X;
     if (this.m_oDrawingBoard && oViewPort)
     {
         if (true === oViewPort.Auto)
         {
-            var nSize = this.m_oBoard.Get_Size().X;
             var X0 = (oReader.m_oViewPort.X0 <= 4 ? 0 : oReader.m_oViewPort.X0 - 2);
             var X1 = (nSize - oReader.m_oViewPort.X1 <= 3 ? nSize - 1 : oReader.m_oViewPort.X1);
             var Y0 = (oReader.m_oViewPort.Y0 <= 4 ? 0 : oReader.m_oViewPort.Y0 - 2);
@@ -303,6 +303,8 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
         else
             this.m_oDrawingBoard.Set_ViewPort(oViewPort.X0, oViewPort.Y0, oViewPort.X1, oViewPort.Y1);
     }
+    else if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Set_ViewPort(0, 0, nSize - 1, nSize - 1);
 
     if (this.m_oDrawingNavigator)
     {
