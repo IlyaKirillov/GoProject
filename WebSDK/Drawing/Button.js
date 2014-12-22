@@ -33,7 +33,8 @@ var EDrawingButtonType =
     WindowClose     : 19,
     GameInfo        : 20,
     WindowOK        : 21,
-    WindowCancel    : 22
+    WindowCancel    : 22,
+    Settings        : 23
 };
 
 var EDrawingButtonState =
@@ -757,6 +758,36 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
 
             break;
         }
+        case EDrawingButtonType.Settings:
+        {
+
+            var PenWidth = 0.02 * Size;
+            var r2    = Size / 2 - Size / 30;
+            var shift = PenWidth * 4;
+            var r     = Size / 4;// - shift;
+
+
+            Canvas.lineWidth = Math.ceil(PenWidth * 7 + 0.5);
+            Canvas.beginPath();
+            Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r, 0, 2 * Math.PI, false);
+            Canvas.stroke();
+
+            Canvas.lineWidth = Math.ceil(PenWidth * 5 + 0.5);
+
+            for (var Index = 0, Count = 9; Index < Count; Index++)
+            {
+                Canvas.beginPath();
+                var nAngle = (360 / Count * Index)  * Math.PI / 180;
+                Canvas.lineTo(X_off + r  * Math.cos(nAngle) + Size / 2, Y_off - r  * Math.sin(nAngle) + Size / 2);
+                Canvas.lineTo(X_off + r2 * Math.cos(nAngle) + Size / 2, Y_off - r2 * Math.sin(nAngle) + Size / 2);
+                Canvas.stroke();
+            }
+
+
+
+
+            break;
+        }
     };
 
     return Canvas.getImageData(0, 0, W, H);
@@ -834,32 +865,25 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.WindowClose    : this.m_oGameTree.Close(); break;
         case EDrawingButtonType.GameInfo       :
         {
-            var sId = this.HtmlElement.Control.HtmlElement.id + "GameInfo";
+//            var Canvas = document.createElement("canvas");
+//            var Context = Canvas.getContext("2d");
+//            var oDrawingBoard = this.m_oGameTree.m_oDrawingBoard;
+//
+//            Canvas.width  = oDrawingBoard.HtmlElement.Board.Control.HtmlElement.width;
+//            Canvas.height = oDrawingBoard.HtmlElement.Board.Control.HtmlElement.height;
+//
+//            Context.drawImage(oDrawingBoard.HtmlElement.Board.Control.HtmlElement, 0, 0);
+//            Context.drawImage(oDrawingBoard.HtmlElement.Lines.Control.HtmlElement, 0, 0);
+//            Context.drawImage(oDrawingBoard.HtmlElement.Shadow.Control.HtmlElement, 0, 0);
+//            Context.drawImage(oDrawingBoard.HtmlElement.Stones.Control.HtmlElement, 0, 0);
+//            Context.drawImage(oDrawingBoard.HtmlElement.Marks.Control.HtmlElement, 0, 0);
+//
+//            var myImage = Canvas.toDataURL("image/png");
+//            window.location.href=myImage;
+//
+//            break;
 
-            var oDiv = document.getElementById(sId);
-            if (oDiv)
-            {
-                oDiv.style.left = "100px";
-                oDiv.style.top  = "100px";
-            }
-            else
-            {
-                oDiv = document.createElement("div");
-                oDiv.setAttribute("id", sId);
-                oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:500px;height: 500px; left : 100px; top:100px;");
-                oDiv.setAttribute("oncontextmenu", "return false;");
-                var aBody = document.getElementsByTagName('body');
-
-                if (aBody.length > 0)
-                {
-                    var oBody = aBody[0];
-                    oBody.appendChild(oDiv);
-
-                    var oWindow = new CDrawingInfoWindow();
-                    oWindow.Init(sId, this.m_oGameTree);
-                }
-            }
-
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.GameInfo, {GameTree : this.m_oGameTree});
             break;
         }
         case EDrawingButtonType.WindowOK:
@@ -874,6 +898,11 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
             if (this.m_oGameTree)
                 this.m_oGameTree.Handle_Cancel();
 
+            break;
+        }
+        case EDrawingButtonType.Settings:
+        {
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.Settings, {GameTree : this.m_oGameTree});
             break;
         }
     };
@@ -904,6 +933,7 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.GameInfo       : return "Game info";
         case EDrawingButtonType.WindowCancel   : return "Cancel";
         case EDrawingButtonType.WindowOK       : return "OK";
+        case EDrawingButtonType.Settings       : return "Settings";
     };
 };
 CDrawingButton.prototype.private_RegisterButton = function()
@@ -933,4 +963,3 @@ CDrawingButton.prototype.private_RegisterButton = function()
         };
     }
 };
-

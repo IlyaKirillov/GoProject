@@ -246,7 +246,7 @@ function CDrawingWindow()
     };
 }
 
-CDrawingWindow.prototype.Init = function(sDivId)
+CDrawingWindow.prototype.Init = function(sDivId, bResizable)
 {
     var oThis = this;
 
@@ -323,88 +323,115 @@ CDrawingWindow.prototype.Init = function(sDivId)
         oThis.Update_Size();
     };
 
-    // Left Handler
-    var sLeftHandlerId      = sDivId + "_LeftHandler";
-    var oLeftHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftHandlerId);
-    var oLeftHandlerControl = CreateControlContainer(sLeftHandlerId);
-    oLeftHandlerControl.Bounds.SetParams(0, 6, 1000, 6, false, true, false, true, 6, -1);
-    oLeftHandlerControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
-    oMainControl.AddControl(oLeftHandlerControl);
-    oLeftHandlerElement.style.cursor = "w-resize";
-    this.HtmlElement.HandlerL = oLeftHandlerElement;
+    if (false !== bResizable)
+    {
+        // Left Handler
+        var sLeftHandlerId = sDivId + "_LeftHandler";
+        var oLeftHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftHandlerId);
+        var oLeftHandlerControl = CreateControlContainer(sLeftHandlerId);
+        oLeftHandlerControl.Bounds.SetParams(0, 6, 1000, 6, false, true, false, true, 6, -1);
+        oLeftHandlerControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+        oMainControl.AddControl(oLeftHandlerControl);
+        oLeftHandlerElement.style.cursor = "w-resize";
+        this.HtmlElement.HandlerL = oLeftHandlerElement;
 
-    // Right Handler
-    var sRightHandlerId      = sDivId + "_RightHandler";
-    var oRightHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightHandlerId);
-    var oRightHandlerControl = CreateControlContainer(sRightHandlerId);
-    oRightHandlerControl.Bounds.SetParams(0, 6, 0, 6, false, true, true, true, 6, -1);
-    oRightHandlerControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
-    oMainControl.AddControl(oRightHandlerControl);
-    oRightHandlerElement.style.cursor = "w-resize";
-    this.HtmlElement.HandlerR = oRightHandlerElement;
+        // Right Handler
+        var sRightHandlerId = sDivId + "_RightHandler";
+        var oRightHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightHandlerId);
+        var oRightHandlerControl = CreateControlContainer(sRightHandlerId);
+        oRightHandlerControl.Bounds.SetParams(0, 6, 0, 6, false, true, true, true, 6, -1);
+        oRightHandlerControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+        oMainControl.AddControl(oRightHandlerControl);
+        oRightHandlerElement.style.cursor = "w-resize";
+        this.HtmlElement.HandlerR = oRightHandlerElement;
 
-    // Bottom Handler
-    var sBottomHandlerId      = sDivId + "_BottomHandler";
-    var oBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sBottomHandlerId);
-    var oBottomHandlerControl = CreateControlContainer(sBottomHandlerId);
-    oBottomHandlerControl.Bounds.SetParams(6, 0, 6, 0, true, false, true, true, -1, 6);
-    oBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_right | g_anchor_left);
-    oMainControl.AddControl(oBottomHandlerControl);
-    oBottomHandlerElement.style.cursor = "s-resize";
-    this.HtmlElement.HandlerB = oBottomHandlerElement;
+        // Bottom Handler
+        var sBottomHandlerId = sDivId + "_BottomHandler";
+        var oBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sBottomHandlerId);
+        var oBottomHandlerControl = CreateControlContainer(sBottomHandlerId);
+        oBottomHandlerControl.Bounds.SetParams(6, 0, 6, 0, true, false, true, true, -1, 6);
+        oBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_right | g_anchor_left);
+        oMainControl.AddControl(oBottomHandlerControl);
+        oBottomHandlerElement.style.cursor = "s-resize";
+        this.HtmlElement.HandlerB = oBottomHandlerElement;
 
-    // Top Handler
-    var sTopHandlerId      = sDivId + "_TopHandler";
-    var oTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sTopHandlerId);
-    var oTopHandlerControl = CreateControlContainer(sTopHandlerId);
-    oTopHandlerControl.Bounds.SetParams(6, 0, 6, 1000, true, true, true, false, -1, 6);
-    oTopHandlerControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_left);
-    oMainControl.AddControl(oTopHandlerControl);
-    oTopHandlerElement.style.cursor = "s-resize";
-    this.HtmlElement.HandlerT = oTopHandlerElement;
+        // Top Handler
+        var sTopHandlerId = sDivId + "_TopHandler";
+        var oTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sTopHandlerId);
+        var oTopHandlerControl = CreateControlContainer(sTopHandlerId);
+        oTopHandlerControl.Bounds.SetParams(6, 0, 6, 1000, true, true, true, false, -1, 6);
+        oTopHandlerControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_left);
+        oMainControl.AddControl(oTopHandlerControl);
+        oTopHandlerElement.style.cursor = "s-resize";
+        this.HtmlElement.HandlerT = oTopHandlerElement;
 
-    // Left-Top Handler
-    var sLeftTopHandlerId      = sDivId + "_LeftTopHandler";
-    var oLeftTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftTopHandlerId);
-    var oLeftTopHandlerControl = CreateControlContainer(sLeftTopHandlerId);
-    oLeftTopHandlerControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, 6, 6);
-    oLeftTopHandlerControl.Anchor = (g_anchor_top | g_anchor_left);
-    oMainControl.AddControl(oLeftTopHandlerControl);
-    oLeftTopHandlerElement.style.cursor = "se-resize";
-    this.HtmlElement.HandlerLT = oLeftTopHandlerElement;
+        // Left-Top Handler
+        var sLeftTopHandlerId = sDivId + "_LeftTopHandler";
+        var oLeftTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftTopHandlerId);
+        var oLeftTopHandlerControl = CreateControlContainer(sLeftTopHandlerId);
+        oLeftTopHandlerControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, 6, 6);
+        oLeftTopHandlerControl.Anchor = (g_anchor_top | g_anchor_left);
+        oMainControl.AddControl(oLeftTopHandlerControl);
+        oLeftTopHandlerElement.style.cursor = "se-resize";
+        this.HtmlElement.HandlerLT = oLeftTopHandlerElement;
 
-    // Right-Top Handler
-    var sRightTopHandlerId      = sDivId + "_RightTopHandler";
-    var oRightTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightTopHandlerId);
-    var oRightTopHandlerControl = CreateControlContainer(sRightTopHandlerId);
-    oRightTopHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, true, false, 6, 6);
-    oRightTopHandlerControl.Anchor = (g_anchor_top | g_anchor_right);
-    oMainControl.AddControl(oRightTopHandlerControl);
-    oRightTopHandlerElement.style.cursor = "ne-resize";
-    this.HtmlElement.HandlerRT = oRightTopHandlerElement;
+        // Right-Top Handler
+        var sRightTopHandlerId = sDivId + "_RightTopHandler";
+        var oRightTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightTopHandlerId);
+        var oRightTopHandlerControl = CreateControlContainer(sRightTopHandlerId);
+        oRightTopHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, true, false, 6, 6);
+        oRightTopHandlerControl.Anchor = (g_anchor_top | g_anchor_right);
+        oMainControl.AddControl(oRightTopHandlerControl);
+        oRightTopHandlerElement.style.cursor = "ne-resize";
+        this.HtmlElement.HandlerRT = oRightTopHandlerElement;
 
-    // Left-Bottom Handler
-    var sLeftBottomHandlerId      = sDivId + "_LeftBottomHandler";
-    var oLeftBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftBottomHandlerId);
-    var oLeftBottomHandlerControl = CreateControlContainer(sLeftBottomHandlerId);
-    oLeftBottomHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, false, false, 6, 6);
-    oLeftBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_left);
-    oMainControl.AddControl(oLeftBottomHandlerControl);
-    oLeftBottomHandlerElement.style.cursor = "ne-resize";
-    this.HtmlElement.HandlerLB = oLeftBottomHandlerElement;
+        // Left-Bottom Handler
+        var sLeftBottomHandlerId = sDivId + "_LeftBottomHandler";
+        var oLeftBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftBottomHandlerId);
+        var oLeftBottomHandlerControl = CreateControlContainer(sLeftBottomHandlerId);
+        oLeftBottomHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, false, false, 6, 6);
+        oLeftBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_left);
+        oMainControl.AddControl(oLeftBottomHandlerControl);
+        oLeftBottomHandlerElement.style.cursor = "ne-resize";
+        this.HtmlElement.HandlerLB = oLeftBottomHandlerElement;
 
-    // Right-Bottom Handler
-    var sRightBottomHandlerId      = sDivId + "_RightBottomHandler";
-    var oRightBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightBottomHandlerId);
-    var oRightBottomHandlerControl = CreateControlContainer(sRightBottomHandlerId);
-    oRightBottomHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, true, false, 6, 6);
-    oRightBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_right);
-    oMainControl.AddControl(oRightBottomHandlerControl);
-    oRightBottomHandlerElement.style.cursor = "se-resize";
-    this.HtmlElement.HandlerRB = oRightBottomHandlerElement;
+        // Right-Bottom Handler
+        var sRightBottomHandlerId = sDivId + "_RightBottomHandler";
+        var oRightBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightBottomHandlerId);
+        var oRightBottomHandlerControl = CreateControlContainer(sRightBottomHandlerId);
+        oRightBottomHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, true, false, 6, 6);
+        oRightBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_right);
+        oMainControl.AddControl(oRightBottomHandlerControl);
+        oRightBottomHandlerElement.style.cursor = "se-resize";
+        this.HtmlElement.HandlerRB = oRightBottomHandlerElement;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
+        this.HtmlElement.HandlerL.onDrag = this.private_OnDragLeftHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
+        this.HtmlElement.HandlerR.onDrag = this.private_OnDragRightHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
+        this.HtmlElement.HandlerT.onDrag = this.private_OnDragTopHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
+        this.HtmlElement.HandlerB.onDrag = this.private_OnDragBottomHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
+        this.HtmlElement.HandlerLT.onDrag = this.private_OnDragLeftTopHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerRT, null, null, null, null, null);
+        this.HtmlElement.HandlerRT.onDrag = this.private_OnDragRightTopHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerLB, null, null, null, null, null);
+        this.HtmlElement.HandlerLB.onDrag = this.private_OnDragLeftBottomHandler;
+
+        Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
+        this.HtmlElement.HandlerRB.onDrag = this.private_OnDragRightBottomHandler;
+    }
 
     // CloseButton
-    var sCloseButtonId      = sDivId + "_Close";
+    var sCloseButtonId = sDivId + "_Close";
     var oCloseButtonElement = this.protected_CreateDivElement(oMainDiv, sCloseButtonId);
     var oCloseButtonControl = CreateControlContainer(sCloseButtonId);
     oCloseButtonControl.Bounds.SetParams(0, 0, 6, 1000, false, true, true, false, 45, 20);
@@ -414,37 +441,11 @@ CDrawingWindow.prototype.Init = function(sDivId)
 
     var oCloseButton = new CDrawingButton(this.m_oDrawing);
     oCloseButton.Init(sCloseButtonId, this, EDrawingButtonType.WindowClose);
-    oCloseButton.m_oNormaFColor  = new CColor(199,  80,  80, 255);
-    oCloseButton.m_oHoverFColor  = new CColor(224,  67,  67, 255);
-    oCloseButton.m_oActiveFColor = new CColor(153,  61,  61, 255);
+    oCloseButton.m_oNormaFColor = new CColor(199, 80, 80, 255);
+    oCloseButton.m_oHoverFColor = new CColor(224, 67, 67, 255);
+    oCloseButton.m_oActiveFColor = new CColor(153, 61, 61, 255);
 
     this.HtmlElement.CloseButton = oCloseButton;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
-    this.HtmlElement.HandlerL.onDrag = this.private_OnDragLeftHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
-    this.HtmlElement.HandlerR.onDrag = this.private_OnDragRightHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
-    this.HtmlElement.HandlerT.onDrag = this.private_OnDragTopHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
-    this.HtmlElement.HandlerB.onDrag = this.private_OnDragBottomHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
-    this.HtmlElement.HandlerLT.onDrag = this.private_OnDragLeftTopHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerRT, null, null, null, null, null);
-    this.HtmlElement.HandlerRT.onDrag = this.private_OnDragRightTopHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerLB, null, null, null, null, null);
-    this.HtmlElement.HandlerLB.onDrag = this.private_OnDragLeftBottomHandler;
-
-    Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
-    this.HtmlElement.HandlerRB.onDrag = this.private_OnDragRightBottomHandler;
-
-    this.Update_Size(true);
 };
 CDrawingWindow.prototype.Update_Size = function(bForce)
 {
@@ -458,30 +459,6 @@ CDrawingWindow.prototype.Update_Size = function(bForce)
 
         this.HtmlElement.Control.Resize(W, H);
         this.HtmlElement.CloseButton.Update_Size();
-
-//        Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
-//        this.HtmlElement.HandlerL.onDrag = this.private_OnDragLeftHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
-//        this.HtmlElement.HandlerR.onDrag = this.private_OnDragRightHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
-//        this.HtmlElement.HandlerT.onDrag = this.private_OnDragTopHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
-//        this.HtmlElement.HandlerB.onDrag = this.private_OnDragBottomHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
-//        this.HtmlElement.HandlerLT.onDrag = this.private_OnDragLeftTopHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerRT, null, null, null, null, null);
-//        this.HtmlElement.HandlerRT.onDrag = this.private_OnDragRightTopHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerLB, null, null, null, null, null);
-//        this.HtmlElement.HandlerLB.onDrag = this.private_OnDragLeftBottomHandler;
-//
-//        Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
-//        this.HtmlElement.HandlerRB.onDrag = this.private_OnDragRightBottomHandler;
     }
 };
 CDrawingWindow.prototype.Close = function()
@@ -508,31 +485,26 @@ CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, s
     return oElement;
 };
 
-function CDrawingInfoWindow()
+function CDrawingConfirmWindow()
 {
-    CDrawingInfoWindow.superclass.constructor.call(this);
+    CDrawingConfirmWindow.superclass.constructor.call(this);
 
     this.HtmlElement.OKButton     = null;
     this.HtmlElement.CancelButton = null;
 
-    this.HtmlElement2 = {};
-    this.m_oGameTree = null;
+    this.HtmlElement.ConfirmInnerDiv     = null;
+    this.HtmlElement.ConfirmInnerControl = null;
 }
 
-CommonExtend(CDrawingInfoWindow, CDrawingWindow);
+CommonExtend(CDrawingConfirmWindow, CDrawingWindow);
 
-CDrawingInfoWindow.prototype.Init = function(_sDivId, oGameTree)
+CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
 {
-    CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
-
-    this.m_oGameTree = oGameTree;
-
-    this.Set_Caption("Game info");
+    CDrawingConfirmWindow.superclass.Init.call(this, _sDivId, bResizable);
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
     var sDivId = oMainDiv.id;
-
 
     var sContentDiv = sDivId + "Content";
     var sButtonsDiv = sDivId + "Buttons";
@@ -549,6 +521,9 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oGameTree)
     oButtonsControl.Bounds.SetParams(0, 0, 0, 0, true, false, true, true, -1, 40);
     oButtonsControl.Anchor = (g_anchor_left |g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oButtonsControl);
+
+    this.HtmlElement.ConfirmInnerControl = oContentControl;
+    this.HtmlElement.ConfirmInnerDiv     = oContentDiv;
 
     // TODO: Цвета должны быть из темы
     oButtonsDiv.style.borderTop = "1px solid rgb(172,172,172)";
@@ -596,13 +571,47 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oGameTree)
     oDrawingButttonCancel.m_oActiveFColor   = new CColor( 86, 157, 229, 255);
     oDrawingButttonCancel.m_oDisabledBColor = new CColor(239, 239, 239, 255);
     oDrawingButttonCancel.m_oDisabledFColor = new CColor(217, 217, 217, 255);
+};
+CDrawingConfirmWindow.prototype.Update_Size = function(bForce)
+{
+    CDrawingConfirmWindow.superclass.Update_Size.call(this, bForce);
 
-    //-----
+    if (this.HtmlElement.OKButton)
+        this.HtmlElement.OKButton.Update_Size();
 
+    if (this.HtmlElement.CancelButton)
+        this.HtmlElement.CancelButton.Update_Size();
+};
+CDrawingConfirmWindow.prototype.Handle_Cancel = function()
+{
+    this.Close();
+};
+CDrawingConfirmWindow.prototype.Handle_OK = function()
+{
+    this.Close();
+};
 
-    oMainControl = oContentControl;
-    oMainDiv     = oContentDiv;
-    sDivId       = sContentDiv;
+function CDrawingInfoWindow()
+{
+    CDrawingInfoWindow.superclass.constructor.call(this);
+
+    this.HtmlElement2 = {};
+    this.m_oGameTree = null;
+}
+
+CommonExtend(CDrawingInfoWindow, CDrawingConfirmWindow);
+
+CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
+
+    this.m_oGameTree = oPr.GameTree;
+
+    this.Set_Caption("Game info");
+
+    var oMainControl = this.HtmlElement.ConfirmInnerControl;
+    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id;
 
     oMainDiv.style.overflowX = "hidden";
     oMainDiv.style.overflowY = "scroll";
@@ -661,8 +670,6 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oGameTree)
     BottomControl.Bounds.SetParams(0, TopOffset, 1000, 1000, true, true, false, false, 0, BottomOffset);
     BottomControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
     oMainControl.AddControl(BottomControl);
-
-    this.Update_Size(true);
 };
 CDrawingInfoWindow.prototype.Update_Size = function(bForce)
 {
@@ -775,9 +782,11 @@ function CDrawingErrorWindow()
 
 CommonExtend(CDrawingErrorWindow, CDrawingWindow);
 
-CDrawingErrorWindow.prototype.Init = function(_sDivId, sText)
+CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
 {
-    CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
+    CDrawingInfoWindow.superclass.Init.call(this, _sDivId, false);
+
+    var sText = oPr.ErrorText;
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
@@ -787,4 +796,295 @@ CDrawingErrorWindow.prototype.Init = function(_sDivId, sText)
 
     oMainDiv.innerHTML = sText;
     oMainDiv.innerText = sText;
+};
+
+function CDrawingSettingsWindow()
+{
+    CDrawingSettingsWindow.superclass.constructor.call(this);
+
+    this.m_oGameTree = null;
+
+    this.HtmlElement2 =
+    {
+        Theme :
+        {
+            TrueColor   : null,
+            SimpleColor : null,
+            BookStyle   : null,
+            Dark        : null
+        }
+    };
+}
+
+CommonExtend(CDrawingSettingsWindow, CDrawingConfirmWindow);
+
+CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingSettingsWindow.superclass.Init.call(this, _sDivId, false);
+    var oWindowDiv = document.getElementById(_sDivId);
+    oWindowDiv.style.width  = "240px";
+    oWindowDiv.style.height = "230px";
+
+    this.m_oGameTree = oPr.GameTree;
+
+    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
+    var oMainControl = this.HtmlElement.ConfirmInnerControl;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id;
+
+    this.Set_Caption("Settings");
+
+    var sThemeId = "ThemeId";
+
+    var sThemeGroupBox = sDivId + "TGB";
+    var oGroupBoxElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBox);
+    var oGroupBoxControl = CreateControlContainer(sThemeGroupBox);
+    oGroupBoxControl.Bounds.SetParams(6, 17, 8, 8, true, true, true, true, -1,-1);
+    oGroupBoxControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oGroupBoxControl);
+    oGroupBoxElement.style.border = "1px solid rgb(221,221,221)";
+
+    var sThemeGroupBoxName = sThemeGroupBox + "N";
+    var oGroupBoxNameElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBoxName);
+    var oGroupBoxNameControl = CreateControlContainer(sThemeGroupBoxName);
+    oGroupBoxNameControl.Bounds.SetParams(20, 10, 1000, 1000, true, true, false, false, 100, 15);
+    oGroupBoxNameControl.Anchor = (g_anchor_top | g_anchor_left);
+    oMainControl.AddControl(oGroupBoxNameControl);
+    oGroupBoxNameElement.style.backgroundColor = "rgb(255,255,255)";
+    oGroupBoxNameElement.style.fontFamily          = "Tahoma, Sans serif";
+    oGroupBoxNameElement.style.fontSize            = "10pt";
+    oGroupBoxNameElement.style.textAlign           = "center";
+    oGroupBoxNameElement.style.height              = "15px";
+    oGroupBoxNameElement.style.lineHeight          = "15px";
+    oGroupBoxNameElement.style.overflow            = "hidden";
+    oGroupBoxNameElement.style.textOverflow        = "ellipsis";
+    oGroupBoxNameElement.style['-o-text-overflow'] = "ellipsis";
+    oGroupBoxNameElement.style.cursor              = "default";
+    oGroupBoxNameElement.innerHTML = "Color scheme";
+    oGroupBoxNameElement.innerText = "Color scheme";
+
+    var oTopPaddingElement = document.createElement("div");
+    oTopPaddingElement.style.width  = "100%";
+    oTopPaddingElement.style.height = "10px";
+    oGroupBoxElement.appendChild(oTopPaddingElement)
+
+    this.HtmlElement2.Theme.TrueColor   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "TC", sThemeId, "TrueColor");
+    this.HtmlElement2.Theme.SimpleColor = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "SC", sThemeId, "SimpleColor");
+    this.HtmlElement2.Theme.BookStyle   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "BS", sThemeId, "BookStyle");
+    this.HtmlElement2.Theme.Dark        = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "D",  sThemeId, "Dark");
+
+    this.private_CheckColorTheme();
+};
+CDrawingSettingsWindow.prototype.Handle_OK = function()
+{
+    var oBoard     = this.m_oGameTree.Get_DrawingBoard();
+    var oNavigator = this.m_oGameTree.Get_DrawingNavigator();
+
+    var bTrueColorBoard   = true;
+    var bTrueColorStones  = true;
+    var oBoardColor       = null;
+    var bShellWhiteStones = true;
+    var bShadows          = true;
+    var oWhiteColor       = new CColor(255, 255, 255, 255);
+    var oBlackColor       = new CColor(0, 0, 0, 255);
+    var oLinesColor       = new CColor(0, 0, 0, 255);
+    var bDarkTheme        = false;
+
+
+    if (this.HtmlElement2.Theme.SimpleColor.checked)
+    {
+        bTrueColorBoard   = false;
+        bTrueColorStones  = false;
+        bShellWhiteStones = false;
+        bShadows          = false;
+
+        oBoardColor       = new CColor(231, 188, 95, 255);
+        oLinesColor       = new CColor(0, 0, 0, 255);
+    }
+    else if (this.HtmlElement2.Theme.BookStyle.checked)
+    {
+        bTrueColorBoard   = false;
+        bTrueColorStones  = false;
+        bShellWhiteStones = false;
+        bShadows          = false;
+
+        oBoardColor       = new CColor(255, 255, 255, 255);
+        oLinesColor       = new CColor(0, 0, 0, 255);
+    }
+    else if (this.HtmlElement2.Theme.Dark.checked)
+    {
+        bTrueColorBoard   = false;
+        bTrueColorStones  = false;
+        bShellWhiteStones = false;
+        bShadows          = false;
+
+        oBoardColor       = new CColor(30, 30, 30, 255);
+        oWhiteColor       = new CColor(220, 220, 220, 220);
+        oLinesColor       = new CColor(255, 255, 255, 255);
+
+        bDarkTheme        = true;
+    }
+    else // TrueColor
+    {
+        bTrueColorBoard   = true;
+        bTrueColorStones  = true;
+        bShellWhiteStones = true;
+        bShadows          = true;
+
+        oBoardColor       = new CColor(231, 188, 95, 255);
+        oLinesColor       = new CColor(0, 0, 0, 255);
+    }
+
+    if (oBoard)
+    {
+        oBoard.m_bTrueColorBoard   = bTrueColorBoard   ;
+        oBoard.m_bTrueColorStones  = bTrueColorStones  ;
+        oBoard.m_oBoardColor       = oBoardColor       ;
+        oBoard.m_bShellWhiteStones = bShellWhiteStones ;
+        oBoard.m_bShadows          = bShadows          ;
+        oBoard.m_oWhiteColor       = oWhiteColor       ;
+        oBoard.m_oBlackColor       = oBlackColor       ;
+        oBoard.m_oLinesColor       = oLinesColor       ;
+        oBoard.m_bDarkBoard        = bDarkTheme        ;
+
+        oBoard.Update_Size(true);
+    }
+
+    if (oNavigator)
+    {
+        oNavigator.m_bTrueColorBoard   = bTrueColorBoard   ;
+        oNavigator.m_bTrueColorStones  = bTrueColorStones  ;
+        oNavigator.m_oBoardColor       = oBoardColor       ;
+        oNavigator.m_bShadows          = bShadows          ;
+        oNavigator.m_oWhiteColor       = oWhiteColor       ;
+        oNavigator.m_oBlackColor       = oBlackColor       ;
+        oNavigator.m_oLinesColor       = oLinesColor       ;
+        oNavigator.m_bDarkBoard        = bDarkTheme        ;
+
+        oNavigator.Update_All();
+    }
+
+    this.Close();
+};
+CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentElement, sName, sRadioIs, sRadioValue)
+{
+    var oMainElement = document.createElement("div");
+    oMainElement.style.paddingLeft   = "10px";
+    oMainElement.style.paddingBottom = "5px";
+    oParentElement.appendChild(oMainElement);
+
+    var oElement = document.createElement("input");
+    oElement.type  = "radio";
+    oElement.name  = sRadioIs;
+    oElement.value = sRadioValue;
+    oElement.setAttribute("id", sName);
+
+    oMainElement.appendChild(oElement);
+
+    var oSpan = document.createElement("span");
+    oSpan.setAttribute("oncontextmenu", "return false;");
+    oSpan.style.fontFamily  = "Tahoma, Sans serif";
+    oSpan.innerHTML = sRadioValue;
+    oSpan.innerText = sRadioValue;
+    oSpan.style.fontFamily          = "Tahoma, Sans serif";
+    oSpan.style.fontSize            = "13pt";
+    oSpan.style.height              = "15px";
+    oSpan.style.lineHeight          = "15px";
+    oSpan.style.cursor = "default";
+
+
+
+    oMainElement.appendChild(oSpan);
+
+    oSpan.onclick = function()
+    {
+        oElement.checked = true;
+    };
+
+    return oElement;
+};
+CDrawingSettingsWindow.prototype.private_CheckColorTheme = function()
+{
+    var oBoard     = this.m_oGameTree.Get_DrawingBoard();
+
+    if (!oBoard)
+        return;
+
+    if (231 === oBoard.m_oBoardColor.r)
+    {
+        // Simple or TrueColor
+        if (oBoard.m_bTrueColorBoard)
+            this.HtmlElement2.Theme.TrueColor.checked = true;
+        else
+            this.HtmlElement2.Theme.SimpleColor.checked = true;
+    }
+    else if (255 === oBoard.m_oBoardColor.r)
+    {
+        this.HtmlElement2.Theme.BookStyle.checked = true;
+    }
+    else if (30 === oBoard.m_oBoardColor.r)
+    {
+        this.HtmlElement2.Theme.Dark.checked = true;
+    }
+    else
+    {
+        this.HtmlElement2.Theme.TrueColor.checked = true;
+    }
+};
+
+var EWindowType =
+{
+    Common   : 0,
+    Confirm  : 1,
+    Error    : 2,
+    GameInfo : 3,
+    Settings : 4
+};
+
+
+function CreateWindow(sDrawingId, nWindowType, oPr)
+{
+    var sApp = "unknownwindow";
+    switch (nWindowType)
+    {
+        case EWindowType.GameInfo: sApp = "Info"; break;
+        case EWindowType.Settings: sApp = "Settings"; break;
+        case EWindowType.Error   : sApp = "Error"; break;
+    }
+    var sId = sDrawingId + sApp;
+
+    var oDiv = document.getElementById(sId);
+    if (oDiv)
+    {
+        oDiv.style.left    = "300px";
+        oDiv.style.top     = "300px";
+    }
+    else
+    {
+        oDiv = document.createElement("div");
+        oDiv.setAttribute("id", sId);
+        oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:500px;height:500px;left:300px;top:300px;");
+        oDiv.setAttribute("oncontextmenu", "return false;");
+        var aBody = document.getElementsByTagName('body');
+
+        if (aBody.length > 0)
+        {
+            var oBody = aBody[0];
+            oBody.appendChild(oDiv);
+
+            var oWindow = null;
+
+            switch (nWindowType)
+            {
+                case EWindowType.GameInfo: oWindow = new CDrawingInfoWindow(); break;
+                case EWindowType.Settings: oWindow = new CDrawingSettingsWindow(); break;
+                case EWindowType.Error   : oWindow = new CDrawingErrorWindow(); break;
+            }
+
+            if (null !== oWindow)
+            {
+                oWindow.Init(sId, oPr);
+                oWindow.Update_Size(true);
+            }
+        }
+    }
 };

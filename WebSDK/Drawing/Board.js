@@ -74,16 +74,11 @@ function CDrawingBoard(oDrawing)
     this.m_bTrueColorStones  = true;
     this.m_bShellWhiteStones = true;
     this.m_bShadows          = true;
-
-    this.m_oBoardColor      = new CColor(231, 188, 95, 255);
-    //this.m_oBoardColor      = new CColor(255, 255, 255, 255);
-    this.m_oLinesColor      = new CColor(0, 0, 0, 255);
-
-    this.m_bDarkBoard       = false;
-
-//    this.m_oBoardColor      = new CColor(0, 0, 0, 255);
-//    this.m_oLinesColor      = new CColor(255, 255, 255, 255);
-//    this.m_bDarkBoard       = true;
+    this.m_oWhiteColor       = new CColor(255, 255, 255, 255);
+    this.m_oBlackColor       = new CColor(0, 0, 0, 255);
+    this.m_oBoardColor       = new CColor(231, 188, 95, 255);
+    this.m_oLinesColor       = new CColor(0, 0, 0, 255);
+    this.m_bDarkBoard        = false;
 
     this.m_oVariantsColor   = new CColor(255,0,0, 128);
 
@@ -1337,26 +1332,26 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
 
                     if (false === bBorder || false === this.m_bDarkBoard)
                     {
-                        BlackBitmap[Index + 0] = 0;
-                        BlackBitmap[Index + 1] = 0;
-                        BlackBitmap[Index + 2] = 0;
+                        BlackBitmap[Index + 0] = this.m_oBlackColor.r;
+                        BlackBitmap[Index + 1] = this.m_oBlackColor.g;
+                        BlackBitmap[Index + 2] = this.m_oBlackColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTarget[Index + 0] = 0;
-                        BlackTarget[Index + 1] = 0;
-                        BlackTarget[Index + 2] = 0;
+                        BlackTarget[Index + 0] = this.m_oBlackColor.r;
+                        BlackTarget[Index + 1] = this.m_oBlackColor.g;
+                        BlackTarget[Index + 2] = this.m_oBlackColor.b;
                         BlackTarget[Index + 3] = parseInt(alpha / 2);
                     }
                     else
                     {
-                        BlackBitmap[Index + 0] = 255;
-                        BlackBitmap[Index + 1] = 255;
-                        BlackBitmap[Index + 2] = 255;
+                        BlackBitmap[Index + 0] = this.m_oWhiteColor.r;
+                        BlackBitmap[Index + 1] = this.m_oWhiteColor.g;
+                        BlackBitmap[Index + 2] = this.m_oWhiteColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTarget[Index + 0] = 255;
-                        BlackTarget[Index + 1] = 255;
-                        BlackTarget[Index + 2] = 255;
+                        BlackTarget[Index + 0] = this.m_oWhiteColor.r;
+                        BlackTarget[Index + 1] = this.m_oWhiteColor.g;
+                        BlackTarget[Index + 2] = this.m_oWhiteColor.b;
                         BlackTarget[Index + 3] = alpha;
                     }
 
@@ -1381,26 +1376,26 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
 
                     if (false === bBorder || true === this.m_bDarkBoard)
                     {
-                        WhiteBitmap[Index + 0] = 255;
-                        WhiteBitmap[Index + 1] = 255;
-                        WhiteBitmap[Index + 2] = 255;
+                        WhiteBitmap[Index + 0] = this.m_oWhiteColor.r;
+                        WhiteBitmap[Index + 1] = this.m_oWhiteColor.g;
+                        WhiteBitmap[Index + 2] = this.m_oWhiteColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTarget[Index + 0] = 255;
-                        WhiteTarget[Index + 1] = 255;
-                        WhiteTarget[Index + 2] = 255;
+                        WhiteTarget[Index + 0] = this.m_oWhiteColor.r;
+                        WhiteTarget[Index + 1] = this.m_oWhiteColor.g;
+                        WhiteTarget[Index + 2] = this.m_oWhiteColor.b;
                         WhiteTarget[Index + 3] = parseInt(alpha / 2);
                     }
                     else
                     {
-                        WhiteBitmap[Index + 0] = 0;
-                        WhiteBitmap[Index + 1] = 0;
-                        WhiteBitmap[Index + 2] = 0;
+                        WhiteBitmap[Index + 0] = this.m_oBlackColor.r;
+                        WhiteBitmap[Index + 1] = this.m_oBlackColor.g;
+                        WhiteBitmap[Index + 2] = this.m_oBlackColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTarget[Index + 0] = 0;
-                        WhiteTarget[Index + 1] = 0;
-                        WhiteTarget[Index + 2] = 0;
+                        WhiteTarget[Index + 0] = this.m_oBlackColor.r;
+                        WhiteTarget[Index + 1] = this.m_oBlackColor.g;
+                        WhiteTarget[Index + 2] = this.m_oBlackColor.b;
                         WhiteTarget[Index + 3] = alpha;
                     }
                 }
@@ -2337,22 +2332,8 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
             if (-1 == MoveNum)
             {
                 return alert("Sorry, no move has been made at that location, so you can't mark it with the move number!");
-                var sId = "tesetste";
-                var oDiv = document.createElement("div");
-                oDiv.setAttribute("id", sId);
-                oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:300px;height:200px; left : 100px; top:100px;");
-                oDiv.setAttribute("oncontextmenu", "return false;");
-                var aBody = document.getElementsByTagName('body');
 
-                if (aBody.length > 0)
-                {
-                    var oBody = aBody[0];
-                    oBody.appendChild(oDiv);
-
-                    var oWindow = new CDrawingErrorWindow();
-                    oWindow.Init(sId, "Sorry, no move has been made at that location, so you can't mark it with the move number!");
-                }
-
+                CreateWindow("tesetste", EWindowType.Error, {ErrorText : "Sorry, no move has been made at that location, so you can't mark it with the move number!"});
                 return;
             }
             else

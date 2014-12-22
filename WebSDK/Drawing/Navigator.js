@@ -37,8 +37,15 @@ function CDrawingNavigator(oDrawing)
         ScrollH     : 0
     };
 
-    this.m_oBoardColor    = new CColor(231, 188, 95, 255);
-    this.m_oLinesColor    = new CColor(0, 0, 0, 255);
+
+    this.m_bTrueColorBoard   = true;
+    this.m_bTrueColorStones  = true;
+    this.m_bShadows          = true;
+    this.m_oWhiteColor       = new CColor(255, 255, 255, 255);
+    this.m_oBlackColor       = new CColor(0, 0, 0, 255);
+    this.m_oBoardColor       = new CColor(231, 188, 95, 255);
+    this.m_oLinesColor       = new CColor(0, 0, 0, 255);
+    this.m_bDarkBoard        = false;
 
     this.m_oCreateWoodyId = null;
     this.m_oImageData =
@@ -316,10 +323,19 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     oEventDiv.style.outline   = 0;    // Убираем рамку фокуса в остальных браузерах
 
     // Сразу создаем камни и линии, потому что они у нас не зависят от размера Div.
-    this.private_CreateGlassStones();
+    this.private_CreateTrueColorStones();
     this.private_CreateLines();
     this.private_CreateTarget();
     this.private_CreateShadows();
+};
+CDrawingNavigator.prototype.Update_All = function()
+{
+    this.private_CreateTrueColorStones();
+    this.private_CreateLines();
+    this.private_CreateTarget();
+    this.private_CreateShadows();
+
+    this.Update_Size(true);
 };
 CDrawingNavigator.prototype.Update_Size = function(bForce)
 {
@@ -351,7 +367,7 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.HorScroll.style.position   = "absolute";
         this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
         this.HtmlElement.HorScroll.style.height     = 8 + "px";
-        this.HtmlElement.HorScroll.style.background = "rgb(0,0,0)";
+        this.HtmlElement.HorScroll.style.background = this.m_bDarkBoard ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
         this.HtmlElement.HorScroll.style.opacity    = 0.5;
 
         Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 12, NavH - 12);
@@ -373,7 +389,7 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.position   = "absolute";
         this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
         this.HtmlElement.VerScroll.style.width      = 8 + "px";
-        this.HtmlElement.VerScroll.style.background = "rgb(0,0,0)";
+        this.HtmlElement.VerScroll.style.background = this.m_bDarkBoard ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
         this.HtmlElement.VerScroll.style.opacity    = 0.5;
 
         Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 12, NavW - 12, 2, NavH - this.HtmlElement.ScrollH - 2);
@@ -495,7 +511,7 @@ CDrawingNavigator.prototype.private_OnResize = function(W, H, bForce)
 CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
 {
     var Canvas = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
-    if (W !== this.m_oImageData.W || H !== this.m_oImageData.H || null === this.m_oImageData.Board || null !== this.m_oCreateWoodyId)
+    if (W !== this.m_oImageData.W || H !== this.m_oImageData.H || null === this.m_oImageData.Board || null !== this.m_oCreateWoodyId || true === bForce)
     {
         this.m_oImageData.W = W;
         this.m_oImageData.H = H;
@@ -539,49 +555,78 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
         dCoffHf[Y] = 0.02 * Math.tan(Y / H);
 
     var r, g, b;
-    var f = 9e-1;
-    for (var Y = 0; Y < H; Y++)
+    if (true === this.m_bTrueColorBoard)
     {
-        for (var X = 0; X < W; X++)
+        var f = 9e-1;
+        for (var Y = 0; Y < H; Y++)
         {
-            f = (dCoffWf[X] + dCoffHf[Y]) * 40 + 0.5;
-            f = f - Math.floor(f);
-
-            if ( f < 2e-1 )
-                f = 1 - f / 2;
-            else if ( f < 4e-1 )
-                f = 1 - ( 4e-1 - f ) / 2;
-            else
-                f = 1;
-
-            if (Y == H - 1 || (Y == H - 2 && X < W - 2) || X >= W - 1 || (X == W - 2 && Y < H - 1))
-                f = f / 2;
-
-            if (Y == 0 || (Y == 1 && X > 1) || X == 0 || (X == 1 && Y > 1))
+            for (var X = 0; X < W; X++)
             {
-                r = 128 + Red   * f / 2;
-                g = 128 + Green * f / 2;
-                b = 128 + Blue  * f / 2;
-            }
-            else
-            {
-                r = Red   * f;
-                g = Green * f;
-                b = Blue  * f;
-            }
+                f = (dCoffWf[X] + dCoffHf[Y]) * 40 + 0.5;
+                f = f - Math.floor(f);
 
-            var Index = (X + Y * W) * 4;
-            oImageData.data[Index + 0] = r;
-            oImageData.data[Index + 1] = g;
-            oImageData.data[Index + 2] = b;
-            oImageData.data[Index + 3] = 255;
+                if (f < 2e-1)
+                    f = 1 - f / 2;
+                else if (f < 4e-1)
+                    f = 1 - ( 4e-1 - f ) / 2;
+                else
+                    f = 1;
+
+                if (Y == H - 1 || (Y == H - 2 && X < W - 2) || X >= W - 1 || (X == W - 2 && Y < H - 1))
+                    f = f / 2;
+
+                if (Y == 0 || (Y == 1 && X > 1) || X == 0 || (X == 1 && Y > 1))
+                {
+                    r = 128 + Red * f / 2;
+                    g = 128 + Green * f / 2;
+                    b = 128 + Blue * f / 2;
+                }
+                else
+                {
+                    r = Red * f;
+                    g = Green * f;
+                    b = Blue * f;
+                }
+
+                var Index = (X + Y * W) * 4;
+                oImageData.data[Index + 0] = r;
+                oImageData.data[Index + 1] = g;
+                oImageData.data[Index + 2] = b;
+                oImageData.data[Index + 3] = 255;
+            }
         }
     }
+    else
+    {
+        for (var i = 0; i < H; i++)
+        {
+            for (var j = 0; j < W; j++)
+            {
+                if (i == 0  || j == 0 || i === H - 1 || j === W - 1)
+                {
+                    r = this.m_oLinesColor.r;
+                    g = this.m_oLinesColor.g;
+                    b = this.m_oLinesColor.b;
+                }
+                else
+                {
+                    r = Red;
+                    g = Green;
+                    b = Blue;
+                }
 
+                var Index = (j + i * W) * 4;
+                oImageData.data[Index + 0] = r;
+                oImageData.data[Index + 1] = g;
+                oImageData.data[Index + 2] = b;
+                oImageData.data[Index + 3] = 255;
+            }
+        }
+    }
     this.m_oImageData.Board = oImageData;
     Canvas.putImageData(this.m_oImageData.Board, 0, 0);
 };
-CDrawingNavigator.prototype.private_CreateGlassStones = function()
+CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
 {
     var Canvas = this.HtmlElement.Nodes.Control.HtmlElement.getContext("2d");
 
@@ -596,84 +641,222 @@ CDrawingNavigator.prototype.private_CreateGlassStones = function()
     var BlackTBitmap = this.m_oImageData.BlackT.data;
     var WhiteTBitmap = this.m_oImageData.WhiteT.data;
 
-    var d2 = d / 2.0 - 5e-1;
-    var r = d2 - 2e-1;
-    var f = Math.sqrt(3);
-    for (var i = 0; i < d; i++)
+    if (true === this.m_bTrueColorStones)
     {
-        for (var j = 0; j < d; j++)
+        var d2 = d / 2.0 - 5e-1;
+        var r = d2 - 2e-1;
+        var f = Math.sqrt(3);
+        for (var i = 0; i < d; i++)
         {
-            var di = i - d2;
-            var dj = j - d2;
-            var hh = r - Math.sqrt( di * di + dj * dj );
-            var Index = (i * d + d - j - 1) * 4;
-            if (hh >= 0)
+            for (var j = 0; j < d; j++)
             {
-                var z = r * r - di * di - dj * dj;
-
-                if (z > 0)
-                    z = Math.sqrt(z) * f;
-                else
-                    z = 0;
-
-                var x = di;
-                var y = dj;
-
-                var xr = Math.sqrt( 6 * ( x * x + y * y + z * z ) );
-                xr = (2 * z - x + y) / xr;
-
-                var xg = 0;
-
-                if (xr > 0.9)
-                    xg = (xr - 0.9) * 10;
-
-                var alpha = 255;
-
-                if ( hh <= pixel )
+                var di = i - d2;
+                var dj = j - d2;
+                var hh = r - Math.sqrt(di * di + dj * dj);
+                var Index = (i * d + d - j - 1) * 4;
+                if (hh >= 0)
                 {
-                    hh = (pixel - hh) / pixel;
-                    var shade = shadow;
-                    if (di - dj < r/3)
-                        shade = 1;
+                    var z = r * r - di * di - dj * dj;
 
-                    alpha = parseInt( (1 - hh * shade ) * 255 );
+                    if (z > 0)
+                        z = Math.sqrt(z) * f;
+                    else
+                        z = 0;
+
+                    var x = di;
+                    var y = dj;
+
+                    var xr = Math.sqrt(6 * ( x * x + y * y + z * z ));
+                    xr = (2 * z - x + y) / xr;
+
+                    var xg = 0;
+
+                    if (xr > 0.9)
+                        xg = (xr - 0.9) * 10;
+
+                    var alpha = 255;
+
+                    if (hh <= pixel)
+                    {
+                        hh = (pixel - hh) / pixel;
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+
+                        alpha = parseInt((1 - hh * shade ) * 255);
+                    }
+
+                    var g = parseInt(10 + 10 * xr + xg * 140);
+
+                    BlackBitmap[Index + 0] = g;
+                    BlackBitmap[Index + 1] = g;
+                    BlackBitmap[Index + 2] = g;
+                    BlackBitmap[Index + 3] = alpha;
+
+                    BlackTBitmap[Index + 0] = g;
+                    BlackTBitmap[Index + 1] = g;
+                    BlackTBitmap[Index + 2] = g;
+                    BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
+
+                    g = parseInt(200 + 10 * xr + xg * 45);
+
+                    WhiteBitmap[Index + 0] = g;
+                    WhiteBitmap[Index + 1] = g;
+                    WhiteBitmap[Index + 2] = g;
+                    WhiteBitmap[Index + 3] = alpha;
+
+                    WhiteTBitmap[Index + 0] = g;
+                    WhiteTBitmap[Index + 1] = g;
+                    WhiteTBitmap[Index + 2] = g;
+                    WhiteTBitmap[Index + 3] = parseInt(alpha * 0.7);
                 }
+                else
+                {
+                    BlackBitmap[Index + 0] = 0;
+                    BlackBitmap[Index + 1] = 0;
+                    BlackBitmap[Index + 2] = 0;
+                    BlackBitmap[Index + 3] = 0;
 
-                var g = parseInt(10 + 10 * xr + xg * 140);
-
-                BlackBitmap[Index + 0] = g;
-                BlackBitmap[Index + 1] = g;
-                BlackBitmap[Index + 2] = g;
-                BlackBitmap[Index + 3] = alpha;
-
-                BlackTBitmap[Index + 0] = g;
-                BlackTBitmap[Index + 1] = g;
-                BlackTBitmap[Index + 2] = g;
-                BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
-
-                g = parseInt(200 + 10 * xr + xg * 45);
-
-                WhiteBitmap[Index + 0] = g;
-                WhiteBitmap[Index + 1] = g;
-                WhiteBitmap[Index + 2] = g;
-                WhiteBitmap[Index + 3] = alpha;
-
-                WhiteTBitmap[Index + 0] = g;
-                WhiteTBitmap[Index + 1] = g;
-                WhiteTBitmap[Index + 2] = g;
-                WhiteTBitmap[Index + 3] = parseInt(alpha * 0.7);
+                    WhiteTBitmap[Index + 0] = 0;
+                    WhiteTBitmap[Index + 1] = 0;
+                    WhiteTBitmap[Index + 2] = 0;
+                    WhiteTBitmap[Index + 3] = 0;
+                }
             }
-            else
-            {
-                BlackBitmap[Index + 0] = 0;
-                BlackBitmap[Index + 1] = 0;
-                BlackBitmap[Index + 2] = 0;
-                BlackBitmap[Index + 3] = 0;
+        }
+    }
+    else
+    {
+        var d2 = d / 2.0 - 5e-1;
+        var r = d2 - 2e-1;
 
-                WhiteTBitmap[Index + 0] = 0;
-                WhiteTBitmap[Index + 1] = 0;
-                WhiteTBitmap[Index + 2] = 0;
-                WhiteTBitmap[Index + 3] = 0;
+        for (var i = 0; i < d; i++)
+        {
+            for (var j = 0; j < d; j++)
+            {
+                var di = i - d2;
+                var dj = j - d2;
+                var hh = r - Math.sqrt(di * di + dj * dj);
+                var Index = (i * d + d - j - 1) * 4;
+                if (hh >= 0)
+                {
+                    var alpha = 255;
+
+                    if (hh <= pixel)
+                    {
+                        var _hh = (pixel - hh) / pixel;
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+
+                        alpha = parseInt((1 - _hh * shade ) * 255);
+                    }
+                    else if (hh <= 2 *pixel && hh >= pixel && true === this.m_bDarkBoard)
+                    {
+                        var _hh = (2 * pixel - hh) / (pixel);
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+                        alpha = parseInt(_hh * shade * 255);
+                    }
+
+                    var bBorder = false;
+                    if (hh <= 2 *pixel)
+                    {
+                        bBorder = true;
+                    }
+
+                    if (false === bBorder || false === this.m_bDarkBoard)
+                    {
+                        BlackBitmap[Index + 0] = this.m_oBlackColor.r;
+                        BlackBitmap[Index + 1] = this.m_oBlackColor.g;
+                        BlackBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackBitmap[Index + 3] = alpha;
+
+                        BlackTBitmap[Index + 0] = this.m_oBlackColor.r;
+                        BlackTBitmap[Index + 1] = this.m_oBlackColor.g;
+                        BlackTBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
+                    }
+                    else
+                    {
+                        BlackBitmap[Index + 0] = this.m_oWhiteColor.r;
+                        BlackBitmap[Index + 1] = this.m_oWhiteColor.g;
+                        BlackBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackBitmap[Index + 3] = alpha;
+
+                        BlackTBitmap[Index + 0] = this.m_oWhiteColor.r;
+                        BlackTBitmap[Index + 1] = this.m_oWhiteColor.g;
+                        BlackTBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
+                    }
+
+                    alpha = 255;
+                    if (hh <= pixel)
+                    {
+                        var _hh = (pixel - hh) / pixel;
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+
+                        alpha = parseInt((1 - _hh * shade ) * 255);
+                    }
+                    else if (hh <= 2 *pixel && hh >= pixel && false === this.m_bDarkBoard)
+                    {
+                        var _hh = (2 * pixel - hh) / (pixel);
+                        var shade = shadow;
+                        if (di - dj < r / 3)
+                            shade = 1;
+                        alpha = parseInt(_hh * shade * 255);
+                    }
+
+                    if (false === bBorder || true === this.m_bDarkBoard)
+                    {
+                        WhiteBitmap[Index + 0] = this.m_oWhiteColor.r;
+                        WhiteBitmap[Index + 1] = this.m_oWhiteColor.g;
+                        WhiteBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteBitmap[Index + 3] = alpha;
+
+                        WhiteTBitmap[Index + 0] = this.m_oWhiteColor.r;
+                        WhiteTBitmap[Index + 1] = this.m_oWhiteColor.g;
+                        WhiteTBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteTBitmap[Index + 3] = parseInt(alpha / 2);
+                    }
+                    else
+                    {
+                        WhiteBitmap[Index + 0] = this.m_oBlackColor.r;
+                        WhiteBitmap[Index + 1] = this.m_oBlackColor.g;
+                        WhiteBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteBitmap[Index + 3] = alpha;
+
+                        WhiteTBitmap[Index + 0] = this.m_oBlackColor.r;
+                        WhiteTBitmap[Index + 1] = this.m_oBlackColor.g;
+                        WhiteTBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteTBitmap[Index + 3] = parseInt(alpha / 2);
+                    }
+                }
+                else
+                {
+                    BlackBitmap[Index + 0] = 0;
+                    BlackBitmap[Index + 1] = 0;
+                    BlackBitmap[Index + 2] = 0;
+                    BlackBitmap[Index + 3] = 0;
+
+                    BlackTBitmap[Index + 0] = 0;
+                    BlackTBitmap[Index + 1] = 0;
+                    BlackTBitmap[Index + 2] = 0;
+                    BlackTBitmap[Index + 3] = 0;
+
+                    WhiteBitmap[Index + 0] = 0;
+                    WhiteBitmap[Index + 1] = 0;
+                    WhiteBitmap[Index + 2] = 0;
+                    WhiteBitmap[Index + 3] = 0;
+
+                    WhiteTBitmap[Index + 0] = 0;
+                    WhiteTBitmap[Index + 1] = 0;
+                    WhiteTBitmap[Index + 2] = 0;
+                    WhiteTBitmap[Index + 3] = 0;
+                }
             }
         }
     }
@@ -730,7 +913,9 @@ CDrawingNavigator.prototype.private_CreateLines = function()
     var NV2_Bitmap_T_3  = this.m_oImageData.Ver2_T_3.data;
     var NV3_Bitmap_T    = this.m_oImageData.Ver3_T.data;
 
-    var Color = new CColor(28, 28, 28, 255);
+    var nChannel = true === this.m_bDarkBoard ? 200 : 28;
+
+    var Color = new CColor(nChannel, nChannel, nChannel, 255);
     for ( var i = 0; i < 24; i++ )
     {
         for ( var j = 0; j < 24; j++ )
@@ -998,7 +1183,7 @@ CDrawingNavigator.prototype.private_CreateLines = function()
     }
 
     this.m_oImageData.Triangle    = this.private_DrawTriangle(20, 20, 20 * 0.07, Color, 1, null);
-    this.m_oImageData.Triangle_T  = this.private_DrawTriangle(20, 20, 20 * 0.07, new CColor(28, 28, 28, nTransAlpha), 1, null);
+    this.m_oImageData.Triangle_T  = this.private_DrawTriangle(20, 20, 20 * 0.07, new CColor(nChannel, nChannel, nChannel, nTransAlpha), 1, null);
     this.m_oImageData.Triangle_B  = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(255, 255, 255, 255), 1, this.m_oImageData.Black);
     this.m_oImageData.Triangle_W  = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(0, 0, 0, 255), 1, this.m_oImageData.White);
     this.m_oImageData.Triangle_BT = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(255, 255, 255, nTransAlpha), 1, this.m_oImageData.BlackT);
@@ -1300,7 +1485,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
                         if (BOARD_BLACK === nMoveType)
                         {
-                            if (bCurVariant)
+                            if (bCurVariant && true === this.m_bShadows)
                                 Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 
                             Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
@@ -1318,7 +1503,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         }
                         else if (BOARD_WHITE === nMoveType)
                         {
-                            if (bCurVariant)
+                            if (bCurVariant && true === this.m_bShadows)
                                 Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);

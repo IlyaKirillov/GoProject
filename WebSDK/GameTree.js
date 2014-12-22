@@ -271,6 +271,10 @@ CGameTree.prototype.Get_DrawingBoard = function()
 {
     return this.m_oDrawingBoard;
 };
+CGameTree.prototype.Get_DrawingNavigator = function()
+{
+    return this.m_oDrawingNavigator;
+};
 CGameTree.prototype.Focus = function()
 {
     if (this.m_oDrawingBoard)

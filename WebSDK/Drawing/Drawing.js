@@ -252,7 +252,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 
     var oDrawingToolbar = new CDrawingToolbar(this);
     oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
-        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo]});
+        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings]});
 
     var oDrawingTimeLineSlider = new CDrawingSlider(this);
     oDrawingTimeLineSlider.Init(sTools3DivId, oGameTree, EDrawingSliderType.Timeline, 0);
