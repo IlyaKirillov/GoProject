@@ -550,9 +550,6 @@ CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
     oDrawingButttonOK.m_oDisabledBColor = new CColor(239, 239, 239, 255);
     oDrawingButttonOK.m_oDisabledFColor = new CColor(217, 217, 217, 255);
 
-    if (true !== oGameTree.Can_EditGameInfo())
-        oDrawingButttonOK.Set_Enabled(false);
-
     var sButtonCancel        = sButtonsDiv + "Cancel";
     var oButtonCancelElement = this.protected_CreateDivElement(oButtonsDiv, sButtonCancel);
     var oButtonCancelControl = CreateControlContainer(sButtonCancel);
@@ -605,7 +602,12 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
 
-    this.m_oGameTree = oPr.GameTree;
+    var oGameTree = oPr.GameTree;
+    this.m_oGameTree = oGameTree;
+
+    if (true !== oGameTree.Can_EditGameInfo())
+        this.HtmlElement.OKButton.Set_Enabled(false);
+
 
     this.Set_Caption("Game info");
 
