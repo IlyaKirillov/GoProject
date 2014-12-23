@@ -19,7 +19,8 @@ var EBoardMode =
     AddMarkCr   : 5,
     AddMarkX    : 6,
     AddMarkTx   : 7,
-    AddMarkNum  : 8
+    AddMarkNum  : 8,
+    ScoreEstimate : 9
 };
 
 function CDrawingBoard(oDrawing)
@@ -45,6 +46,8 @@ function CDrawingBoard(oDrawing)
     {
         W           : 0,
         H           : 0,
+        W2          : 0,
+        H2          : 0,
         StoneDiam   : 0,
         ShadowOff   : 0,
         HandiRad    : 2,
@@ -65,6 +68,8 @@ function CDrawingBoard(oDrawing)
         Sq_White    : null,
         Ter_Black   : null,
         Ter_White   : null,
+        Ter_Black2  : null,
+        Ter_White2  : null,
         LastMove    : null,
         Cr_Black    : null,
         Cr_White    : null
@@ -294,10 +299,16 @@ CDrawingBoard.prototype.Update_Size = function(bForce)
     else
         H = _H;
 
-    this.HtmlElement.Control.Resize(W, H);
+    if (W !== this.m_oImageData.W2 || H !== this.m_oImageData.H2 || true === bForce)
+    {
+        this.m_oImageData.W2 = W;
+        this.m_oImageData.H2 = H;
 
-    this.private_UpdateKoeffs();
-    this.private_OnResize(bForce);
+        this.HtmlElement.Control.Resize(W, H);
+
+        this.private_UpdateKoeffs();
+        this.private_OnResize(bForce);
+    }
 };
 CDrawingBoard.prototype.Set_Presentation = function(oPresentation)
 {
@@ -433,7 +444,7 @@ CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 };
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
-    if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE))
+    if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE) && eMode !== EBoardMode.ScoreEstimate)
         return;
 
     if (this.m_eMode !== eMode)
@@ -448,6 +459,11 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
         {
             this.m_oLogicBoard.Init_CountScores();
             this.m_oGameTree.Count_Scores();
+        }
+        else if (EBoardMode.ScoreEstimate === eMode)
+        {
+            this.m_oLogicBoard.Init_ScoreEstimate(this);
+
         }
 
         this.m_oGameTree.Update_InterfaceState();
@@ -1770,8 +1786,10 @@ CDrawingBoard.prototype.private_CreateMarks = function()
     this.m_oImageData.Tr_White  = this.private_DrawTriangle    (d, d, d * 0.05, new CColor(255, 255, 255, 255));
     this.m_oImageData.Sq_Black  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Sq_White  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(255, 255, 255, 255));
-    this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, new CColor(  0,   0,   0, 255), this.m_bTrueColorBoard ? new CColor(  0,   0,   0, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
-    this.m_oImageData.Ter_White = this.private_DrawFilledSquare(d, d, d * 0.05, new CColor(255, 255, 255, 255), this.m_bTrueColorBoard ? new CColor(255, 255, 255, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(  0,   0,   0, 255), this.m_bTrueColorBoard ? new CColor(  0,   0,   0, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_White = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(255, 255, 255, 255), this.m_bTrueColorBoard ? new CColor(255, 255, 255, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_Black2= this.private_DrawFilledSquare(d, d, d * 0.05, true,  new CColor(  0,   0,   0, 255), this.m_bTrueColorBoard ? new CColor(  0,   0,   0, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_White2= this.private_DrawFilledSquare(d, d, d * 0.05, true,  new CColor(255, 255, 255, 255), this.m_bTrueColorBoard ? new CColor(255, 255, 255, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
     this.m_oImageData.LastMove  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 0, 0, 255));
     this.m_oImageData.Cr_Black  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Cr_White  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 255, 255, 255));
@@ -1874,48 +1892,17 @@ CDrawingBoard.prototype.private_DrawEmptySquare = function(W, H, PenWidth, Color
 
 
     return ImageData;
-
-//    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
-//    MarksCanvas.clearRect(0, 0, W, H);
-//
-//    MarksCanvas.strokeStyle = Color.ToString();
-//    MarksCanvas.fillStyle   = Color.ToString();
-//    MarksCanvas.lineWidth   = Math.floor(Math.floor(PenWidth + 0.5));
-//
-//    var r     = W / 2;
-//    var shift = PenWidth;
-//
-//    var _y1  = -H / 2 * Math.sqrt(2) / 2 + H / 2;
-//    var _y2  =  H / 2 * Math.sqrt(2) / 2 + H / 2;
-//
-//    var _x1 =  Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
-//    var _x2 = -Math.sqrt(r * r - (_y1 - r) * (_y1 - r)) + r;
-//
-//    var x1 = Math.floor(_x1 - shift);
-//    var x2 = Math.ceil(_x2 + shift);
-//    var y1 = Math.ceil(_y1 + shift);
-//    var y2 = Math.floor(_y2 - shift);
-//
-//    MarksCanvas.beginPath();
-//    MarksCanvas.moveTo(x1, y1);
-//    MarksCanvas.lineTo(x2, y1);
-//    MarksCanvas.lineTo(x2, y2);
-//    MarksCanvas.lineTo(x1, y2);
-//    MarksCanvas.closePath();
-//    MarksCanvas.stroke();
-//
-//    return MarksCanvas.getImageData(0, 0, W, H);
 };
-CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, Color, BorderColor)
+CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, bBig, Color, BorderColor)
 {
     var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
 
     var ImageData = MarksCanvas.createImageData(W, H);
 
-    var H_3   = H / 3 | 0;
-    var H_2_3 = H * 2 / 3 | 0;
-    var W_3   = W / 3 | 0;
-    var W_2_3 = W * 2 / 3 | 0;
+    var H_3   = bBig ? H / 4     | 0 : H / 3     | 0;
+    var H_2_3 = bBig ? H * 3 / 4 | 0 : H * 2 / 3 | 0;
+    var W_3   = bBig ? W / 4     | 0 : W / 3     | 0;
+    var W_2_3 = bBig ? W * 3 / 4 | 0 : W * 2 / 3 | 0;
 
     for (var i = 0; i < H; i++)
     {
@@ -2097,6 +2084,12 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 break;
             case EDrawingMark.Tw:
                 MarksCanvas.putImageData(this.m_oImageData.Ter_White, _X, _Y);
+                break;
+            case EDrawingMark.Tb2:
+                MarksCanvas.putImageData(this.m_oImageData.Ter_Black2, _X, _Y);
+                break;
+            case EDrawingMark.Tw2:
+                MarksCanvas.putImageData(this.m_oImageData.Ter_White2, _X, _Y);
                 break;
             case EDrawingMark.Lm:
                 MarksCanvas.putImageData(this.m_oImageData.LastMove, _X, _Y);
@@ -2499,6 +2492,10 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     else if (40 === KeyCode ) // Down Arrow
     {
         this.m_oGameTree.GoTo_NextVariant();
+    }
+    else if (69 === KeyCode && true === Event.CtrlKey)
+    {
+        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree});
     }
     else if (112 === KeyCode) // F1
     {

@@ -7,7 +7,7 @@
  * Time     0:48
  */
 
-function CNode(oGameTree)
+function CNode()
 {
     this.m_aNext      = [];                        // Массив следующих нод
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
@@ -18,7 +18,21 @@ function CNode(oGameTree)
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
 }
+CNode.prototype.Copy_CurrentVariant = function(LastNode)
+{
+    var oNode = new CNode();
 
+    // TODO: Сделать нормальное копирование
+    oNode.m_aCommands = this.m_aCommands;
+
+    if (this.m_aNext.length > 0 && this !== LastNode)
+    {
+        oNode.m_aNext[0] = this.m_aNext[this.m_nNextCur].Copy_CurrentVariant(LastNode);
+        oNode.m_nNextCur = 0;
+    }
+
+    return oNode;
+};
 CNode.prototype.Is_Node = function()
 {
     return true;

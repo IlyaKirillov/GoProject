@@ -209,6 +209,16 @@ function CLogicBoard(nW, nH)
     this.m_oBoundary    = new CBoundaryScoreCounter();
 
 }
+CLogicBoard.prototype.Copy = function()
+{
+    var oNewLB = new CLogicBoard(this.m_nW, this.m_nH);
+
+    for (var Index = 0, nCount = this.m_aBoard.length; Index < nCount; Index++)
+        oNewLB.m_aBoard[Index] = this.m_aBoard[Index];
+
+    oNewLB.m_oKo.CopyFrom(this.m_oKo);
+    return oNewLB;
+};
 CLogicBoard.prototype.Clear = function()
 {
     var nSize = this.m_nW * this.m_nH;
@@ -574,4 +584,246 @@ CLogicBoard.prototype.private_CheckAllEmptyAreas = function(bCheckDraw)
             }
         }
     }
+};
+CLogicBoard.prototype.Init_ScoreEstimate = function(oDrawingBoard)
+{
+    // Moyo 5/10, Scores 5/21
+
+    this.private_InitScoreEstimate();
+
+    for (var nIndex = 0; nIndex < 5; nIndex++)
+    {
+        this.private_MakeDilation();
+    }
+
+    for (var nIndex = 0; nIndex < 3; nIndex++)
+    {
+        this.private_MakeErosion();
+    }
+
+    var nBlackScores = 0;
+    var nWhiteScores = 0;
+
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            var oMark = null;
+            var nValue = this.m_aScoreEstimate[this.private_GetPos(X, Y)]
+
+            if (nValue > 0 && BOARD_BLACK !== this.Get(X, Y))
+            {
+                oMark = new CDrawingMark(X, Y, EDrawingMark.Tb, "");
+                if (BOARD_WHITE === this.Get(X, Y))
+                    nBlackScores += 2;
+                else
+                    nBlackScores++;
+            }
+            else if (nValue < 0 && BOARD_WHITE !== this.Get(X, Y))
+            {
+                oMark = new CDrawingMark(X, Y, EDrawingMark.Tw, "");
+                if (BOARD_BLACK === this.Get(X, Y))
+                    nWhiteScores += 2;
+                else
+                    nWhiteScores++;
+            }
+
+            if (null === oMark)
+                oDrawingBoard.Remove_Mark(X, Y);
+            else
+                oDrawingBoard.Add_Mark(oMark);
+        }
+    }
+
+    for (var nIndex = 0; nIndex < 18; nIndex++)
+    {
+        this.private_MakeErosion();
+    }
+
+    var nBlackScores = 0;
+    var nWhiteScores = 0;
+
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            var oMark = null;
+            var nValue = this.m_aScoreEstimate[this.private_GetPos(X, Y)]
+
+            if (nValue > 0 && BOARD_BLACK !== this.Get(X, Y))
+            {
+                oMark = new CDrawingMark(X, Y, EDrawingMark.Tb2, "");
+                if (BOARD_WHITE === this.Get(X, Y))
+                    nBlackScores += 2;
+                else
+                    nBlackScores++;
+            }
+            else if (nValue < 0 && BOARD_WHITE !== this.Get(X, Y))
+            {
+                oMark = new CDrawingMark(X, Y, EDrawingMark.Tw2, "");
+                if (BOARD_BLACK === this.Get(X, Y))
+                    nWhiteScores += 2;
+                else
+                    nWhiteScores++;
+            }
+
+            if (null !== oMark)
+                oDrawingBoard.Add_Mark(oMark);
+        }
+    }
+
+    return {Black : nBlackScores, White : nWhiteScores};
+};
+CLogicBoard.prototype.private_InitScoreEstimate = function()
+{
+    this.m_aScoreEstimate = [];
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            var Value = this.Get(X, Y);
+
+            if (BOARD_BLACK === Value)
+                this.m_aScoreEstimate[this.private_GetPos(X, Y)] = 128;
+            else if (BOARD_WHITE === Value)
+                this.m_aScoreEstimate[this.private_GetPos(X, Y)] = -128;
+            else
+            {
+                this.m_aScoreEstimate[this.private_GetPos(X, Y)] = 0;
+
+//                if (1 === X || this.m_nW - 1 === X || 1 === Y || this.m_nH - 1 === Y)
+//                {
+//                    var aResult = this.private_GetNearestStones(X, Y);
+//                    var Count = aResult.Stones.length;
+//                    if (Count > 0)
+//                    {
+//                        var bWhite = false, bBlack = false;
+//                        for (var Index = 0; Index < Count; Index++)
+//                        {
+//                            if (BOARD_BLACK === aResult.Stones[Index].Value)
+//                                bBlack = true;
+//                            if (BOARD_WHITE === aResult.Stones[Index].Value)
+//                                bWhite = true;
+//                        }
+//
+//                        if (true !== bWhite || true !== bBlack)
+//                        {
+//                            var CalcValue = Math.max((1 - (aResult.Diff - 1) / 5) * 128 * Count, 128);
+//
+//                            if (bWhite)
+//                                this.m_aScoreEstimate[this.private_GetPos(X, Y)] = -CalcValue;
+//                            else
+//                                this.m_aScoreEstimate[this.private_GetPos(X, Y)] = CalcValue;
+//                        }
+//                    }
+//                }
+            }
+        }
+    }
+};
+CLogicBoard.prototype.private_GetNearestStones = function(X, Y)
+{
+    var Diff = 100;
+    var aResult = [];
+
+    for (var nX = X - 5; nX <= X + 5; nX++)
+    {
+        for (var nY = Y - 5; nY <= Y + 5; nY++)
+        {
+            if (nX < 1 || nX > this.m_nW || nY < 1 || nY > this.m_nH || Math.abs(X - nX) + Math.abs(Y - nY) > 5)
+                continue;
+
+            var Value = this.Get(nX, nY);
+            if (BOARD_EMPTY === Value)
+                continue;
+
+            var CurDiff = Math.abs(X - nX) + Math.abs(Y - nY);
+
+            if (CurDiff < Diff)
+            {
+                aResult = [];
+                aResult.push({X : nX, Y : nY, Value : Value});
+            }
+            else if (CurDif === Diff)
+                aResult.push({X : nX, Y : nY, Value : Value});
+        }
+    }
+
+    return {Stones : aResult, Diff : Diff};
+};
+CLogicBoard.prototype.private_MakeDilation = function()
+{
+    var aNewSE = [];
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            var aValue = [];
+            aValue[0] = (X > 1             ? this.m_aScoreEstimate[this.private_GetPos(X - 1, Y)] : 0);
+            aValue[1] = (X < this.m_nW - 1 ? this.m_aScoreEstimate[this.private_GetPos(X + 1, Y)] : 0);
+            aValue[2] = (Y > 1             ? this.m_aScoreEstimate[this.private_GetPos(X, Y - 1)] : 0);
+            aValue[3] = (X < this.m_nH - 1 ? this.m_aScoreEstimate[this.private_GetPos(X, Y + 1)] : 0);
+
+            var nSum = 0;
+            var bPositive = false, bNegative = false;
+            for (var Index = 0; Index < 4; Index++)
+            {
+                if (aValue[Index] > 0)
+                {
+                    bPositive = true;
+                    nSum++;
+                }
+                else if (aValue[Index] < 0)
+                {
+                    bNegative = true;
+                    nSum--;
+                }
+            }
+
+            var CurValue = this.m_aScoreEstimate[this.private_GetPos(X, Y)];
+            if ((CurValue >= 0 && false === bNegative) || (CurValue <= 0 && false === bPositive))
+                aNewSE[this.private_GetPos(X, Y)] = CurValue + nSum;
+            else
+                aNewSE[this.private_GetPos(X, Y)] = CurValue;
+        }
+    }
+
+    this.m_aScoreEstimate = aNewSE;
+};
+CLogicBoard.prototype.private_MakeErosion = function()
+{
+    var aNewSE = [];
+    for (var Y = 1; Y <= this.m_nH; Y++)
+    {
+        for (var X = 1; X <= this.m_nW; X++)
+        {
+            var aValue = [];
+            aValue[0] = (X > 1             ? this.m_aScoreEstimate[this.private_GetPos(X - 1, Y)] : null);
+            aValue[1] = (X < this.m_nW - 1 ? this.m_aScoreEstimate[this.private_GetPos(X + 1, Y)] : null);
+            aValue[2] = (Y > 1             ? this.m_aScoreEstimate[this.private_GetPos(X, Y - 1)] : null);
+            aValue[3] = (X < this.m_nH - 1 ? this.m_aScoreEstimate[this.private_GetPos(X, Y + 1)] : null);
+
+            var nPosSum = 0, nNegSum = 0;
+            for (var Index = 0; Index < 4; Index++)
+            {
+                if (null !== aValue[Index])
+                {
+                    if (aValue[Index] >= 0)
+                        nPosSum++;
+                    if (aValue[Index] <= 0)
+                        nNegSum--;
+                }
+            }
+
+            var CurValue = this.m_aScoreEstimate[this.private_GetPos(X, Y)];
+            if (CurValue > 0 && 0 !== nNegSum)
+                aNewSE[this.private_GetPos(X, Y)] = Math.max(CurValue + nNegSum, 0);
+            else if (CurValue < 0 && 0 !== nPosSum)
+                aNewSE[this.private_GetPos(X, Y)] = Math.min(CurValue + nPosSum, 0);
+            else
+                aNewSE[this.private_GetPos(X, Y)] = CurValue;
+        }
+    }
+
+    this.m_aScoreEstimate = aNewSE;
 };

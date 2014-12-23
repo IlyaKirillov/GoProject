@@ -1033,13 +1033,54 @@ CDrawingSettingsWindow.prototype.private_CheckColorTheme = function()
     }
 };
 
+function CDrawingScoreEstimateWindow()
+{
+    CDrawingScoreEstimateWindow.superclass.constructor.call(this);
+
+    this.m_oDrawingBoard = null;
+}
+
+CommonExtend(CDrawingScoreEstimateWindow, CDrawingWindow);
+
+CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingScoreEstimateWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.m_oGameTree = oPr.GameTree;
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sMainId      = this.HtmlElement.InnerDiv.id;
+
+    var sBoard = sMainId + "B";
+    var oBoardElement = this.protected_CreateDivElement(oMainDiv, sBoard);
+    var oBoardControl = CreateControlContainer(sBoard);
+    oBoardControl.Bounds.SetParams(0, 0, 1000, 1000, true, true, false, false, -1, -1);
+    oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oBoardControl);
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_Mode(EBoardMode.ScoreEstimate);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+};
+CDrawingScoreEstimateWindow.prototype.Update_Size = function(bForce)
+{
+    CDrawingScoreEstimateWindow.superclass.Update_Size.call(this, bForce);
+
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Update_Size(bForce);
+};
+
 var EWindowType =
 {
     Common   : 0,
     Confirm  : 1,
     Error    : 2,
     GameInfo : 3,
-    Settings : 4
+    Settings : 4,
+    ScoreEstimate : 5
 };
 
 
@@ -1051,6 +1092,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
         case EWindowType.GameInfo: sApp = "Info"; break;
         case EWindowType.Settings: sApp = "Settings"; break;
         case EWindowType.Error   : sApp = "Error"; break;
+        case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
     }
     var sId = sDrawingId + sApp;
 
@@ -1080,6 +1122,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.GameInfo: oWindow = new CDrawingInfoWindow(); break;
                 case EWindowType.Settings: oWindow = new CDrawingSettingsWindow(); break;
                 case EWindowType.Error   : oWindow = new CDrawingErrorWindow(); break;
+                case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
             }
 
             if (null !== oWindow)

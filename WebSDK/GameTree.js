@@ -94,6 +94,15 @@ function CGameTree(Drawing, Sound)
     this.m_pTutorRightCallback = null;
     this.m_pTutorWrongCallback = null;
 };
+CGameTree.prototype.Copy_ForScoreEstimate = function()
+{
+    var oGameTree = new CGameTree();
+    oGameTree.m_oBoard = this.m_oBoard.Copy();
+    oGameTree.m_oFirstNode = this.m_oFirstNode.Copy_CurrentVariant(this.m_oCurNode);
+    oGameTree.m_oCurNode   = oGameTree.m_oFirstNode;
+    oGameTree.Step_ForwardToEnd();
+    return oGameTree;
+};
 CGameTree.prototype.Set_TutorMode = function(bAuto, nMode, nInterval)
 {
     if (true === bAuto)
