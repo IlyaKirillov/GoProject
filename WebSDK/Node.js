@@ -29,6 +29,7 @@ CNode.prototype.Copy_CurrentVariant = function(LastNode)
     {
         oNode.m_aNext[0] = this.m_aNext[this.m_nNextCur].Copy_CurrentVariant(LastNode);
         oNode.m_nNextCur = 0;
+        oNode.m_aNext[0].m_oPrev = oNode;
     }
 
     return oNode;

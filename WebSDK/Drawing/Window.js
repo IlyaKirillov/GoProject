@@ -465,6 +465,9 @@ CDrawingWindow.prototype.Close = function()
 {
     var oMainDiv = this.HtmlElement.Control.HtmlElement;
     oMainDiv.parentNode.removeChild(oMainDiv);
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Focus();
 };
 CDrawingWindow.prototype.Focus = function()
 {
@@ -1048,9 +1051,14 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
 
     this.m_oGameTree = oPr.GameTree;
 
+    this.Set_Caption("Score estimate");
+
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
     var sMainId      = this.HtmlElement.InnerDiv.id;
+
+    oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
+    oMainControl.Set_Type(2);
 
     var sBoard = sMainId + "B";
     var oBoardElement = this.protected_CreateDivElement(oMainDiv, sBoard);
@@ -1061,7 +1069,7 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
 
     var oDrawingBoard = new CDrawingBoard();
     oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
-    oDrawingBoard.Set_Mode(EBoardMode.ScoreEstimate);
+    oDrawingBoard.Set_EstimateMode(this);
 
     this.m_oDrawingBoard = oDrawingBoard;
 };
@@ -1071,6 +1079,11 @@ CDrawingScoreEstimateWindow.prototype.Update_Size = function(bForce)
 
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Update_Size(bForce);
+};
+CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, WhiteReal, BlackPotential, WhitePotential)
+{
+    var sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ")";
+    this.Set_Caption(sCaption);
 };
 
 var EWindowType =

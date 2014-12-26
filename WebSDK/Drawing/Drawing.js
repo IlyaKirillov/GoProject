@@ -58,6 +58,8 @@ function CDrawing(oGameTree)
     this.m_nDrawTimerInterval = 40;
     this.m_nDrawTimerId = setTimeout(function(){oThis.private_OnTimerDraw();}, this.m_nDrawTimerInterval);
 
+    this.m_bNeedUpdateSize = true;
+
     var oThis = this;
 
     this.private_OnTimerDraw = function()
@@ -66,6 +68,9 @@ function CDrawing(oGameTree)
         {
             this.m_oNavigator.Draw();
         }
+
+        if (this.m_bNeedUpdateSize)
+            this.private_UpdateSize(false);
 
         this.m_nDrawTimerId = setTimeout(function(){oThis.private_OnTimerDraw();}, oThis.m_nDrawTimerInterval);
     };
@@ -345,6 +350,15 @@ CDrawing.prototype.Create_Problems = function(sDivId)
 };
 CDrawing.prototype.Update_Size = function(bForce)
 {
+    if (bForce)
+        this.private_UpdateSize(true);
+    else
+        this.m_bNeedUpdateSize = true;
+};
+CDrawing.prototype.private_UpdateSize = function(bForce)
+{
+    this.m_bNeedUpdateSize = false;
+
     if (this.m_oControl)
     {
         var W = this.m_oControl.HtmlElement.clientWidth;

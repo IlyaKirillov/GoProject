@@ -865,24 +865,6 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.WindowClose    : this.m_oGameTree.Close(); break;
         case EDrawingButtonType.GameInfo       :
         {
-//            var Canvas = document.createElement("canvas");
-//            var Context = Canvas.getContext("2d");
-//            var oDrawingBoard = this.m_oGameTree.m_oDrawingBoard;
-//
-//            Canvas.width  = oDrawingBoard.HtmlElement.Board.Control.HtmlElement.width;
-//            Canvas.height = oDrawingBoard.HtmlElement.Board.Control.HtmlElement.height;
-//
-//            Context.drawImage(oDrawingBoard.HtmlElement.Board.Control.HtmlElement, 0, 0);
-//            Context.drawImage(oDrawingBoard.HtmlElement.Lines.Control.HtmlElement, 0, 0);
-//            Context.drawImage(oDrawingBoard.HtmlElement.Shadow.Control.HtmlElement, 0, 0);
-//            Context.drawImage(oDrawingBoard.HtmlElement.Stones.Control.HtmlElement, 0, 0);
-//            Context.drawImage(oDrawingBoard.HtmlElement.Marks.Control.HtmlElement, 0, 0);
-//
-//            var myImage = Canvas.toDataURL("image/png");
-//            window.location.href=myImage;
-//
-//            break;
-
             CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.GameInfo, {GameTree : this.m_oGameTree});
             break;
         }
