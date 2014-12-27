@@ -75,7 +75,12 @@ function CDrawingBoard(oDrawing)
         Ter_White2  : null,
         LastMove    : null,
         Cr_Black    : null,
-        Cr_White    : null
+        Cr_White    : null,
+
+        RcolorTarget: null,
+        GcolorTarget: null,
+        BcolorTarget: null,
+        AcolorTarget: null
     };
 
     this.m_bTrueColorBoard   = true;
@@ -161,6 +166,15 @@ function CDrawingBoard(oDrawing)
             global_mouseEvent.ShiftKey = true;
             oThis.private_UpdateTarget();
         }
+        else if ((16 === global_keyboardEvent.KeyCode || 17 === global_keyboardEvent.KeyCode) && EBoardMode.AddMarkColor === oThis.Get_Mode())
+        {
+            if (16 === global_keyboardEvent.KeyCode)
+                global_mouseEvent.ShiftKey = true;
+            else if (17 === global_keyboardEvent.KeyCode)
+                global_mouseEvent.CtrlKey = true;
+
+            oThis.private_UpdateTarget();
+        }
         else
             oThis.private_HandleKeyDown(global_keyboardEvent);
 
@@ -174,6 +188,15 @@ function CDrawingBoard(oDrawing)
         if (16 === global_keyboardEvent.KeyCode && EBoardMode.AddRemove === oThis.Get_Mode())
         {
             global_mouseEvent.ShiftKey = false;
+            oThis.private_UpdateTarget();
+        }
+        else if ((16 === global_keyboardEvent.KeyCode || 17 === global_keyboardEvent.KeyCode) && EBoardMode.AddMarkColor === oThis.Get_Mode())
+        {
+            if (16 === global_keyboardEvent.KeyCode)
+                global_mouseEvent.ShiftKey = false;
+            else if (17 === global_keyboardEvent.KeyCode)
+                global_mouseEvent.CtrlKey = false;
+
             oThis.private_UpdateTarget();
         }
     };
@@ -1709,7 +1732,7 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
         this.m_oLastTargetPos.X = X;
         this.m_oLastTargetPos.Y = Y;
 
-        if (EBoardMode.AddMarkColor === this.m_eMode && this.m_bMouseDown)
+        if (EBoardMode.AddMarkColor === this.m_eMode && this.m_bMouseDown && !bForce)
         {
             this.private_AddColorMark(X, Y, e);
         }
@@ -1776,6 +1799,19 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
                         TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
                     else if (BOARD_WHITE === ValueSE)
                         TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
+
+                    break;
+                }
+                case EBoardMode.AddMarkColor:
+                {
+                    if (global_mouseEvent.CtrlKey && !global_mouseEvent.ShiftKey)
+                        TargetCanvas.putImageData(this.m_oImageData.RcolorTarget, _X, _Y);
+                    else if (!global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
+                        TargetCanvas.putImageData(this.m_oImageData.GcolorTarget, _X, _Y);
+                    else if (global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
+                        TargetCanvas.putImageData(this.m_oImageData.AcolorTarget, _X, _Y);
+                    else
+                        TargetCanvas.putImageData(this.m_oImageData.BcolorTarget, _X, _Y);
 
                     break;
                 }
@@ -1863,6 +1899,11 @@ CDrawingBoard.prototype.private_CreateMarks = function()
     this.m_oImageData.LastMove  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 0, 0, 255));
     this.m_oImageData.Cr_Black  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Cr_White  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 255, 255, 255));
+
+    this.m_oImageData.RcolorTarget = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(200, 0, 0, 255));
+    this.m_oImageData.GcolorTarget = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(0, 128, 0, 255));
+    this.m_oImageData.BcolorTarget = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(0, 0, 200, 255));
+    this.m_oImageData.AcolorTarget = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(128, 128, 128, 255));
 };
 CDrawingBoard.prototype.private_DrawX = function(W, H, PenWidth, Color)
 {
