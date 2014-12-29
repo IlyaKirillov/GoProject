@@ -2304,17 +2304,17 @@ CDrawingBoard.prototype.private_AddColorMark = function(X, Y, e)
         var Color;
         if (e.CtrlKey && !e.ShiftKey)
         {
-            Color = new CColor(255, 0, 0, 64);
+            Color = new CColor(0xCC, 0, 0, 64);
             this.m_oColorMarks[nPosValue].push(1)
         }
         else if (e.ShiftKey && !e.CtrlKey)
         {
-            Color = new CColor(0, 255, 0, 64);
+            Color = new CColor(0, 150, 0, 55);
             this.m_oColorMarks[nPosValue].push(2);
         }
         else if (e.ShiftKey && e.CtrlKey)
         {
-            Color = new CColor(128, 128, 128, 64);
+            Color = new CColor(96, 96, 96, 64);
             this.m_oColorMarks[nPosValue].push(3);
         }
         else

@@ -9,7 +9,7 @@
 <div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
 <script>
     var oGameTree = GoBoardApi.Create_GameTree();
-    GoBoardApi.Create_Problems(oGameTree, "divId", {TutorColor : "Auto", TutorTime : 0.2, NewNode : ""});
+    GoBoardApi.Create_Problems(oGameTree, "divId", {TutorColor : "Auto", TutorTime : 0.2, NewNode : "", ResetCallback : null});
     //GoBoardApi.Load_Sgf(oGameTree, "(;GE[life and death]DI[7k]DP[40]SO[caocao]CO[6]GM[1]FF[4]CA[UTF-8]AP[CGoban:2]ST[2]RU[Japanese]SZ[9]KM[0.00]TM[]PW[White]PB[Black]AW[bd][be][cf][df][ef][eg][fh][gh][ei]AB[bf][bg][cg][dg][bh][dh][eh]C[White to Play\nAssume white wins kos.  Stylized from a complicated full-board position.]PL[W](;W[ci]CR[ci];B[di]CR[di];W[bi]CR[bi];B[af]CR[af];W[ah]CR[ah]C[RIGHT White gets a gote seki.])(;W[di]CR[di];B[ci]CR[ci]C[One point in gote satisfies you? I hope you aren't this timid with girls!])        (;W[af]CR[af]        ;B[ci]CR[ci]C[Ooh -- two points in sente -- unless you prefer to play a3 for a third in gote?  You can do better!]))");
     //GoBoardApi.Load_Sgf(oGameTree, "(;GM[1]FF[3]SZ[19]AB[il][kl][kj][hj][ii]AW[jk]PL[W];W[jj];B[ki];W[ik];B[hl];W[ji];B[jh];W[ih];B[kk];W[hi];B[ij];W[hk])", {Auto : true});
     GoBoardApi.Load_Sgf(oGameTree, "(;GM[1]FF[3]SZ[19]AB[ap][bp][cp][dp][eq][fq][hq][gr][gs]AW[bs][bq][cq][dq][er][fr]PL[B];B[ar];W[ds];B[cr];W[br];B[dr];W[cs];B[dr];W[cr];B[fs])", {Auto : true});
@@ -19,34 +19,6 @@
     {
         GoBoardApi.Update_Size(oGameTree);
     };
-
-    function Add_NextProblemButton()
-    {
-        var oInput = document.createElement("input");
-        oInput.style.position = "absolute";
-        oInput.style.top      = "100px";
-        oInput.style.left     = "500px";
-        oInput.type           = "button";
-        oInput.value          = "Next problem";
-        oInput.onclick        = function()
-        {
-            if (aSgfs.length > 0)
-            {
-                g_nSgfIndex++;
-                Load_Problem();
-            }
-        };
-
-        var aBody = document.getElementsByTagName('body');
-
-        if (aBody.length > 0)
-        {
-            var oBody = aBody[0];
-            oBody.appendChild(oInput);
-        }
-
-    }
-    Add_NextProblemButton();
 
 </script>
 </body>

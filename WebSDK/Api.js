@@ -87,7 +87,8 @@ CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
 
     var pRightCallback = (undefined !== oPr['RightCallback'] ? oPr['RightCallback'] : null);
     var pWrongCallback = (undefined !== oPr['WrongCallback'] ? oPr['WrongCallback'] : null);
-    oGameTree.Set_TutorCallbacks(pRightCallback, pWrongCallback);
+    var pResetCallback = (undefined !== oPr['ResetCallback'] ? oPr['ResetCallback'] : null)
+    oGameTree.Set_TutorCallbacks(pRightCallback, pWrongCallback, pResetCallback);
 };
 
 /*

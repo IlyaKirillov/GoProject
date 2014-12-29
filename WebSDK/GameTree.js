@@ -93,6 +93,7 @@ function CGameTree(Drawing, Sound)
     this.m_nTutorId            = null;
     this.m_pTutorRightCallback = null;
     this.m_pTutorWrongCallback = null;
+    this.m_pTutorResetCallback = null;
 };
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -126,10 +127,11 @@ CGameTree.prototype.Set_TutorNewNodeText = function(sText)
 
     this.m_sTutorText = sText;
 };
-CGameTree.prototype.Set_TutorCallbacks = function(pRightCallBack, pWrongCallback)
+CGameTree.prototype.Set_TutorCallbacks = function(pRightCallBack, pWrongCallback, pResetCallback)
 {
     this.m_pTutorRightCallback = pRightCallBack;
     this.m_pTutorWrongCallback = pWrongCallback;
+    this.m_pTutorResetCallback = pResetCallback;
 };
 CGameTree.prototype.Start_AutoPlay = function()
 {
@@ -374,11 +376,20 @@ CGameTree.prototype.Step_BackwardToStart = function()
     var nOldFlag = this.m_nEditingFlags;
     // Если у нас TutorMode, то даем перемещаться в начало, даже с запрещающим флагом перемещения
     if (BOARD_EMPTY !== this.m_nTutorMode)
+    {
         this.Set_EditingFlags({Move : true});
+    }
 
     this.GoTo_Node(this.m_oFirstNode);
 
     this.m_nEditingFlags = nOldFlag;
+
+    if (BOARD_EMPTY !== this.m_nTutorMode)
+    {
+        if (this.m_pTutorResetCallback)
+            this.m_pTutorResetCallback();
+    }
+
 };
 CGameTree.prototype.Step_Backward = function(Count)
 {
