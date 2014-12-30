@@ -426,6 +426,11 @@ CGameTree.prototype.Step_ForwardToEnd = function()
 
     this.GoTo_Node(this.Get_CurNode());
 };
+CGameTree.prototype.Pass = function()
+{
+    if (true === this.Add_NewNodeByPos(0, 0, this.m_nNextMove))
+        this.Execute_CurNodeCommands();
+};
 CGameTree.prototype.GoTo_PrevVariant = function()
 {
     var PrevNode = this.m_oCurNode.Get_Prev();

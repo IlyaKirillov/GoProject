@@ -1086,6 +1086,166 @@ CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, White
     this.Set_Caption(sCaption);
 };
 
+function CDrawingCountColorsWindow()
+{
+    CDrawingCountColorsWindow.superclass.constructor.call(this);
+}
+
+CommonExtend(CDrawingCountColorsWindow, CDrawingWindow);
+
+CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.Set_Caption("Colors counter");
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sDivId       = this.HtmlElement.InnerDiv.id;
+
+    oMainDiv.style.overflowX = "hidden";
+    oMainDiv.style.overflowY = "scroll";
+
+    var RowHeight   = 20;
+    var TopOffset   = 10;
+    var LineSpacing = 5;
+    var BottomOffset = 10;
+
+    var oColorsMap = oPr.DrawingBoard.m_oColorMarks;
+
+    var Red = [0, 0, 0], Green = [0, 0, 0], Blue = [0, 0, 0], Gray = [0, 0, 0];
+    var bRed = false, bGreen = false, bBlue = false, bGray = false;
+
+    for (var oPos in oColorsMap)
+    {
+        var oColor = oColorsMap[oPos];
+        var nNum = -1;
+
+        if (0 !== oColor.r && 0 !== oColor.g && 0 !== oColor.b)
+        {
+            bGray = true;
+            nNum = 3;
+        }
+        else if (0 !== oColor.r)
+        {
+            bRed = true;
+            nNum = 0;
+        }
+        else if (0 !== oColor.g)
+        {
+            bGreen = true;
+            nNum = 1;
+        }
+        else if (0 !== oColor.b)
+        {
+            bBlue = true;
+            nNum = 2;
+        }
+
+        var Index = 0;
+        if (oColor.a <= 60)
+            Index = 0;
+        else if (oColor.a <= 120)
+            Index = 1;
+        else
+            Index = 2;
+
+        switch (nNum)
+        {
+            case 0: Red[Index]++; break;
+            case 1: Green[Index]++; break;
+            case 2: Blue[Index]++; break;
+            case 3: Gray[Index]++; break;
+        }
+    }
+
+    if (bRed)
+    {
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
+        TopOffset += RowHeight + LineSpacing;
+    }
+
+    if (bGreen)
+    {
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
+        TopOffset += RowHeight + LineSpacing;
+    }
+
+    if (bBlue)
+    {
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
+        TopOffset += RowHeight + LineSpacing;
+    }
+
+    if (bGray)
+    {
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
+        TopOffset += RowHeight + LineSpacing;
+    }
+
+    this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
+    var BottomControl = CreateControlContainer(sDivId + "Bottom");
+    BottomControl.Bounds.SetParams(0, TopOffset, 1000, 1000, true, true, false, false, 0, BottomOffset);
+    BottomControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
+    oMainControl.AddControl(BottomControl);
+};
+CDrawingCountColorsWindow.prototype.private_CreateDivElement = function(oParentElement, sName, Height)
+{
+    var oElement = document.createElement("div");
+    oElement.setAttribute("id", sName);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.style.fontFamily  = "Tahoma, Sans serif";
+    oElement.style.fontSize    = Height * 15 / 20 + "px";
+    oElement.style.lineHeight  = Height + "px";
+    oElement.style.height      = Height + "px";
+
+    oParentElement.appendChild(oElement);
+    return oElement;
+};
+CDrawingCountColorsWindow.prototype.private_CreateInputElement = function(oParentElement, sName)
+{
+    var oElement = document.createElement("input");
+    oElement.setAttribute("id", sName);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.setAttribute("type", "text");
+    oElement.style.fontFamily  = "Tahoma, Sans serif";
+    oElement.style.fontSize    = "10pt";
+    oElement.style.outline     = "none";
+    oElement.disabled = "disabled";
+
+    oParentElement.appendChild(oElement);
+    return oElement;
+};
+CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight, bCanEdit)
+{
+    var LeftWidth  = 100;
+    var LeftOffset = 10;
+    var RightOffset = 10;
+
+    RightOffset += 20; // Scroll
+
+    var sNameId      = sDivId + sName;
+    var oNameElement = this.private_CreateDivElement(oMainDiv, sNameId, RowHeight);
+    var oNameControl = CreateControlContainer(sNameId);
+    oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
+    oNameControl.Anchor = (g_anchor_left | g_anchor_top);
+    oMainControl.AddControl(oNameControl);
+    oNameElement.innerText = sName;
+    oNameElement.innerHTML = sName;
+
+    var sValueId      = sNameId + "Value";
+    var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId, bCanEdit);
+    var oValueControl = CreateControlContainer(sValueId);
+    oValueControl.Bounds.SetParams(LeftOffset + LeftWidth, TopOffset + 1, RightOffset, 1000, true, true, true, false, -1, RowHeight - 2);
+    oValueControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
+    oMainControl.AddControl(oValueControl);
+    oValueElement.value = sValue;
+
+    return oValueElement;
+};
+
 var EWindowType =
 {
     Common   : 0,
@@ -1093,7 +1253,8 @@ var EWindowType =
     Error    : 2,
     GameInfo : 3,
     Settings : 4,
-    ScoreEstimate : 5
+    ScoreEstimate : 5,
+    CountColors   : 6
 };
 
 
@@ -1106,6 +1267,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
         case EWindowType.Settings: sApp = "Settings"; break;
         case EWindowType.Error   : sApp = "Error"; break;
         case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
+        case EWindowType.CountColors   : sApp = "CountColors"; break;
     }
     var sId = sDrawingId + sApp;
 
@@ -1136,6 +1298,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.Settings: oWindow = new CDrawingSettingsWindow(); break;
                 case EWindowType.Error   : oWindow = new CDrawingErrorWindow(); break;
                 case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
+                case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
             }
 
             if (null !== oWindow)

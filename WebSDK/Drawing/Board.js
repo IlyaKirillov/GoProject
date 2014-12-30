@@ -102,6 +102,7 @@ function CDrawingBoard(oDrawing)
         Board    : {Control : null}, // Канва для отрисовки текстурной доски.
         Lines    : {Control : null}, // Канва для отрисовки линий.
         Stones   : {Control : null}, // Канва для отрисовки камней.
+        Colors   : {Control : null}, // Канва для рисования цветом.
         Shadow   : {Control : null}, // Канва для теней от камней.
         Variants : {Control : null}, // Канва для отрисовки вариантов.
         Marks    : {Control : null}, // Канва для отрисовки отметок
@@ -253,6 +254,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
 
     var sBoardName    = sName + "_BoardCanvas";
     var sLinesName    = sName + "_LinesCanvas";
+    var sColorName    = sName + "_ColorCanvas";
     var sShadowsName  = sName + "_ShadowsCanvas";
     var sStonesName   = sName + "_StonesCanvas";
     var sVariantsName = sName + "_VariantsCanvas";
@@ -263,6 +265,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     // Сначала заполняем Div нужными нам элементами
     this.private_CreateCanvasElement(oElement, sBoardName);
     this.private_CreateCanvasElement(oElement, sLinesName);
+    this.private_CreateCanvasElement(oElement, sColorName);
     this.private_CreateCanvasElement(oElement, sShadowsName);
     this.private_CreateCanvasElement(oElement, sStonesName);
     this.private_CreateCanvasElement(oElement, sVariantsName);
@@ -275,6 +278,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     var oControl = this.HtmlElement.Control;
     this.private_FillHtmlElement(this.HtmlElement.Board,    oControl, sBoardName);
     this.private_FillHtmlElement(this.HtmlElement.Lines,    oControl, sLinesName);
+    this.private_FillHtmlElement(this.HtmlElement.Colors,   oControl, sColorName);
     this.private_FillHtmlElement(this.HtmlElement.Shadow,   oControl, sShadowsName);
     this.private_FillHtmlElement(this.HtmlElement.Stones,   oControl, sStonesName);
     this.private_FillHtmlElement(this.HtmlElement.Variants, oControl, sVariantsName);
@@ -483,14 +487,6 @@ CDrawingBoard.prototype.Add_Mark = function(Mark)
 CDrawingBoard.prototype.Remove_AllMarks = function()
 {
     this.m_oMarks = {};
-
-    for (var nPosValue in this.m_oColorMarks)
-    {
-        var oPos = Common_ValuetoXY(nPosValue);
-        this.private_ClearColorMark(oPos.X, oPos.Y);
-    }
-
-    this.m_oColorMarks = {};
 };
 CDrawingBoard.prototype.Draw_Marks = function()
 {
@@ -2266,23 +2262,15 @@ CDrawingBoard.prototype.private_DrawAllColorMarks = function()
     for (var nPosValue in this.m_oColorMarks)
     {
         var oPos = Common_ValuetoXY(nPosValue);
-        var oMark = this.m_oColorMarks[nPosValue];
-
-        for (var Index = 0, Count = oMark.length; Index < Count; Index++)
-        {
-            var ColorIndex = oMark[Index];
-            var Color;
-            switch (ColorIndex)
-            {
-                case 1: Color = new CColor(255,   0,   0, 64); break;
-                case 2: Color = new CColor(  0, 255,   0, 64); break;
-                case 3: Color = new CColor(128, 128, 128, 64); break;
-                default:
-                case 0: Color = new CColor(  0,   0, 255, 64); break;
-            }
-            this.private_DrawColorMark(oPos.X, oPos.Y, Color);
-        }
+        this.private_DrawColorMark(oPos.X, oPos.Y);
     }
+};
+CDrawingBoard.prototype.private_ClearAllColorMarks = function()
+{
+    var Canvas = this.HtmlElement.Colors.Control.HtmlElement.getContext("2d");
+    Canvas.clearRect(0, 0, this.m_oImageData.W, this.m_oImageData.H);
+
+    this.m_oColorMarks = {};
 };
 CDrawingBoard.prototype.private_AddColorMark = function(X, Y, e)
 {
@@ -2298,62 +2286,71 @@ CDrawingBoard.prototype.private_AddColorMark = function(X, Y, e)
     }
     else
     {
-        if (undefined === this.m_oColorMarks[nPosValue])
-            this.m_oColorMarks[nPosValue] = [];
-
         var Color;
         if (e.CtrlKey && !e.ShiftKey)
-        {
-            Color = new CColor(0xCC, 0, 0, 64);
-            this.m_oColorMarks[nPosValue].push(1)
-        }
+            Color = new CColor(200, 0, 0, 60);
         else if (e.ShiftKey && !e.CtrlKey)
-        {
-            Color = new CColor(0, 150, 0, 55);
-            this.m_oColorMarks[nPosValue].push(2);
-        }
+            Color = new CColor(0, 100, 0, 60);
         else if (e.ShiftKey && e.CtrlKey)
+            Color = new CColor(80, 80, 80, 60);
+        else
+            Color = new CColor(0, 0, 200, 60);
+
+        if (undefined !== this.m_oColorMarks[nPosValue])
         {
-            Color = new CColor(96, 96, 96, 64);
-            this.m_oColorMarks[nPosValue].push(3);
+            var PrevColor = this.m_oColorMarks[nPosValue];
+            if (Color.r === PrevColor.r && Color.g === PrevColor.g && Color.b === PrevColor.b)
+            {
+
+                var a = PrevColor.a;
+                if (a < 60)
+                    a = 60;
+                else if (a < 120)
+                    a = 120;
+                else
+                    a = 180;
+
+                this.m_oColorMarks[nPosValue].a = a;
+            }
+            else
+                this.m_oColorMarks[nPosValue] = Color;
         }
         else
-        {
-            Color = new CColor(0, 0, 255, 64);
-            this.m_oColorMarks[nPosValue].push(0);
-        }
+            this.m_oColorMarks[nPosValue] = Color;
 
-        this.private_DrawColorMark(X, Y, Color);
+        this.private_DrawColorMark(X, Y);
     }
 };
-CDrawingBoard.prototype.private_DrawColorMark = function(_X, _Y, Color)
+CDrawingBoard.prototype.private_DrawColorMark = function(_X, _Y)
 {
-    var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
+    this.private_ClearColorMark(_X, _Y);
+
+    var Canvas = this.HtmlElement.Colors.Control.HtmlElement.getContext("2d");
 
     var Lines = this.m_oImageData.Lines;
 
     var X = _X - 1;
     var Y = _Y - 1;
 
-    ShadowCanvas.fillStyle = Color.ToString();
-    ShadowCanvas.beginPath();
-    ShadowCanvas.moveTo(Lines[X].X_L2, Lines[Y].Y_L2);
-    ShadowCanvas.lineTo(Lines[X].X_G2, Lines[Y].Y_L2);
-    ShadowCanvas.lineTo(Lines[X].X_G2, Lines[Y].Y_G2);
-    ShadowCanvas.lineTo(Lines[X].X_L2, Lines[Y].Y_G2);
-    ShadowCanvas.closePath();
-    ShadowCanvas.fill();
+    Canvas.fillStyle = this.m_oColorMarks[Common_XYtoValue(_X, _Y)].ToString();
+    Canvas.beginPath();
+    Canvas.moveTo(Lines[X].X_L2, Lines[Y].Y_L2);
+    Canvas.lineTo(Lines[X].X_G2, Lines[Y].Y_L2);
+    Canvas.lineTo(Lines[X].X_G2, Lines[Y].Y_G2);
+    Canvas.lineTo(Lines[X].X_L2, Lines[Y].Y_G2);
+    Canvas.closePath();
+    Canvas.fill();
 };
 CDrawingBoard.prototype.private_ClearColorMark = function(_X, _Y)
 {
-    var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
+    var Canvas = this.HtmlElement.Colors.Control.HtmlElement.getContext("2d");
 
     var Lines = this.m_oImageData.Lines;
 
     var X = _X - 1;
     var Y = _Y - 1;
 
-    ShadowCanvas.clearRect(Lines[X].X_L2, Lines[Y].Y_L2, Lines[X].X_G2 - Lines[X].X_L2, Lines[Y].Y_G2 - Lines[Y].Y_L2);
+    Canvas.clearRect(Lines[X].X_L2, Lines[Y].Y_L2, Lines[X].X_G2 - Lines[X].X_L2, Lines[Y].Y_G2 - Lines[Y].Y_L2);
 };
 CDrawingBoard.prototype.private_HandleMouseDown = function(X, Y, event)
 {
@@ -2712,9 +2709,17 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.m_oGameTree.GoTo_NextVariant();
     }
-    else if (69 === KeyCode && true === Event.CtrlKey)
+    else if (69 === KeyCode && true === Event.CtrlKey) // Ctrl + E
     {
         CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree});
+    }
+    else if (79 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + O
+    {
+        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this});
+    }
+    else if (82 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + R
+    {
+        this.private_ClearAllColorMarks();
     }
     else if (112 === KeyCode) // F1
     {

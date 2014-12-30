@@ -30,6 +30,7 @@ function CDrawing(oGameTree)
         ForwardToEnd    : [],
         NextVariant     : [],
         PrevVariant     : [],
+        Pass            : null,
 
         BoardModeMove   : [],
         BoardModeScores : [],
@@ -256,7 +257,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oDrawingComents.Init(sCommentsDivId, oGameTree);
 
     var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
+    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant,
         EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings]});
 
     var oDrawingTimeLineSlider = new CDrawingSlider(this);
@@ -378,6 +379,10 @@ CDrawing.prototype.private_CreateDiv = function(oParent, sName)
     oElement.setAttribute("oncontextmenu", "return false;");
     oParent.appendChild(oElement);
     return oElement;
+};
+CDrawing.prototype.Register_PassButton = function(PassButton)
+{
+    this.m_oButtons.Pass = PassButton;
 };
 CDrawing.prototype.Register_BackwardToStartButton = function(oButton)
 {
