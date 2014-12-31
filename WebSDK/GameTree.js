@@ -20,9 +20,9 @@ var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
 var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
 var EDITINGFLAGS_GAMEINFO_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_GAMEINFO;
 
-function CGameTree(Drawing, Sound)
+function CGameTree(Drawing)
 {
-    this.m_oSound            = Sound;
+    this.m_oSound            = new CBoardSound();
     this.m_oDrawing          = Drawing;
 
     this.m_oInterfaceState   = new CInterfaceState();
@@ -967,7 +967,7 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
         }
 
         if (this.m_oSound && true !== bSilent)
-            this.m_oSound.Play_CaptureStones(oDeadChecker);
+            this.m_oSound.Play_CaptureStones(oDeadChecker.Get_Size());
 
         if (BOARD_BLACK === Value)
             this.m_nBlackCapt += nGroupSize;
@@ -975,7 +975,7 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
             this.m_nWhiteCapt += nGroupSize;
     }
     // Проверяем самоубийство
-    else  if (null !== (oDeadChecker = this.m_oBoard.Check_Dead(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
+    else if (null !== (oDeadChecker = this.m_oBoard.Check_Dead(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
     {
         var nGroupSize = oDeadChecker.Get_Size();
         for (var Index = 0; Index < nGroupSize; Index++)
@@ -985,7 +985,7 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
         }
 
         if (this.m_oSound && true !== bSilent)
-            this.m_oSound.Play_CaptureStones( g_nGroupSize );
+            this.m_oSound.Play_CaptureStones(oDeadChecker.Get_Size());
 
         if (BOARD_BLACK === Value)
             this.m_nWhiteCapt += nGroupSize;
@@ -1031,6 +1031,10 @@ CGameTree.prototype.Count_Scores = function()
 
         this.Update_InterfaceState();
     }
+};
+CGameTree.prototype.Set_Sound = function(sPath)
+{
+    this.m_oSound.Init(sPath);
 };
 CGameTree.prototype.GoTo_Node = function(Node)
 {

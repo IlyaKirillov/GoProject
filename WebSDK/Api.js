@@ -146,6 +146,15 @@ CGoBoardApi.prototype.Update_Size = function(oGameTree)
     oGameTree.Update_Size();
 };
 
+
+/*
+ Функция для выставления звука.
+ */
+CGoBoardApi.prototype.Set_Sound = function(oGameTree, sPath)
+{
+    oGameTree.Set_Sound(sPath);
+};
+
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
@@ -156,3 +165,4 @@ CGoBoardApi.prototype['Create_Problems']                      = CGoBoardApi.prot
 CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prototype.Set_Permissions;
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;
+CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prototype.Set_Sound;

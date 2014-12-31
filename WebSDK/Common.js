@@ -350,3 +350,22 @@ function CommonExtend(Child, Parent)
     Child.prototype.constructor = Child;
     Child.superclass = Parent.prototype;
 }
+
+function Common_GetBrowser()
+{
+    var sBrowser = "";
+
+    var sBrowserName = navigator.userAgent;
+    if (-1 != sBrowserName.indexOf("Opera"))
+        sBrowser = "Opera";
+    else if (-1 != sBrowserName.indexOf("Chrome"))
+        sBrowser = "Chrome";
+    else if (-1 != sBrowserName.indexOf("MSIE"))
+        sBrowser = "IE";
+    else if (-1 != sBrowserName.indexOf("Safari"))
+        sBrowser = "Safari";
+    else if (-1 != sBrowserName.indexOf("Mozilla"))
+        sBrowser = "Mozilla";
+
+    return sBrowser;
+};

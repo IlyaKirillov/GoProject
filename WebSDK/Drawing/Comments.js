@@ -187,6 +187,11 @@ CDrawingPlayerInfo.prototype.Update_Size = function()
     nOffset += 25;
     this.HtmlElement.NameDiv.style.paddingLeft   = nOffset + "px";
     this.HtmlElement.ScoresDiv.style.paddingLeft = nOffset + "px";
+
+    this.HtmlElement.NameDiv.style.overflow            = "hidden";
+    this.HtmlElement.NameDiv.style.textOverflow        = "ellipsis";
+    this.HtmlElement.NameDiv.style['-o-text-overflow'] = "ellipsis";
+    this.HtmlElement.NameDiv.style.height              = 25 + "px";
 };
 CDrawingPlayerInfo.prototype.Update_Name = function(sName)
 {

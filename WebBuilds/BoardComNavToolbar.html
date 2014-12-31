@@ -9,6 +9,7 @@
 <div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
 <script>
     var oGameTree = GoBoardApi.Create_GameTree();
+    GoBoardApi.Set_Sound(oGameTree, "../Resources/Sound");
     GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
 

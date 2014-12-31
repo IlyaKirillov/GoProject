@@ -179,11 +179,13 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     var sInfoDivId     = sCaTDivId + "_Info";
     var sCommentsDivId = sCaTDivId + "_Comments";
     var sToolsDivId    = sCaTDivId + "_Toolbar";
+    var sToolsDivId2   = sCaTDivId + "_ToolbarSecond";
     var sTools2DivId   = sCaTDivId + "_ToolbarAutoPlay";
     var sTools3DivId   = sCaTDivId + "_ToolbarTimeLine";
     this.private_CreateDiv(oCaTControl.HtmlElement, sInfoDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sCommentsDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId);
+    this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId2);
     var oTools2Element = this.private_CreateDiv(oCaTControl.HtmlElement, sTools2DivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sTools3DivId);
 
@@ -229,6 +231,11 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oCaTControl.AddControl(oCommentsControl);
 
     var oToolsControl = CreateControlContainer(sToolsDivId);
+    oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 3, false, false, false, true, -1, ToolbarH);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaTControl.AddControl(oToolsControl);
+
+    oToolsControl = CreateControlContainer(sToolsDivId2);
     oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 2, false, false, false, true, -1, ToolbarH);
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oToolsControl);
@@ -257,8 +264,11 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oDrawingComents.Init(sCommentsDivId, oGameTree);
 
     var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant,
-        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings]});
+    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant]});
+
+    var oDrawingToolbar2 = new CDrawingToolbar(this);
+    oDrawingToolbar2.Init(sToolsDivId2, oGameTree, {Controls : [EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings]});
+
 
     var oDrawingTimeLineSlider = new CDrawingSlider(this);
     oDrawingTimeLineSlider.Init(sTools3DivId, oGameTree, EDrawingSliderType.Timeline, 0);
@@ -273,6 +283,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.m_aElements.push(oDrawingNavigator);
     this.m_aElements.push(oDrawingComents);
     this.m_aElements.push(oDrawingToolbar);
+    this.m_aElements.push(oDrawingToolbar2);
     this.m_aElements.push(oDrawingTimeLineSlider);
     this.m_aElements.push(oDrawingAutoPlayButton);
     this.m_aElements.push(oDrawingAutoPlaySlider);
