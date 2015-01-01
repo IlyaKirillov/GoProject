@@ -913,14 +913,14 @@ CDrawingButton.prototype.private_GetHint = function()
 {
     switch(this.m_nType)
     {
-        case EDrawingButtonType.BackwardToStart: return "Back to the start";
-        case EDrawingButtonType.Backward_5     : return "Back 5 moves";
-        case EDrawingButtonType.Backward       : return "Back";
-        case EDrawingButtonType.Forward        : return "Forward";
-        case EDrawingButtonType.Forward_5      : return "Forward 5 moves";
-        case EDrawingButtonType.ForwardToEnd   : return "Go to the end";
-        case EDrawingButtonType.NextVariant    : return "Next variant";
-        case EDrawingButtonType.PrevVariant    : return "Previous variant";
+        case EDrawingButtonType.BackwardToStart: return "Back to the start (Ctrl+Shift+Left)";
+        case EDrawingButtonType.Backward_5     : return "Back 5 moves (Ctrl+Left)";
+        case EDrawingButtonType.Backward       : return "Back (Left)";
+        case EDrawingButtonType.Forward        : return "Forward (Right)";
+        case EDrawingButtonType.Forward_5      : return "Forward 5 moves (Ctrl+Right)";
+        case EDrawingButtonType.ForwardToEnd   : return "Go to the end (Ctrl+Shift+Right)";
+        case EDrawingButtonType.NextVariant    : return "Next variant (Down)";
+        case EDrawingButtonType.PrevVariant    : return "Previous variant (Up)";
         case EDrawingButtonType.EditModeMove   : return "Moves (F1)";
         case EDrawingButtonType.EditModeScores : return "Count Scores (F2)";
         case EDrawingButtonType.EditModeAddRem : return "Editor (F3)";

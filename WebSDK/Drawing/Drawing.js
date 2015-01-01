@@ -226,7 +226,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     // END INFO
 
     var oCommentsControl = CreateControlContainer(sCommentsDivId);
-    oCommentsControl.Bounds.SetParams(0, InfoH, 1000, ToolbarH * 3, false, true, false, true, -1, ToolbarH);
+    oCommentsControl.Bounds.SetParams(0, InfoH, 1000, ToolbarH * 4, false, true, false, true, -1, ToolbarH);
     oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oCommentsControl);
 
