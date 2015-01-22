@@ -7,8 +7,15 @@
  * Time     0:48
  */
 
+function CNodeIdCounter()
+{
+    this.m_nCounter = 0;
+}
+
+
 function CNode()
 {
+    this.m_nId        = 0;
     this.m_aNext      = [];                        // Массив следующих нод
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
     this.m_oPrev      = null;                      // Родительская нода
@@ -17,6 +24,7 @@ function CNode()
     this.m_sComment   = "";                        // Комментарий
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
+    this.m_bLoaded    = false;                     // Была ли данная нода в исходном загруженном файле.
 }
 CNode.prototype.Copy_CurrentVariant = function(LastNode)
 {
@@ -359,5 +367,15 @@ CNode.prototype.private_ShowNextVariants = function(oDrawingBoard, ExceptionalVa
             var Pos = Common_ValuetoXY(oMove.Get_Value());
             oDrawingBoard.Draw_Variant(Pos.X, Pos.Y);
         }
+    }
+};
+CNode.prototype.Find_RightNodes = function(aNodes)
+{
+    if (-1 !== this.m_sComment.indexOf("RIGHT"))
+        aNodes.push(this);
+
+    for (var nIndex = 0, nCount = this.Get_NextsCount(); nIndex < nCount; nIndex++)
+    {
+        this.Get_Next(nIndex).Find_RightNodes(aNodes);
     }
 };

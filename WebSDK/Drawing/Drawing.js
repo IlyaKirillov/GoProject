@@ -56,25 +56,23 @@ function CDrawing(oGameTree)
     // Массив ссылок на окна с комментариями
     this.m_aComments = [];
 
-    this.m_nDrawTimerInterval = 40;
-    this.m_nDrawTimerId = setTimeout(function(){oThis.private_OnTimerDraw();}, this.m_nDrawTimerInterval);
-
-    this.m_bNeedUpdateSize = true;
-
     var oThis = this;
+    this.m_bNeedUpdateSize = true;
 
     this.private_OnTimerDraw = function()
     {
-        if (this.m_oNavigator && this.m_oNavigator.Need_Redraw())
+        Common_RequestAnimationFrame(oThis.private_OnTimerDraw);
+
+        if (oThis.m_oNavigator && oThis.m_oNavigator.Need_Redraw())
         {
-            this.m_oNavigator.Draw();
+            oThis.m_oNavigator.Draw();
         }
 
-        if (this.m_bNeedUpdateSize)
-            this.private_UpdateSize(false);
-
-        this.m_nDrawTimerId = setTimeout(function(){oThis.private_OnTimerDraw();}, oThis.m_nDrawTimerInterval);
+        if (oThis.m_bNeedUpdateSize)
+            oThis.private_UpdateSize(false);
     };
+
+    this.private_OnTimerDraw();
 };
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {

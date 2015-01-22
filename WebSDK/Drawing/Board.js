@@ -2721,6 +2721,36 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.private_ClearAllColorMarks();
     }
+    else if (83 === KeyCode && true === Event.CtrlKey) // Ctrl + S
+    {
+        var sSgf = this.m_oGameTree.Save_Sgf();
+
+        if (FileReader && Blob)
+        {
+            var sGameName = this.m_oGameTree.Get_GameName();
+            if ("" === sGameName)
+                sGameName = this.m_oGameTree.Get_WhiteName() + " vs. " + this.m_oGameTree.Get_BlackName();
+            if ("" === sGameName)
+                sGameName = "download";
+
+            sGameName += ".sgf";
+
+            var oFileReader = new FileReader();
+            oFileReader['readAsDataURL'](new Blob([sSgf], {type: "text/plain;charset=utf-8"}));
+            oFileReader['onload'] = function (event)
+            {
+                var oSaveElement         = document.createElement('a');
+                oSaveElement['href']     = event.target.result;
+                oSaveElement['target']   = '_blank';
+                oSaveElement['download'] = sGameName || 'unknown file';
+
+                var oEvent = document.createEvent('Event');
+                oEvent.initEvent('click', true, true);
+                oSaveElement.dispatchEvent(oEvent);
+                (window['URL'] || window['webkitURL']).revokeObjectURL(oSaveElement['href']);
+            };
+        }
+    }
     else if (112 === KeyCode) // F1
     {
         this.Set_Mode(EBoardMode.Move);

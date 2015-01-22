@@ -133,9 +133,25 @@ CGameTree.prototype.Set_TutorCallbacks = function(pRightCallBack, pWrongCallback
     this.m_pTutorWrongCallback = pWrongCallback;
     this.m_pTutorResetCallback = pResetCallback;
 };
-CGameTree.prototype.Start_AutoPlay = function()
+CGameTree.prototype.Find_ProblemRightVariant = function()
 {
-    if (!(EDITINGFLAGS_MOVE & this.m_nEditingFlags))
+    // Ищем по всем нодам, ноду с комментарием RIGHT. Среди найденых нод выбираем любую случайным образом, и делаем
+    // вариант с данной нодой текущим.
+    var aRightNodes = [];
+    this.m_oFirstNode.Find_RightNodes(aRightNodes);
+
+    if (aRightNodes.length > 0)
+    {
+        var nRand = Math.max(0, Math.min(aRightNodes.length - 1, Math.floor(Math.random() * aRightNodes.length)));
+        aRightNodes[nRand].Make_ThisNodeCurrent();
+        return true;
+    }
+
+    return false;
+};
+CGameTree.prototype.Start_AutoPlay = function(bForce)
+{
+    if (!(EDITINGFLAGS_MOVE & this.m_nEditingFlags) && true !== bForce)
         return;
 
     this.Stop_AutoPlay();
@@ -149,7 +165,8 @@ CGameTree.prototype.Start_AutoPlay = function()
     {
         if (oThis.Get_CurNode().Get_NextsCount() > 0)
         {
-            oThis.Step_Forward(1);
+            oThis.m_nAutoPlayTimer = 0; // Делаем его не null
+            oThis.Step_Forward(1, bForce);
         }
 
         if (oThis.Get_CurNode().Get_NextsCount() > 0)
@@ -179,8 +196,8 @@ CGameTree.prototype.Start_AutoPlay = function()
 };
 CGameTree.prototype.Get_AutoPlayInterval = function()
 {
-    var nMinInterval = 100;   // 0.1 секунды
-    var nMaxInterval = 20000; // 20 секунд
+    var nMinInterval = 100;  // 0.1 секунды
+    var nMaxInterval = 7000; // 7 секунд
     return nMinInterval + (nMaxInterval - nMinInterval) * (1 - this.m_dAutoPlaySpeed);
 };
 CGameTree.prototype.Stop_AutoPlay = function()
@@ -337,6 +354,12 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
     if (this.m_oDrawing)
         this.m_oDrawing.Update_Size(true);
 };
+CGameTree.prototype.Save_Sgf = function()
+{
+    var oWriter = new CSgfWriter();
+    oWriter.Write(this);
+    return oWriter.m_sFile;
+};
 CGameTree.prototype.Set_DrawingBoard = function(DrawingBoard)
 {
     this.m_oDrawingBoard = DrawingBoard;
@@ -402,11 +425,11 @@ CGameTree.prototype.Step_Backward = function(Count)
 
     this.GoTo_Node(ParentNode);
 }
-CGameTree.prototype.Step_Forward = function(Count)
+CGameTree.prototype.Step_Forward = function(Count, bForce)
 {
     if (1 === Count)
     {
-        if (!this.GoTo_Next())
+        if (!this.GoTo_Next(bForce))
             return;
 
         this.Execute_CurNodeCommands();
@@ -885,6 +908,9 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         var bNeedUpdateComment = true;
         if (BOARD_EMPTY !== this.m_nTutorMode)
         {
+            if (-1 !== sComment.indexOf("CHOICE"))
+                sComment = sComment.replace("CHOICE", "");
+
             if (this.m_oCurNode.Get_NextsCount() <= 0)
             {
                 if (-1 !== sComment.indexOf("RIGHT") && null !== this.m_pTutorRightCallback)
@@ -915,7 +941,7 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
 
     if (this.m_nNextMove === this.m_nTutorMode)
     {
-        if (null !== this.m_nTutorId)
+        if (null !== this.m_nTutorId || null !== this.m_nAutoPlayTimer)
             return;
 
         if (this.m_oCurNode.Get_NextsCount() >= 0)
@@ -926,6 +952,27 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
             this.m_nTutorId = setTimeout(function()
             {
                 oThis.Reset_EditingFlags();
+
+                // Находим все ноды с комментарием CHOICE, и выбираем случайно одну из них. Если таковых нод нет, тогда
+                // идем по верхней ветке.
+
+                var oCurNode = oThis.Get_CurNode();
+                var aChoice = [];
+                for (var nIndex = 0, nCount = oCurNode.Get_NextsCount(); nIndex < nCount; nIndex++)
+                {
+                    var oTempNode = oCurNode.Get_Next(nIndex);
+                    if (-1 !== oTempNode.Get_Comment().indexOf("CHOICE"))
+                        aChoice.push(nIndex);
+                }
+
+                if (aChoice.length > 0)
+                {
+                    var nRand = Math.max(0, Math.min(aChoice.length - 1, Math.floor(Math.random() * aChoice.length)));
+                    oCurNode.Set_NextCur(aChoice[nRand]);
+                }
+                else if (oCurNode.Get_NextsCount() > 0)
+                    oCurNode.Set_NextCur(0);
+
                 oThis.Step_Forward(1);
                 oThis.m_nEditingFlags = nOldFlags;
                 oThis.m_nTutorId = null;
@@ -1000,9 +1047,9 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 
     this.private_UpdateNextMove(Value);
 };
-CGameTree.prototype.GoTo_Next = function()
+CGameTree.prototype.GoTo_Next = function(bForce)
 {
-    if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE))
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE) && true !== bForce)
         return false;
 
     if (0 === this.m_oCurNode.Get_NextsCount() || -1 === this.m_oCurNode.Get_NextCur())
@@ -1380,6 +1427,10 @@ CGameTree.prototype.Set_WhiteRating = function(sWhiteRating)
 CGameTree.prototype.Set_WhiteTeam = function(sWhiteTeam)
 {
     this.m_sWhiteTeam = sWhiteTeam;
+};
+CGameTree.prototype.Get_WhiteTeam = function()
+{
+    return this.m_sWhiteTeam;
 };
 CGameTree.prototype.Set_BoardSize = function(W, H)
 {

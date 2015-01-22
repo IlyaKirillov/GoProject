@@ -97,6 +97,9 @@ CSgfReader.prototype.private_Parse = function()
                 else
                     this.m_oGameTree.Set_CurNode(this.m_oGameTree.Get_FirstNode());
 
+                // Отмечаем, что данная нода загружена из файла
+                this.m_oGameTree.m_oCurNode.m_bLoaded = true;
+
                 if (!this.private_ReadNode())
                     return false;
             }
@@ -174,7 +177,7 @@ CSgfReader.prototype.private_ReadNode = function()
             {
                 switch (Char2)
                 {
-                    case 'D': this.private_ReadDT(); break;
+                    case 'T': this.private_ReadDT(); break;
                     default : this.private_ReadUnknown(); break;
                 }
                 break;

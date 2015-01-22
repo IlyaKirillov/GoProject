@@ -92,6 +92,31 @@ CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
 };
 
 /*
+ Ищем правильный вариант решения задачи. Если такого варианта нет возвращается false, если есть, тогда
+ возвращаем true и делаем вариант с правильной нодой текущим.
+ */
+CGoBoardApi.prototype.Find_ProblemRightVariant = function(oGameTree)
+{
+    return oGameTree.Find_ProblemRightVariant();
+};
+
+/*
+ Стартуем автопроигрывание
+ */
+CGoBoardApi.prototype.Start_AutoPlay = function(oGameTree)
+{
+    oGameTree.Start_AutoPlay(true);
+};
+
+/*
+ Останавливаем автопроигрывание
+ */
+CGoBoardApi.prototype.Stop_AutoPlay = function(oGameTree)
+{
+    oGameTree.Stop_AutoPlay();
+};
+
+/*
  Накладываем ограничения на редактирование.
  */
 CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
@@ -139,6 +164,14 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
 };
 
 /*
+ Сохраняем Sgf в виде строки
+ */
+CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
+{
+    return oGameTree.Save_Sgf();
+};
+
+/*
  Функция обновления размеров всех графических объектов.
  */
 CGoBoardApi.prototype.Update_Size = function(oGameTree)
@@ -166,3 +199,6 @@ CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prot
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;
 CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prototype.Set_Sound;
+CGoBoardApi.prototype['Find_ProblemRightVariant']             = CGoBoardApi.prototype.Find_ProblemRightVariant;
+CGoBoardApi.prototype['Start_AutoPlay']                       = CGoBoardApi.prototype.Start_AutoPlay;
+CGoBoardApi.prototype['Stop_AutoPlay']                        = CGoBoardApi.prototype.Stop_AutoPlay;

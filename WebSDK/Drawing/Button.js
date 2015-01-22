@@ -167,6 +167,10 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     oCanvasElement.setAttribute("id", sDivId + "_canvas");
     oCanvasElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
     oCanvasElement.setAttribute("oncontextmenu", "return false;");
+
+    oCanvasElement.style['-webkit-transition'] = "background 2s";
+    oCanvasElement.style['transition']         = "background 2s";
+
     oDivElement.appendChild(oCanvasElement);
 
     this.HtmlElement.Canvas.Control = CreateControlContainer(sDivId + "_canvas");
@@ -184,6 +188,8 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     oDivElement.style.outline = "none";
     oDivElement.draggable   = "true";
     oDivElement.ondragstart = this.private_OnDragStart;
+
+    //oDivElement.style.backgroundImage = "url('')";
 
     this.Update_Size();
 };
@@ -255,6 +261,21 @@ CDrawingButton.prototype.private_OnResize = function()
     this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor,    this.m_oNormaFColor,    W, H);
     this.m_oImageData.Disabled = this.private_Draw(this.m_oDisabledBColor, this.m_oDisabledFColor, W, H);
     this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H);
+
+    var oDivElement = this.HtmlElement.Control.HtmlElement;
+    //oDivElement.style.
+
+    var oHead  = document.getElementsByTagName('head')[0];
+    var oStyle = document.createElement('style');
+    var oRules = document.createTextNode('a#my_link:hover{color:#ff0000 !important;}');
+
+    oStyle.type = 'text/css';
+    if (oStyle.styleSheet)
+        oStyle.styleSheet.cssText = oRules.nodeValue;
+    else
+        oStyle.appendChild(oRules);
+
+    oHead.appendChild(oStyle);
 
     this.private_UpdateState();
 };
@@ -805,6 +826,7 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
         }
     };
 
+    //return Canvas.toDataURL();
     return Canvas.getImageData(0, 0, W, H);
 };
 CDrawingButton.prototype.private_DrawTriangle = function(Size, X_off, Y_off, Canvas, Direction)
