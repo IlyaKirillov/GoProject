@@ -1556,3 +1556,18 @@ CGameTree.prototype.Can_EditGameInfo = function()
 {
     return (this.m_nEditingFlags & EDITINGFLAGS_GAMEINFO ? true : false);
 };
+CGameTree.prototype.Download_BoardScreenShot = function()
+{
+    var oDrawingBoard = this.Get_DrawingBoard();
+
+    if (oDrawingBoard)
+    {
+        var oCanvas = oDrawingBoard.Get_FullImage();
+        var sImage  = oCanvas.toDataURL("image/png");
+
+        var oHref = document.createElement("a");
+        oHref['download'] = "BoardShot.png";
+        oHref['href']     = "data:image/png;base64" + sImage;
+        oHref.click();
+    }
+};

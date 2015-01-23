@@ -2713,6 +2713,10 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree});
     }
+    else if (72 === KeyCode && true === Event.CtrlKey) // Ctrl + H
+    {
+        this.m_oGameTree.Download_BoardScreenShot();
+    }
     else if (79 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + O
     {
         CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this});
