@@ -381,3 +381,75 @@ var Common_RequestAnimationFrame = (window.requestAnimationFrame ? window.reques
                window.setTimeout(callback, 1000 / 60);
            };
 })());
+
+
+var g_sBase64Key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+function Common_Base64_Encode(srcData, nSrcLen, nOffset)
+{
+    if ( "undefined" === typeof(nOffset) )
+        nOffset = 0;
+
+    var nWritten = 0;
+    var nLen1 = (((nSrcLen / 3) >> 0) * 4);
+    var nLen2 = (nLen1 / 76) >> 0;
+    var nLen3 = 19;
+    var srcInd = 0;
+    var dstStr = "";
+
+    for (var i=0; i<=nLen2; i++)
+    {
+        if (i == nLen2)
+            nLen3 = ((nLen1%76)/4) >> 0;
+
+        for (var j=0;j<nLen3;j++)
+        {
+            var dwCurr = 0;
+            for (var n=0; n<3; n++)
+            {
+                dwCurr |= srcData[srcInd++ + nOffset];
+                dwCurr <<= 8;
+            }
+            for (var k=0; k<4; k++)
+            {
+                var b = (dwCurr>>>26)&0xFF;
+                dstStr += g_sBase64Key[b];
+                dwCurr <<= 6;
+                dwCurr &= 0xFFFFFFFF;
+            }
+        }
+    }
+    nLen2 = (nSrcLen%3 != 0) ? (nSrcLen%3 + 1) : 0;
+    if (nLen2)
+    {
+        var dwCurr = 0;
+        for (var n=0; n<3; n++)
+        {
+            if (n<(nSrcLen%3))
+                dwCurr |= srcData[srcInd++ + nOffset];
+            dwCurr <<= 8;
+        }
+        for (var k=0; k<nLen2; k++)
+        {
+            var b = (dwCurr>>>26)&0xFF;
+            dstStr += g_sBase64Key[b];
+            dwCurr <<= 6;
+        }
+
+        nLen3 = (nLen2 != 0) ? 4-nLen2 : 0;
+        for (var j=0; j<nLen3; j++)
+        {
+            dstStr += '=';
+        }
+    }
+    return dstStr;
+};
+
+function Common_SaveAs(oBlob, sName)
+{
+    var oLink = document.createElement("a");
+    var oURL  = (window['URL'] || window['webkitURL'] || window);
+    var url   = oLink['href'] = oURL.createObjectURL(oBlob);
+    oLink['download'] = sName;
+    oLink.click();
+    oURL.revokeObjectURL(url);
+}

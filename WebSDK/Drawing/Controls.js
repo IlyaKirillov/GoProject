@@ -65,14 +65,18 @@ function CControlContainer()
 
     this.Type           = 0;
     this.DrawingElement = null;
+    this.RMin           = 400;
 }
-CControlContainer.prototype.Set_Type = function(Type, DrawingElement)
+CControlContainer.prototype.Set_Type = function(Type, DrawingElement, Pr)
 {
     this.Type = Type;
     this.DrawingElement = DrawingElement;
 
     if (DrawingElement && DrawingElement.Add_LinkedControl)
         DrawingElement.Add_LinkedControl(this);
+
+    if (Pr.RMin)
+        this.RMin = Pr.RMin;
 };
 CControlContainer.prototype.AddControl = function(ctrl)
 {
@@ -246,7 +250,7 @@ CControlContainer.prototype.private_ResizeControls = function(_w, _h)
         var ControlL = this.Controls[0];
         var ControlR = this.Controls[1];
 
-        var _rMin = 400;
+        var _rMin = this.RMin;
 
         var W = _w;
         var H = _h;

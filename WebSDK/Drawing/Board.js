@@ -43,6 +43,8 @@ function CDrawingBoard(oDrawing)
 
     this.m_oCreateWoodyId = null; // Id таймера по которому рисуется красивая доска.
 
+    this.m_bBlackWhiteLastMark = false; // Черно-белая метка последнего хода
+
     this.m_oImageData =
     {
         W           : 0,
@@ -327,6 +329,10 @@ CDrawingBoard.prototype.Set_ShellWhiteStones = function(Value)
 {
     this.m_bShellWhiteStones = Value;
 };
+CDrawingBoard.prototype.Set_BlackWhiteLastMark = function(Value)
+{
+    this.m_bBlackWhiteLastMark = Value;
+};
 CDrawingBoard.prototype.Get_FullImage = function()
 {
     var Canvas = document.createElement("canvas");
@@ -468,6 +474,60 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
             this.private_UpdateTarget();
     }
 };
+CDrawingBoard.prototype.Get_BoardState = function()
+{
+    var oStones = {};
+    var oMarks  = {};
+
+    for (var nPos in this.m_oBoardPosition)
+    {
+        oStones[nPos] = this.m_oBoardPosition[nPos];
+    }
+
+    for (var sPos in this.m_oMarks)
+    {
+        var nPos = parseInt(sPos);
+
+        var oMark = this.m_oMarks[sPos];
+
+        if (EDrawingMark.Tx === oMark.Get_Type() && BOARD_EMPTY === this.m_oLogicBoard.Get(oMark.Get_X(), oMark.Get_Y()))
+            oMarks[nPos] = false;
+        else
+            oMarks[nPos] = true;
+    }
+
+    return {Stones : oStones, Marks : oMarks};
+};
+CDrawingBoard.prototype.Get_BoardAreaByPosition = function(X, Y, bShadow, bStone)
+{
+    if (true !== this.private_IsPointInViewPort(X - 1, Y - 1))
+        return null;
+
+    var Lines = this.m_oImageData.Lines;
+    if (true === bStone)
+    {
+        var d = this.m_oImageData.StoneDiam;
+        var Rad = (d - 1) / 2;
+        var Off = bShadow ? this.m_oImageData.ShadowOff : 0;
+
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
+
+        return {X0 : _X, Y0 : _Y, X1 : _X + d + Off, Y1 : _Y + d + Off};
+    }
+    else
+    {
+        var clear_w = Lines[1].X - Lines[0].X + 2;
+        var clear_h = Lines[1].Y - Lines[0].Y + 2;
+
+        var X0 = Lines[X - 1].X_L2;
+        var Y0 = Lines[Y - 1].Y_L2;
+        var X1 = X0 + clear_w;
+        var Y1 = Y0 + clear_h;
+
+        return {X0 : X0, Y0 : Y0, X1 : X1, Y1 : Y1};
+    }
+};
 CDrawingBoard.prototype.Show_Target = function()
 {
     this.private_UpdateTarget();
@@ -492,7 +552,7 @@ CDrawingBoard.prototype.Draw_Marks = function()
 {
     this.private_DrawMarks();
 };
-CDrawingBoard.prototype.Draw_AllStones = function(OldLogicBoard)
+CDrawingBoard.prototype.Draw_AllStones = function()
 {
     this.private_DrawTrueColorAllStones();
 };
@@ -2199,8 +2259,18 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 MarksCanvas.putImageData(this.m_oImageData.Ter_White2, _X, _Y);
                 break;
             case EDrawingMark.Lm:
-                MarksCanvas.putImageData(this.m_oImageData.LastMove, _X, _Y);
+            {
+                if (true === this.m_bBlackWhiteLastMark)
+                {
+                    if (BOARD_BLACK === Value)
+                        MarksCanvas.putImageData(this.m_oImageData.Cr_White, _X, _Y);
+                    else
+                        MarksCanvas.putImageData(this.m_oImageData.Cr_Black, _X, _Y);
+                }
+                else
+                    MarksCanvas.putImageData(this.m_oImageData.LastMove, _X, _Y);
                 break;
+            }
             case EDrawingMark.Cr:
                 MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
                 break;
@@ -2715,7 +2785,17 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     }
     else if (72 === KeyCode && true === Event.CtrlKey) // Ctrl + H
     {
-        this.m_oGameTree.Download_BoardScreenShot();
+        if (true === Event.ShiftKey)
+            this.m_oGameTree.Download_GifBoardScreenShot();
+        else
+            this.m_oGameTree.Download_PngBoardScreenShot();
+    }
+    else if (73 === KeyCode && true === Event.CtrlKey) // Ctrl + I
+    {
+        if (true === Event.ShiftKey)
+            this.m_oGameTree.Download_GifForProblem();
+        else
+            this.m_oGameTree.Download_GifForCurVariant();
     }
     else if (79 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + O
     {
@@ -2738,21 +2818,8 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
                 sGameName = "download";
 
             sGameName += ".sgf";
-
-            var oFileReader = new FileReader();
-            oFileReader['readAsDataURL'](new Blob([sSgf], {type: "text/plain;charset=utf-8"}));
-            oFileReader['onload'] = function (event)
-            {
-                var oSaveElement         = document.createElement('a');
-                oSaveElement['href']     = event.target.result;
-                oSaveElement['target']   = '_blank';
-                oSaveElement['download'] = sGameName || 'unknown file';
-
-                var oEvent = document.createEvent('Event');
-                oEvent.initEvent('click', true, true);
-                oSaveElement.dispatchEvent(oEvent);
-                (window['URL'] || window['webkitURL']).revokeObjectURL(oSaveElement['href']);
-            };
+            var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
+            Common_SaveAs(oBlob, sGameName);
         }
     }
     else if (112 === KeyCode) // F1

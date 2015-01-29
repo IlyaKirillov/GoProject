@@ -1246,15 +1246,131 @@ CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDi
     return oValueElement;
 };
 
+function CDrawingGifWriterWindow()
+{
+    CDrawingGifWriterWindow.superclass.constructor.call(this);
+
+    this.m_oProgressSliderElement = null;
+    this.m_oProgressValueElement  = null;
+    this.m_oDrawing               = null;
+    this.m_oGameTree              = null;
+}
+
+CommonExtend(CDrawingGifWriterWindow, CDrawingWindow);
+
+CDrawingGifWriterWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, false);
+
+    this.Set_Caption("Creating Gif file...");
+
+    var oWindowDiv = document.getElementById(_sDivId);
+    oWindowDiv.style.width  = "240px";
+    oWindowDiv.style.height = "100px";
+
+    if (oPr.Drawing)
+    {
+        this.m_oDrawing = oPr.Drawing;
+
+        oWindowDiv.style.left = (this.m_oDrawing.Get_Width() / 2  - 120) + "px";
+        oWindowDiv.style.top  = (this.m_oDrawing.Get_Height() / 2 -  50) + "px";
+    }
+
+    if (oPr.GameTree)
+        this.m_oGameTree = oPr.GameTree;
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sDivId       = this.HtmlElement.InnerDiv.id;
+
+    var sProgressBack = sDivId + "PB";
+    var oProgressBackElement = this.protected_CreateDivElement(oMainDiv, sProgressBack);
+    var oProgressBackControl = CreateControlContainer(sProgressBack);
+    oProgressBackControl.Bounds.SetParams(6, 30, 8, 8, true, true, true, true, -1,-1);
+    oProgressBackControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oProgressBackControl);
+    oProgressBackElement.style.border = "1px solid rgb(221,221,221)";
+    oProgressBackElement.style.backgroundColor = "rgb(140, 140, 140)";
+
+    var sProgress = sDivId + "P";
+    var oProgressElement = this.protected_CreateDivElement(oMainDiv, sProgress);
+    var oProgressControl = CreateControlContainer(sProgress);
+    oProgressControl.Bounds.SetParams(7, 31, 0, 7, true, true, false, true, 10,-1);
+    oProgressControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    oMainControl.AddControl(oProgressControl);
+    oProgressElement.style.backgroundColor = "rgb(54, 101, 179)";
+
+    this.m_oProgressSliderElement = oProgressElement;
+
+    var sDigitProgress = sDivId + "PV";
+    var oDigitProgressElement = this.protected_CreateDivElement(oMainDiv, sDigitProgress);
+    var oDigitProgressControl = CreateControlContainer(sDigitProgress);
+    oDigitProgressControl.Bounds.SetParams(0, 7, 1000, 32, false, false, false, true, -1, -1);
+    oDigitProgressControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    oMainControl.AddControl(oDigitProgressControl);
+    oDigitProgressElement.style.fontFamily  = "Tahoma, Sans serif";
+    oDigitProgressElement.style.fontSize    = 20 * 15 / 20 + "px";
+    oDigitProgressElement.style.lineHeight  = 20 + "px";
+    oDigitProgressElement.style.height      = 20 + "px";
+    oDigitProgressElement.style.color       = "rgb(0, 0, 0)";
+    oDigitProgressElement.style.textAlign   = "center";
+
+    this.m_oProgressValueElement = oDigitProgressElement;
+};
+CDrawingGifWriterWindow.prototype.On_Progress = function(Progress)
+{
+    var dWidth = 214;
+    this.m_oProgressSliderElement.style.width = (Progress / 100 * dWidth) + "px";
+
+    var dValue = (Progress * 100 | 0) / 100;
+    this.m_oProgressValueElement.innerHTML = dValue + "%";
+    this.m_oProgressValueElement.innerText = dValue + "%";
+};
+CDrawingGifWriterWindow.prototype.On_Start = function()
+{
+    this.On_Progress(0);
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Disable();
+};
+CDrawingGifWriterWindow.prototype.On_End = function()
+{
+    this.On_Progress(100);
+
+    var oThis = this;
+    function Close()
+    {
+        oThis.Close(true);
+    }
+
+    // Закрываем окно не сразу, чтобы показать 100%
+    setTimeout(Close, 300);
+};
+CDrawingGifWriterWindow.prototype.Close = function(bEnd)
+{
+    if (true !== bEnd)
+    {
+        if (this.m_oGameTree)
+            this.m_oGameTree.Abort_DownloadGid();
+    }
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Enable();
+
+    CDrawingGifWriterWindow.superclass.Close.apply(this);
+};
+
+
 var EWindowType =
 {
-    Common   : 0,
-    Confirm  : 1,
-    Error    : 2,
-    GameInfo : 3,
-    Settings : 4,
+    Common        : 0,
+    Confirm       : 1,
+    Error         : 2,
+    GameInfo      : 3,
+    Settings      : 4,
     ScoreEstimate : 5,
-    CountColors   : 6
+    CountColors   : 6,
+    GifWriter     : 7
 };
 
 
@@ -1263,11 +1379,12 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
     var sApp = "unknownwindow";
     switch (nWindowType)
     {
-        case EWindowType.GameInfo: sApp = "Info"; break;
-        case EWindowType.Settings: sApp = "Settings"; break;
-        case EWindowType.Error   : sApp = "Error"; break;
+        case EWindowType.GameInfo      : sApp = "Info"; break;
+        case EWindowType.Settings      : sApp = "Settings"; break;
+        case EWindowType.Error         : sApp = "Error"; break;
         case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
         case EWindowType.CountColors   : sApp = "CountColors"; break;
+        case EWindowType.GifWriter     : sApp = "GifWriter"; break;
     }
     var sId = sDrawingId + sApp;
 
@@ -1294,11 +1411,12 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
 
             switch (nWindowType)
             {
-                case EWindowType.GameInfo: oWindow = new CDrawingInfoWindow(); break;
-                case EWindowType.Settings: oWindow = new CDrawingSettingsWindow(); break;
-                case EWindowType.Error   : oWindow = new CDrawingErrorWindow(); break;
+                case EWindowType.GameInfo      : oWindow = new CDrawingInfoWindow(); break;
+                case EWindowType.Settings      : oWindow = new CDrawingSettingsWindow(); break;
+                case EWindowType.Error         : oWindow = new CDrawingErrorWindow(); break;
                 case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
                 case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
+                case EWindowType.GifWriter     : oWindow = new CDrawingGifWriterWindow(); break;
             }
 
             if (null !== oWindow)
@@ -1306,6 +1424,10 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 oWindow.Init(sId, oPr);
                 oWindow.Update_Size(true);
             }
+
+            return oWindow;
         }
     }
+
+    return null;
 };

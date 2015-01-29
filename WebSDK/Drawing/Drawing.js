@@ -16,6 +16,9 @@ function CDrawing(oGameTree)
     if (oGameTree)
         oGameTree.Set_Drawing(this);
 
+    this.m_oMainDiv        = null
+    this.m_oDisableElement = null;
+
     this.m_oControl = null;
     this.m_aElements = [];
 
@@ -74,8 +77,49 @@ function CDrawing(oGameTree)
 
     this.private_OnTimerDraw();
 };
+CDrawing.prototype.Disable = function()
+{
+    if (this.m_oMainDiv)
+    {
+        var oDisable = document.createElement("div");
+        oDisable.style.width           = "100%";
+        oDisable.style.height          = "100%";
+        oDisable.style.position        = "absolute";
+        oDisable.style.left            = "0px";
+        oDisable.style.top             = "0px";
+        oDisable.style.backgroundColor = "rgb(0, 0, 0)";
+        oDisable.style.opacity         = 0.4;
+
+        this.m_oMainDiv.appendChild(oDisable);
+        this.m_oDisableElement = oDisable;
+    }
+};
+CDrawing.prototype.Enable = function()
+{
+    if (this.m_oDisableElement)
+    {
+        this.m_oMainDiv.removeChild(this.m_oDisableElement);
+        this.m_oDisableElement = null;
+    }
+};
+CDrawing.prototype.Get_Width = function()
+{
+    if (this.m_oMainDiv)
+        return parseInt(this.m_oMainDiv.style.width);
+
+    return 0;
+};
+CDrawing.prototype.Get_Height = function()
+{
+    if (this.m_oMainDiv)
+        return parseInt(this.m_oMainDiv.style.height);
+
+    return 0;
+};
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {
+    this.private_SetMainDiv(sDivId);
+
     var DrawingBoard = new CDrawingBoard(this);
     DrawingBoard.Init(sDivId, this.m_oGameTree);
     DrawingBoard.Focus();
@@ -86,6 +130,7 @@ CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 };
 CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 {
+    this.private_SetMainDiv(sDivId);
     var oGameTree = this.m_oGameTree;
 
     var oMainControl = CreateControlContainer(sDivId);
@@ -134,13 +179,14 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 
     var oParentControl = CreateControlContainer(sDivId);
     var sMainDivId = sDivId + "GoBoard";
+
     this.private_CreateDiv(oParentControl.HtmlElement, sMainDivId);
     var oMainControl = CreateControlContainer(sMainDivId);
     oMainControl.Bounds.SetParams(0, 0, 1, 1, false, false, true, true, -1, -1);
     oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oParentControl.AddControl(oMainControl);
 
-    oMainControl.Set_Type(1, oDrawingBoard);
+    oMainControl.Set_Type(1, oDrawingBoard, {RMin : 400});
 
     var sBoardDivId = sDivId + "_Board";
     var sPanelDivId = sDivId + "_Panel";
@@ -293,6 +339,8 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.Update_Size();
 
     oGameTree.On_EndLoadDrawing();
+
+    this.private_SetMainDiv(sMainDivId);
 };
 CDrawing.prototype.Create_Problems = function(sDivId)
 {
@@ -309,7 +357,7 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oParentControl.AddControl(oMainControl);
 
-    oMainControl.Set_Type(1, oDrawingBoard);
+    oMainControl.Set_Type(1, oDrawingBoard, {RMin : 100});
 
     var sBoardDivId = sDivId + "_Board";
     var sPanelDivId = sDivId + "_Panel";
@@ -357,6 +405,8 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     this.Update_Size();
 
     oGameTree.On_EndLoadDrawing();
+
+    this.private_SetMainDiv(sMainDivId);
 };
 CDrawing.prototype.Update_Size = function(bForce)
 {
@@ -364,6 +414,10 @@ CDrawing.prototype.Update_Size = function(bForce)
         this.private_UpdateSize(true);
     else
         this.m_bNeedUpdateSize = true;
+};
+CDrawing.prototype.private_SetMainDiv = function(sDivId)
+{
+    this.m_oMainDiv = document.getElementById(sDivId);
 };
 CDrawing.prototype.private_UpdateSize = function(bForce)
 {
