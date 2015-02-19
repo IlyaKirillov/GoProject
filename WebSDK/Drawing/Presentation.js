@@ -180,7 +180,7 @@ CPresentation.prototype.Init = function(sDivId, aSlides)
 
     this.private_GoToStep(0, 0);
 };
-CPresentation.prototype.Update_Size = function()
+CPresentation.prototype.Update_Size = function(bForce)
 {
     if (this.m_oControl)
     {
@@ -191,7 +191,7 @@ CPresentation.prototype.Update_Size = function()
     }
 
     for (var Index = 0, Count = this.m_aElements.length; Index < Count; Index++)
-        this.m_aElements[Index].Update_Size();
+        this.m_aElements[Index].Update_Size(bForce);
 };
 CPresentation.prototype.Get_NodesCountInSlide = function()
 {
