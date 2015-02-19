@@ -505,7 +505,7 @@ CGameTree.prototype.GoTo_MainVariant = function()
 CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
 {
     if (this.m_oSound)
-        this.m_oSound.Set_Silence( true );
+        this.m_oSound.Off();
 
     var CurNode = this.m_oCurNode;
     this.Step_BackwardToStart();
@@ -522,7 +522,7 @@ CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
         this.GoTo_Node(CurNode);
 
     if (this.m_oSound)
-        this.m_oSound.Set_Silence( false );
+        this.m_oSound.On();
 };
 CGameTree.prototype.Set_NextMove = function(Value)
 {
@@ -901,6 +901,7 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
             this.m_oDrawingBoard.Set_Mode(EBoardMode.CountScores);
 
         this.m_oDrawingBoard.Draw_Marks();
+        this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);
     }
 
     if (this.m_oDrawing)
@@ -1564,13 +1565,13 @@ CGameTree.prototype.Download_PngBoardScreenShot = function()
 
     if (oDrawingBoard)
     {
-        var oCanvas = oDrawingBoard.Get_FullImage();
+        var oCanvas = oDrawingBoard.Get_FullImage(true);
         var sImage  = oCanvas.toDataURL("image/png");
 
         var oHref = document.createElement("a");
         oHref['download'] = "BoardShot.png";
         oHref['href']     = "data:image/png;base64" + sImage;
-        oHref.click();
+        Common.Click(oHref);
     }
 };
 CGameTree.prototype.Download_GifForCurVariant = function()
@@ -1677,7 +1678,7 @@ CGameTree.prototype.private_DownloadGif = function(aNodes)
         {
             oThis.GoTo_Node(aNodes[nCurrentFrame], true);
 
-            oCanvas  = oDrawingBoard.Get_FullImage();
+            oCanvas  = oDrawingBoard.Get_FullImage(false);
             oContext = oCanvas.getContext("2d");
 
             // Теперь нам надо запоминать логическое состояние отрисовки, т.е. где что отрисовано (камни и метки)
@@ -1725,7 +1726,7 @@ CGameTree.prototype.private_DownloadGif = function(aNodes)
                 for (var nPos in oChangedAreas)
                 {
                     var oPos = Common_ValuetoXY(nPos);
-                    var oArea = oDrawingBoard.Get_BoardAreaByPosition(oPos.X, oPos.Y, oDrawingBoard.m_bShadows, oChangedAreas[nPos]);
+                    var oArea = oDrawingBoard.Get_BoardAreaByPosition(oPos.X, oPos.Y, oDrawingBoard.private_GetSettings_Shadows(), oChangedAreas[nPos]);
                     if (null !== oArea)
                         aAreas.push(oArea);
                 }
@@ -1778,9 +1779,17 @@ CGameTree.prototype.private_DownloadGif = function(aNodes)
 
             oGifWriter.Finish();
 
-            var sGameName = "Test.gif";
+
+            var sGameName = oThis.Get_GameName();
+            if ("" === sGameName)
+                sGameName = oThis.Get_WhiteName() + " vs. " + oThis.Get_BlackName();
+            if ("" === sGameName)
+                sGameName = "download";
+
+            sGameName += ".gif";
+
             var oBlob = new Blob([oGifWriter.Get_Stream().Get_Bytes()], {type: "image/gif"});
-            Common_SaveAs(oBlob, sGameName);
+            Common.SaveAs(oBlob, sGameName);
 
             // Возвращаемся к ноде, в которой мы были изначально.
             oThis.m_nGifId = null;
@@ -1802,4 +1811,35 @@ CGameTree.prototype.private_SendCallback = function(pCallback)
 
     if (pCallback)
         pCallback();
+};
+CGameTree.prototype.TurnOn_Sound = function()
+{
+    g_oGlobalSettings.Set_Sound(true);
+};
+CGameTree.prototype.TurnOff_Sound = function()
+{
+    g_oGlobalSettings.Set_Sound(false);
+};
+CGameTree.prototype.Is_SoundOn = function()
+{
+    return g_oGlobalSettings.Is_SoundOn();
+};
+CGameTree.prototype.Add_ColorMark = function(X, Y, Color)
+{
+    this.m_oCurNode.Add_ColorMark(X, Y, Color);
+};
+CGameTree.prototype.Remove_ColorMark = function(X, Y)
+{
+    this.m_oCurNode.Remove_ColorMark(X, Y);
+};
+CGameTree.prototype.Remove_AllColorMarks = function()
+{
+    this.m_oCurNode.Remove_AllColorMarks();
+};
+CGameTree.prototype.Copy_ColorMapFromPrevNode = function()
+{
+    this.m_oCurNode.Copy_ColorMapFromPrevNode();
+
+    if (this.m_oDrawingBoard)
+        this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);
 };

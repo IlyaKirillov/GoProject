@@ -11,13 +11,16 @@
 
 function CSgfWriter()
 {
-    this.m_sFile     = null;
-    this.m_oGameTree = null;
+    this.m_sFile       = null;
+    this.m_oGameTree   = null;
+    this.m_oColorTable = null;
 }
 CSgfWriter.prototype.Write = function(oGameTree)
 {
-    this.m_oGameTree = oGameTree;
-    this.m_sFile     = "";
+    this.m_oGameTree   = oGameTree;
+    this.m_sFile       = "";
+    this.m_oColorTable = null;
+
     this.private_Write(oGameTree.Get_FirstNode());
 };
 CSgfWriter.prototype.private_WriteString = function(sString)
@@ -100,6 +103,27 @@ CSgfWriter.prototype.private_WriteGameInfo = function()
     this.private_WriteNonEmptyCommand("ON", oGameTree.Get_GameFuseki());
     this.private_WriteNonEmptyCommand("SO", oGameTree.Get_GameSource());
     this.private_WriteNonEmptyCommand("US", oGameTree.Get_GameTranscriber());
+
+    // Пробегаемся по всем нодам, чтобы составить таблицу цветов
+    var oColorTable = {};
+    this.m_oGameTree.Get_FirstNode().Get_ColorTable(oColorTable);
+
+    // цвет с 0 индеском всегда 0x00000000 (прозрачный)
+    var nColorTableLen = 1, aColorTable = [];
+    for (var nColor in oColorTable)
+    {
+        oColorTable[nColor] = nColorTableLen;
+        aColorTable[nColorTableLen++] = nColor | 0;
+    }
+
+    if (nColorTableLen > 1)
+    {
+        oColorTable[0] = 0;
+        aColorTable[0] = 0;
+
+        this.m_oColorTable = oColorTable;
+        this.private_WriteColorTable(aColorTable);
+    }
 };
 CSgfWriter.prototype.private_WriteNode = function(oNode)
 {
@@ -143,6 +167,11 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
         this.private_WriteString(sComment);
         this.private_WriteString("]");
     }
+
+    if (null !== this.m_oColorTable)
+    {
+        this.private_WriteNodeColorMap(oNode);
+    }
 };
 CSgfWriter.prototype.private_Write = function(oNode)
 {
@@ -162,4 +191,62 @@ CSgfWriter.prototype.private_Write = function(oNode)
 
     if (bVariant)
         this.private_WriteString(")");
+};
+CSgfWriter.prototype.private_WriteColorTable = function(aColorTable)
+{
+    var oStream = new CStreamWriter();
+    oStream.Write_String("SGFCT");           // SGF color table (сигнатура)
+    oStream.Write_Short(1);                  // Версия
+    oStream.Write_Long(aColorTable.length); // Количество цветов в таблице
+
+    for (var nColorIndex = 0, nColorsCount = aColorTable.length; nColorIndex < nColorsCount; nColorIndex++)
+    {
+        oStream.Write_Long(aColorTable[nColorIndex]);
+    }
+
+    var sOutput = Common.Encode_Base64(oStream.Get_Bytes());
+    this.private_WriteCommand("CT", sOutput);
+};
+CSgfWriter.prototype.private_WriteNodeColorMap = function(oNode)
+{
+    // TODO: Тут пока рассчет на то что в таблице цветов не более 255
+
+    var oStream = new CStreamWriter();
+    oStream.Write_String("SGFCM");   // SGF color map (сигнатура)
+    oStream.Write_Short(1);          // версия
+
+    var oSize = this.m_oGameTree.Get_Board().Get_Size();
+    var nW = oSize.X, nH = oSize.Y;
+
+    oStream.Write_Short(nW);
+    oStream.Write_Short(nH);
+
+    // Проверяем есть ли в данной ноде хоть какие-либо цвета
+    var bColorMap = false;
+    for (var nY = 0; nY < nH; nY++)
+    {
+        for (var nX = 0; nX < nW; nX++)
+        {
+            var oColor = oNode.m_oColorMap[Common_XYtoValue(nX + 1, nY + 1)];
+            if (!oColor)
+                oStream.Write_Byte(0);
+            else
+            {
+                var nColor = oColor.ToLong();
+                if (undefined !== this.m_oColorTable[nColor])
+                {
+                    oStream.Write_Byte(this.m_oColorTable[nColor]);
+                    bColorMap = true;
+                }
+                else
+                    oStream.Write_Byte(0);
+            }
+        }
+    }
+
+    if (true === bColorMap)
+    {
+        var sOutput = Common.Encode_Base64(oStream.Get_Bytes());
+        this.private_WriteCommand("CM", sOutput);
+    }
 };

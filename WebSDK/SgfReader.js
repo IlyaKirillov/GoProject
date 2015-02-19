@@ -9,6 +9,12 @@
 
 var g_nSgfReaderCharCodeOffset = 'a'.charCodeAt(0) - 1;
 
+var ESgfEncoding =
+{
+    None : 0,
+    UTF8 : 1
+};
+
 function CSgfReader(oGameTree)
 {
     this.m_oGameTree     = oGameTree;
@@ -20,6 +26,8 @@ function CSgfReader(oGameTree)
     this.m_bValidNode    = true;
     this.m_nLength       = 0;
     this.m_oViewPort     = {X0 : 100, Y0 : 100, X1 : -1, Y1 : -1};
+    this.m_eEncoding     = ESgfEncoding.None;
+    this.m_oColorTable   = null;
 }
 
 CSgfReader.prototype.Load = function(SGF)
@@ -169,6 +177,8 @@ CSgfReader.prototype.private_ReadNode = function()
                     case 'A': this.private_ReadCA(); break;
                     case 'P': this.private_ReadCP(); break;
                     case 'R': this.private_ReadMark(EDrawingMark.Cr); break;
+                    case 'T': this.private_ReadCT(); break;
+                    case 'M': this.private_ReadCM(); break;
                     default : this.private_ReadUnknown(); break;
                 }
                 break;
@@ -505,46 +515,41 @@ CSgfReader.prototype.private_ReadComments = function()
 
     var sComment = "";
 
-    // TODO: Реализовать чтение кодировки
-    var bUTF8 = false;
-    if (!bUTF8)
+    while (']' !== this.m_sSGF[this.m_nPos] || '\\' === this.m_sSGF[this.m_nPos - 1])
     {
-        while (']' !== this.m_sSGF[this.m_nPos] || '\\' === this.m_sSGF[this.m_nPos - 1])
+        if (']' === this.m_sSGF[this.m_nPos + 1] && '\\' === this.m_sSGF[this.m_nPos])
         {
-            if (']' === this.m_sSGF[this.m_nPos + 1] && '\\' === this.m_sSGF[this.m_nPos])
-            {
-                sComment += "]";
-                this.m_nPos++;
-            }
+            sComment += "]";
+            this.m_nPos++;
+        }
 //            else if (0x000D == this.m_sSGF[this.m_nPos].charCodeAt(0))
 //                sComment += "<br>\n";
 //            else if (0x000A == this.m_sSGF[this.m_nPos].charCodeAt(0))
 //                sComment += "<br>\n";
 //            else if (0x0085 == this.m_sSGF[this.m_nPos].charCodeAt(0))
 //                sComment += "<br>\n";
-            else
-                sComment += this.m_sSGF[this.m_nPos];
-            this.m_nPos++;
-        }
-        this.m_nPos++;
-        this.m_oGameTree.Add_Comment(sComment);
-    }
-    else
-    {
-        while (']' !== this.m_sSGF[this.m_nPos] && this.m_nPos < this.m_nLength)
-        {
+        else
             sComment += this.m_sSGF[this.m_nPos];
-            this.m_nPos++;
-        }
-
         this.m_nPos++;
-        this.m_oGameTree.Add_Comment(Common_UTF8_Decode(Common_EncodeString(sComment, "cp1251")));
     }
+    this.m_nPos++;
+
+    switch(this.m_eEncoding)
+    {
+        case ESgfEncoding.UTF8: sComment = Common_UTF8_Decode(sComment); break;
+    }
+
+    this.m_oGameTree.Add_Comment(sComment);
 };
 CSgfReader.prototype.private_ReadCA = function()
 {
     this.m_nPos += 3;
-    this.m_oGameTree.Set_Charset(this.private_ReadSimpleText());
+    var sEncoding = this.private_ReadSimpleText();
+
+//    if (-1 !== sEncoding.indexOf("UTF-8"))
+//        this.m_eEncoding = ESgfEncoding.UTF8;
+
+    this.m_oGameTree.Set_Charset(sEncoding);
 };
 CSgfReader.prototype.private_ReadCP = function()
 {
@@ -859,4 +864,66 @@ CSgfReader.prototype.private_RegisterPoint = function(X, Y)
 
     if (Y > this.m_oViewPort.Y1)
         this.m_oViewPort.Y1 = Y;
+};
+CSgfReader.prototype.private_ReadCT = function()
+{
+    this.m_nPos += 3;
+    var sColorTable = this.private_ReadSimpleText();
+
+    if ("" === sColorTable)
+        return;
+
+    var aBytes = Common.Decode_Base64(sColorTable);
+
+    var oReader = new CStreamReader(aBytes, aBytes.length);
+    var sSign = oReader.Get_String(5);
+
+    if ("SGFCT" !== sSign)
+        return;
+
+    var nVersion = oReader.Get_Short();
+    var nColorTableLen = oReader.Get_Long();
+    this.m_oColorTable = [];
+    for (var nIndex = 0; nIndex < nColorTableLen; nIndex++)
+    {
+        var nColor = oReader.Get_Long();
+        this.m_oColorTable[nIndex] = new CColor(0, 0, 0, 0);
+        this.m_oColorTable[nIndex].FromLong(nColor);
+    }
+};
+CSgfReader.prototype.private_ReadCM = function()
+{
+    this.m_nPos += 3;
+    var sColorMap = this.private_ReadSimpleText();
+
+    if ("" === sColorMap)
+        return;
+
+    var aBytes = Common.Decode_Base64(sColorMap);
+
+    var oReader = new CStreamReader(aBytes, aBytes.length);
+    var sSign = oReader.Get_String(5);
+
+    if ("SGFCM" !== sSign)
+        return;
+
+    var nVersion = oReader.Get_Short();
+    var nW = oReader.Get_Short();
+    var nH = oReader.Get_Short();
+
+    var oNode = this.m_oGameTree.Get_CurNode();
+    oNode.m_oColorMap = {};
+    for (var nY = 0; nY < nH; nY++)
+    {
+        for (var nX = 0; nX < nW; nX++)
+        {
+            var nColorIndex = oReader.Get_Byte();
+
+            if (undefined !== this.m_oColorTable[nColorIndex] && 0 !== this.m_oColorTable[nColorIndex].a)
+            {
+                var nPos = Common_XYtoValue(nX + 1, nY + 1);
+                oNode.m_oColorMap[nPos] = this.m_oColorTable[nColorIndex].Copy();
+            }
+        }
+    }
 };

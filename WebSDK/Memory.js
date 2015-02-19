@@ -9,7 +9,7 @@
  * Time     20:52
  */
 
-function CMemory()
+function CStreamWriter()
 {
     this.m_pData      = null;
     this.m_pImageData = null;
@@ -19,7 +19,7 @@ function CMemory()
     this.Init();
 };
 
-CMemory.prototype.Init = function()
+CStreamWriter.prototype.Init = function()
 {
     var oContext = document.createElement('canvas').getContext('2d');
 
@@ -28,7 +28,7 @@ CMemory.prototype.Init = function()
     this.m_pData      = this.m_pImageData.data;
     this.m_nPos       = 0;
 };
-CMemory.prototype.private_CheckSize = function(nCount)
+CStreamWriter.prototype.private_CheckSize = function(nCount)
 {
     if (this.m_nPos + nCount >= this.m_nLength)
     {
@@ -45,7 +45,7 @@ CMemory.prototype.private_CheckSize = function(nCount)
             pNewData[nPos] = pOldData[nPos];
     }
 };
-CMemory.prototype.Get_Bytes = function()
+CStreamWriter.prototype.Get_Bytes = function()
 {
     var oArray = new Uint8Array(this.m_nPos);
     for (var nPos = 0; nPos < this.m_nPos; nPos++)
@@ -53,31 +53,31 @@ CMemory.prototype.Get_Bytes = function()
 
     return oArray;
 };
-CMemory.prototype.Get_CurPosition = function()
+CStreamWriter.prototype.Get_CurPosition = function()
 {
     return this.m_nPos;
 };
-CMemory.prototype.Seek = function(nPos)
+CStreamWriter.prototype.Seek = function(nPos)
 {
     this.m_nPos = nPos;
 }
-CMemory.prototype.Skip = function(nBytes)
+CStreamWriter.prototype.Skip = function(nBytes)
 {
     this.m_nPos += nBytes;
 };
-CMemory.prototype.Write_Byte = function(nByte)
+CStreamWriter.prototype.Write_Byte = function(nByte)
 {
     this.private_CheckSize(1);
     this.m_pData[this.m_nPos++] = nByte;
 };
-CMemory.prototype.Write_String = function(sString)
+CStreamWriter.prototype.Write_String = function(sString)
 {
     var nLen = sString.length;
     this.private_CheckSize(nLen);
     for (var nPos = 0; nPos < nLen; nPos++)
         this.m_pData[this.m_nPos++] = sString.charCodeAt(nPos);
 };
-CMemory.prototype.Write_Bytes = function(pBytes, nOffset, nCount)
+CStreamWriter.prototype.Write_Bytes = function(pBytes, nOffset, nCount)
 {
     var nStartPos = nOffset || 0;
     var nEndPos   = nCount || pBytes.length;
@@ -87,9 +87,54 @@ CMemory.prototype.Write_Bytes = function(pBytes, nOffset, nCount)
     for (var nPos = nStartPos; nPos < nEndPos; nPos++)
         this.m_pData[this.m_nPos++] = pBytes[nPos];
 };
-CMemory.prototype.Write_Short = function(nShort)
+CStreamWriter.prototype.Write_Short = function(nShort)
 {
     this.private_CheckSize(2);
     this.m_pData[this.m_nPos++] = nShort & 0xFF;
     this.m_pData[this.m_nPos++] = (nShort >> 8) & 0xFF;
+};
+CStreamWriter.prototype.Write_Long = function(nInt32)
+{
+    this.private_CheckSize(4);
+    this.m_pData[this.m_nPos++] = nInt32 & 0xFF;
+    this.m_pData[this.m_nPos++] = (nInt32 >> 8) & 0xFF;
+    this.m_pData[this.m_nPos++] = (nInt32 >> 16) & 0xFF;
+    this.m_pData[this.m_nPos++] = (nInt32 >> 24) & 0xFF;
+};
+
+function CStreamReader(data, size)
+{
+    this.m_pData = data;
+    this.m_nSize = size;
+    this.m_nPos  = 0;
+}
+CStreamReader.prototype.Get_Byte = function()
+{
+    if (this.m_nPos >= this.m_nSize)
+        return 0;
+    return this.m_pData[this.m_nPos++];
+};
+CStreamReader.prototype.Get_Short = function()
+{
+    if (this.m_nPos + 1 >= this.m_nSize)
+        return 0;
+    return (this.m_pData[this.m_nPos++] | this.m_pData[this.m_nPos++] << 8);
+};
+CStreamReader.prototype.Get_Long = function()
+{
+    if (this.m_nPos + 3 >= this.m_nSize)
+        return 0;
+    return (this.m_pData[this.m_nPos++] | this.m_pData[this.m_nPos++] << 8 | this.m_pData[this.m_nPos++] << 16 | this.m_pData[this.m_nPos++] << 24);
+};
+CStreamReader.prototype.Get_String = function(nLen)
+{
+    if (this.m_nPos + nLen > this.m_nSize)
+        return "";
+
+    var sStr = [];
+    for (var nIndex = 0; nIndex < nLen; nIndex++)
+        sStr.push(String.fromCharCode(this.m_pData[this.m_nPos + nIndex]));
+
+    this.m_nPos += nLen;
+    return sStr.join("");
 };

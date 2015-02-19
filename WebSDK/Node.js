@@ -25,6 +25,7 @@ function CNode()
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
     this.m_bLoaded    = false;                     // Была ли данная нода в исходном загруженном файле.
+    this.m_oColorMap  = {};                        // Карта цветов
 }
 CNode.prototype.Copy_CurrentVariant = function(LastNode)
 {
@@ -377,5 +378,52 @@ CNode.prototype.Find_RightNodes = function(aNodes)
     for (var nIndex = 0, nCount = this.Get_NextsCount(); nIndex < nCount; nIndex++)
     {
         this.Get_Next(nIndex).Find_RightNodes(aNodes);
+    }
+};
+CNode.prototype.Add_ColorMark = function(X, Y, Color)
+{
+    this.m_oColorMap[Common_XYtoValue(X, Y)] = Color;
+};
+CNode.prototype.Remove_ColorMark = function(X, Y)
+{
+    delete this.m_oColorMap[Common_XYtoValue(X, Y)];
+};
+CNode.prototype.Remove_AllColorMarks = function()
+{
+    this.m_oColorMap = {};
+};
+CNode.prototype.Draw_ColorMap = function(oDrawingBoard)
+{
+    oDrawingBoard.Clear_AllColorMarks();
+
+    for (var nPos in this.m_oColorMap)
+    {
+        oDrawingBoard.m_oColorMarks[nPos] = this.m_oColorMap[nPos];
+    }
+
+    oDrawingBoard.Draw_AllColorMarks();
+};
+CNode.prototype.Copy_ColorMapFromPrevNode = function()
+{
+    this.m_oColorMap = {};
+    if (null !== this.m_oPrev)
+    {
+        var oPrevMap = this.m_oPrev.m_oColorMap;
+        for (var nPos in oPrevMap)
+        {
+            this.m_oColorMap[nPos] = oPrevMap[nPos].Copy();
+        }
+    }
+};
+CNode.prototype.Get_ColorTable = function(oTable)
+{
+    for (var nPos in this.m_oColorMap)
+    {
+        var nColor = this.m_oColorMap[nPos].ToLong();
+        oTable[nColor] = true;
+    }
+    for (var nNextNode = 0, nNextsCount = this.Get_NextsCount(); nNextNode < nNextsCount; nNextNode++)
+    {
+        this.m_aNext[nNextNode].Get_ColorTable(oTable);
     }
 };

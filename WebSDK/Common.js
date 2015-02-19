@@ -26,6 +26,32 @@ CColor.prototype =
     ToString : function()
     {
         return "rgba(" + this.r + "," + this.g + "," + this.b + "," + this.a / 255 +")";
+    },
+
+    Compare : function(oColor)
+    {
+        if (this.r !== oColor.r || this.g !== oColor.g || this.b !== oColor.b || this.a !== oColor.a)
+            return false;
+
+        return true;
+    },
+
+    Copy : function()
+    {
+        return new CColor(this.r, this.g, this.b, this.a);
+    },
+
+    ToLong : function()
+    {
+        return ((this.r << 24 & 0xFF000000 ) | (this.g << 16 & 0x00FF0000) | (this.b << 8 & 0x0000FF00) | (this.a & 0x000000FF));
+    },
+
+    FromLong : function(nLong)
+    {
+        this.r = (nLong >> 24) & 0xFF;
+        this.g = (nLong >> 16) & 0xFF;
+        this.b = (nLong >>  8) & 0xFF;
+        this.a = (nLong      ) & 0xFF;
     }
 };
 
@@ -175,27 +201,22 @@ function Common_UTF8_Decode(utftext)
     var i = 0;
     var c = c1 = c2 = 0;
 
-    while (i < utftext.length)
-    {
+    while ( i < utftext.length ) {
+
         c = utftext.charCodeAt(i);
 
-        if (c < 128)
-        {
+        if (c < 128) {
             string += String.fromCharCode(c);
             i++;
         }
-        else if((c > 191) && (c < 224))
-        {
+        else if((c > 191) && (c < 224)) {
             c2 = utftext.charCodeAt(i+1);
-            var charCode = ((c & 31) << 6) | (c2 & 63);
             string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
             i += 2;
         }
-        else
-        {
+        else {
             c2 = utftext.charCodeAt(i+1);
             c3 = utftext.charCodeAt(i+2);
-            var charCode = ((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63);
             string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
             i += 3;
         }
@@ -351,7 +372,22 @@ function CommonExtend(Child, Parent)
     Child.superclass = Parent.prototype;
 }
 
-function Common_GetBrowser()
+var Common_RequestAnimationFrame = (window['requestAnimationFrame'] ? window['requestAnimationFrame'] : (function()
+{
+    return window['webkitRequestAnimationFrame'] ||
+           window['mozRequestAnimationFrame']    ||
+           window['oRequestAnimationFrame']      ||
+           window['msRequestAnimationFrame']     ||
+           function(callback)
+           {
+               window.setTimeout(callback, 1000 / 60);
+           };
+})());
+
+function CCommon()
+{
+}
+CCommon.prototype.Get_Browser = function()
 {
     var sBrowser = "";
 
@@ -369,87 +405,110 @@ function Common_GetBrowser()
 
     return sBrowser;
 };
-
-var Common_RequestAnimationFrame = (window.requestAnimationFrame ? window.requestAnimationFrame : (function()
+CCommon.prototype.SaveAs = function(oBlob, sName)
 {
-    return window.webkitRequestAnimationFrame ||
-           window.mozRequestAnimationFrame    ||
-           window.oRequestAnimationFrame      ||
-           window.msRequestAnimationFrame     ||
-           function(callback)
-           {
-               window.setTimeout(callback, 1000 / 60);
-           };
-})());
+    if (typeof navigator !== "undefined" && navigator['msSaveOrOpenBlob'])
+        return navigator['msSaveOrOpenBlob'](oBlob, sName);
 
-
-var g_sBase64Key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-function Common_Base64_Encode(srcData, nSrcLen, nOffset)
+    var oLink = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+    var oURL = (window['URL'] || window['webkitURL'] || window).createObjectURL(oBlob);
+    oLink['href']     = oURL;
+    oLink['download'] = sName;
+    this.Click(oLink);
+};
+CCommon.prototype.Click = function(oNode)
 {
-    if ( "undefined" === typeof(nOffset) )
-        nOffset = 0;
-
-    var nWritten = 0;
-    var nLen1 = (((nSrcLen / 3) >> 0) * 4);
-    var nLen2 = (nLen1 / 76) >> 0;
-    var nLen3 = 19;
-    var srcInd = 0;
-    var dstStr = "";
-
-    for (var i=0; i<=nLen2; i++)
+    var oEvent = document.createEvent("MouseEvents");
+    oEvent.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    oNode.dispatchEvent(oEvent);
+};
+CCommon.prototype.Get_LocalStorageItem = function(_name)
+{
+    if (undefined !== window.localStorage)
     {
-        if (i == nLen2)
-            nLen3 = ((nLen1%76)/4) >> 0;
-
-        for (var j=0;j<nLen3;j++)
-        {
-            var dwCurr = 0;
-            for (var n=0; n<3; n++)
-            {
-                dwCurr |= srcData[srcInd++ + nOffset];
-                dwCurr <<= 8;
-            }
-            for (var k=0; k<4; k++)
-            {
-                var b = (dwCurr>>>26)&0xFF;
-                dstStr += g_sBase64Key[b];
-                dwCurr <<= 6;
-                dwCurr &= 0xFFFFFFFF;
-            }
-        }
+        var name = "HTMLGoBoard" + _name;
+        return localStorage.getItem(name);
     }
-    nLen2 = (nSrcLen%3 != 0) ? (nSrcLen%3 + 1) : 0;
-    if (nLen2)
+    return "";
+};
+CCommon.prototype.Set_LocalStorageItem = function(_name, value)
+{
+    if (undefined !== window.localStorage)
     {
-        var dwCurr = 0;
-        for (var n=0; n<3; n++)
+        var name = "HTMLGoBoard" + _name;
+        localStorage.setItem(name, value);
+    }
+};
+CCommon.prototype.Encode_Base64 = function(aBytes)
+{
+    var sOutput = "";
+    var nByte1, nByte2, nByte3 = 0;
+    var nEnc1, nEnc2, nEnc3, nEnc4 = 0;
+    var nPos = 0;
+
+    do
+    {
+        nByte1 = aBytes[nPos++];
+        nByte2 = aBytes[nPos++];
+        nByte3 = aBytes[nPos++];
+
+        nEnc1 = nByte1 >> 2;
+        nEnc2 = ((nByte1 &  3) << 4) | (nByte2 >> 4);
+        nEnc3 = ((nByte2 & 15) << 2) | (nByte3 >> 6);
+        nEnc4 = nByte3 & 63;
+
+        if (isNaN(nByte2))
         {
-            if (n<(nSrcLen%3))
-                dwCurr |= srcData[srcInd++ + nOffset];
-            dwCurr <<= 8;
+            nEnc3 = nEnc4 = 64;
         }
-        for (var k=0; k<nLen2; k++)
+        else if (isNaN(nByte3))
         {
-            var b = (dwCurr>>>26)&0xFF;
-            dstStr += g_sBase64Key[b];
-            dwCurr <<= 6;
+            nEnc4 = 64;
         }
 
-        nLen3 = (nLen2 != 0) ? 4-nLen2 : 0;
-        for (var j=0; j<nLen3; j++)
-        {
-            dstStr += '=';
-        }
-    }
-    return dstStr;
+        sOutput = sOutput + g_oBase64String.charAt(nEnc1) + g_oBase64String.charAt(nEnc2) + g_oBase64String.charAt(nEnc3) + g_oBase64String.charAt(nEnc4);
+    } while (nPos < aBytes.length);
+
+    return sOutput;
+};
+CCommon.prototype.Decode_Base64 = function(_sInput)
+{
+    var nByte1, nByte2, nByte3 = 0;
+    var nEnc1, nEnc2, nEnc3, nEnc4 = "";
+    var nPos = 0;
+
+    // Удаляем все невалидные символы A-Z, a-z, 0-9, +, /, or =
+    sInput = _sInput.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    var aOut = [];
+
+    do
+    {
+        nEnc1 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+        nEnc2 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+        nEnc3 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+        nEnc4 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+
+        nByte1 = (nEnc1 << 2) | (nEnc2 >> 4);
+        nByte2 = ((nEnc2 & 15) << 4) | (nEnc3 >> 2);
+        nByte3 = ((nEnc3 & 3) << 6) | nEnc4;
+
+        aOut.push(nByte1);
+
+        if (nEnc3 != 64)
+            aOut.push(nByte2);
+
+        if (nEnc4 != 64)
+            aOut.push(nByte3);
+
+    } while (nPos < sInput.length);
+
+    return aOut;
 };
 
-function Common_SaveAs(oBlob, sName)
-{
-    var oLink = document.createElement("a");
-    var oURL  = (window['URL'] || window['webkitURL'] || window);
-    var url   = oLink['href'] = oURL.createObjectURL(oBlob);
-    oLink['download'] = sName;
-    oLink.click();
-    oURL.revokeObjectURL(url);
-}
+var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+var Common = new CCommon();
+
+
+
+

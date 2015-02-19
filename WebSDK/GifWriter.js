@@ -60,7 +60,7 @@ CGifWriter.prototype.Set_Delay = function(nDelay)
 };
 CGifWriter.prototype.Start = function()
 {
-    this.m_pStream = new CMemory();
+    this.m_pStream = new CStreamWriter();
     this.m_pStream.Write_String("GIF89a");
 };
 CGifWriter.prototype.Finish = function()

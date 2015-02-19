@@ -817,7 +817,9 @@ function CDrawingSettingsWindow()
             SimpleColor : null,
             BookStyle   : null,
             Dark        : null
-        }
+        },
+
+        Sound : null
     };
 }
 
@@ -827,7 +829,7 @@ CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingSettingsWindow.superclass.Init.call(this, _sDivId, false);
     var oWindowDiv = document.getElementById(_sDivId);
-    oWindowDiv.style.width  = "240px";
+    oWindowDiv.style.width  = "170px";
     oWindowDiv.style.height = "230px";
 
     this.m_oGameTree = oPr.GameTree;
@@ -840,13 +842,18 @@ CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
 
     var sThemeId = "ThemeId";
 
+    var nTop = 17;
+    var nGBT = 110;
+
     var sThemeGroupBox = sDivId + "TGB";
     var oGroupBoxElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBox);
     var oGroupBoxControl = CreateControlContainer(sThemeGroupBox);
-    oGroupBoxControl.Bounds.SetParams(6, 17, 8, 8, true, true, true, true, -1,-1);
-    oGroupBoxControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oGroupBoxControl.Bounds.SetParams(6, nTop, 8, 1000, true, true, true, false, -1, nGBT);
+    oGroupBoxControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oMainControl.AddControl(oGroupBoxControl);
     oGroupBoxElement.style.border = "1px solid rgb(221,221,221)";
+
+    nTop += nGBT;
 
     var sThemeGroupBoxName = sThemeGroupBox + "N";
     var oGroupBoxNameElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBoxName);
@@ -877,96 +884,48 @@ CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
     this.HtmlElement2.Theme.BookStyle   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "BS", sThemeId, "BookStyle");
     this.HtmlElement2.Theme.Dark        = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "D",  sThemeId, "Dark");
 
+    nTop += 5; // отступ
+
+    var nGBS = 15;
+    var sGroupBoxSound = sDivId + "S";
+    var oGroupBoxSoundElement = this.protected_CreateDivElement(oMainDiv, sGroupBoxSound);
+    var oGroupBoxSoundControl = CreateControlContainer(sGroupBoxSound);
+    oGroupBoxSoundControl.Bounds.SetParams(6, nTop, 8, 8, true, true, true, false, -1, 15);
+    oGroupBoxSoundControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oGroupBoxSoundControl);
+    this.HtmlElement2.Sound = this.private_CreateCheckBox(oGroupBoxSoundElement, sGroupBoxSound + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
+
+    nTop += nGBS;
+
     this.private_CheckColorTheme();
 };
 CDrawingSettingsWindow.prototype.Handle_OK = function()
 {
+    var eColorScheme = EColorScheme.TrueColor;
+    if (this.HtmlElement2.Theme.SimpleColor.checked)
+        eColorScheme = EColorScheme.SimpleColor;
+    else if (this.HtmlElement2.Theme.BookStyle.checked)
+        eColorScheme = EColorScheme.BookStyle;
+    else if (this.HtmlElement2.Theme.Dark.checked)
+        eColorScheme = EColorScheme.Dark;
+    else // TrueColor
+        eColorScheme = EColorScheme.TrueColor;
+
+    var oSchemeChange = g_oGlobalSettings.Set_ColorScheme(eColorScheme);
+
+    if (this.HtmlElement2.Sound.checked)
+        this.m_oGameTree.TurnOn_Sound();
+    else
+        this.m_oGameTree.TurnOff_Sound();
+
     var oBoard     = this.m_oGameTree.Get_DrawingBoard();
     var oNavigator = this.m_oGameTree.Get_DrawingNavigator();
 
-    var bTrueColorBoard   = true;
-    var bTrueColorStones  = true;
-    var oBoardColor       = null;
-    var bShellWhiteStones = true;
-    var bShadows          = true;
-    var oWhiteColor       = new CColor(255, 255, 255, 255);
-    var oBlackColor       = new CColor(0, 0, 0, 255);
-    var oLinesColor       = new CColor(0, 0, 0, 255);
-    var bDarkTheme        = false;
-
-
-    if (this.HtmlElement2.Theme.SimpleColor.checked)
-    {
-        bTrueColorBoard   = false;
-        bTrueColorStones  = false;
-        bShellWhiteStones = false;
-        bShadows          = false;
-
-        oBoardColor       = new CColor(231, 188, 95, 255);
-        oLinesColor       = new CColor(0, 0, 0, 255);
-    }
-    else if (this.HtmlElement2.Theme.BookStyle.checked)
-    {
-        bTrueColorBoard   = false;
-        bTrueColorStones  = false;
-        bShellWhiteStones = false;
-        bShadows          = false;
-
-        oBoardColor       = new CColor(255, 255, 255, 255);
-        oLinesColor       = new CColor(0, 0, 0, 255);
-    }
-    else if (this.HtmlElement2.Theme.Dark.checked)
-    {
-        bTrueColorBoard   = false;
-        bTrueColorStones  = false;
-        bShellWhiteStones = false;
-        bShadows          = false;
-
-        oBoardColor       = new CColor(30, 30, 30, 255);
-        oWhiteColor       = new CColor(220, 220, 220, 220);
-        oLinesColor       = new CColor(255, 255, 255, 255);
-
-        bDarkTheme        = true;
-    }
-    else // TrueColor
-    {
-        bTrueColorBoard   = true;
-        bTrueColorStones  = true;
-        bShellWhiteStones = true;
-        bShadows          = true;
-
-        oBoardColor       = new CColor(231, 188, 95, 255);
-        oLinesColor       = new CColor(0, 0, 0, 255);
-    }
-
-    if (oBoard)
-    {
-        oBoard.m_bTrueColorBoard   = bTrueColorBoard   ;
-        oBoard.m_bTrueColorStones  = bTrueColorStones  ;
-        oBoard.m_oBoardColor       = oBoardColor       ;
-        oBoard.m_bShellWhiteStones = bShellWhiteStones ;
-        oBoard.m_bShadows          = bShadows          ;
-        oBoard.m_oWhiteColor       = oWhiteColor       ;
-        oBoard.m_oBlackColor       = oBlackColor       ;
-        oBoard.m_oLinesColor       = oLinesColor       ;
-        oBoard.m_bDarkBoard        = bDarkTheme        ;
-
+    if (oBoard && true === oSchemeChange.Board)
         oBoard.Update_Size(true);
-    }
 
-    if (oNavigator)
-    {
-        oNavigator.m_bTrueColorBoard   = bTrueColorBoard   ;
-        oNavigator.m_bTrueColorStones  = bTrueColorStones  ;
-        oNavigator.m_oBoardColor       = oBoardColor       ;
-        oNavigator.m_bShadows          = bShadows          ;
-        oNavigator.m_oWhiteColor       = oWhiteColor       ;
-        oNavigator.m_oBlackColor       = oBlackColor       ;
-        oNavigator.m_oLinesColor       = oLinesColor       ;
-        oNavigator.m_bDarkBoard        = bDarkTheme        ;
-
+    if (oNavigator && true === oSchemeChange.Navigator)
         oNavigator.Update_All();
-    }
 
     this.Close();
 };
@@ -1007,26 +966,57 @@ CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentEle
 
     return oElement;
 };
+CDrawingSettingsWindow.prototype.private_CreateCheckBox = function(oParentElement, sName, bChecked, sCheckboxName)
+{
+    var oMainElement = document.createElement("div");
+    oMainElement.style.paddingLeft   = "10px";
+    oMainElement.style.paddingBottom = "5px";
+    oParentElement.appendChild(oMainElement);
+
+    var oElement = document.createElement("input");
+    oElement.type    = "checkbox";
+    oElement.checked = bChecked;
+    oElement.setAttribute("id", sName);
+
+    oMainElement.appendChild(oElement);
+
+    var oSpan = document.createElement("span");
+    oSpan.setAttribute("oncontextmenu", "return false;");
+    oSpan.style.fontFamily  = "Tahoma, Sans serif";
+    oSpan.innerHTML = sCheckboxName;
+    oSpan.innerText = sCheckboxName;
+    oSpan.style.fontFamily          = "Tahoma, Sans serif";
+    oSpan.style.fontSize            = "13pt";
+    oSpan.style.height              = "15px";
+    oSpan.style.lineHeight          = "15px";
+    oSpan.style.cursor = "default";
+
+    oMainElement.appendChild(oSpan);
+
+    oSpan.onclick = function()
+    {
+        oElement.checked = !oElement.checked;
+    };
+
+    return oElement;
+};
 CDrawingSettingsWindow.prototype.private_CheckColorTheme = function()
 {
-    var oBoard     = this.m_oGameTree.Get_DrawingBoard();
+    var oBoardColorR = g_oGlobalSettings.m_oBoardPr.oBoardColor.r;
 
-    if (!oBoard)
-        return;
-
-    if (231 === oBoard.m_oBoardColor.r)
+    if (231 === oBoardColorR)
     {
         // Simple or TrueColor
-        if (oBoard.m_bTrueColorBoard)
+        if (g_oGlobalSettings.m_oBoardPr.bTrueColorBoard)
             this.HtmlElement2.Theme.TrueColor.checked = true;
         else
             this.HtmlElement2.Theme.SimpleColor.checked = true;
     }
-    else if (255 === oBoard.m_oBoardColor.r)
+    else if (255 === oBoardColorR)
     {
         this.HtmlElement2.Theme.BookStyle.checked = true;
     }
-    else if (30 === oBoard.m_oBoardColor.r)
+    else if (30 === oBoardColorR)
     {
         this.HtmlElement2.Theme.Dark.checked = true;
     }
@@ -1143,12 +1133,14 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
         }
 
         var Index = 0;
-        if (oColor.a <= 60)
+        if (oColor.a <= 50)
             Index = 0;
-        else if (oColor.a <= 120)
+        else if (oColor.a <= 100)
             Index = 1;
-        else
+        else if (oColor.a <= 150)
             Index = 2;
+        else
+            Index = 3;
 
         switch (nNum)
         {
@@ -1161,25 +1153,25 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 
     if (bRed)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bGreen)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bBlue)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bGray)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 

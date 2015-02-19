@@ -75,7 +75,7 @@ CControlContainer.prototype.Set_Type = function(Type, DrawingElement, Pr)
     if (DrawingElement && DrawingElement.Add_LinkedControl)
         DrawingElement.Add_LinkedControl(this);
 
-    if (Pr.RMin)
+    if (Pr && Pr.RMin)
         this.RMin = Pr.RMin;
 };
 CControlContainer.prototype.AddControl = function(ctrl)

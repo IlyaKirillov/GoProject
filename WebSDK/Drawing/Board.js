@@ -85,16 +85,6 @@ function CDrawingBoard(oDrawing)
         AcolorTarget: null
     };
 
-    this.m_bTrueColorBoard   = true;
-    this.m_bTrueColorStones  = true;
-    this.m_bShellWhiteStones = true;
-    this.m_bShadows          = true;
-    this.m_oWhiteColor       = new CColor(255, 255, 255, 255);
-    this.m_oBlackColor       = new CColor(0, 0, 0, 255);
-    this.m_oBoardColor       = new CColor(231, 188, 95, 255);
-    this.m_oLinesColor       = new CColor(0, 0, 0, 255);
-    this.m_bDarkBoard        = false;
-
     this.m_oVariantsColor   = new CColor(255,0,0, 128);
 
     this.HtmlElement =
@@ -152,7 +142,6 @@ function CDrawingBoard(oDrawing)
         oThis.private_HandleMouseDown(oPos.X, oPos.Y, global_mouseEvent);
 
         e.preventDefault();
-        e.stopPropagation();
         return false;
     };
     this.private_OnMouseUp = function(e)
@@ -182,6 +171,7 @@ function CDrawingBoard(oDrawing)
             oThis.private_HandleKeyDown(global_keyboardEvent);
 
         e.preventDefault();
+        return false;
     };
     this.private_OnKeyUp = function(e)
     {
@@ -203,6 +193,11 @@ function CDrawingBoard(oDrawing)
             oThis.private_UpdateTarget();
         }
     };
+    this.private_OnKeyPress = function(e)
+    {
+        e.preventDefault();
+        return false;
+    };
     this.private_StartDrawingTimer = function()
     {
         return setTimeout(function()
@@ -214,7 +209,7 @@ function CDrawingBoard(oDrawing)
             oThis.private_CreateMarks();
             oThis.private_OnResize();
 
-            oThis.m_oImageData.ResizeBoard = oThis.Get_FullImage();
+            oThis.m_oImageData.ResizeBoard = oThis.Get_FullImage(true);
         }, 20);
     };
     this.private_OnDragover = function(e)
@@ -294,6 +289,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     oEventDiv.onmouseup       = this.private_OnMouseUp;
     oEventDiv.onkeydown       = this.private_OnKeyDown;
     oEventDiv.onkeyup         = this.private_OnKeyUp;
+    oEventDiv.onkeypress      = this.private_OnKeyPress;
     oEventDiv.tabIndex        = -1;   // Этот параметр нужен, чтобы принимать сообщения клавиатуры (чтобы на этой div вставал фокус)
     oEventDiv.style.hidefocus = true; // Убираем рамку фокуса в IE
     oEventDiv.style.outline   = 0;    // Убираем рамку фокуса в остальных браузерах
@@ -327,13 +323,13 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
 };
 CDrawingBoard.prototype.Set_ShellWhiteStones = function(Value)
 {
-    this.m_bShellWhiteStones = Value;
+    g_oGlobalSettings.m_oBoardPr.bShellWhiteStones = Value;
 };
 CDrawingBoard.prototype.Set_BlackWhiteLastMark = function(Value)
 {
     this.m_bBlackWhiteLastMark = Value;
 };
-CDrawingBoard.prototype.Get_FullImage = function()
+CDrawingBoard.prototype.Get_FullImage = function(bColorMarks)
 {
     var Canvas = document.createElement("canvas");
     var Context = Canvas.getContext("2d");
@@ -343,6 +339,8 @@ CDrawingBoard.prototype.Get_FullImage = function()
 
     Context.drawImage(this.HtmlElement.Board.Control.HtmlElement, 0, 0);
     Context.drawImage(this.HtmlElement.Lines.Control.HtmlElement, 0, 0);
+    if (true === bColorMarks)
+        Context.drawImage(this.HtmlElement.Colors.Control.HtmlElement, 0, 0);
     Context.drawImage(this.HtmlElement.Shadow.Control.HtmlElement, 0, 0);
     Context.drawImage(this.HtmlElement.Stones.Control.HtmlElement, 0, 0);
     Context.drawImage(this.HtmlElement.Marks.Control.HtmlElement, 0, 0);
@@ -431,6 +429,8 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
     var Lines = this.m_oImageData.Lines;
     var Off = this.m_oImageData.ShadowOff;
 
+    var bShadows = this.private_GetSettings_Shadows();
+
     if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
     {
         var _X = Lines[X - 1].X - Rad;
@@ -441,7 +441,7 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
             case BOARD_BLACK:
             {
                 StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y);
-                if (true === this.m_bShadows)
+                if (true === bShadows)
                     ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
@@ -449,7 +449,7 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
             {
                 var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * this.m_oLogicBoard.Get_Size().X];
                 StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y);
-                if (true === this.m_bShadows)
+                if (true === bShadows)
                     ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
@@ -457,7 +457,7 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
             default:
             {
                 StonesCanvas.clearRect(_X, _Y, d, d);
-                if (true === this.m_bShadows)
+                if (true === bShadows)
                     ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
                 break;
             }
@@ -795,7 +795,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
 
     // Доска
     var Board = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
-    Board.fillStyle = this.m_oBoardColor.ToString();
+    Board.fillStyle = this.private_GetSettings_BoardColor().ToString();
     Board.fillRect(0, 0, W, H);
 
     // Разлиновка
@@ -809,7 +809,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     var oSize = this.m_oLogicBoard.Get_Size();
 
     LinesCanvas.clearRect(0, 0, W, H);
-    LinesCanvas.strokeStyle = this.m_oLinesColor.ToString();
+    LinesCanvas.strokeStyle = this.private_GetSettings_LinesColor().ToString();
 
     var X0 = dOffX, X1 = X0 + (oSize.X - 1) * dCellW;
     for (var nY = 0; nY < oSize.Y; nY++)
@@ -834,7 +834,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     // Форовые точки
     if (oSize.X === oSize.Y && (9 === oSize.X || 13 === oSize.X || 19 === oSize.X))
     {
-        LinesCanvas.fillStyle = this.m_oLinesColor.ToString();
+        LinesCanvas.fillStyle = this.private_GetSettings_LinesColor().ToString();
 
         // Радиус делаем минимум 2 пикселя, чтобы форовая отметка всегда выделялась на
         // фоне сетки доски.
@@ -861,7 +861,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     // Рисуем все камни
     var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
     StonesCanvas.clearRect(0, 0, W, H);
-    StonesCanvas.strokeStyle = this.m_oLinesColor.ToString();
+    StonesCanvas.strokeStyle = this.private_GetSettings_LinesColor().ToString();
     StonesCanvas.lineWidth   = 1;
 
     var ColorB = (new CColor(0,0,0,255)).ToString();
@@ -909,9 +909,10 @@ CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
     var ImageData = Board.createImageData(W, H);
     var f = 9e-1;
 
-    var Red   = this.m_oBoardColor.r;
-    var Green = this.m_oBoardColor.g;
-    var Blue  = this.m_oBoardColor.b;
+    var oBoardColor = this.private_GetSettings_BoardColor();
+    var Red   = oBoardColor.r;
+    var Green = oBoardColor.g;
+    var Blue  = oBoardColor.b;
 
     var dCoffWf = new Array(W);
     for (var j = 0; j < W; j++)
@@ -927,7 +928,7 @@ CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
 
     var r, g, b;
 
-    if (true === this.m_bTrueColorBoard)
+    if (true === this.private_GetSettings_TrueColorBoard())
     {
         for (var i = 0; i < H; i++)
         {
@@ -1075,7 +1076,7 @@ CDrawingBoard.prototype.private_CreateLines = function()
     var _x   = nRad;
     var _y   = nRad;
 
-    var HandiColor = this.m_oLinesColor;
+    var HandiColor = this.private_GetSettings_LinesColor();
     this.m_oImageData.Handi = this.private_DrawHandiMark(_x, _y, nRad, Diam + 2, Diam + 2, HandiColor);
     this.m_oImageData.HandiRad = nRad + 1;
 };
@@ -1130,7 +1131,7 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
     var VerLine = LinesCanvas.createImageData(1, H);
     var HorLine = LinesCanvas.createImageData(W, 1);
 
-    var LineColor = this.m_oLinesColor;
+    var LineColor = this.private_GetSettings_LinesColor();
     for (var i = 0; i < H; i++)
     {
         var Index = i * 4;
@@ -1344,7 +1345,11 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
     var BlackTarget = this.m_oImageData.BlackTarget.data;
     var WhiteTarget = this.m_oImageData.WhiteTarget.data;
 
-    if (true === this.m_bTrueColorStones)
+    var oWhiteColor = this.private_GetSettings_WhiteColor();
+    var oBlackColor = this.private_GetSettings_BlackColor();
+    var bDarkBoard  = this.private_GetSettings_DarkBoard();
+
+    if (true === this.private_GetSettings_TrueColorStones())
     {
         var d2 = d / 2.0 - 5e-1;
         var r = d2 - 2e-1;
@@ -1465,7 +1470,7 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
 
                         alpha = parseInt((1 - _hh * shade ) * 255);
                     }
-                    else if (hh <= 2 *pixel && hh >= pixel && true === this.m_bDarkBoard)
+                    else if (hh <= 2 *pixel && hh >= pixel && true === bDarkBoard)
                     {
                         var _hh = (2 * pixel - hh) / (pixel);
                         var shade = shadow;
@@ -1480,28 +1485,28 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
                         bBorder = true;
                     }
 
-                    if (false === bBorder || false === this.m_bDarkBoard)
+                    if (false === bBorder || false === bDarkBoard)
                     {
-                        BlackBitmap[Index + 0] = this.m_oBlackColor.r;
-                        BlackBitmap[Index + 1] = this.m_oBlackColor.g;
-                        BlackBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackBitmap[Index + 0] = oBlackColor.r;
+                        BlackBitmap[Index + 1] = oBlackColor.g;
+                        BlackBitmap[Index + 2] = oBlackColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTarget[Index + 0] = this.m_oBlackColor.r;
-                        BlackTarget[Index + 1] = this.m_oBlackColor.g;
-                        BlackTarget[Index + 2] = this.m_oBlackColor.b;
+                        BlackTarget[Index + 0] = oBlackColor.r;
+                        BlackTarget[Index + 1] = oBlackColor.g;
+                        BlackTarget[Index + 2] = oBlackColor.b;
                         BlackTarget[Index + 3] = parseInt(alpha / 2);
                     }
                     else
                     {
-                        BlackBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        BlackBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        BlackBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackBitmap[Index + 0] = oWhiteColor.r;
+                        BlackBitmap[Index + 1] = oWhiteColor.g;
+                        BlackBitmap[Index + 2] = oWhiteColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTarget[Index + 0] = this.m_oWhiteColor.r;
-                        BlackTarget[Index + 1] = this.m_oWhiteColor.g;
-                        BlackTarget[Index + 2] = this.m_oWhiteColor.b;
+                        BlackTarget[Index + 0] = oWhiteColor.r;
+                        BlackTarget[Index + 1] = oWhiteColor.g;
+                        BlackTarget[Index + 2] = oWhiteColor.b;
                         BlackTarget[Index + 3] = alpha;
                     }
 
@@ -1515,7 +1520,7 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
 
                         alpha = parseInt((1 - _hh * shade ) * 255);
                     }
-                    else if (hh <= 2 *pixel && hh >= pixel && false === this.m_bDarkBoard)
+                    else if (hh <= 2 *pixel && hh >= pixel && false === bDarkBoard)
                     {
                         var _hh = (2 * pixel - hh) / (pixel);
                         var shade = shadow;
@@ -1524,28 +1529,28 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
                         alpha = parseInt(_hh * shade * 255);
                     }
 
-                    if (false === bBorder || true === this.m_bDarkBoard)
+                    if (false === bBorder || true === bDarkBoard)
                     {
-                        WhiteBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        WhiteBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        WhiteBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteBitmap[Index + 0] = oWhiteColor.r;
+                        WhiteBitmap[Index + 1] = oWhiteColor.g;
+                        WhiteBitmap[Index + 2] = oWhiteColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTarget[Index + 0] = this.m_oWhiteColor.r;
-                        WhiteTarget[Index + 1] = this.m_oWhiteColor.g;
-                        WhiteTarget[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteTarget[Index + 0] = oWhiteColor.r;
+                        WhiteTarget[Index + 1] = oWhiteColor.g;
+                        WhiteTarget[Index + 2] = oWhiteColor.b;
                         WhiteTarget[Index + 3] = parseInt(alpha / 2);
                     }
                     else
                     {
-                        WhiteBitmap[Index + 0] = this.m_oBlackColor.r;
-                        WhiteBitmap[Index + 1] = this.m_oBlackColor.g;
-                        WhiteBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteBitmap[Index + 0] = oBlackColor.r;
+                        WhiteBitmap[Index + 1] = oBlackColor.g;
+                        WhiteBitmap[Index + 2] = oBlackColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTarget[Index + 0] = this.m_oBlackColor.r;
-                        WhiteTarget[Index + 1] = this.m_oBlackColor.g;
-                        WhiteTarget[Index + 2] = this.m_oBlackColor.b;
+                        WhiteTarget[Index + 0] = oBlackColor.r;
+                        WhiteTarget[Index + 1] = oBlackColor.g;
+                        WhiteTarget[Index + 2] = oBlackColor.b;
                         WhiteTarget[Index + 3] = alpha;
                     }
                 }
@@ -1598,7 +1603,7 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
     WhiteStones2.push(WhiteTarget);
     WhiteStones2.push(WhiteBitmap);
 
-    if (true === this.m_bShellWhiteStones)
+    if (true === this.private_GetSettings_ShellWhiteStones())
         this.private_CreateShellWhiteStones(WhiteStones2, d, d);
 
     this.m_oImageData.WhiteStones  = WhiteStones;
@@ -1873,7 +1878,7 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
                 }
                 default:
                 {
-                    if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.m_bDarkBoard))
+                    if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.private_GetSettings_DarkBoard()))
                         TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
                     else
                         TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
@@ -1941,6 +1946,9 @@ CDrawingBoard.prototype.private_CreateMarks = function()
     if (!this.m_oImageData.Lines)
         return;
 
+    var bTrueColorBoard = this.private_GetSettings_TrueColorBoard();
+    var bDarkBoard      = this.private_GetSettings_DarkBoard();
+
     var d = this.m_oImageData.StoneDiam;
     this.m_oImageData.X_Black   = this.private_DrawX           (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.X_White   = this.private_DrawX           (d, d, d * 0.05, new CColor(255, 255, 255, 255));
@@ -1948,10 +1956,10 @@ CDrawingBoard.prototype.private_CreateMarks = function()
     this.m_oImageData.Tr_White  = this.private_DrawTriangle    (d, d, d * 0.05, new CColor(255, 255, 255, 255));
     this.m_oImageData.Sq_Black  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Sq_White  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(255, 255, 255, 255));
-    this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(  0,   0,   0, 255), this.m_bTrueColorBoard ? new CColor(  0,   0,   0, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
-    this.m_oImageData.Ter_White = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(255, 255, 255, 255), this.m_bTrueColorBoard ? new CColor(255, 255, 255, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
-    this.m_oImageData.Ter_Black2= this.private_DrawFilledSquare(d, d, d * 0.05, true,  new CColor(  0,   0,   0, 255), this.m_bTrueColorBoard ? new CColor(  0,   0,   0, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
-    this.m_oImageData.Ter_White2= this.private_DrawFilledSquare(d, d, d * 0.05, true,  new CColor(255, 255, 255, 255), this.m_bTrueColorBoard ? new CColor(255, 255, 255, 255) : this.m_bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(  0,   0,   0, 255), bTrueColorBoard ? new CColor(  0,   0,   0, 255) : bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_White = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(255, 255, 255, 255), bTrueColorBoard ? new CColor(255, 255, 255, 255) : bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_Black2= this.private_DrawFilledSquare(d, d, d * 0.05, true,  new CColor(  0,   0,   0, 255), bTrueColorBoard ? new CColor(  0,   0,   0, 255) : bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
+    this.m_oImageData.Ter_White2= this.private_DrawFilledSquare(d, d, d * 0.05, true,  new CColor(255, 255, 255, 255), bTrueColorBoard ? new CColor(255, 255, 255, 255) : bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
     this.m_oImageData.LastMove  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 0, 0, 255));
     this.m_oImageData.Cr_Black  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Cr_White  = this.private_DrawCircle      (d, d, d * 0.05, new CColor(255, 255, 255, 255));
@@ -2233,6 +2241,7 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
     var nType = Mark.Get_Type();
 
     var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+    var bDarkBoard = this.private_GetSettings_DarkBoard();
 
     if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
     {
@@ -2272,16 +2281,16 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 break;
             }
             case EDrawingMark.Cr:
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
                 break;
             case EDrawingMark.Sq:
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
                 break;
             case EDrawingMark.Tr:
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
                 break;
             case EDrawingMark.X :
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
+                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
                 break;
             case EDrawingMark.Tx:
             {
@@ -2290,7 +2299,7 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
                 var sFont = FontSize + "px " + FontFamily;
 
-                MarksCanvas.fillStyle = Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == this.m_bDarkBoard) ? "rgb(255,255,255)" : "rgb(0,0,0)";
+                MarksCanvas.fillStyle = Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? "rgb(255,255,255)" : "rgb(0,0,0)";
                 MarksCanvas.font = sFont;
 
                 var y_offset = d / 2 + FontSize / 3;
@@ -2327,6 +2336,14 @@ CDrawingBoard.prototype.private_ClearMark = function(X, Y)
         }
     }
 };
+CDrawingBoard.prototype.Draw_AllColorMarks = function()
+{
+    this.private_DrawAllColorMarks();
+};
+CDrawingBoard.prototype.Clear_AllColorMarks = function()
+{
+    this.private_ClearAllColorMarks();
+};
 CDrawingBoard.prototype.private_DrawAllColorMarks = function()
 {
     for (var nPosValue in this.m_oColorMarks)
@@ -2337,8 +2354,11 @@ CDrawingBoard.prototype.private_DrawAllColorMarks = function()
 };
 CDrawingBoard.prototype.private_ClearAllColorMarks = function()
 {
-    var Canvas = this.HtmlElement.Colors.Control.HtmlElement.getContext("2d");
-    Canvas.clearRect(0, 0, this.m_oImageData.W, this.m_oImageData.H);
+    for (var nPos in this.m_oColorMarks)
+    {
+        var oPos = Common_ValuetoXY(nPos);
+        this.private_ClearColorMark(oPos.X, oPos.Y);
+    }
 
     this.m_oColorMarks = {};
 };
@@ -2352,19 +2372,20 @@ CDrawingBoard.prototype.private_AddColorMark = function(X, Y, e)
         {
             delete this.m_oColorMarks[nPosValue];
             this.private_ClearColorMark(X, Y);
+            this.m_oGameTree.Remove_ColorMark(X, Y);
         }
     }
     else
     {
         var Color;
         if (e.CtrlKey && !e.ShiftKey)
-            Color = new CColor(200, 0, 0, 60);
+            Color = new CColor(200, 0, 0, 50);
         else if (e.ShiftKey && !e.CtrlKey)
-            Color = new CColor(0, 100, 0, 60);
+            Color = new CColor(0, 100, 0, 50);
         else if (e.ShiftKey && e.CtrlKey)
-            Color = new CColor(80, 80, 80, 60);
+            Color = new CColor(80, 80, 80, 50);
         else
-            Color = new CColor(0, 0, 200, 60);
+            Color = new CColor(0, 0, 200, 50);
 
         if (undefined !== this.m_oColorMarks[nPosValue])
         {
@@ -2373,12 +2394,14 @@ CDrawingBoard.prototype.private_AddColorMark = function(X, Y, e)
             {
 
                 var a = PrevColor.a;
-                if (a < 60)
-                    a = 60;
-                else if (a < 120)
-                    a = 120;
+                if (a < 50)
+                    a = 50;
+                else if (a < 100)
+                    a = 100;
+                else if (a < 150)
+                    a = 150;
                 else
-                    a = 180;
+                    a = 200;
 
                 this.m_oColorMarks[nPosValue].a = a;
             }
@@ -2389,6 +2412,7 @@ CDrawingBoard.prototype.private_AddColorMark = function(X, Y, e)
             this.m_oColorMarks[nPosValue] = Color;
 
         this.private_DrawColorMark(X, Y);
+        this.m_oGameTree.Add_ColorMark(X, Y, this.m_oColorMarks[nPosValue]);
     }
 };
 CDrawingBoard.prototype.private_DrawColorMark = function(_X, _Y)
@@ -2779,6 +2803,10 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.m_oGameTree.GoTo_NextVariant();
     }
+    else if (67 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + C
+    {
+        this.m_oGameTree.Copy_ColorMapFromPrevNode();
+    }
     else if (69 === KeyCode && true === Event.CtrlKey) // Ctrl + E
     {
         CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree});
@@ -2803,6 +2831,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     }
     else if (82 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + R
     {
+        this.m_oGameTree.Remove_AllColorMarks();
         this.private_ClearAllColorMarks();
     }
     else if (83 === KeyCode && true === Event.CtrlKey) // Ctrl + S
@@ -2819,7 +2848,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 
             sGameName += ".sgf";
             var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
-            Common_SaveAs(oBlob, sGameName);
+            Common.SaveAs(oBlob, sGameName);
         }
     }
     else if (112 === KeyCode) // F1
@@ -2876,6 +2905,8 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.Set_Rulers(true === this.m_bRulers ? false : true);
     }
+
+    return false;
 };
 CDrawingBoard.prototype.private_IsPointInViewPort = function(X, Y)
 {
@@ -2897,6 +2928,42 @@ CDrawingBoard.prototype.private_IsVerLineInViewPort = function(X)
         return true;
 
     return false;
+};
+CDrawingBoard.prototype.private_GetSettings_TrueColorBoard = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.bTrueColorBoard;
+};
+CDrawingBoard.prototype.private_GetSettings_TrueColorStones = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.bTrueColorStones;
+};
+CDrawingBoard.prototype.private_GetSettings_ShellWhiteStones = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.bShellWhiteStones;
+};
+CDrawingBoard.prototype.private_GetSettings_Shadows = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.bShadows;
+};
+CDrawingBoard.prototype.private_GetSettings_WhiteColor = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.oWhiteColor;
+};
+CDrawingBoard.prototype.private_GetSettings_BlackColor = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.oBlackColor;
+};
+CDrawingBoard.prototype.private_GetSettings_BoardColor = function()
+{
+   return g_oGlobalSettings.m_oBoardPr.oBoardColor;
+};
+CDrawingBoard.prototype.private_GetSettings_LinesColor = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.oLinesColor;
+};
+CDrawingBoard.prototype.private_GetSettings_DarkBoard = function()
+{
+    return g_oGlobalSettings.m_oBoardPr.bDarkBoard;
 };
 
 var g_sBackground = "data:image/png;base64,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";

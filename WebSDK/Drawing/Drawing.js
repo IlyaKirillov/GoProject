@@ -9,6 +9,188 @@
  * Time     23:15
  */
 
+var EColorScheme =
+{
+    Custom      : 0,
+    TrueColor   : 1,
+    BookStyle   : 2,
+    SimpleColor : 3,
+    Dark        : 4
+};
+
+function CSettings()
+{
+    this.m_bSound = true;
+
+    this.m_oBoardPr =
+    {
+        bTrueColorBoard   : true,
+        bTrueColorStones  : true,
+        oBoardColor       : new CColor(231, 188, 95, 255),
+        bShellWhiteStones : true,
+        bShadows          : true,
+        oWhiteColor       : new CColor(255, 255, 255, 255),
+        oBlackColor       : new CColor(0, 0, 0, 255),
+        oLinesColor       : new CColor(0, 0, 0, 255),
+        bDarkBoard        : false
+    };
+
+    this.m_oNavigatorPr =
+    {
+        bTrueColorBoard   : true,
+        bTrueColorStones  : true,
+        oBoardColor       : new CColor(231, 188, 95, 255),
+        bShadows          : true,
+        oWhiteColor       : new CColor(255, 255, 255, 255),
+        oBlackColor       : new CColor(0, 0, 0, 255),
+        oLinesColor       : new CColor(0, 0, 0, 255),
+        bDarkBoard        : false
+    };
+}
+CSettings.prototype.Load_FromLocalStorage = function()
+{
+    var sSound = Common.Get_LocalStorageItem("Sound");
+    this.m_bSound = (sSound === "0" ? false : true);
+
+    var eColorScheme = EColorScheme.TrueColor;
+    var sColorScheme = Common.Get_LocalStorageItem("ColorScheme");
+    if ("BookStyle" === sColorScheme)
+        eColorScheme = EColorScheme.BookStyle;
+    else if ("SimpleColor" === sColorScheme)
+        eColorScheme = EColorScheme.SimpleColor;
+    else if ("Dark" === sColorScheme)
+        eColorScheme = EColorScheme.Dark;
+
+    this.Set_ColorScheme(eColorScheme);
+};
+CSettings.prototype.Set_Sound = function(Value)
+{
+    this.m_bSound = Value;
+    Common.Set_LocalStorageItem("Sound", Value === true ? "1" : "0");
+};
+CSettings.prototype.Is_SoundOn = function()
+{
+    return this.m_bSound;
+};
+CSettings.prototype.Set_ColorScheme = function(eScheme)
+{
+    var bTrueColorBoard   = true;
+    var bTrueColorStones  = true;
+    var oBoardColor       = null;
+    var bShellWhiteStones = true;
+    var bShadows          = true;
+    var oWhiteColor       = new CColor(255, 255, 255, 255);
+    var oBlackColor       = new CColor(0, 0, 0, 255);
+    var oLinesColor       = new CColor(0, 0, 0, 255);
+    var bDarkTheme        = false;
+
+    switch (eScheme)
+    {
+        case EColorScheme.TrueColor:
+        {
+            bTrueColorBoard   = true;
+            bTrueColorStones  = true;
+            bShellWhiteStones = true;
+            bShadows          = true;
+
+            oBoardColor       = new CColor(231, 188, 95, 255);
+            oLinesColor       = new CColor(0, 0, 0, 255);
+
+            Common.Set_LocalStorageItem("ColorScheme", "TrueColor");
+            break;
+        }
+        case EColorScheme.BookStyle:
+        {
+            bTrueColorBoard   = false;
+            bTrueColorStones  = false;
+            bShellWhiteStones = false;
+            bShadows          = false;
+
+            oBoardColor       = new CColor(255, 255, 255, 255);
+            oLinesColor       = new CColor(0, 0, 0, 255);
+
+            Common.Set_LocalStorageItem("ColorScheme", "BookStyle");
+            break;
+        }
+        case EColorScheme.SimpleColor:
+        {
+            bTrueColorBoard   = false;
+            bTrueColorStones  = false;
+            bShellWhiteStones = false;
+            bShadows          = false;
+
+            oBoardColor       = new CColor(231, 188, 95, 255);
+            oLinesColor       = new CColor(0, 0, 0, 255);
+
+            Common.Set_LocalStorageItem("ColorScheme", "SimpleColor");
+            break;
+        }
+        case EColorScheme.Dark:
+        {
+            bTrueColorBoard   = false;
+            bTrueColorStones  = false;
+            bShellWhiteStones = false;
+            bShadows          = false;
+            bDarkTheme        = true;
+
+            oBoardColor       = new CColor(30, 30, 30, 255);
+            oWhiteColor       = new CColor(220, 220, 220, 220);
+            oLinesColor       = new CColor(255, 255, 255, 255);
+
+            Common.Set_LocalStorageItem("ColorScheme", "Dark");
+            break;
+        }
+    }
+
+    var bBoardChange = false, bNavigatorChange = false;
+    if (this.m_oBoardPr.bTrueColorBoard   !== bTrueColorBoard     ||
+        this.m_oBoardPr.bTrueColorStones  !== bTrueColorStones    ||
+        this.m_oBoardPr.oBoardColor.Compare(oBoardColor) !== true ||
+        this.m_oBoardPr.bShellWhiteStones !== bShellWhiteStones   ||
+        this.m_oBoardPr.bShadows          !== bShadows            ||
+        this.m_oBoardPr.oWhiteColor.Compare(oWhiteColor) !== true ||
+        this.m_oBoardPr.oBlackColor.Compare(oBlackColor) !== true ||
+        this.m_oBoardPr.oLinesColor.Compare(oLinesColor) !== true ||
+        this.m_oBoardPr.bDarkBoard        !== bDarkTheme)
+    {
+
+        this.m_oBoardPr.bTrueColorBoard   = bTrueColorBoard;
+        this.m_oBoardPr.bTrueColorStones  = bTrueColorStones;
+        this.m_oBoardPr.oBoardColor       = oBoardColor;
+        this.m_oBoardPr.bShellWhiteStones = bShellWhiteStones;
+        this.m_oBoardPr.bShadows          = bShadows;
+        this.m_oBoardPr.oWhiteColor       = oWhiteColor;
+        this.m_oBoardPr.oBlackColor       = oBlackColor;
+        this.m_oBoardPr.oLinesColor       = oLinesColor;
+        this.m_oBoardPr.bDarkBoard        = bDarkTheme;
+        bBoardChange = true;
+    }
+
+    if (this.m_oNavigatorPr.bTrueColorBoard   !== bTrueColorBoard     ||
+        this.m_oNavigatorPr.bTrueColorStones  !== bTrueColorStones    ||
+        this.m_oNavigatorPr.oBoardColor.Compare(oBoardColor) !== true ||
+        this.m_oNavigatorPr.bShadows          !== bShadows            ||
+        this.m_oNavigatorPr.oWhiteColor.Compare(oWhiteColor) !== true ||
+        this.m_oNavigatorPr.oBlackColor.Compare(oBlackColor) !== true ||
+        this.m_oNavigatorPr.oLinesColor.Compare(oLinesColor) !== true ||
+        this.m_oNavigatorPr.bDarkBoard        !== bDarkTheme)
+    {
+        this.m_oNavigatorPr.bTrueColorBoard  = bTrueColorBoard;
+        this.m_oNavigatorPr.bTrueColorStones = bTrueColorStones;
+        this.m_oNavigatorPr.oBoardColor      = oBoardColor;
+        this.m_oNavigatorPr.bShadows         = bShadows;
+        this.m_oNavigatorPr.oWhiteColor      = oWhiteColor;
+        this.m_oNavigatorPr.oBlackColor      = oBlackColor;
+        this.m_oNavigatorPr.oLinesColor      = oLinesColor;
+        this.m_oNavigatorPr.bDarkBoard       = bDarkTheme;
+        bNavigatorChange = true;
+    }
+
+    return {Board : bBoardChange, Navigator : bNavigatorChange};
+};
+
+var g_oGlobalSettings = new CSettings();
+
 function CDrawing(oGameTree)
 {
     this.m_oGameTree = oGameTree;
@@ -130,6 +312,8 @@ CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 };
 CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 {
+    g_oGlobalSettings.Load_FromLocalStorage();
+
     this.private_SetMainDiv(sDivId);
     var oGameTree = this.m_oGameTree;
 
@@ -174,6 +358,8 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 };
 CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 {
+    g_oGlobalSettings.Load_FromLocalStorage();
+
     var oGameTree = this.m_oGameTree;
     var oDrawingBoard = new CDrawingBoard(this);
 

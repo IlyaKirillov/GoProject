@@ -37,16 +37,6 @@ function CDrawingNavigator(oDrawing)
         ScrollH     : 0
     };
 
-
-    this.m_bTrueColorBoard   = true;
-    this.m_bTrueColorStones  = true;
-    this.m_bShadows          = true;
-    this.m_oWhiteColor       = new CColor(255, 255, 255, 255);
-    this.m_oBlackColor       = new CColor(0, 0, 0, 255);
-    this.m_oBoardColor       = new CColor(231, 188, 95, 255);
-    this.m_oLinesColor       = new CColor(0, 0, 0, 255);
-    this.m_bDarkBoard        = false;
-
     this.m_oCreateWoodyId = null;
     this.m_oImageData =
     {
@@ -367,7 +357,7 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.HorScroll.style.position   = "absolute";
         this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
         this.HtmlElement.HorScroll.style.height     = 8 + "px";
-        this.HtmlElement.HorScroll.style.background = this.m_bDarkBoard ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
+        this.HtmlElement.HorScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
         this.HtmlElement.HorScroll.style.opacity    = 0.5;
 
         Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 12, NavH - 12);
@@ -389,7 +379,7 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.position   = "absolute";
         this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
         this.HtmlElement.VerScroll.style.width      = 8 + "px";
-        this.HtmlElement.VerScroll.style.background = this.m_bDarkBoard ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
+        this.HtmlElement.VerScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
         this.HtmlElement.VerScroll.style.opacity    = 0.5;
 
         Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 12, NavW - 12, 2, NavH - this.HtmlElement.ScrollH - 2);
@@ -516,7 +506,7 @@ CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
         this.m_oImageData.W = W;
         this.m_oImageData.H = H;
 
-        Canvas.fillStyle = this.m_oBoardColor.ToString();
+        Canvas.fillStyle = this.private_GetSettings_BoardColor().ToString();
         Canvas.fillRect(0, 0, W, H);
 
         if (null !== this.m_oCreateWoodyId)
@@ -542,9 +532,10 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
 
     var oImageData = Canvas.createImageData(W, H);
 
-    var Red   = this.m_oBoardColor.r;
-    var Green = this.m_oBoardColor.g;
-    var Blue  = this.m_oBoardColor.b;
+    var oBoardColor = this.private_GetSettings_BoardColor();
+    var Red   = oBoardColor.r;
+    var Green = oBoardColor.g;
+    var Blue  = oBoardColor.b;
 
     var dCoffWf = new Array(W);
     for (var X = 0; X < W; X++)
@@ -555,7 +546,8 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
         dCoffHf[Y] = 0.02 * Math.tan(Y / H);
 
     var r, g, b;
-    if (true === this.m_bTrueColorBoard)
+    var oLinesColor = this.private_GetSettings_LinesColor();
+    if (true === this.private_GetSettings_TrueColorBoard())
     {
         var f = 9e-1;
         for (var Y = 0; Y < H; Y++)
@@ -604,9 +596,9 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
             {
                 if (i == 0  || j == 0 || i === H - 1 || j === W - 1)
                 {
-                    r = this.m_oLinesColor.r;
-                    g = this.m_oLinesColor.g;
-                    b = this.m_oLinesColor.b;
+                    r = oLinesColor.r;
+                    g = oLinesColor.g;
+                    b = oLinesColor.b;
                 }
                 else
                 {
@@ -641,7 +633,11 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
     var BlackTBitmap = this.m_oImageData.BlackT.data;
     var WhiteTBitmap = this.m_oImageData.WhiteT.data;
 
-    if (true === this.m_bTrueColorStones)
+    var oWhiteColor = this.private_GetSettings_WhiteColor();
+    var oBlackColor = this.private_GetSettings_BlackColor();
+    var bDarkBoard  = this.private_GetSettings_DarkBoard();
+
+    if (true === this.private_GetSettings_TrueColorStones())
     {
         var d2 = d / 2.0 - 5e-1;
         var r = d2 - 2e-1;
@@ -751,7 +747,7 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
 
                         alpha = parseInt((1 - _hh * shade ) * 255);
                     }
-                    else if (hh <= 2 *pixel && hh >= pixel && true === this.m_bDarkBoard)
+                    else if (hh <= 2 *pixel && hh >= pixel && true === bDarkBoard)
                     {
                         var _hh = (2 * pixel - hh) / (pixel);
                         var shade = shadow;
@@ -766,28 +762,28 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
                         bBorder = true;
                     }
 
-                    if (false === bBorder || false === this.m_bDarkBoard)
+                    if (false === bBorder || false === bDarkBoard)
                     {
-                        BlackBitmap[Index + 0] = this.m_oBlackColor.r;
-                        BlackBitmap[Index + 1] = this.m_oBlackColor.g;
-                        BlackBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackBitmap[Index + 0] = oBlackColor.r;
+                        BlackBitmap[Index + 1] = oBlackColor.g;
+                        BlackBitmap[Index + 2] = oBlackColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTBitmap[Index + 0] = this.m_oBlackColor.r;
-                        BlackTBitmap[Index + 1] = this.m_oBlackColor.g;
-                        BlackTBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackTBitmap[Index + 0] = oBlackColor.r;
+                        BlackTBitmap[Index + 1] = oBlackColor.g;
+                        BlackTBitmap[Index + 2] = oBlackColor.b;
                         BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
                     }
                     else
                     {
-                        BlackBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        BlackBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        BlackBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackBitmap[Index + 0] = oWhiteColor.r;
+                        BlackBitmap[Index + 1] = oWhiteColor.g;
+                        BlackBitmap[Index + 2] = oWhiteColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        BlackTBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        BlackTBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackTBitmap[Index + 0] = oWhiteColor.r;
+                        BlackTBitmap[Index + 1] = oWhiteColor.g;
+                        BlackTBitmap[Index + 2] = oWhiteColor.b;
                         BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
                     }
 
@@ -801,7 +797,7 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
 
                         alpha = parseInt((1 - _hh * shade ) * 255);
                     }
-                    else if (hh <= 2 *pixel && hh >= pixel && false === this.m_bDarkBoard)
+                    else if (hh <= 2 *pixel && hh >= pixel && false === bDarkBoard)
                     {
                         var _hh = (2 * pixel - hh) / (pixel);
                         var shade = shadow;
@@ -810,28 +806,28 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
                         alpha = parseInt(_hh * shade * 255);
                     }
 
-                    if (false === bBorder || true === this.m_bDarkBoard)
+                    if (false === bBorder || true === bDarkBoard)
                     {
-                        WhiteBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        WhiteBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        WhiteBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteBitmap[Index + 0] = oWhiteColor.r;
+                        WhiteBitmap[Index + 1] = oWhiteColor.g;
+                        WhiteBitmap[Index + 2] = oWhiteColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        WhiteTBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        WhiteTBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteTBitmap[Index + 0] = oWhiteColor.r;
+                        WhiteTBitmap[Index + 1] = oWhiteColor.g;
+                        WhiteTBitmap[Index + 2] = oWhiteColor.b;
                         WhiteTBitmap[Index + 3] = parseInt(alpha / 2);
                     }
                     else
                     {
-                        WhiteBitmap[Index + 0] = this.m_oBlackColor.r;
-                        WhiteBitmap[Index + 1] = this.m_oBlackColor.g;
-                        WhiteBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteBitmap[Index + 0] = oBlackColor.r;
+                        WhiteBitmap[Index + 1] = oBlackColor.g;
+                        WhiteBitmap[Index + 2] = oBlackColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTBitmap[Index + 0] = this.m_oBlackColor.r;
-                        WhiteTBitmap[Index + 1] = this.m_oBlackColor.g;
-                        WhiteTBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteTBitmap[Index + 0] = oBlackColor.r;
+                        WhiteTBitmap[Index + 1] = oBlackColor.g;
+                        WhiteTBitmap[Index + 2] = oBlackColor.b;
                         WhiteTBitmap[Index + 3] = parseInt(alpha / 2);
                     }
                 }
@@ -913,7 +909,7 @@ CDrawingNavigator.prototype.private_CreateLines = function()
     var NV2_Bitmap_T_3  = this.m_oImageData.Ver2_T_3.data;
     var NV3_Bitmap_T    = this.m_oImageData.Ver3_T.data;
 
-    var nChannel = true === this.m_bDarkBoard ? 200 : 28;
+    var nChannel = true === this.private_GetSettings_DarkBoard() ? 200 : 28;
 
     var Color = new CColor(nChannel, nChannel, nChannel, 255);
     for ( var i = 0; i < 24; i++ )
@@ -1413,6 +1409,8 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
     var Height = this.m_oMap.Get_Height();
 
+    var bShadows = this.private_GetSettings_Shadows();
+
     for (var Y = 0; Y <= Height - 1 ; Y++)
     {
         var _y = y + 24 * Y;
@@ -1485,7 +1483,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
                         if (BOARD_BLACK === nMoveType)
                         {
-                            if (bCurVariant && true === this.m_bShadows)
+                            if (bCurVariant && true === bShadows)
                                 Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 
                             Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
@@ -1503,7 +1501,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         }
                         else if (BOARD_WHITE === nMoveType)
                         {
-                            if (bCurVariant && true === this.m_bShadows)
+                            if (bCurVariant && true === bShadows)
                                 Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
@@ -1617,4 +1615,36 @@ CDrawingNavigator.prototype.private_DrawCurrentOnTimer = function()
     }
 
     this.m_bNeedRedrawCurrent = false;
+};
+CDrawingNavigator.prototype.private_GetSettings_TrueColorBoard = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bTrueColorBoard;
+};
+CDrawingNavigator.prototype.private_GetSettings_TrueColorStones = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bTrueColorStones;
+};
+CDrawingNavigator.prototype.private_GetSettings_Shadows = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bShadows;
+};
+CDrawingNavigator.prototype.private_GetSettings_WhiteColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oWhiteColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_BlackColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oBlackColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_BoardColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oBoardColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_LinesColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oLinesColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_DarkBoard = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bDarkBoard;
 };
