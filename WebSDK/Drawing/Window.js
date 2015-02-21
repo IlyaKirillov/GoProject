@@ -1352,6 +1352,353 @@ CDrawingGifWriterWindow.prototype.Close = function(bEnd)
     CDrawingGifWriterWindow.superclass.Close.apply(this);
 };
 
+function CDrawingAboutWindow()
+{
+    CDrawingAboutWindow.superclass.constructor.call(this);
+}
+
+CommonExtend(CDrawingAboutWindow, CDrawingWindow);
+
+CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, true);
+
+    var oWindowDiv = document.getElementById(_sDivId);
+
+    if (oPr.Drawing)
+    {
+        this.m_oDrawing = oPr.Drawing;
+
+        var DrawingW = this.m_oDrawing.Get_Width();
+        var DrawingH = this.m_oDrawing.Get_Height();
+
+        var WindowW = Math.max(100, Math.min(700, DrawingW * 0.9));
+        var WindowH = Math.max(100, Math.min(600, DrawingH * 0.9));
+
+        oWindowDiv.style.width  = WindowW + "px";
+        oWindowDiv.style.height = WindowH + "px";
+        oWindowDiv.style.left = Math.max(0, (DrawingW / 2 - WindowW / 2)) + "px";
+        oWindowDiv.style.top  = Math.max(0, (DrawingH / 2 - WindowH / 2)) + "px";
+    }
+
+    this.Set_Caption("Web Html Go Board Help");
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sDivId       = this.HtmlElement.InnerDiv.id;
+
+    oMainDiv.style.overflowX = "hidden";
+    oMainDiv.style.overflowY = "scroll";
+
+    var sInnerHtml = '<html><head>\
+            <title>Keyboard Shortcuts</title>\
+            <meta charset="utf-8">\
+                <style>\
+                body\
+    {\
+        font-family: Tahoma, Arial, Verdana;\
+        font-size: 12px;\
+        color: #666;\
+        background: #fff;\
+    }\
+    .mainpart\
+    {\
+        margin: 0;\
+        padding: 10px 20px;\
+    }\
+    .mainpart h1\
+    {\
+        font-size: 16px;\
+        font-weight: bold;\
+    }\
+    table,\
+        tr,\
+        td,\
+        th\
+    {\
+        border-left: 0;\
+        border-right: 0;\
+        border-bottom: solid 1px #E4E4E4;\
+        border-collapse: collapse;\
+        padding: 8px;\
+        text-align: left;\
+    }\
+    table\
+    {\
+        margin: 20px 0;\
+        width: 100%;\
+    }\
+    th\
+    {\
+        font-size: 14px;\
+        font-weight: bold;\
+        padding-top: 20px;\
+    }\
+    td.description\
+                </style>\
+                <link type="text/css" rel="stylesheet" href="editor.css">\
+                </head>\
+                <body>\
+                    <div class="mainpart">\
+                        <h1>Keyboard Shortcuts</h1>\
+                        <table>\
+                            <tbody>\
+                                <tr>\
+                                    <th colspan="3">Working with Files</th>\
+                                </tr>\
+                                <tr>\
+                                    <td class="function">Open Sgf</td>\
+                                    <td class="combination">Ctrl+O</td>\
+                                    <td class="description">Open the <b>Sgf file</b> from source. (Not in color mode, see below)</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Save Sgf</td>\
+                                    <td>Ctrl+S</td>\
+                                    <td>Save <b>Sgf file</b>.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Save png shot</td>\
+                                    <td>Ctrl+H</td>\
+                                    <td>Save board shot in png format.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Save gif shot</td>\
+                                    <td>Ctrl+Shift+H</td>\
+                                    <td>Save board shot in gif format.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Save multipage gif file.</td>\
+                                    <td>Ctrl+I</td>\
+                                    <td>Save <b>gif file</b> for current variant.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Save multipage gif file</td>\
+                                    <td>Ctrl+Shift+I</td>\
+                                    <td>Save <b>gif file</b> for all branches with comment RIGHT (for problem mode).</td>\
+                                </tr>\
+                                <tr>\
+                                    <th colspan="3">Navigation</th>\
+                                </tr>\
+                                <tr>\
+                                    <td>Next node</td>\
+                                    <td>Right arrow</td>\
+                                    <td>Jump to next node.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Next 5 node</td>\
+                                    <td>Ctrl+Right arrow</td>\
+                                    <td>Jump over 5 nodes.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>End of the variant</td>\
+                                    <td>Ctrl+Shift+Right arrow</td>\
+                                    <td>Jump to the end of the current variant.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Previous node</td>\
+                                    <td>Left arrow</td>\
+                                    <td>Jump to previous node.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Previous 5 node</td>\
+                                    <td>Shift+Left arrow</td>\
+                                    <td>Jump back over 5 nodes.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Start of the file</td>\
+                                    <td>Ctrl+Shift+Right arrow</td>\
+                                    <td>Jump to the start of the file.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Previous variant</td>\
+                                    <td>Up arrow</td>\
+                                    <td>Jump to previous variant.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Next variant</td>\
+                                    <td>Down arrow</td>\
+                                    <td>Jump to next variant.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Play mode</b></td>\
+                                    <td colspan="2">F1</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Add move</td>\
+                                    <td>Left mouse click</td>\
+                                    <td>Set sequentially stones.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Add alternative move</td>\
+                                    <td>Right mouse click</td>\
+                                    <td>Create new brunch and add alternative move.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Go to the point</td>\
+                                    <td>Shift+Left mouse click onto a board position</td>\
+                                    <td>Teleports you to the moment of the game forth or back, when the stone on this position has been played.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Change move order</td>\
+                                    <td>Ctrl+Shift+Left mouse click</td>\
+                                    <td>When sequentially stones are entered: changes the colour of the next stone to be set. What stone will appear on the board is shown by the tools field (useful e.g. after a problem has been set up).</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Add comment with coordinates</td>\
+                                    <td>Ctrl+Shift+Left mouse click</td>\
+                                    <td>Add comment with coordinates.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Count scores</b></td>\
+                                    <td colspan="2">F2</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Mark dead groups</td>\
+                                    <td>Left mouse click</td>\
+                                    <td>Mark dead groups.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>End count scores</td>\
+                                    <td>Ctrl+Left mouse click onto board</td>\
+                                    <td>Return to play mode.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Set up a board position</b></td>\
+                                    <td colspan="2">F3</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Add black stone or remove stone</td>\
+                                    <td>Left mouse click</td>\
+                                    <td>Add black stone or remove stone.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Add white stone or remove stone</td>\
+                                    <td>Shift+Left mouse click</td>\
+                                    <td>Add white stone or remove stone.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Triangles</b></td>\
+                                    <td>F4</td>\
+                                    <td>Add triangles.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Squares</b></td>\
+                                    <td>F5</td>\
+                                    <td>Add squares.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Circles</b></td>\
+                                    <td>F6</td>\
+                                    <td>Add circles.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>X mark</b></td>\
+                                    <td>F7</td>\
+                                    <td>Add "X" mark.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Text label</b></td>\
+                                    <td colspan="2">F8</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Letter</td>\
+                                    <td>Left mouse click</td>\
+                                    <td>Add letter.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Text</td>\
+                                    <td>Shift+Left mouse click</td>\
+                                    <td>Add text entered by the user.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Numeric label</b></td>\
+                                    <td colspan="2">F9</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Number</td>\
+                                    <td>Left mouse click</td>\
+                                    <td>Add the smallest positive number.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Move number</td>\
+                                    <td>Shift+Left mouse click</td>\
+                                    <td>Add number of the first move which was played here.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td><b>Color mode</b></td>\
+                                    <td colspan="2">F10</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Blue region</td>\
+                                    <td>Left mouse click</td>\
+                                    <td>Add blue region.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Green region</td>\
+                                    <td>Shift+Left mouse click</td>\
+                                    <td>Add green region.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Red region</td>\
+                                    <td>Shift+Left mouse click</td>\
+                                    <td>Add red region.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Gray region</td>\
+                                    <td>Ctrl+Shift+Left mouse click</td>\
+                                    <td>Add gray region.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Clear region</td>\
+                                    <td>Right mouse click</td>\
+                                    <td>Clear region.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Continue</td>\
+                                    <td>Ctrl+C</td>\
+                                    <td>Copy all colors from previous node.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Count colors</td>\
+                                    <td>Ctrl+O</td>\
+                                    <td>Count all colors with depth.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Clear colors</td>\
+                                    <td>Ctrl+R</td>\
+                                    <td>Clear all colors in the current node.</td>\
+                                </tr>\
+                                <tr>\
+                                    <th colspan="3">Miscellaneous</th>\
+                                </tr>\
+                                <tr>\
+                                    <td>Remove node</td>\
+                                    <td>Backspace/delete</td>\
+                                    <td>Deletes the current node and all of the following brunches.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Score estimator</td>\
+                                    <td>Ctrl+E</td>\
+                                    <td>Show window with score estimator (you can mark dead groups by click on them).</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>View mode change of the next move</td>\
+                                    <td>- (minus)</td>\
+                                    <td>There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.</td>\
+                                </tr>\
+                                <tr>\
+                                    <td>Show/Hide coordinates</td>\
+                                    <td>~ (tilde)</td>\
+                                    <td>Show/Hide coordinates.</td>\
+                                </tr>\
+                            </tbody></table>\
+                    </div>\
+                </body></html>';
+
+    oMainDiv.innerHTML = sInnerHtml;
+    //oMainDiv.innerText = sInnerHtml;
+}
+
 
 var EWindowType =
 {
@@ -1362,7 +1709,8 @@ var EWindowType =
     Settings      : 4,
     ScoreEstimate : 5,
     CountColors   : 6,
-    GifWriter     : 7
+    GifWriter     : 7,
+    About         : 8
 };
 
 
@@ -1377,6 +1725,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
         case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
         case EWindowType.CountColors   : sApp = "CountColors"; break;
         case EWindowType.GifWriter     : sApp = "GifWriter"; break;
+        case EWindowType.About         : sApp = "About"; break;
     }
     var sId = sDrawingId + sApp;
 
@@ -1409,6 +1758,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
                 case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
                 case EWindowType.GifWriter     : oWindow = new CDrawingGifWriterWindow(); break;
+                case EWindowType.About         : oWindow = new CDrawingAboutWindow(); break;
             }
 
             if (null !== oWindow)

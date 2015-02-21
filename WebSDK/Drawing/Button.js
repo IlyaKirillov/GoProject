@@ -35,7 +35,8 @@ var EDrawingButtonType =
     WindowOK        : 21,
     WindowCancel    : 22,
     Settings        : 23,
-    Pass            : 24
+    Pass            : 24,
+    About           : 25
 };
 
 var EDrawingButtonState =
@@ -263,7 +264,6 @@ CDrawingButton.prototype.private_OnResize = function()
     this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H);
 
     var oDivElement = this.HtmlElement.Control.HtmlElement;
-    //oDivElement.style.
 
     var oHead  = document.getElementsByTagName('head')[0];
     var oStyle = document.createElement('style');
@@ -824,6 +824,32 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
 
             break;
         }
+        case EDrawingButtonType.About:
+        {
+            var PenWidth = 0.02 * Size;
+            var r     = Size / 2;
+            var shift = PenWidth * 4;
+
+            Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
+            Canvas.beginPath();
+            Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
+            Canvas.stroke();
+
+            var Text       = "?";
+            var FontSize   = Size * 0.9;
+            var FontFamily = "Times New Roman, Sans serif";
+            var sFont      = FontSize + "px " + FontFamily;
+
+
+            Canvas.font = sFont;
+
+            var Y = Y_off + Size / 2 + FontSize / 3;
+            var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+
+            Canvas.fillText(Text, X, Y);
+
+            break;
+        }
     };
 
     //return Canvas.toDataURL();
@@ -929,6 +955,11 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
             this.m_oGameTree.Pass();
             break;
         }
+        case EDrawingButtonType.About:
+        {
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.About, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+            break;
+        }
     };
 };
 CDrawingButton.prototype.private_GetHint = function()
@@ -959,6 +990,7 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.WindowOK       : return "OK";
         case EDrawingButtonType.Settings       : return "Settings";
         case EDrawingButtonType.Pass           : return "Pass";
+        case EDrawingButtonType.About          : return "About";
     };
 };
 CDrawingButton.prototype.private_RegisterButton = function()

@@ -62,6 +62,7 @@ CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
             case EDrawingButtonType.GameInfo       :
             case EDrawingButtonType.Settings       :
             case EDrawingButtonType.Pass           :
+            case EDrawingButtonType.About          :
                 oControl = new CDrawingButton(this.m_oDrawing);
                 break;
         }

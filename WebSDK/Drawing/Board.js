@@ -2769,11 +2769,6 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         this.m_oGameTree.Remove_CurNode();
     }
-    else if (13 === KeyCode) // Enter
-    {
-        var sSgfFile = prompt("Enter here code of ur sgf file", "");
-        this.m_oGameTree.Load_Sgf(sSgfFile);
-    }
     else if (37 === KeyCode) // Left Arrow
     {
         if (Event.CtrlKey && Event.ShiftKey)
@@ -2825,9 +2820,15 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
         else
             this.m_oGameTree.Download_GifForCurVariant();
     }
-    else if (79 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + O
+    else if (79 === KeyCode && true === Event.CtrlKey) // Ctrl + O
     {
-        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this});
+        if (EBoardMode.AddMarkColor === this.m_eMode)
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this});
+        else
+        {
+            var sSgfFile = prompt("Enter here code of ur sgf file", "");
+            this.m_oGameTree.Load_Sgf(sSgfFile);
+        }
     }
     else if (82 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + R
     {

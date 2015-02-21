@@ -287,14 +287,14 @@ CDrawing.prototype.Enable = function()
 CDrawing.prototype.Get_Width = function()
 {
     if (this.m_oMainDiv)
-        return parseInt(this.m_oMainDiv.style.width);
+        return parseInt(this.m_oMainDiv.clientWidth);
 
     return 0;
 };
 CDrawing.prototype.Get_Height = function()
 {
     if (this.m_oMainDiv)
-        return parseInt(this.m_oMainDiv.style.height);
+        return parseInt(this.m_oMainDiv.clientHeight);
 
     return 0;
 };
@@ -348,7 +348,7 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 
     var oDrawingToolbar = new CDrawingToolbar(this);
     oDrawingToolbar.Init(sToolbaDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
-        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo]});
+        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.About]});
 
     this.m_oControl = oMainControl;
     this.m_aElements.push(oDrawingBoard);
@@ -497,7 +497,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant]});
 
     var oDrawingToolbar2 = new CDrawingToolbar(this);
-    oDrawingToolbar2.Init(sToolsDivId2, oGameTree, {Controls : [EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings]});
+    oDrawingToolbar2.Init(sToolsDivId2, oGameTree, {Controls : [EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings, EDrawingButtonType.About]});
 
 
     var oDrawingTimeLineSlider = new CDrawingSlider(this);
