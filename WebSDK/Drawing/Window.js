@@ -1103,7 +1103,7 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 
     var oColorsMap = oPr.DrawingBoard.m_oColorMarks;
 
-    var Red = [0, 0, 0], Green = [0, 0, 0], Blue = [0, 0, 0], Gray = [0, 0, 0];
+    var Red = [0, 0, 0, 0], Green = [0, 0, 0, 0], Blue = [0, 0, 0, 0], Gray = [0, 0, 0, 0];
     var bRed = false, bGreen = false, bBlue = false, bGray = false;
 
     for (var oPos in oColorsMap)
@@ -1153,25 +1153,25 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 
     if (bRed)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bGreen)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bBlue)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bGray)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
@@ -1421,6 +1421,7 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
         border-bottom: solid 1px #E4E4E4;\
         border-collapse: collapse;\
         padding: 8px;\
+        font-size: 12px;\
         text-align: left;\
     }\
     table\
@@ -1434,8 +1435,19 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
         font-weight: bold;\
         padding-top: 20px;\
     }\
+    td.function\
+    {\
+        width: 35%;\
+    }\
+    td.combination\
+    {\
+        width: 15%;\
+    }\
     td.description\
-                </style>\
+    {\
+        width: 50%;\
+    }\
+    </style>\
                 <link type="text/css" rel="stylesheet" href="editor.css">\
                 </head>\
                 <body>\
@@ -1449,6 +1461,11 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
                                 <tr>\
                                     <td class="function">Open Sgf</td>\
                                     <td class="combination">Ctrl+O</td>\
+                                    <td class="description">Open the <b>Sgf file</b> from disk. (Not in color mode, see below)</td>\
+                                </tr>\
+                                <tr>\
+                                    <td class="function">Open Sgf</td>\
+                                    <td class="combination">Ctrl+Shift+O</td>\
                                     <td class="description">Open the <b>Sgf file</b> from source. (Not in color mode, see below)</td>\
                                 </tr>\
                                 <tr>\

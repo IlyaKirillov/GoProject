@@ -2826,8 +2826,52 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this});
         else
         {
-            var sSgfFile = prompt("Enter here code of ur sgf file", "");
-            this.m_oGameTree.Load_Sgf(sSgfFile);
+            if (true === Event.ShiftKey)
+            {
+                var sSgfFile = prompt("Enter here code of ur sgf file", "");
+                this.m_oGameTree.Load_Sgf(sSgfFile);
+            }
+            else
+            {
+                var oThis = this;
+
+                var aBody = document.getElementsByTagName('body');
+
+                if (aBody.length > 0)
+                {
+                    var oBody = aBody[0];
+                    var oInput = document.createElement("input");
+                    oBody.appendChild(oInput); // в IE без этого не будет работать
+
+                    oInput.type          = "file";
+                    oInput.multiple      = false;
+                    oInput.accept        = ".sgf";
+                    oInput.style.display = "none";
+
+                    oInput.onchange = function(oEvent)
+                    {
+                        var aFiles = oEvent.target.files;
+
+                        if (aFiles.length > 0)
+                        {
+                            var oFile = aFiles[0];
+
+                            var oReader = new FileReader();
+                            oReader.onload = function(oEvent2)
+                            {
+                                oThis.m_oGameTree.Load_Sgf(oEvent2.target.result);
+                                oThis.Focus();
+                            };
+
+                            oReader.readAsText(oFile);
+                            oThis.Focus();
+                        }
+                    };
+
+                    Common.Click(oInput);
+                    oBody.removeChild(oInput);
+                }
+            }
         }
     }
     else if (82 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + R

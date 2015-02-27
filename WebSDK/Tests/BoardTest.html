@@ -38,9 +38,15 @@
 <script type="text/javascript" language="JavaScript" src="../Api.js"></script>
 <body onselectstart="return false;" style="position: absolute;top:0px; left:0px;padding:0;margin:0;height: 100vh;width: 100vw; background-repeat: repeat; background-image: url('../../../Background3.png');-moz-user-select: none; user-select: none;">
 
-<div id="divId" style="position:absolute;top:0px; left:0px; height: 100vh;width: 100vw;"></div>
+<div id="divId" style="position:absolute;top:0px; left:0px; height: 100vh;width: 100vw;" onfocus="BodyFocus()" tabindex="-1"></div>
 
 <script>
+
+        function BodyFocus()
+        {
+            if (oGameTree)
+                oGameTree.Focus();
+        }
 
 
         var oGameTree = GoBoardApi.Create_GameTree();

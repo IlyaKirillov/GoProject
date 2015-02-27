@@ -188,6 +188,12 @@ CGoBoardApi.prototype.Set_Sound = function(oGameTree, sPath)
     oGameTree.Set_Sound(sPath);
 };
 
+CGoBoardApi.prototype.Focus = function(oGameTree)
+{
+    if (oGameTree)
+        oGameTree.Focus();
+};
+
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
@@ -202,3 +208,4 @@ CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prot
 CGoBoardApi.prototype['Find_ProblemRightVariant']             = CGoBoardApi.prototype.Find_ProblemRightVariant;
 CGoBoardApi.prototype['Start_AutoPlay']                       = CGoBoardApi.prototype.Start_AutoPlay;
 CGoBoardApi.prototype['Stop_AutoPlay']                        = CGoBoardApi.prototype.Stop_AutoPlay;
+CGoBoardApi.prototype['Focus']                                = CGoBoardApi.prototype.Focus;
