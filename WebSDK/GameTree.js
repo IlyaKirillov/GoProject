@@ -310,10 +310,12 @@ CGameTree.prototype.Focus = function()
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Focus();
 };
-CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
+CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_LOADFILE))
         return;
+
+    g_oIdCounter.Reset();
 
     var oReader = new CSgfReader(this);
     var nEditingFlags = this.m_nEditingFlags;
@@ -346,7 +348,10 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
         this.m_oDrawingNavigator.Update();
     }
 
-    this.GoTo_Node(this.m_oFirstNode);
+    if (sMoveReference)
+        this.GoTo_MoveReference(sMoveReference);
+    else
+        this.GoTo_Node(this.m_oFirstNode);
 
     this.m_nEditingFlags = nEditingFlags;
 
@@ -1842,4 +1847,211 @@ CGameTree.prototype.Copy_ColorMapFromPrevNode = function()
 
     if (this.m_oDrawingBoard)
         this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);
+};
+CGameTree.prototype.Get_MoveReference = function()
+{
+    var oCurNode = this.Get_CurNode();
+    var oEndNode = oCurNode;
+
+    while (!oCurNode.Is_FromFile())
+    {
+        var oPrev = oCurNode.Get_Prev();
+        if (null === oPrev)
+            return "";
+
+        oCurNode = oPrev;
+    }
+
+    var oStream = new CStreamWriter();
+    oStream.Write_String("GBMR"); // GoBoard Move Reference (сигнатура)
+    oStream.Write_Short(1);       // версия
+    oStream.Write_String2(oCurNode.Get_Id());
+
+    // Значит добавленный вариант, которого не было в исходном файле
+    if (oCurNode !== oEndNode)
+    {
+        oStream.Write_Byte(0x01);
+
+        var aNodes = [];
+        var oTempCurNode = oEndNode;
+
+        while (oTempCurNode !== oCurNode)
+        {
+            aNodes.splice(0, 0, oTempCurNode);
+            oTempCurNode = oTempCurNode.Get_Prev();
+        }
+
+        oStream.Write_Long(aNodes.length);
+        for (var nIndex = 0, nCount = aNodes.length; nIndex < nCount; nIndex++)
+        {
+            var oNode = aNodes[nIndex];
+            oStream.Write_Short(0x01); // Начало ноды
+
+            // Мы записываем только команды добавления камней и ходов
+            var nStartPos = oStream.Get_CurPosition();
+            oStream.Skip(4);
+
+            var nWrittenCommansCount = 0;
+            for (var CommandIndex = 0, CommandsCount = oNode.Get_CommandsCount(); CommandIndex < CommandsCount; CommandIndex++)
+            {
+                var Command = oNode.Get_Command( CommandIndex );
+                var Command_Type  = Command.Get_Type();
+                var Command_Value = Command.Get_Value();
+                var Command_Count = Command.Get_Count();
+
+                // Начало всегда такое
+                // Short : тип команды
+                // Long  : длина бинарника под данную команду
+
+                switch(Command_Type)
+                {
+                    case ECommand.B:
+                    {
+                        oStream.Write_Short(0x10); // B
+                        oStream.Write_Long(4);
+                        oStream.Write_Long(Command_Value);
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    case ECommand.W:
+                    {
+                        oStream.Write_Short(0x11); // W
+                        oStream.Write_Long(4);
+                        oStream.Write_Long(Command_Value);
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    case ECommand.AB:
+                    case ECommand.AW:
+                    case ECommand.AE:
+                    {
+                        switch(Command_Type)
+                        {
+                            case ECommand.AB: oStream.Write_Short(0x20); break;
+                            case ECommand.AW: oStream.Write_Short(0x21); break;
+                            case ECommand.AE: oStream.Write_Short(0x22); break;
+                        }
+
+                        oStream.Write_Long(4 * (Command_Count + 1));
+                        oStream.Write_Long(Command_Count);
+
+                        for (var Index = 0; Index < Command_Count; Index++ )
+                            oStream.Write_Long(Command_Value[Index]);
+
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                }
+            }
+
+            var nEndPos = oStream.Get_CurPosition();
+            oStream.Seek(nStartPos);
+            oStream.Write_Long(nWrittenCommansCount);
+            oStream.Seek(nEndPos);
+            oStream.Write_Short(0x00);
+        }
+    }
+    else
+        oStream.Write_Byte(0x00);
+
+    return Common.Encode_Base64_UrlSafe(oStream.Get_Bytes());
+};
+CGameTree.prototype.GoTo_MoveReference = function(sReference)
+{
+    var oFirstNode = this.Get_FirstNode();
+
+    var aBytes = Common.Decode_Base64_UrlSafe(sReference);
+    var oReader = new CStreamReader(aBytes, aBytes.length);
+    var sSign = oReader.Get_String(4);
+
+    if ("GBMR" !== sSign)
+        return this.GoTo_Node(oFirstNode);
+
+    var nVersion = oReader.Get_Short();
+    var sId      = oReader.Get_String2();
+
+    var oNode = oFirstNode.Get_NodeById(sId);
+
+    if (null !== oNode)
+    {
+        var bUserVariant = oReader.Get_Byte();
+
+        this.m_oCurNode = oNode;
+
+        if (0x01 === bUserVariant)
+        {
+            var nUserNodesCount = oReader.Get_Long();
+            for (var nIndex = 0; nIndex < nUserNodesCount; nIndex++)
+            {
+                if (0x01 !== oReader.Get_Short())
+                    break;
+
+                this.Add_NewNode(false, false);
+
+                var nCommandsCount = oReader.Get_Long();
+                for (var nCommandIndex = 0; nCommandIndex < nCommandsCount; nCommandIndex++)
+                {
+                    var nCommandType = oReader.Get_Short();
+                    var nCommandLen  = oReader.Get_Long();
+
+                    switch(nCommandType)
+                    {
+                        case 0x10:
+                        {
+                            var oPos = Common_ValuetoXY(oReader.Get_Long());
+                            this.Add_Move(oPos.X, oPos.Y, BOARD_BLACK);
+                            break;
+                        }
+                        case 0x11:
+                        {
+                            var oPos = Common_ValuetoXY(oReader.Get_Long());
+                            this.Add_Move(oPos.X, oPos.Y, BOARD_WHITE);
+                            break;
+                        }
+                        case 0x20:
+                        case 0x21:
+                        case 0x22:
+                        {
+
+                            var Value = BOARD_BLACK;
+                            switch (nCommandType)
+                            {
+                                case 0x20: Value = BOARD_BLACK; break;
+                                case 0x21: Value = BOARD_WHITE; break;
+                                case 0x22: Value = BOARD_EMPTY; break;
+                            }
+
+                            var nPointsCount = oReader.Get_Long();
+
+                            var arrPos = [];
+                            for (var nPointIndex = 0; nPointIndex < nPointsCount; nPointIndex++)
+                                arrPos.push(oReader.Get_Long());
+
+                            this.AddOrRemove_Stones(Value, arrPos);
+
+                            break;
+                        }
+                        default  :
+                        {
+                            oReader.Skip(nCommandLen);
+                            break;
+                        }
+                    }
+                }
+
+                oReader.Get_Short(); // 0x00
+                oNode = this.Get_CurNode();
+
+                if (this.m_oDrawingNavigator)
+                {
+                    this.m_oDrawingNavigator.Create_FromGameTree();
+                    this.m_oDrawingNavigator.Update();
+                }
+            }
+        }
+
+        this.GoTo_Node(oNode, true);
+    }
+    else
+        this.GoTo_Node(oFirstNode, true);
 };

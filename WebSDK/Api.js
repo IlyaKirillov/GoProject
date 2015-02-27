@@ -135,7 +135,7 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
 /*
  Загружаем Sgf в GameTree.
  */
-CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
+CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMoveReference)
 {
     var oViewPort = {};
 
@@ -159,7 +159,7 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
     // Через апи мы всегда даем грузить сгф
     var nOldFlags = oGameTree.m_nEditingFlags;
     oGameTree.Reset_EditingFlags();
-    oGameTree.Load_Sgf(sSgfFile, oViewPort);
+    oGameTree.Load_Sgf(sSgfFile, oViewPort, sMoveReference);
     oGameTree.m_nEditingFlags = nOldFlags;
 };
 
@@ -169,6 +169,14 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
 CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
 {
     return oGameTree.Save_Sgf();
+};
+
+/*
+ Получаем ссылку на ход, чтобы потом можно было переоткрыть файл с данной ссылкой
+ */
+CGoBoardApi.prototype.Get_MoveReference = function(oGameTree)
+{
+    return oGameTree.Get_MoveReference();
 };
 
 /*
@@ -203,6 +211,8 @@ CGoBoardApi.prototype['Create_Presentation']                  = CGoBoardApi.prot
 CGoBoardApi.prototype['Create_Problems']                      = CGoBoardApi.prototype.Create_Problems;
 CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prototype.Set_Permissions;
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
+CGoBoardApi.prototype['Save_Sgf']                             = CGoBoardApi.prototype.Save_Sgf;
+CGoBoardApi.prototype['Get_MoveReference']                    = CGoBoardApi.prototype.Get_MoveReference;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;
 CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prototype.Set_Sound;
 CGoBoardApi.prototype['Find_ProblemRightVariant']             = CGoBoardApi.prototype.Find_ProblemRightVariant;

@@ -12,10 +12,20 @@ function CNodeIdCounter()
     this.m_nCounter = 0;
 }
 
+CNodeIdCounter.prototype.Get_NextId = function()
+{
+    return ((++this.m_nCounter) + "");
+};
+CNodeIdCounter.prototype.Reset = function()
+{
+    this.m_nCounter = 0;
+};
+
+var g_oIdCounter = new CNodeIdCounter();
 
 function CNode()
 {
-    this.m_nId        = 0;
+    this.m_sId        = g_oIdCounter.Get_NextId();
     this.m_aNext      = [];                        // Массив следующих нод
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
     this.m_oPrev      = null;                      // Родительская нода
@@ -27,6 +37,28 @@ function CNode()
     this.m_bLoaded    = false;                     // Была ли данная нода в исходном загруженном файле.
     this.m_oColorMap  = {};                        // Карта цветов
 }
+CNode.prototype.Get_Id = function()
+{
+    return this.m_sId;
+};
+CNode.prototype.Is_FromFile = function()
+{
+    return this.m_bLoaded;
+};
+CNode.prototype.Get_NodeById = function(sId)
+{
+    if (sId === this.m_sId)
+        return this;
+
+    for (var nIndex = 0, nNextsCount = this.Get_NextsCount(); nIndex < nNextsCount; nIndex++)
+    {
+        var oNode = this.m_aNext[nIndex].Get_NodeById(sId);
+        if (null !== oNode)
+            return oNode;
+    }
+
+    return null;
+};
 CNode.prototype.Copy_CurrentVariant = function(LastNode)
 {
     var oNode = new CNode();

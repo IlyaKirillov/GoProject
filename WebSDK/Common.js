@@ -504,6 +504,21 @@ CCommon.prototype.Decode_Base64 = function(_sInput)
 
     return aOut;
 };
+CCommon.prototype.Encode_Base64_UrlSafe = function(aBytes)
+{
+    var sOutput = this.Encode_Base64(aBytes);
+    sOutput = sOutput.replace(new RegExp("\\+", 'g'), '~');
+    sOutput = sOutput.replace(new RegExp("\\/", 'g'), '-');
+    sOutput = sOutput.replace(new RegExp("=", 'g'), '_');
+    return sOutput;
+};
+CCommon.prototype.Decode_Base64_UrlSafe = function(sInput)
+{
+    sInput = sInput.replace(new RegExp("~", 'g'), '+');
+    sInput = sInput.replace(new RegExp("-", 'g'), '/');
+    sInput = sInput.replace(new RegExp("_", 'g'), '=');
+    return this.Decode_Base64(sInput);
+};
 
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 

@@ -160,7 +160,7 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
     var sComment = oNode.Get_Comment();
     if ("" !== sComment)
     {
-        sComment = sComment.replace("]", "\\]");
+        sComment = sComment.replace(new RegExp("]", "g"), "\\]");
 
         this.private_WriteCommandName("C");
         this.private_WriteString("[");

@@ -77,6 +77,11 @@ CStreamWriter.prototype.Write_String = function(sString)
     for (var nPos = 0; nPos < nLen; nPos++)
         this.m_pData[this.m_nPos++] = sString.charCodeAt(nPos);
 };
+CStreamWriter.prototype.Write_String2 = function(sString)
+{
+    this.Write_Long(sString.length);
+    this.Write_String(sString);
+};
 CStreamWriter.prototype.Write_Bytes = function(pBytes, nOffset, nCount)
 {
     var nStartPos = nOffset || 0;
@@ -137,4 +142,9 @@ CStreamReader.prototype.Get_String = function(nLen)
 
     this.m_nPos += nLen;
     return sStr.join("");
+};
+CStreamReader.prototype.Get_String2 = function()
+{
+    var nLen = this.Get_Long();
+    return this.Get_String(nLen);
 };
