@@ -310,16 +310,25 @@ CGameTree.prototype.Focus = function()
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Focus();
 };
-CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference)
+CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_LOADFILE))
         return;
 
     g_oIdCounter.Reset();
 
-    var oReader = new CSgfReader(this);
     var nEditingFlags = this.m_nEditingFlags;
     this.Reset_EditingFlags();
+
+    // Сначала определим тип файла
+    var oReader = null;
+    if ("gib" === sExt)
+        oReader = new CGibReader(this);
+    else if ("ngf" === sExt)
+        oReader = new CNgfReader(this);
+    else
+        oReader = new CSgfReader(this);
+
     oReader.Load(sFile);
 
     if (this.m_bTutorModeAuto)
@@ -1443,7 +1452,7 @@ CGameTree.prototype.Get_WhiteTeam = function()
 CGameTree.prototype.Set_BoardSize = function(W, H)
 {
     // TODO: Пока мы работаем только с квадратными досками размера >= 2 (доска размером 1х1 бессмысленна)
-    var W = Math.max(W, H, 2);
+    var W = Math.min(50, Math.max(W, H, 2));
     var H = W;
 
     var OldSize = this.m_oBoard.Get_Size();

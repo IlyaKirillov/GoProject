@@ -927,3 +927,513 @@ CSgfReader.prototype.private_ReadCM = function()
         }
     }
 };
+
+function CFileReaderBase(oGameTree)
+{
+    this.m_oGameTree = oGameTree;
+
+    this.m_sFile = [];
+    this.m_nPos  = 0;
+    this.m_nSize = 0;
+}
+
+CFileReaderBase.prototype.private_Normalize = function(sFile)
+{
+    var nLen = sFile.length;
+    var sRes = [];
+    var nPos = 0;
+
+    while (nPos < nLen)
+        sRes.push(sFile.charAt(nPos++));
+
+    this.m_nPos  = 0;
+    this.m_sFile = sRes;
+    this.m_nSize = this.m_sFile.length;
+};
+CFileReaderBase.prototype.private_PrepareGameTree = function()
+{
+    this.m_oGameTree.Reset();
+    this.m_oGameTree.Set_CurNode(this.m_oGameTree.Get_FirstNode());
+    this.m_oGameTree.m_oCurNode.m_bLoaded = true;
+};
+CFileReaderBase.prototype.private_ReadChar = function()
+{
+    if (this.m_nPos >= this.m_nSize)
+        return -1;
+
+    return this.m_sFile[this.m_nPos++];
+};
+CFileReaderBase.prototype.private_ReadLine = function()
+{
+    var sLine = "";
+    var sChar = null;
+
+    while (-1 !== sChar && '\n' !== sChar)
+    {
+        sChar = this.private_ReadChar();
+        sLine += sChar;
+    }
+
+    return sLine;
+};
+CFileReaderBase.prototype.private_IsEOF = function()
+{
+    if (this.m_nPos >= this.m_nSize)
+        return true;
+
+    return false;
+};
+
+var g_nNgfReaderCharCodeOffset = 'A'.charCodeAt(0);
+
+function CNgfReader(oGameTree)
+{
+    CNgfReader.superclass.constructor.call(this, oGameTree);
+
+    this.m_nHandicap   = 0;
+    this.m_nMovesCount = 0;
+    this.m_nBoardSize  = 19;
+}
+
+CommonExtend(CNgfReader, CFileReaderBase);
+
+CNgfReader.prototype.Load = function(sFile)
+{
+    this.private_Normalize(sFile);
+    this.private_PrepareGameTree();
+    this.private_ReadHeader();
+    this.private_ProcessHandicap();
+    this.private_ReadGameTree();
+};
+CNgfReader.prototype.private_ReadHeader = function()
+{
+    // Ровно 12 строк в заголовке
+
+    // 1 Application name + game type
+    this.m_oGameTree.Set_GameInfo(this.private_ReadLine());
+
+    // 2 размер доски
+    var sSize = this.private_ReadLine();
+    this.m_nBoardSize = sSize | 0;
+    this.m_oGameTree.Set_BoardSize(this.m_nBoardSize, this.m_nBoardSize);
+
+    // 3 имя белого игрока + рейтинг
+    // 4 имя черного игрока + рейтинг
+    this.private_ReadPlayer(false);
+    this.private_ReadPlayer(true);
+
+    // 5 Website
+    this.private_ReadLine();
+
+    // 6 Handicap
+    var sHandicap = this.private_ReadLine();
+    this.m_nHandicap = Math.min(9, Math.max(sHandicap | 0, 0));
+    this.m_oGameTree.Set_Handicap(this.m_nHandicap);
+
+    // 7 unknown
+    this.private_ReadLine();
+
+    // 8 komi
+    var sKomi = this.private_ReadLine();
+    var dKomi = parseFloat(sKomi);
+    this.m_oGameTree.Set_Komi(dKomi);
+
+    // 9 Date
+    var sDate = this.private_ReadLine();
+    this.m_oGameTree.Set_DateTime(sDate);
+
+    // 10 Unknown
+    this.private_ReadLine();
+
+    // 11 Result
+    var sResult = this.private_ReadLine();
+    this.m_oGameTree.Set_Result(sResult);
+
+    // 12 Moves count
+    var sMovesCount = this.private_ReadLine();
+    this.m_nMovesCount = sMovesCount | 0;
+};
+CNgfReader.prototype.private_ProcessHandicap = function()
+{
+    if (this.m_nHandicap <= 1)
+        return;
+
+    var arrPos = [];
+
+    var arrLines = [];
+
+    if (19 === this.m_nBoardSize)
+    {
+        arrLines = [4, 10, 16];
+    }
+    else if (13 === this.m_nBoardSize)
+    {
+        arrLines = [4, 7, 10];
+    }
+    else if (9 === this.m_nBoardSize)
+    {
+        arrLines = [3, 5, 7];
+    }
+
+    if (3 === arrLines.length)
+    {
+        switch (this.m_nHandicap)
+        {
+            case 2: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]]]; break;
+            case 3: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]]];break;
+            case 4: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]], [arrLines[0], arrLines[0]]];break;
+            case 5: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]], [arrLines[0], arrLines[0]], [arrLines[1], arrLines[1]]]; break;
+            case 6: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]], [arrLines[0], arrLines[0]], [arrLines[0], arrLines[1]], [arrLines[2], arrLines[1]]]; break;
+            case 7: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]], [arrLines[0], arrLines[0]], [arrLines[0], arrLines[1]], [arrLines[2], arrLines[1]], [arrLines[1], arrLines[1]]]; break;
+            case 8: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]], [arrLines[0], arrLines[0]], [arrLines[0], arrLines[1]], [arrLines[2], arrLines[1]], [arrLines[1], arrLines[0]], [arrLines[1], arrLines[2]]]; break;
+            case 9: arrPos = [[arrLines[2], arrLines[0]], [arrLines[0], arrLines[2]], [arrLines[2], arrLines[2]], [arrLines[0], arrLines[0]], [arrLines[0], arrLines[1]], [arrLines[2], arrLines[1]], [arrLines[1], arrLines[0]], [arrLines[1], arrLines[2]], [arrLines[1], arrLines[1]]]; break;
+        }
+    }
+
+    if (arrPos.length > 0)
+    {
+        var arrValues = [];
+        for (var Index = 0, Count = arrPos.length; Index < Count; Index++)
+            arrValues.push(Common_XYtoValue(arrPos[Index][0], arrPos[Index][1]));
+
+        this.m_oGameTree.AddOrRemove_Stones(BOARD_BLACK, arrValues);
+    }
+};
+CNgfReader.prototype.private_ReadGameTree = function()
+{
+    if (this.private_IsEOF())
+        return;
+
+    for (var nMoveIndex = 0; nMoveIndex < this.m_nMovesCount; nMoveIndex++)
+    {
+        this.m_oGameTree.Add_NewNode(false, false);
+        this.m_oGameTree.m_oCurNode.m_bLoaded = true;
+        this.private_ReadNodeLine();
+
+        if (this.private_IsEOF())
+            return;
+    }
+};
+CNgfReader.prototype.private_ReadNodeLine = function()
+{
+    var sCommand = this.private_ReadChar() + this.private_ReadChar();
+
+    if ("PM" !== sCommand)
+        return this.private_ReadLine();
+
+    var sMoveNum = this.private_ReadChar() + this.private_ReadChar();
+
+    var sMoveValue = this.private_ReadChar();
+    var nMoveValue = ("B" === sMoveValue ? BOARD_BLACK : BOARD_WHITE);
+
+    var sX = this.private_ReadChar();
+    var sY = this.private_ReadChar();
+
+    var nX = sX.charCodeAt(0) - g_nNgfReaderCharCodeOffset;
+    var nY = sY.charCodeAt(0) - g_nNgfReaderCharCodeOffset;
+
+    if (nX < 0 || nY < 0)
+        this.m_oGameTree.Add_Move(0, 0, nMoveValue);
+    else
+        this.m_oGameTree.Add_Move(nX, nY, nMoveValue);
+
+    this.private_ReadLine();
+};
+CNgfReader.prototype.private_ReadPlayer = function(bBlack)
+{
+    var sLine = this.private_ReadLine();
+
+    var nPos = sLine.indexOf(" ");
+
+    var sName = "", sRank = "";
+
+    if (-1 !== nPos)
+    {
+        sName = this.private_ClearString(sLine.substr(0, nPos));
+        sRank = this.private_ClearString(sLine.substr(nPos));
+    }
+    else
+    {
+        sName = this.private_ClearString(sLine);
+    }
+
+    if (true === bBlack)
+    {
+        this.m_oGameTree.Set_Black(sName);
+        this.m_oGameTree.Set_BlackRating(sRank);
+    }
+    else
+    {
+        this.m_oGameTree.Set_White(sName);
+        this.m_oGameTree.Set_WhiteRating(sRank);
+    }
+};
+CNgfReader.prototype.private_ClearString = function(sStr)
+{
+    return sStr.replace(/\s+/g, '');
+};
+
+function CGibReader(oGameTree)
+{
+    CGibReader.superclass.constructor.call(this, oGameTree);
+}
+
+CommonExtend(CGibReader, CFileReaderBase);
+
+CGibReader.prototype.Load = function(sFile)
+{
+    this.private_Normalize(sFile);
+    this.private_PrepareGameTree();
+    if (false === this.private_ReadHeader())
+        return;
+
+    this.private_ReadGameTree();
+};
+CGibReader.prototype.private_ReadHeader = function()
+{
+    var sChar = -1;
+    while ('\\' !== sChar)
+    {
+        if (this.private_IsEOF())
+            return false;
+
+        sChar = this.private_ReadChar();
+    }
+
+    var sCommand = this.private_ReadChar() + this.private_ReadChar();
+
+    if ('GS' === sCommand)
+    {
+        this.m_nPos -= 3;
+        return true;
+    }
+    else if ('HS' !== sCommand)
+        return false;
+
+    while (true)
+    {
+        sChar = -1;
+        while ('\\' !== sChar)
+        {
+            if (this.private_IsEOF())
+                return false;
+
+            sChar = this.private_ReadChar();
+        }
+
+        sChar = this.private_ReadChar();
+        if ('H' === sChar)
+        {
+            if ('E' !== this.private_ReadChar())
+                return false;
+
+            return true;
+        }
+        else if ('[' !== sChar)
+            return false;
+
+        var sName = "";
+        while (true)
+        {
+            if (this.private_IsEOF())
+                return false;
+
+            sChar = this.private_ReadChar();
+
+            if ('=' === sChar)
+                break;
+
+            sName += sChar;
+        }
+
+        var sValue = "";
+        while (true)
+        {
+            if (this.private_IsEOF())
+                return false;
+
+            sChar = this.private_ReadChar();
+
+            if ('\\' === sChar)
+            {
+                if (']' === this.private_ReadChar())
+                    break;
+                return false;
+            }
+
+            sValue += sChar;
+        }
+
+        this.private_ProcessHeaderRecord(sName, sValue);
+    }
+
+    return false;
+};
+CGibReader.prototype.private_ProcessHeaderRecord = function(sCommand, sValue)
+{
+    switch(sCommand)
+    {
+        case "WUSERINFO"   :
+        case "BUSERINFO"   :
+        case "GAMEINFOMAIN":
+        case "GAMEINFOSUB" : this.private_ReadInfo(sValue); break;
+    }
+};
+CGibReader.prototype.private_ReadGameTree = function()
+{
+    // Ищем GS
+    var sChar = -1;
+    while ('\\' !== sChar)
+    {
+        if (this.private_IsEOF())
+            return false;
+
+        sChar = this.private_ReadChar();
+    }
+
+    var sCommand = this.private_ReadChar() + this.private_ReadChar();
+    if ('GS' !== sCommand)
+        return false;
+
+    // читаем до конца данной строки
+    this.private_ReadLine();
+
+    // 2 1 0
+    this.private_ReadLine();
+
+    // Количество ходов
+    this.private_ReadLine();
+
+    while(!this.private_IsEOF())
+    {
+        var sLine = this.private_ReadLine();
+        if (-1 !== sLine.indexOf("\\GE"))
+            return true;
+
+        var aResult = this.private_ParseNodeLine(sLine);
+        if (aResult.length <= 0)
+            return false;
+
+        var sCommand = aResult[0];
+        if ("INI" === sCommand)
+        {
+            // В 5-м элементе лежит комментарий после значения '&4'
+            if (aResult.length >= 5)
+                this.m_oGameTree.Set_GameInfo(aResult[4]);
+        }
+        else if ("STO" === sCommand)
+        {
+            if (6 !== aResult.length)
+                return false;
+
+            // 1 - reserved 0
+            // 2 - номер хода (или команды)
+            // 3 - Игрок (1 - черный, 2 - белый)
+            // 4 - координата по X
+            // 5 - координата по Y
+
+            this.m_oGameTree.Add_NewNode(false, false);
+            this.m_oGameTree.m_oCurNode.m_bLoad = true;
+
+            var Value = ("1" === aResult[3] ? BOARD_BLACK : BOARD_WHITE);
+            var nX = aResult[4] | 0;
+            var nY = aResult[5] | 0;
+            this.m_oGameTree.Add_Move(nX + 1, nY + 1, Value);
+        }
+    }
+
+};
+CGibReader.prototype.private_ParseNodeLine = function(sLine)
+{
+    var aResult = [];
+    var nPos = -1;
+
+    var sLeftLine = sLine;
+    while (-1 !== (nPos = sLeftLine.indexOf(" ")))
+    {
+        aResult.push(sLeftLine.substr(0, nPos));
+        sLeftLine = sLeftLine.substr(nPos + 1);
+    }
+
+    return aResult;
+};
+CGibReader.prototype.private_ParseValue = function(sValue)
+{
+    var aResult = [];
+    var nPos = -1;
+
+    var sLeftValue = sValue;
+    while (-1 !== (nPos = sLeftValue.indexOf(",")))
+    {
+        var sTemp = sLeftValue.substr(0, nPos);
+        var sName = sTemp, sVal = "";
+
+        var nTempPos = -1;
+        if (-1 !== (nTempPos = sTemp.indexOf(":")))
+        {
+            sName = sTemp.substr(0, nTempPos);
+            sVal  = sTemp.substr(nTempPos + 1);
+        }
+
+        aResult.push({Name : sName, Value : sVal});
+
+        sLeftValue = sLeftValue.substr(nPos + 1);
+    }
+
+    return aResult;
+};
+CGibReader.prototype.private_ReadInfo = function(sValue)
+{
+    var sGameResult = null, sZIPSU = null;
+    var aInfo = this.private_ParseValue(sValue);
+    for (var nIndex = 0, nCount = aInfo.length; nIndex < nCount; nIndex++)
+    {
+        var sName = aInfo[nIndex].Name;
+        var sVal  = aInfo[nIndex].Value;
+
+        switch(sName)
+        {
+            case "WNICK" : this.m_oGameTree.Set_White(sVal); break;
+            case "BNICK" : this.m_oGameTree.Set_Black(sVal); break;
+            case "WLV"   : this.m_oGameTree.Set_WhiteRating(this.private_ParseRank(sVal)); break;
+            case "BLV"   : this.m_oGameTree.Set_BlackRating(this.private_ParseRank(sVal)); break;
+            case "GNAME" : this.m_oGameTree.Set_GameEvent(sVal); break;
+            case "GDATE" : this.m_oGameTree.Set_DateTime(sVal); break;
+            case "GPLC"  : this.m_oGameTree.Set_GamePlace(sVal); break;
+            case "GCMT"  : this.m_oGameTree.Set_GameInfo(sVal); break;
+            case "GONGJE": this.m_oGameTree.Set_Komi((sVal | 0) / 10); break
+            case "GRLT"  : sGameResult = sVal; break;
+            case "ZIPSU" : sZIPSU = sVal; break;
+        }
+    }
+
+    if (null !== sGameResult)
+    {
+        this.private_ParseGameResult(sGameResult, sZIPSU);
+    }
+};
+CGibReader.prototype.private_ParseRank = function(sRank)
+{
+    var nRank = sRank | 0;
+
+    if (nRank < 0x12)
+        return (0x12 - nRank + "k");
+    else if (nRank > 0x1a)
+        return (nRank - 0x1a + "p");
+    else
+        return (nRank - 0x11 + "d");
+};
+CGibReader.prototype.private_ParseGameResult = function(sGameResult, sZIPSU)
+{
+    switch(sGameResult)
+    {
+        case "0"  : this.m_oGameTree.Set_Result("Black " + ((sZIPSU | 0) / 10) + " win"); break;
+        case "1"  : this.m_oGameTree.Set_Result("White " + ((sZIPSU | 0) / 10) + " win"); break;
+        case "3"  : this.m_oGameTree.Set_Result("Black wins by resignation"); break;
+        case "4"  : this.m_oGameTree.Set_Result("White wins by resignation"); break;
+        case "255": this.m_oGameTree.Set_Result("Unfinished"); break;
+    }
+};
+
+
+

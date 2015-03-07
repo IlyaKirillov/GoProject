@@ -132,6 +132,8 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
     if (oNode === this.m_oGameTree.Get_FirstNode())
         this.private_WriteGameInfo();
 
+    this.private_WriteAddOrRemoveStones(oNode);
+
     for (var nIndex = 0, nCount = oNode.Get_CommandsCount(); nIndex < nCount; nIndex++)
     {
         var oCommand = oNode.Get_Command(nIndex);
@@ -140,9 +142,9 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
 
         switch (nCommandType)
         {
-            case ECommand.AB: this.private_WriteCommandName("AB"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.AW: this.private_WriteCommandName("AW"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.AE: this.private_WriteCommandName("AE"); this.private_WritePosArray(oCommandValue); break;
+            case ECommand.AB: break; //this.private_WriteCommandName("AB"); this.private_WritePosArray(oCommandValue); break;
+            case ECommand.AW: break; //this.private_WriteCommandName("AW"); this.private_WritePosArray(oCommandValue); break;
+            case ECommand.AE: break; //this.private_WriteCommandName("AE"); this.private_WritePosArray(oCommandValue); break;
             case ECommand.B:  this.private_WriteCommandName("B");  this.private_WritePos(oCommandValue); break;
             case ECommand.W:  this.private_WriteCommandName("W");  this.private_WritePos(oCommandValue); break;
             case ECommand.BL: this.private_WriteCommandName("BL"); this.private_WriteReal(oCommandValue); break;
@@ -248,5 +250,85 @@ CSgfWriter.prototype.private_WriteNodeColorMap = function(oNode)
     {
         var sOutput = Common.Encode_Base64(oStream.Get_Bytes());
         this.private_WriteCommand("CM", sOutput);
+    }
+};
+CSgfWriter.prototype.private_WriteAddOrRemoveStones = function(oNode)
+{
+    var AB = [], AW = [], AE = [];
+
+    for (var nIndex = 0, nCount = oNode.Get_CommandsCount(); nIndex < nCount; nIndex++)
+    {
+        var oCommand = oNode.Get_Command(nIndex);
+        var nCommandType  = oCommand.Get_Type();
+        var oCommandValue = oCommand.Get_Value();
+
+        switch (nCommandType)
+        {
+            case ECommand.AB:
+            case ECommand.AW:
+            case ECommand.AE:
+            {
+                for (var nPos = 0, nPointsCount = oCommandValue.length; nPos < nPointsCount; nPos++)
+                {
+                    var nPosValue = oCommandValue[nPos];
+                    for (var nTempPos = 0, nTempCount = AB.length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === AB[nTempPos])
+                        {
+                            AB.splice(nTempPos, 1);
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+
+                    for (var nTempPos = 0, nTempCount = AW.length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === AW[nTempPos])
+                        {
+                            AW.splice(nTempPos, 1);
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+
+                    for (var nTempPos = 0, nTempCount = AE.length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === AE[nTempPos])
+                        {
+                            AE.splice(nTempPos, 1);
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+
+                    if (ECommand.AB === nCommandType)
+                        AB.push(nPosValue);
+                    else if (ECommand.AW === nCommandType)
+                        AW.push(nPosValue);
+                    else if (ECommand.AE === nCommandType)
+                        AE.push(nPosValue);
+                }
+
+                break;
+            }
+        }
+    }
+
+    if (AB.length > 0)
+    {
+        this.private_WriteCommandName("AB");
+        this.private_WritePosArray(AB);
+    }
+
+    if (AW.length > 0)
+    {
+        this.private_WriteCommandName("AW");
+        this.private_WritePosArray(AW);
+    }
+
+    if (AE.length > 0)
+    {
+        this.private_WriteCommandName("AE");
+        this.private_WritePosArray(AE);
     }
 };

@@ -224,10 +224,11 @@ function CDrawingBoard(oDrawing)
         if (e.dataTransfer.files.length > 0 && FileReader)
         {
             var oFile = e.dataTransfer.files[0];
+            var sExt  = oFile.name.split('.').pop().toLowerCase();
             var oReader = new FileReader();
             oReader.onload = function(event)
             {
-                oThis.m_oGameTree.Load_Sgf(event.target.result);
+                oThis.m_oGameTree.Load_Sgf(event.target.result, null, null, sExt);
             };
 
             oReader.readAsText(oFile);
@@ -2845,7 +2846,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 
                     oInput.type          = "file";
                     oInput.multiple      = false;
-                    oInput.accept        = ".sgf";
+                    oInput.accept        = ".sgf,.gib,.ngf";
                     oInput.style.display = "none";
 
                     oInput.onchange = function(oEvent)
@@ -2855,11 +2856,11 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
                         if (aFiles.length > 0)
                         {
                             var oFile = aFiles[0];
-
+                            var sExt  = oFile.name.split('.').pop().toLowerCase();
                             var oReader = new FileReader();
                             oReader.onload = function(oEvent2)
                             {
-                                oThis.m_oGameTree.Load_Sgf(oEvent2.target.result);
+                                oThis.m_oGameTree.Load_Sgf(oEvent2.target.result, null, null, sExt);
                                 oThis.Focus();
                             };
 

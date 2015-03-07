@@ -113,6 +113,13 @@ function CStreamReader(data, size)
     this.m_nSize = size;
     this.m_nPos  = 0;
 }
+CStreamReader.prototype.Is_EOF = function()
+{
+    if (this.m_nPos < this.m_nSize)
+        return false;
+
+    return true;
+};
 CStreamReader.prototype.Get_Byte = function()
 {
     if (this.m_nPos >= this.m_nSize)
