@@ -195,35 +195,72 @@ function Common_SortIncrease(First, Second)
         return 0;
 }
 
-function Common_UTF8_Decode(utftext)
+function Common_UTF8_Decode(sUtf8Text)
 {
-    var string = "";
-    var i = 0;
-    var c = c1 = c2 = 0;
+    var sString = "";
+    var nPos = 0;
+    var nCharCode1 = 0, nCharCode2 = 0, nCharCode3 = 0;
 
-    while ( i < utftext.length ) {
+    var nLen = sUtf8Text.length;
+    while (nPos < nLen)
+    {
+        nCharCode1 = sUtf8Text.charCodeAt(nPos);
 
-        c = utftext.charCodeAt(i);
-
-        if (c < 128) {
-            string += String.fromCharCode(c);
-            i++;
+        if (nCharCode1 < 128)
+        {
+            sString += String.fromCharCode(nCharCode1);
+            nPos++;
         }
-        else if((c > 191) && (c < 224)) {
-            c2 = utftext.charCodeAt(i+1);
-            string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-            i += 2;
+        else if((nCharCode1 > 191) && (nCharCode1 < 224))
+        {
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            sString += String.fromCharCode(((nCharCode1 & 31) << 6) | (nCharCode2 & 63));
+            nPos += 2;
         }
-        else {
-            c2 = utftext.charCodeAt(i+1);
-            c3 = utftext.charCodeAt(i+2);
-            string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-            i += 3;
+        else
+        {
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            nCharCode3 = sUtf8Text.charCodeAt(nPos + 2);
+            sString += String.fromCharCode(((nCharCode1 & 15) << 12) | ((nCharCode2 & 63) << 6) | (nCharCode3 & 63));
+            nPos += 3;
         }
-
     }
 
-    return string;
+    return sString;
+}
+
+function Common_UTF8_Encode(sUtf8Text)
+{
+    var sString = "";
+    var nPos = 0;
+    var nCharCode1 = 0, nCharCode2 = 0, nCharCode3 = 0;
+
+    var nLen = sUtf8Text.length;
+    while (nPos < nLen)
+    {
+        nCharCode1 = sUtf8Text.charCodeAt(nPos);
+
+        if (nCharCode1 < 128)
+        {
+            sString += String.fromCharCode(nCharCode1);
+            nPos++;
+        }
+        else if((nCharCode1 > 191) && (nCharCode1 < 224))
+        {
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            sString += String.fromCharCode(((nCharCode1 & 31) << 6) | (nCharCode2 & 63));
+            nPos += 2;
+        }
+        else
+        {
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            nCharCode3 = sUtf8Text.charCodeAt(nPos + 2);
+            sString += String.fromCharCode(((nCharCode1 & 15) << 12) | ((nCharCode2 & 63) << 6) | (nCharCode3 & 63));
+            nPos += 3;
+        }
+    }
+
+    return sString;
 }
 
 function Common_EncodeString(string, Encoding)
@@ -478,7 +515,7 @@ CCommon.prototype.Decode_Base64 = function(_sInput)
     var nPos = 0;
 
     // Удаляем все невалидные символы A-Z, a-z, 0-9, +, /, or =
-    sInput = _sInput.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    var sInput = _sInput.replace(/[^A-Za-z0-9\+\/\=]/g, "");
     var aOut = [];
 
     do

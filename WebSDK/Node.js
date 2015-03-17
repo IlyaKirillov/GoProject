@@ -322,11 +322,12 @@ CNode.prototype.Add_Mark = function(MarkType, arrPos)
     switch(MarkType)
     {
         case EDrawingMark.Cr: CommandType = ECommand.CR; break;
-        case EDrawingMark.Lm: CommandType = ECommand.LM; break;
+        case EDrawingMark.Lm: return;
         case EDrawingMark.Sq: CommandType = ECommand.SQ; break;
         case EDrawingMark.Tr: CommandType = ECommand.TR; break;
         case EDrawingMark.Tx: CommandType = ECommand.LB; break;
-        case EDrawingMark.X : CommandType = ECommand.MA;  break;
+        case EDrawingMark.X : CommandType = ECommand.MA; break;
+        case ECommand.RM    : CommandType = ECommand.RM; break;
     }
 
     this.Add_Command(new CCommand(CommandType, Common_CopyArray(arrPos), arrPos.length));

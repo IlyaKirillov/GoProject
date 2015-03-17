@@ -135,7 +135,7 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
 /*
  Загружаем Sgf в GameTree.
  */
-CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMoveReference)
+CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMoveReference, sExt)
 {
     var oViewPort = {};
 
@@ -159,7 +159,7 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMove
     // Через апи мы всегда даем грузить сгф
     var nOldFlags = oGameTree.m_nEditingFlags;
     oGameTree.Reset_EditingFlags();
-    oGameTree.Load_Sgf(sSgfFile, oViewPort, sMoveReference);
+    oGameTree.Load_Sgf(sSgfFile, oViewPort, sMoveReference, sExt);
     oGameTree.m_nEditingFlags = nOldFlags;
 };
 

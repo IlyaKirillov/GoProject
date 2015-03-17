@@ -345,7 +345,7 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
             var Y1 = (nSize - oReader.m_oViewPort.Y1 <= 3 ? nSize - 1 : oReader.m_oViewPort.Y1);
             this.m_oDrawingBoard.Set_ViewPort(X0, Y0, X1, Y1);
         }
-        else
+        else if (undefined !== oViewPort.X0 && undefined !== oViewPort.X1 && undefined !== oViewPort.Y0 && undefined !== oViewPort.Y1)
             this.m_oDrawingBoard.Set_ViewPort(oViewPort.X0, oViewPort.Y0, oViewPort.X1, oViewPort.Y1);
     }
     else if (this.m_oDrawingBoard)
