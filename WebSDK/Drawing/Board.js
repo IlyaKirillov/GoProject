@@ -150,6 +150,7 @@ function CDrawingBoard(oDrawing)
     };
     this.private_OnKeyDown = function(e)
     {
+        oThis.private_HideTarget();
         check_KeyboardEvent(e);
 
         // Обрабатываем Shift при добавлении/удалении камней
@@ -2875,10 +2876,17 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             }
         }
     }
-    else if (82 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + R
+    else if (82 === KeyCode && true === Event.CtrlKey) // Ctrl + R
     {
-        this.m_oGameTree.Remove_AllColorMarks();
-        this.private_ClearAllColorMarks();
+        if (EBoardMode.AddMarkColor === this.m_eMode)
+        {
+            this.m_oGameTree.Remove_AllColorMarks();
+            this.private_ClearAllColorMarks();
+        }
+        else
+        {
+            this.Set_Rulers(true === this.m_bRulers ? false : true);
+        }
     }
     else if (83 === KeyCode && true === Event.CtrlKey) // Ctrl + S
     {
@@ -2896,6 +2904,16 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
             Common.SaveAs(oBlob, sGameName);
         }
+    }
+    else if (86 === KeyCode)
+    {
+        var eType = this.m_oGameTree.Get_ShowVariants();
+
+        eType++;
+        if (eType > EShowVariants.Max)
+            eType = EShowVariants.Min;
+
+        this.m_oGameTree.Set_ShowVariants(eType);
     }
     else if (112 === KeyCode) // F1
     {
@@ -2936,20 +2954,6 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     else if (121 === KeyCode) // F10
     {
         this.Set_Mode(EBoardMode.AddMarkColor);
-    }
-    else if (189 === KeyCode) // -
-    {
-        var eType = this.m_oGameTree.Get_ShowVariants();
-
-        eType++;
-        if (eType > EShowVariants.Max)
-            eType = EShowVariants.Min;
-
-        this.m_oGameTree.Set_ShowVariants(eType);
-    }
-    else if (192 === KeyCode) // ~ (Ё)
-    {
-        this.Set_Rulers(true === this.m_bRulers ? false : true);
     }
 
     return false;

@@ -1700,13 +1700,13 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
                                 </tr>\
                                 <tr>\
                                     <td>View mode change of the next move</td>\
-                                    <td>- (minus)</td>\
+                                    <td>Ctrl+V</td>\
                                     <td>There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.</td>\
                                 </tr>\
                                 <tr>\
                                     <td>Show/Hide coordinates</td>\
-                                    <td>~ (tilde)</td>\
-                                    <td>Show/Hide coordinates.</td>\
+                                    <td>Ctrl+R</td>\
+                                    <td>Show/Hide coordinates. (Not in color mode, see above)</td>\
                                 </tr>\
                             </tbody></table>\
                     </div>\
