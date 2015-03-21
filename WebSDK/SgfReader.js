@@ -487,8 +487,16 @@ CSgfReader.prototype.private_ReadMove = function(Value)
             this.private_RegisterPoint(X, Y);
             this.m_oGameTree.Add_Move(X, Y, Value);
 
-            if (']' !== this.m_sSGF[this.m_nPos])
-                this.m_bValidNode = false;
+            while (']' !== this.m_sSGF[this.m_nPos])
+            {
+                this.m_nPos++;
+
+                if (this.m_nPos >= this.m_nLength)
+                {
+                    this.m_bValidNode = false;
+                    break;
+                }
+            }
         }
     }
 

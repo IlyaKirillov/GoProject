@@ -187,6 +187,15 @@ CGoBoardApi.prototype.Update_Size = function(oGameTree)
     oGameTree.Update_Size();
 };
 
+/*
+ Получаем название матча.
+ */
+CGoBoardApi.prototype.Get_MatchName = function(oGameTree)
+{
+    if (oGameTree)
+        oGameTree.Get_MatchName();
+};
+
 
 /*
  Функция для выставления звука.
@@ -219,3 +228,4 @@ CGoBoardApi.prototype['Find_ProblemRightVariant']             = CGoBoardApi.prot
 CGoBoardApi.prototype['Start_AutoPlay']                       = CGoBoardApi.prototype.Start_AutoPlay;
 CGoBoardApi.prototype['Stop_AutoPlay']                        = CGoBoardApi.prototype.Stop_AutoPlay;
 CGoBoardApi.prototype['Focus']                                = CGoBoardApi.prototype.Focus;
+CGoBoardApi.prototype['Get_MatchName']                        = CGoBoardApi.prototype.Get_MatchName;

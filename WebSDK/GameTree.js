@@ -1343,6 +1343,16 @@ CGameTree.prototype.Get_GameName = function()
 {
     return this.m_sGameName;
 };
+CGameTree.prototype.Get_MatchName = function()
+{
+    var sGameName = this.Get_GameName();
+    if ("" === sGameName)
+        sGameName = this.Get_WhiteName() + " vs. " + this.Get_BlackName();
+    if ("" === sGameName)
+        sGameName = "White vs. Black";
+
+    return sGameName;
+};
 CGameTree.prototype.Set_GameInfo = function(sGameInfo)
 {
     this.m_sGameInfo = sGameInfo;
