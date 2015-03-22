@@ -193,7 +193,9 @@ CGoBoardApi.prototype.Update_Size = function(oGameTree)
 CGoBoardApi.prototype.Get_MatchName = function(oGameTree)
 {
     if (oGameTree)
-        oGameTree.Get_MatchName();
+        return oGameTree.Get_MatchName();
+
+    return "White vs. Black";
 };
 
 

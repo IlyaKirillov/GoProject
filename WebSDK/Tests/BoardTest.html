@@ -2,6 +2,8 @@
 <html>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/sgf; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
 <head>
     <title>Тестируем вставление доски в DIV</title>
 </head>
@@ -36,7 +38,7 @@
 <script type="text/javascript" language="JavaScript" src="../SgfReader.js"></script>
 <script type="text/javascript" language="JavaScript" src="../SgfWriter.js"></script>
 <script type="text/javascript" language="JavaScript" src="../Api.js"></script>
-<body onselectstart="return false;" style="position: absolute;top:0px; left:0px;padding:0;margin:0;height: 100vh;width: 100vw; background-repeat: repeat; background-image: url('../../../Background3.png');-moz-user-select: none; user-select: none;">
+<body onselectstart="return false;" style="text-size-adjust:100%;-webkit-text-size-adjust:100%; -moz-text-size-adjust:100%; -ms-text-size-adjust:100%; position: absolute;top:0px; left:0px;padding:0;margin:0;height: 100vh;width: 100vw; background-repeat: repeat; background-image: url('../../../Background3.png');-moz-user-select: none; user-select: none;">
 
 <div id="divId" style="position:absolute;top:0px; left:0px; height: 100vh;width: 100vw;" onfocus="BodyFocus()" tabindex="-1"></div>
 
@@ -286,6 +288,8 @@
     };
 
 */
+
+    document.title = GoBoardApi.Get_MatchName(oGameTree);
 
 
 </script>

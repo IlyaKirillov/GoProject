@@ -2902,7 +2902,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 
             sGameName += ".sgf";
             var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
-            Common.SaveAs(oBlob, sGameName);
+            Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
         }
     }
     else if (86 === KeyCode)

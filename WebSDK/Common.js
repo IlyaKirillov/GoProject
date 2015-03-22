@@ -442,7 +442,7 @@ CCommon.prototype.Get_Browser = function()
 
     return sBrowser;
 };
-CCommon.prototype.SaveAs = function(oBlob, sName)
+CCommon.prototype.SaveAs = function(oBlob, sName, sMimeType)
 {
     if (typeof navigator !== "undefined" && navigator['msSaveOrOpenBlob'])
         return navigator['msSaveOrOpenBlob'](oBlob, sName);
@@ -451,6 +451,10 @@ CCommon.prototype.SaveAs = function(oBlob, sName)
     var oURL = (window['URL'] || window['webkitURL'] || window).createObjectURL(oBlob);
     oLink['href']     = oURL;
     oLink['download'] = sName;
+
+    if (sMimeType)
+        oLink['type'] = sMimeType;
+
     this.Click(oLink);
 };
 CCommon.prototype.Click = function(oNode)
