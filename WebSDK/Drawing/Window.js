@@ -285,7 +285,6 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCaptionTextControl.Bounds.SetParams(15, 0, 55, 1000, true, false, true, false, -1, 30);
     oCaptionTextControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaptionControl.AddControl(oCaptionTextControl);
-    oCaptionTextElement.innerText = "Caption";
     oCaptionTextElement.style.fontFamily          = "Tahoma, Sans serif";
     oCaptionTextElement.style.fontSize            = "13pt";
     oCaptionTextElement.style.textAlign           = "center";
@@ -295,6 +294,7 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCaptionTextElement.style.textOverflow        = "ellipsis";
     oCaptionTextElement.style['-o-text-overflow'] = "ellipsis";
     oCaptionTextElement.style.cursor              = "default";
+    Common.Set_InnerTextToElement(oCaptionTextElement, "Caption");
     this.HtmlElement.CaptionText = oCaptionTextElement;
 
     // Caption
@@ -475,8 +475,7 @@ CDrawingWindow.prototype.Focus = function()
 };
 CDrawingWindow.prototype.Set_Caption = function(sCaption)
 {
-    this.HtmlElement.CaptionText.innerText = sCaption;
-    this.HtmlElement.CaptionText.innerHTML = sCaption;
+    Common.Set_InnerTextToElement(this.HtmlElement.CaptionText, sCaption);
 };
 CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, sName)
 {
@@ -766,8 +765,7 @@ CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMai
     oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
     oNameControl.Anchor = (g_anchor_left | g_anchor_top);
     oMainControl.AddControl(oNameControl);
-    oNameElement.innerText = sName;
-    oNameElement.innerHTML = sName;
+    Common.Set_InnerTextToElement(oNameElement, sName);
 
     var sValueId      = sNameId + "Value";
     var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId, bCanEdit);
@@ -799,8 +797,7 @@ CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
     oMainDiv.style.fontFamily = "Tahoma, Sans serif";
     oMainDiv.style.fontSize   = 16 + "px";
 
-    oMainDiv.innerHTML = sText;
-    oMainDiv.innerText = sText;
+    Common.Set_InnerTextToElement(oMainDiv, sText);
 };
 
 function CDrawingSettingsWindow()
@@ -871,8 +868,7 @@ CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
     oGroupBoxNameElement.style.textOverflow        = "ellipsis";
     oGroupBoxNameElement.style['-o-text-overflow'] = "ellipsis";
     oGroupBoxNameElement.style.cursor              = "default";
-    oGroupBoxNameElement.innerHTML = "Color scheme";
-    oGroupBoxNameElement.innerText = "Color scheme";
+    Common.Set_InnerTextToElement(oGroupBoxNameElement, "Color scheme");
 
     var oTopPaddingElement = document.createElement("div");
     oTopPaddingElement.style.width  = "100%";
@@ -947,8 +943,7 @@ CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentEle
     var oSpan = document.createElement("span");
     oSpan.setAttribute("oncontextmenu", "return false;");
     oSpan.style.fontFamily  = "Tahoma, Sans serif";
-    oSpan.innerHTML = sRadioValue;
-    oSpan.innerText = sRadioValue;
+    Common.Set_InnerTextToElement(oSpan, sRadioValue);
     oSpan.style.fontFamily          = "Tahoma, Sans serif";
     oSpan.style.fontSize            = "13pt";
     oSpan.style.height              = "15px";
@@ -959,10 +954,10 @@ CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentEle
 
     oMainElement.appendChild(oSpan);
 
-    oSpan.onclick = function()
+    oSpan.addEventListener("click", function()
     {
         oElement.checked = true;
-    };
+    }, false);
 
     return oElement;
 };
@@ -983,8 +978,7 @@ CDrawingSettingsWindow.prototype.private_CreateCheckBox = function(oParentElemen
     var oSpan = document.createElement("span");
     oSpan.setAttribute("oncontextmenu", "return false;");
     oSpan.style.fontFamily  = "Tahoma, Sans serif";
-    oSpan.innerHTML = sCheckboxName;
-    oSpan.innerText = sCheckboxName;
+    Common.Set_InnerTextToElement(oSpan, sCheckboxName);
     oSpan.style.fontFamily          = "Tahoma, Sans serif";
     oSpan.style.fontSize            = "13pt";
     oSpan.style.height              = "15px";
@@ -993,10 +987,10 @@ CDrawingSettingsWindow.prototype.private_CreateCheckBox = function(oParentElemen
 
     oMainElement.appendChild(oSpan);
 
-    oSpan.onclick = function()
+    oSpan.addEventListener("click", function()
     {
         oElement.checked = !oElement.checked;
-    };
+    }, false);
 
     return oElement;
 };
@@ -1224,8 +1218,7 @@ CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDi
     oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
     oNameControl.Anchor = (g_anchor_left | g_anchor_top);
     oMainControl.AddControl(oNameControl);
-    oNameElement.innerText = sName;
-    oNameElement.innerHTML = sName;
+    Common.Set_InnerTextToElement(oNameElement, sName);
 
     var sValueId      = sNameId + "Value";
     var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId, bCanEdit);
@@ -1315,8 +1308,7 @@ CDrawingGifWriterWindow.prototype.On_Progress = function(Progress)
     this.m_oProgressSliderElement.style.width = (Progress / 100 * dWidth) + "px";
 
     var dValue = (Progress * 100 | 0) / 100;
-    this.m_oProgressValueElement.innerHTML = dValue + "%";
-    this.m_oProgressValueElement.innerText = dValue + "%";
+    Common.Set_InnerTextToElement(this.m_oProgressValueElement, dValue + "%");
 };
 CDrawingGifWriterWindow.prototype.On_Start = function()
 {
@@ -1390,332 +1382,158 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
     oMainDiv.style.overflowX = "hidden";
     oMainDiv.style.overflowY = "scroll";
 
-    var sInnerHtml = '<html><head>\
-            <title>Keyboard Shortcuts</title>\
-            <meta charset="utf-8">\
-                <style>\
-                body\
-    {\
-        font-family: Tahoma, Arial, Verdana;\
-        font-size: 12px;\
-        color: #666;\
-        background: #fff;\
-    }\
-    .mainpart\
-    {\
-        margin: 0;\
-        padding: 10px 20px;\
-    }\
-    .mainpart h1\
-    {\
-        font-size: 16px;\
-        font-weight: bold;\
-    }\
-    table,\
-        tr,\
-        td,\
-        th\
-    {\
-        border-left: 0;\
-        border-right: 0;\
-        border-bottom: solid 1px #E4E4E4;\
-        border-collapse: collapse;\
-        padding: 8px;\
-        font-size: 12px;\
-        text-align: left;\
-    }\
-    table\
-    {\
-        margin: 20px 0;\
-        width: 100%;\
-    }\
-    th\
-    {\
-        font-size: 14px;\
-        font-weight: bold;\
-        padding-top: 20px;\
-    }\
-    td.function\
-    {\
-        width: 35%;\
-    }\
-    td.combination\
-    {\
-        width: 15%;\
-    }\
-    td.description\
-    {\
-        width: 50%;\
-    }\
-    </style>\
-                <link type="text/css" rel="stylesheet" href="editor.css">\
-                </head>\
-                <body>\
-                    <div class="mainpart">\
-                        <h1>Keyboard Shortcuts</h1>\
-                        <table>\
-                            <tbody>\
-                                <tr>\
-                                    <th colspan="3">Working with Files</th>\
-                                </tr>\
-                                <tr>\
-                                    <td class="function">Open Sgf</td>\
-                                    <td class="combination">Ctrl+O</td>\
-                                    <td class="description">Open the <b>Sgf file</b> from disk. (Not in color mode, see below)</td>\
-                                </tr>\
-                                <tr>\
-                                    <td class="function">Open Sgf</td>\
-                                    <td class="combination">Ctrl+Shift+O</td>\
-                                    <td class="description">Open the <b>Sgf file</b> from source. (Not in color mode, see below)</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Save Sgf</td>\
-                                    <td>Ctrl+S</td>\
-                                    <td>Save <b>Sgf file</b>.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Save png shot</td>\
-                                    <td>Ctrl+H</td>\
-                                    <td>Save board shot in png format.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Save gif shot</td>\
-                                    <td>Ctrl+Shift+H</td>\
-                                    <td>Save board shot in gif format.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Save multipage gif file.</td>\
-                                    <td>Ctrl+I</td>\
-                                    <td>Save <b>gif file</b> for current variant.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Save multipage gif file</td>\
-                                    <td>Ctrl+Shift+I</td>\
-                                    <td>Save <b>gif file</b> for all branches with comment RIGHT (for problem mode).</td>\
-                                </tr>\
-                                <tr>\
-                                    <th colspan="3">Navigation</th>\
-                                </tr>\
-                                <tr>\
-                                    <td>Next node</td>\
-                                    <td>Right arrow</td>\
-                                    <td>Jump to next node.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Next 5 node</td>\
-                                    <td>Ctrl+Right arrow</td>\
-                                    <td>Jump over 5 nodes.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>End of the variant</td>\
-                                    <td>Ctrl+Shift+Right arrow</td>\
-                                    <td>Jump to the end of the current variant.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Previous node</td>\
-                                    <td>Left arrow</td>\
-                                    <td>Jump to previous node.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Previous 5 node</td>\
-                                    <td>Shift+Left arrow</td>\
-                                    <td>Jump back over 5 nodes.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Start of the file</td>\
-                                    <td>Ctrl+Shift+Right arrow</td>\
-                                    <td>Jump to the start of the file.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Previous variant</td>\
-                                    <td>Up arrow</td>\
-                                    <td>Jump to previous variant.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Next variant</td>\
-                                    <td>Down arrow</td>\
-                                    <td>Jump to next variant.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Play mode</b></td>\
-                                    <td colspan="2">F1</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Add move</td>\
-                                    <td>Left mouse click</td>\
-                                    <td>Set sequentially stones.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Add alternative move</td>\
-                                    <td>Right mouse click</td>\
-                                    <td>Create new brunch and add alternative move.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Go to the point</td>\
-                                    <td>Shift+Left mouse click onto a board position</td>\
-                                    <td>Teleports you to the moment of the game forth or back, when the stone on this position has been played.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Change move order</td>\
-                                    <td>Ctrl+Shift+Left mouse click</td>\
-                                    <td>When sequentially stones are entered: changes the colour of the next stone to be set. What stone will appear on the board is shown by the tools field (useful e.g. after a problem has been set up).</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Add comment with coordinates</td>\
-                                    <td>Ctrl+Shift+Left mouse click</td>\
-                                    <td>Add comment with coordinates.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Count scores</b></td>\
-                                    <td colspan="2">F2</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Mark dead groups</td>\
-                                    <td>Left mouse click</td>\
-                                    <td>Mark dead groups.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>End count scores</td>\
-                                    <td>Ctrl+Left mouse click onto board</td>\
-                                    <td>Return to play mode.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Set up a board position</b></td>\
-                                    <td colspan="2">F3</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Add black stone or remove stone</td>\
-                                    <td>Left mouse click</td>\
-                                    <td>Add black stone or remove stone.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Add white stone or remove stone</td>\
-                                    <td>Shift+Left mouse click</td>\
-                                    <td>Add white stone or remove stone.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Triangles</b></td>\
-                                    <td>F4</td>\
-                                    <td>Add triangles.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Squares</b></td>\
-                                    <td>F5</td>\
-                                    <td>Add squares.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Circles</b></td>\
-                                    <td>F6</td>\
-                                    <td>Add circles.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>X mark</b></td>\
-                                    <td>F7</td>\
-                                    <td>Add "X" mark.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Text label</b></td>\
-                                    <td colspan="2">F8</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Letter</td>\
-                                    <td>Left mouse click</td>\
-                                    <td>Add letter.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Text</td>\
-                                    <td>Shift+Left mouse click</td>\
-                                    <td>Add text entered by the user.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Numeric label</b></td>\
-                                    <td colspan="2">F9</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Number</td>\
-                                    <td>Left mouse click</td>\
-                                    <td>Add the smallest positive number.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Move number</td>\
-                                    <td>Shift+Left mouse click</td>\
-                                    <td>Add number of the first move which was played here.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td><b>Color mode</b></td>\
-                                    <td colspan="2">F10</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Blue region</td>\
-                                    <td>Left mouse click</td>\
-                                    <td>Add blue region.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Green region</td>\
-                                    <td>Shift+Left mouse click</td>\
-                                    <td>Add green region.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Red region</td>\
-                                    <td>Shift+Left mouse click</td>\
-                                    <td>Add red region.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Gray region</td>\
-                                    <td>Ctrl+Shift+Left mouse click</td>\
-                                    <td>Add gray region.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Clear region</td>\
-                                    <td>Right mouse click</td>\
-                                    <td>Clear region.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Continue</td>\
-                                    <td>Ctrl+C</td>\
-                                    <td>Copy all colors from previous node.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Count colors</td>\
-                                    <td>Ctrl+O</td>\
-                                    <td>Count all colors with depth.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Clear colors</td>\
-                                    <td>Ctrl+R</td>\
-                                    <td>Clear all colors in the current node.</td>\
-                                </tr>\
-                                <tr>\
-                                    <th colspan="3">Miscellaneous</th>\
-                                </tr>\
-                                <tr>\
-                                    <td>Remove node</td>\
-                                    <td>Backspace/delete</td>\
-                                    <td>Deletes the current node and all of the following brunches.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Score estimator</td>\
-                                    <td>Ctrl+E</td>\
-                                    <td>Show window with score estimator (you can mark dead groups by click on them).</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>View mode change of the next move</td>\
-                                    <td>Ctrl+V</td>\
-                                    <td>There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.</td>\
-                                </tr>\
-                                <tr>\
-                                    <td>Show/Hide coordinates</td>\
-                                    <td>Ctrl+R</td>\
-                                    <td>Show/Hide coordinates. (Not in color mode, see above)</td>\
-                                </tr>\
-                            </tbody></table>\
-                    </div>\
-                </body></html>';
+    var oDivMainPart = document.createElement("div");
+    oMainDiv.appendChild(oDivMainPart);
+    oDivMainPart.style.margin  = "0";
+    oDivMainPart.style.padding = "10px 20px";
 
-    oMainDiv.innerHTML = sInnerHtml;
-    //oMainDiv.innerText = sInnerHtml;
-}
+    oDivMainPart.style.fontFamily = "Tahoma, Arial, Verdana";
+    oDivMainPart.style.fontSize   = "12px";
+    oDivMainPart.style.color      = "#666";
+    oDivMainPart.style.background = "#fff";
 
+    var oHeading = document.createElement("h1");
+    oDivMainPart.appendChild(oHeading);
+    Common.Set_InnerTextToElement(oHeading, "Keyboard Shortcuts");
+    oHeading.style.fontSize   = "16px";
+    oHeading.style.fontWeight = "bold";
+
+    var oTable = document.createElement("table");
+    oDivMainPart.appendChild(oTable);
+    oTable.style.margin = "20px 0";
+    oTable.style.width  = "100%";
+
+    var oTBody = document.createElement("tbody");
+    oTable.appendChild(oTBody);
+
+
+    this.private_AppendTableHeading1(oTBody,     "Working with Files");
+
+    this.private_AppendTableCommonString(oTBody, "Open Sgf/Gib/Ngf",                  "Ctrl+O",                                        "Open the Sgf/Gib/Ngf file from disk. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, "Open Sgf",                          "Ctrl+Shift+O",                                  "Open the Sgf file from source. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, "Save Sgf",                          "Ctrl+S",                                        "Save Sgf file.");
+    this.private_AppendTableCommonString(oTBody, "Save png shot",                     "Ctrl+H",                                        "Save board shot in png format.");
+    this.private_AppendTableCommonString(oTBody, "Save gif shot",                     "Ctrl+Shift+H",                                  "Save board shot in gif format.");
+    this.private_AppendTableCommonString(oTBody, "Save multipage gif file.",          "Ctrl+I",                                        "Save gif file for current variant.");
+    this.private_AppendTableCommonString(oTBody, "Save multipage gif file.",          "Ctrl+Shift+I",                                  "Save gif file for all branches with comment RIGHT (for problem mode).");
+
+    this.private_AppendTableHeading1(oTBody,     "Navigation");
+
+    this.private_AppendTableCommonString(oTBody, "Next node",                         "Right arrow",                                   "Jump to next node.");
+    this.private_AppendTableCommonString(oTBody, "Next 5 node",                       "Ctrl+Right arrow",                              "Jump over 5 nodes.");
+    this.private_AppendTableCommonString(oTBody, "End of the variant",                "Ctrl+Shift+Right arrow",                        "Jump to the end of the current variant.");
+    this.private_AppendTableCommonString(oTBody, "Previous node",                     "Left arrow",                                    "Jump to previous node.");
+    this.private_AppendTableCommonString(oTBody, "Previous 5 node",                   "Shift+Left arrow",                              "Jump back over 5 nodes.");
+    this.private_AppendTableCommonString(oTBody, "Start of the file",                 "Ctrl+Shift+Right arrow",                        "Jump to the start of the file.");
+    this.private_AppendTableCommonString(oTBody, "Previous variant",                  "Up arrow",                                      "Jump to previous variant.");
+    this.private_AppendTableCommonString(oTBody, "Next variant",                      "Down arrow",                                    "Jump to next variant.");
+
+    this.private_AppendTableHeading2(oTBody,    "Play mode", "F1");
+
+    this.private_AppendTableCommonString(oTBody, "Add move",                          "Left mouse click",                              "Set sequentially stones.");
+    this.private_AppendTableCommonString(oTBody, "Add alternative move",              "Right mouse click",                             "Create new brunch and add alternative move.");
+    this.private_AppendTableCommonString(oTBody, "Go to the point",                   "Shift+Left mouse click onto a board position",  "Teleports you to the moment of the game forth or back, when the stone on this position has been played.");
+    this.private_AppendTableCommonString(oTBody, "Change move order",                 "Ctrl+Shift+Left mouse click",                   "When sequentially stones are entered: changes the colour of the next stone to be set. What stone will appear on the board is shown by the tools field (useful e.g. after a problem has been set up).");
+    this.private_AppendTableCommonString(oTBody, "Add comment with coordinates",      "Ctrl+Left mouse click",                         "Add comment with coordinates.");
+
+    this.private_AppendTableHeading2(oTBody,    "Count scores", "F2");
+
+    this.private_AppendTableCommonString(oTBody, "Mark dead groups",                  "Left mouse click",                              "Mark dead groups.");
+    this.private_AppendTableCommonString(oTBody, "End count scores",                  "Ctrl+Left mouse click onto board",              "Return to play mode.");
+
+    this.private_AppendTableHeading2(oTBody,     "Set up a board position", "F3");
+
+    this.private_AppendTableCommonString(oTBody, "Add black stone or remove stone",   "Left mouse click",                              "Add black stone or remove stone.");
+    this.private_AppendTableCommonString(oTBody, "Add white stone or remove stone",   "Shift+Left mouse click",                        "Add white stone or remove stone.");
+
+    this.private_AppendTableHeading3(oTBody,     "Triangles",                         "F4",                                           "Add triangles.");
+    this.private_AppendTableHeading3(oTBody,     "Squares",                           "F5",                                           "Add squares.");
+    this.private_AppendTableHeading3(oTBody,     "Circles",                           "F6",                                           "Add circles.");
+    this.private_AppendTableHeading3(oTBody,     "X mark",                            "F7",                                           "Add \"X\" mark.");
+
+    this.private_AppendTableHeading2(oTBody,     "Text label", "F8");
+    this.private_AppendTableCommonString(oTBody, "Letter",                            "Left mouse click",                             "Add letter.");
+    this.private_AppendTableCommonString(oTBody, "Text",                              "Shift+Left mouse click",                       "Add text entered by the user.");
+    this.private_AppendTableHeading2(oTBody,     "Numeric label", "F9");
+    this.private_AppendTableCommonString(oTBody, "Number",                            "Left mouse click",                             "Add the smallest positive number.");
+    this.private_AppendTableCommonString(oTBody, "Move number",                       "Shift+Left mouse click",                       "Add number of the first move which was played here.");
+    this.private_AppendTableHeading2(oTBody,     "Color mode", "F10");
+    this.private_AppendTableCommonString(oTBody, "Blue region",                       "Left mouse click",                             "Add blue region.");
+    this.private_AppendTableCommonString(oTBody, "Green region",                      "Shift+Left mouse click",                       "Add green region.");
+    this.private_AppendTableCommonString(oTBody, "Red region",                        "Ctrl+Left mouse click",                        "Add red region.");
+    this.private_AppendTableCommonString(oTBody, "Gray region",                       "Ctrl+Shift+Left mouse click",                  "Add gray region.");
+    this.private_AppendTableCommonString(oTBody, "Clear region",                      "Right mouse click",                            "Clear region.");
+    this.private_AppendTableCommonString(oTBody, "Continue",                          "Ctrl+C",                                       "Copy all colors from previous node.");
+    this.private_AppendTableCommonString(oTBody, "Count colors",                      "Ctrl+O",                                       "Count all colors with depth.");
+    this.private_AppendTableCommonString(oTBody, "Clear colors",                      "Ctrl+R",                                       "Clear all colors in the current node.");
+    this.private_AppendTableHeading1(oTBody, "Miscellaneous");
+    this.private_AppendTableCommonString(oTBody, "Remove node",                       "Backspace/delete",                             "Deletes the current node and all of the following brunches.");
+    this.private_AppendTableCommonString(oTBody, "Score estimator",                   "Ctrl+E",                                       "Show window with score estimator (you can mark dead groups by click on them).");
+    this.private_AppendTableCommonString(oTBody, "View mode change of the next move", "Ctrl+V",                                       "There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.");
+    this.private_AppendTableCommonString(oTBody, "Show/Hide coordinates",             "Ctrl+R",                                       "Show/Hide coordinates. (Not in color mode, see above)");
+};
+CDrawingAboutWindow.prototype.private_AppendTR = function(oTBody)
+{
+    var oTr = document.createElement("tr");
+    oTBody.appendChild(oTr);
+
+    oTr.style.borderLeft     = "0";
+    oTr.style.borderRight    = "0";
+    oTr.style.borderBottom   = "solid 1px #E4E4E4";
+    oTr.style.borderCollapse = "collapse";
+    oTr.style.padding        = "8px";
+    oTr.style.fontSize       = "12px";
+    oTr.style.textAlign      = "left";
+
+    return oTr;
+};
+CDrawingAboutWindow.prototype.private_AppendTD = function(oTR, sText)
+{
+    var oTd = document.createElement("td");
+    oTR.appendChild(oTd);
+    Common.Set_InnerTextToElement(oTd, sText);
+
+    oTd.style.borderLeft     = "0";
+    oTd.style.borderRight    = "0";
+    oTd.style.borderBottom   = "solid 1px #E4E4E4";
+    oTd.style.borderCollapse = "collapse";
+    oTd.style.padding        = "8px";
+    oTd.style.fontSize       = "12px";
+    oTd.style.textAlign      = "left";
+
+    return oTd;
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading1 = function(oTBody, sText)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    var oTd = this.private_AppendTD(oTr, sText);
+    oTd.colSpan = "3";
+
+    oTd.style.fontSize   = "14px";
+    oTd.style.fontWeight = "bold";
+    oTd.style.paddingTop = "20px";
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading2 = function(oTBody, sText1, sText2)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    this.private_AppendTD(oTr, sText1).style.fontWeight = "bold";
+    var oTd = this.private_AppendTD(oTr, sText2);
+    oTd.colSpan = "2";
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading3 = function(oTBody, sText1, sText2, sText3)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    this.private_AppendTD(oTr, sText1).style.fontWeight = "bold";
+    this.private_AppendTD(oTr, sText2);
+    this.private_AppendTD(oTr, sText3);
+};
+CDrawingAboutWindow.prototype.private_AppendTableCommonString = function(oTBody, sText1, sText2, sText3)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    this.private_AppendTD(oTr, sText1).style.width = "35%";
+    this.private_AppendTD(oTr, sText2).style.width = "15%";
+    this.private_AppendTD(oTr, sText3).style.width = "50%";
+};
 
 var EWindowType =
 {

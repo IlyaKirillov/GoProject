@@ -85,26 +85,46 @@
 
 
 /*
-
     var aSlides = [];
+
+        var oSpan, oStrong;
+        var oMessage = document.createElement("div");
+        Common.Set_InnerTextToElement(oMessage, "Начать изучение правил игры Го");
 
     aSlides.push(
             {
-                Message : "Начать изучение правил игры Го",
+                Message : oMessage,
                 Sgf     : null,
                 SgfPr   : null
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "В го играют на прямоугольном поле, называемом доска или ");
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "гобан");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, ", расчерченном вертикальными и горизонтальными линиями. Стандартная доска имеет разлиновку 19×19 линий.");
+
     aSlides.push(
             {
-                Message : 'В го играют на прямоугольном поле, называемом доска или \<strong\>гобан\<\/strong\>, расчерченном вертикальными и горизонтальными линиями. Стандартная доска имеет разлиновку 19×19 линий.',
+                Message : oMessage,
                 Sgf     : "(;SZ[19])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {NewNode : false, Move : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+        Common.Set_InnerTextToElement(oMessage, "Для обучения и коротких неофициальных игр могут применяться доски меньших размеров: обычно 13×13 или 9×9 линий");
+
     aSlides.push(
             {
-                Message : "Для обучения и коротких неофициальных игр могут применяться доски меньших размеров: обычно 13×13 или 9×9 линий",
+                Message : oMessage,
                 Sgf     : "(;SZ[13])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
@@ -116,37 +136,121 @@
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Но, ничто не мешает использовать произвольную прямоугольную доску. Также для игры необходимы ");
+
+        oSpan    = document.createElement("b");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "камни");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " — специальные фишки двух контрастных цветов, чаще всего — чёрные и белые. Полный комплект для игры должен содержать 361 камень — 180 белых и 181 чёрный.");
+
     aSlides.push(
             {
-                Message : 'Но, ничто не мешает использовать произвольную прямоугольную доску. Также для игры необходимы \<b\>камни\<\/b\> — специальные фишки двух контрастных цветов, чаще всего — чёрные и белые. Полный комплект для игры должен содержать 361 камень — 180 белых и 181 чёрный.',
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[aa][ab][ac][ba][bb][bc][bd][bs][as][br][ar][aq][bq][jj][ji][jh][jg][jf][je][jd][jc][jb][ja][ia][ib][ic][id][ie][if][ig][ih][ii][ij][ik][il][im][in][ip][iq][ir][is][io][ho][hp][db][hr][hs][gs][gq][gp][gr][fs][fr][fq][fp][ep][eq][er][es][ds][cr][cs][cq][dq][dr][dp][cp][bp][ap][ao][bo][co][do][eo][fo][go][hn][gn][fn][en][ca][da][ea][fa][ga][ha][hb][gb][eb][ag][cb][cc][dc][ec][fc][fb][gc][hc][gd][hd][ge][he][gf][gg][hf][hg][hh][hi][hj][hk][hl][hm][gm][gl][gk][gj][gh][fh][eh][dh][ch][bh][ah][ai][bi][ci][di][ei][fi][gi][fj][ej][bj][aj][ak][am][an][al][bl][bm][bn][cn][cm][cl][ck][bk][dj][cj][dk][dm][dn][dl][el][em][fm][fl][fk][ek][dg][df][de][dd][ed][fd][fe][ee][ef][ff][fg][eg][cg][cf][ce][cd][be][ae][ad][af][bf][bg]AW[sa][jk][jl][kl][kk][lk][ll][ml][mk][nk][nl][ol][ok][pk][pl][ql][qk][rk][rl][sl][sk][sm][rm][qm][km][jm][jn][jo][jp][jq][jr][js][ks][ls][ms][ns][os][ps][qs][rs][ss][sr][sq][sp][so][sn][rn][qn][pn][on][nn][mn][ln][kn][lm][mm][nm][om][pm][no][np][nq][nr][mr][lr][kr][kq][lq][mq][mp][lp][kp][ko][lo][mo][po][oo][op][or][oq][pq][pr][qr][qq][rq][rr][rp][qp][pp][qo][ro][kj][ki][kh][kg][kf][ke][kd][kc][kb][ka][la][lb][lc][ld][le][lf][lg][lh][li][lj][mj][mh][mi][nh][og][pf][qe][qd][rc][rb][ra][qa][pa][oa][na][ma][mb][nb][nc][mc][md][nd][ne][me][mf][nf][ng][mg][of][oe][pe][pd][od][oc][pc][qc][qb][pb][ob][ni][nj][oj][oi][oh][ph][qj][pi][pj][qi][qh][qg][pg][qf][rf][rg][rh][sj][rj][ri][si][sh][sg][sf][se][re][rd][sd][sc][sb]AB[hq])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Перейдем к основным правилам игры. Перед началом игры доска пуста. Первыми ходят чёрные. Затем белые. Далее ходы делаются по очереди. Делая ход, игрок выставляет один свой камень на доску в любую не занятую точку пересечения линий (пересечения называют пунктами). Камни, однажды размещённые на доске, не перемещаются, но могут быть захвачены противником и сняты с неё.");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Задание:");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " Попробуйте сделать по несколько ходов за обоих игроков.");
+
     aSlides.push(
             {
-                Message : "Перейдем к основным правилам игры. Перед началом игры доска пуста. Первыми ходят чёрные. Затем белые. Далее ходы делаются по очереди. Делая ход, игрок выставляет один свой камень на доску в любую не занятую точку пересечения линий (пересечения называют пунктами). Камни, однажды размещённые на доске, не перемещаются, но могут быть захвачены противником и сняты с неё.\<br\/\>\<strong\>Задание:\<\/strong\> Попробуйте сделать по несколько ходов за обоих игроков.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19])",
                 SgfPr   : {Count : 5, WaitOnEnd : true, Flags : {Move : false, NewNode : true, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "У каждого камня есть, так называемые, ");
+
+        oSpan    = document.createElement("b");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "дамэ");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " (точка свободы, дыхательный пункт) — соседние по вертикали или горизонтали (но не по диагонали!) незанятые пункты.");
+
     aSlides.push(
             {
-                Message : "У каждого камня есть, так называемые, \<b\>дамэ\<\/b\> (точка свободы, дыхательный пункт) — соседние по вертикали или горизонтали (но не по диагонали!) незанятые пункты.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[ea][cd][aa]MA[da][eb][ba][ab][ce][cc][bd][dd][fa])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Соседние либо связанные непрерывной цепочкой соседей камни образуют ");
+
+        oSpan    = document.createElement("b");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "группу");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " и делят дамэ между собой (то есть любое дамэ любого камня в группе относится одновременно ко всем камням этой группы).");
+
     aSlides.push(
             {
-                Message : "Соседние либо связанные непрерывной цепочкой соседей камни образуют \<b\>группу\<\/b\> и делят дамэ между собой (то есть любое дамэ любого камня в группе относится одновременно ко всем камням этой группы).",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[hg][hi][aa][ab][bg][ea][fb][ga][bf][hf][cg][hh]MA[bb][ac][be][af][ag][bh][dg][cf][ch][gf][he][if][ig][ih][ii][hj][gi][gh][gg][fc][eb][da][gb][ha][ba]AB[fa])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Когда камень или группа камней окружается камнями соперника так, что у неё не остаётся точек свободы, она считается  ");
+
+        oSpan    = document.createElement("b");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "захваченной");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " и снимается с доски.");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Задание:");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " Захватить белый камень.");
+
     aSlides.push(
             {
-                Message : "Когда камень или группа камней окружается камнями соперника так, что у неё не остаётся точек свободы, она считается  \<b\>захваченной \<\/b\> и снимается с доски.\<br\/\>\<strong\>Задание:\<\/strong\> Захватить белый камень.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[ij][kj]AW[jj]AB[ji];B[jk])",
                 SgfPr   : {Count : 2, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
@@ -166,9 +270,19 @@
                 SgfPr   : {Count : 2, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Задание:");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " Захватить группу белых камней.");
+
     aSlides.push(
             {
-                Message : "\<strong\>Задание:\<\/strong\> Захватить группу белых камней.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[fg][gh][hh][ig][hf]AW[gf][gg][hg]AB[ff];B[ge])",
                 SgfPr   : {Count : 2, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
@@ -201,75 +315,218 @@
                 SgfPr   : {Count : 2, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "В большинстве вариантов правил запрещено делать ход, в результате которого своя группа утрачивает последнюю точку свободы (самоубийственный ход). В следующем примере черным запрещено делать ход в пункты отмеченные крестиком.");
+
     aSlides.push(
             {
-                Message : "В большинстве вариантов правил запрещено делать ход, в результате которого своя группа утрачивает последнюю точку свободы (самоубийственный ход). В следующем примере черным запрещено делать ход в пункты отмеченные крестиком.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[ef][fg][ff][li][lj][ma][sa][sb]AW[fe][eh][fh][gg][gf][ee][ki][kj][kk][kh][lg][mi][mj][mk][ll][la][mb][nb][oa][dg][df][sc][rb][qa][mh]MA[eg][lh][na][ra]AB[lk])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Исключение составляет случай, когда в результате этого хода лишается всех дамэ группа противника; в этом случае игрок захватывает группу противника, а его собственная остаётся на доске (легко видеть, что после снятия группы противника группа игрока уже будет иметь не менее одного дамэ). ");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Задание:");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " Захватить белые камни.");
+
     aSlides.push(
             {
-                Message : "Исключение составляет случай, когда в результате этого хода лишается всех дамэ группа противника; в этом случае игрок захватывает группу противника, а его собственная остаётся на доске (легко видеть, что после снятия группы противника группа игрока уже будет иметь не менее одного дамэ). \<br\/\> \<strong\>Задание:\<\/strong\> Захватить белые камни.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[gf][ge][ed][fc][gc][hd]AW[ef][ee][fg][gg][hf][he][gd][fd]AB[ff];B[fe])",
                 SgfPr   : {Count : 2, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Последнее исключение приводит к еще одному правилу. Правило ");
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "ко");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, ": Запрещается повторять предыдущую позицию. В следующем примере захватите камень белых.");
+
     aSlides.push(
             {
-                Message : "Последнее исключение приводит к еще одному правилу. Правило \<strong\>ко\<\/strong\>: Запрещается повторять предыдущую позицию. В следующем примере захватите камень белых.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[je][id]AW[jd][ld][ke][kc]AB[jc];B[kd]MA[jd])",
                 SgfPr   : {Count : 2, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Казалось бы, у белых есть возможность захватить черный камень назад, но это запрещено правилом ко, т.к. это приведет к повторению позиции. Подробнее о ");
+
+        oSpan    = document.createElement("a");
+        oSpan.href   = "https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D0%BE_%D0%BA%D0%BE";
+        oSpan.target = "_blank";
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "правиле ко");
+
     aSlides.push(
             {
-                Message : "Казалось бы, у белых есть возможность захватить черный камень назад, но это запрещено правилом ко, т.к. это приведет к повторению позиции. Подробнее о \<a href=\"https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D0%BE_%D0%BA%D0%BE\"\>правиле ко\<\/a\>",
+                Message : oMessage,
                 Sgf     : null,
                 SgfPr   : null
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Теперь вы знакомы со всеми основными правилами игры Го, но какая же цель у игроков, и как определить победителя партии?");
+
     aSlides.push(
             {
-                Message : "Теперь вы знакомы со всеми основными правилами игры Го, но какая же цель у игроков, и как определить победителя партии?",
+                Message : oMessage,
                 Sgf     : null,
                 SgfPr   : null
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Основная цель игры Го - это окружить как можно больше территории своими камнями. Территория считается принадлежащей какому-либо игроку, если она окружена камнями только одного цвета. ");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Задание:");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " Посчитайте размер территории игроков на следующей диаграмме.");
+
     aSlides.push(
             {
-                Message : "Основная цель игры Го - это окружить как можно больше территории своими камнями. Территория считается принадлежащей какому-либо игроку, если она окружена камнями только одного цвета. \<br\/\>\<strong\>Задание:\<\/strong\> Посчитайте размер территории игроков на следующей диаграмме.",
+                Message : oMessage,
                 Sgf     : "(;SZ[19]AB[cc][cd][ce][cf][gf][dg][eg][fg][gg][dc][ge][gd][gc][fc][ec]AW[gk][gl][fm][fl][fn][fo][fp][gp][hp][ip][io][jn][jo][kn][ln][lm][ll][lk][kk][kj][jj][ij][hk][hj]AB[cg]TB[aa]TW[aa];)",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Правильный ответ: у черного 9 очков, а у белого - 16.");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Кроме этого игроки получают очки за захват камней. За каждый захваченный камень игрок получает 1 очко. Также, белые получают компенсацию за то, что черные ходят в партии, что дает им игровое преимущество. Эта компенсация называется ");
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "коми");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, ". Размер коми должен быть согласован между игроками до начала партии. В настоящее время, как правило, используется нецелая величина коми (5,5; 6,5; 7,5 очков), чтобы исключить возможность ничейного результата в партии.");
+
     aSlides.push(
             {
-                Message : "Правильный ответ: у черного 9 очков, а у белого - 16.\<br\/\>Кроме этого игроки получают очки за захват камней. За каждый захваченный камень игрок получает 1 очко. Также, белые получают компенсацию за то, что черные ходят в партии, что дает им игровое преимущество. Эта компенсация называется \<strong\>коми\<\/strong\>. Размер коми должен быть согласован между игроками до начала партии. В настоящее время, как правило, используется нецелая величина коми (5,5; 6,5; 7,5 очков), чтобы исключить возможность ничейного результата в партии.",
+                Message : oMessage,
                 Sgf     : null,
                 SgfPr   : null
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Когда игрок приходит к выводу, что ни один из возможных ходов не принесет ему очков, тогда он пасует и передает очередность хода сопернику. Соперник при это не обязан пасовать, он может играть до тех пор пока сам не решит, что для него нет больше ходов, приносящих очки.");
+
     aSlides.push(
             {
-                Message : "Когда игрок приходит к выводу, что ни один из возможных ходов не принесет ему очков, тогда он пасует и передает очередность хода сопернику. Соперник при это не обязан пасовать, он может играть до тех пор пока сам не решит, что для него нет больше ходов, приносящих очки.",
+                Message : oMessage,
                 Sgf     : null,
                 SgfPr   : null
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Партия заканчивается, когда оба игрока последовательно пасуют. После этого начинается подсчет очков. Игрок, у которого их оказывается больше, считается победителем. ");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("strong");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Задание:");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, " Посчитайте очки и определите победителя на следующей диаграмме, с учетом того, что коми равно 6,5 очков, а во время партии белые захватили 1 камень, а черные 2.");
+
+
     aSlides.push(
             {
-                Message : "Партия заканчивается, когда оба игрока последовательно пасуют. После этого начинается подсчет очков. Игрок, у которого их оказывается больше, считается победителем. \<br\/\>\<strong\>Задание:\<\/strong\> Посчитайте очки и определите победителя на следующей диаграмме, с учетом того, что коми равно 6,5 очков, а во время партии белые захватили 1 камень, а черные 2.",
+                Message : oMessage,
                 Sgf     : "(;SZ[9]AB[df][ef][eb][ed][ei][dg][dh][de][ec][fh][dd][bc][fg][bb][ba][ca]AW[ea][db][dc][ff][cb][fe][gg][fc][gh][hi][fb][da][ee][fi][gi][fd][fa][hf]AB[cc]TB[aa]TW[aa])",
                 SgfPr   : {Count : 0, WaitOnEnd : true, Flags : {Move : false, NewNode : false, ChangeBoardMode : false, LoadFile : false}}
             });
 
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "У черных  24 очка территории + 2 захваченных камня = 26 очков. ");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "У белых 22 очка территории + 1 захваченный камень + 6,5 очков коми = 29,5 очков. ");
+
+        oSpan    = document.createElement("br");
+        oMessage.appendChild(oSpan);
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Белые выиграли с разницей в 3,5 очка!");
+
     aSlides.push(
             {
-                Message : "У черных  24 очка территории + 2 захваченных камня = 26 очков. \<br\/\>У белых 22 очка территории + 1 захваченный камень + 6,5 очков коми = 29,5 очков. \<br\/\>Белые выиграли с разницей в 3,5 очка!",
+                Message : oMessage,
                 Sgf     : null,
                 SgfPr   : null
             });
+
+        oMessage = document.createElement("div");
+
+        oSpan    = document.createElement("span");
+        oMessage.appendChild(oSpan);
+        Common.Set_InnerTextToElement(oSpan, "Поздравляем! Теперь вы готовы к тому, чтобы сыграть свою первую партию в Го. Удачи!");
 
     aSlides.push(
             {
@@ -288,7 +545,6 @@
     };
 
 */
-
     document.title = GoBoardApi.Get_MatchName(oGameTree);
 
 

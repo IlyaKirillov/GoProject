@@ -309,9 +309,9 @@ var Common_DragHandler =
         o.xMapper = fXMapper ? fXMapper : null;
         o.yMapper = fYMapper ? fYMapper : null;
 
-        o.root.onDragStart  = new Function();
-        o.root.onDragEnd    = new Function();
-        o.root.onDrag       = new Function();
+        o.root.onDragStart  = function(){};//= new Function();
+        o.root.onDragEnd    = function(){};//= new Function();
+        o.root.onDrag       = function(){};//= new Function();
     },
 
     Start : function(e)
@@ -559,6 +559,13 @@ CCommon.prototype.Decode_Base64_UrlSafe = function(sInput)
     sInput = sInput.replace(new RegExp("-", 'g'), '/');
     sInput = sInput.replace(new RegExp("_", 'g'), '=');
     return this.Decode_Base64(sInput);
+};
+CCommon.prototype.Set_InnerTextToElement = function(oElement, sText)
+{
+    if (oElement.innerText)
+        oElement.innerText = sText;
+    else
+        oElement.textContent = sText;
 };
 
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
