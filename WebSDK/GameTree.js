@@ -2083,5 +2083,6 @@ CGameTree.prototype.Make_CurrentVariantMainly = function()
     {
         this.m_oDrawingNavigator.Create_FromGameTree();
         this.m_oDrawingNavigator.Update();
+        this.m_oDrawingNavigator.Update_Current(true);
     }
 };

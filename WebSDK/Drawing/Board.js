@@ -2854,7 +2854,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
                     oInput.accept        = ".sgf,.gib,.ngf";
                     oInput.style.display = "none";
 
-                    oInput.onchange = function(oEvent)
+                    oInput.addEventListener("change", function(oEvent)
                     {
                         var aFiles = oEvent.target.files;
 
@@ -2872,7 +2872,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
                             oReader.readAsText(oFile);
                             oThis.Focus();
                         }
-                    };
+                    }, false);
 
                     Common.Click(oInput);
                     oBody.removeChild(oInput);
