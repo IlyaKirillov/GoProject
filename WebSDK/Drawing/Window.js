@@ -1347,6 +1347,8 @@ CDrawingGifWriterWindow.prototype.Close = function(bEnd)
 function CDrawingAboutWindow()
 {
     CDrawingAboutWindow.superclass.constructor.call(this);
+
+    this.m_oDrawingBoard = null;
 }
 
 CommonExtend(CDrawingAboutWindow, CDrawingWindow);
@@ -1406,71 +1408,75 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
     var oTBody = document.createElement("tbody");
     oTable.appendChild(oTBody);
 
+    this.m_oDrawingBoard = null;
+    if (oPr.GameTree)
+        this.m_oDrawingBoard = oPr.GameTree.Get_DrawingBoard();
 
     this.private_AppendTableHeading1(oTBody,     "Working with Files");
 
-    this.private_AppendTableCommonString(oTBody, "Open Sgf/Gib/Ngf",                  "Ctrl+O",                                        "Open the Sgf/Gib/Ngf file from disk. (Not in color mode, see below)");
-    this.private_AppendTableCommonString(oTBody, "Open Sgf",                          "Ctrl+Shift+O",                                  "Open the Sgf file from source. (Not in color mode, see below)");
-    this.private_AppendTableCommonString(oTBody, "Save Sgf",                          "Ctrl+S",                                        "Save Sgf file.");
-    this.private_AppendTableCommonString(oTBody, "Save png shot",                     "Ctrl+H",                                        "Save board shot in png format.");
-    this.private_AppendTableCommonString(oTBody, "Save gif shot",                     "Ctrl+Shift+H",                                  "Save board shot in gif format.");
-    this.private_AppendTableCommonString(oTBody, "Save multipage gif file.",          "Ctrl+I",                                        "Save gif file for current variant.");
-    this.private_AppendTableCommonString(oTBody, "Save multipage gif file.",          "Ctrl+Shift+I",                                  "Save gif file for all branches with comment RIGHT (for problem mode).");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 79, ShiftKey : false}, "Open Sgf/Gib/Ngf",                  "Ctrl+O",                                        "Open the Sgf/Gib/Ngf file from disk. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 79, ShiftKey : true }, "Open Sgf",                          "Ctrl+Shift+O",                                  "Open the Sgf file from source. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 83, ShiftKey : false}, "Save Sgf",                          "Ctrl+S",                                        "Save Sgf file.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 72, ShiftKey : false}, "Save png shot",                     "Ctrl+H",                                        "Save board shot in png format.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 72, ShiftKey : true }, "Save gif shot",                     "Ctrl+Shift+H",                                  "Save board shot in gif format.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 73, ShiftKey : false}, "Save multipage gif file.",          "Ctrl+I",                                        "Save gif file for current variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 73, ShiftKey : true }, "Save multipage gif file.",          "Ctrl+Shift+I",                                  "Save gif file for all branches with comment RIGHT (for problem mode).");
 
     this.private_AppendTableHeading1(oTBody,     "Navigation");
 
-    this.private_AppendTableCommonString(oTBody, "Next node",                         "Right arrow",                                   "Jump to next node.");
-    this.private_AppendTableCommonString(oTBody, "Next 5 node",                       "Ctrl+Right arrow",                              "Jump over 5 nodes.");
-    this.private_AppendTableCommonString(oTBody, "End of the variant",                "Ctrl+Shift+Right arrow",                        "Jump to the end of the current variant.");
-    this.private_AppendTableCommonString(oTBody, "Previous node",                     "Left arrow",                                    "Jump to previous node.");
-    this.private_AppendTableCommonString(oTBody, "Previous 5 node",                   "Shift+Left arrow",                              "Jump back over 5 nodes.");
-    this.private_AppendTableCommonString(oTBody, "Start of the file",                 "Ctrl+Shift+Right arrow",                        "Jump to the start of the file.");
-    this.private_AppendTableCommonString(oTBody, "Previous variant",                  "Up arrow",                                      "Jump to previous variant.");
-    this.private_AppendTableCommonString(oTBody, "Next variant",                      "Down arrow",                                    "Jump to next variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 39, ShiftKey : false}, "Next node",                         "Right arrow",                                   "Jump to next node.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 39, ShiftKey : false}, "Next 5 node",                       "Ctrl+Right arrow",                              "Jump over 5 nodes.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 39, ShiftKey : true }, "End of the variant",                "Ctrl+Shift+Right arrow",                        "Jump to the end of the current variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 37, ShiftKey : false}, "Previous node",                     "Left arrow",                                    "Jump to previous node.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 37, ShiftKey : false}, "Previous 5 node",                   "Shift+Left arrow",                              "Jump back over 5 nodes.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 37, ShiftKey : true }, "Start of the file",                 "Ctrl+Shift+Right arrow",                        "Jump to the start of the file.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 38, ShiftKey : false}, "Previous variant",                  "Up arrow",                                      "Jump to previous variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 40, ShiftKey : false}, "Next variant",                      "Down arrow",                                    "Jump to next variant.");
 
-    this.private_AppendTableHeading2(oTBody,    "Play mode", "F1");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 112, ShiftKey : false},    "Play mode", "F1");
 
-    this.private_AppendTableCommonString(oTBody, "Add move",                          "Left mouse click",                              "Set sequentially stones.");
-    this.private_AppendTableCommonString(oTBody, "Add alternative move",              "Right mouse click",                             "Create new brunch and add alternative move.");
-    this.private_AppendTableCommonString(oTBody, "Go to the point",                   "Shift+Left mouse click onto a board position",  "Teleports you to the moment of the game forth or back, when the stone on this position has been played.");
-    this.private_AppendTableCommonString(oTBody, "Change move order",                 "Ctrl+Shift+Left mouse click",                   "When sequentially stones are entered: changes the colour of the next stone to be set. What stone will appear on the board is shown by the tools field (useful e.g. after a problem has been set up).");
-    this.private_AppendTableCommonString(oTBody, "Add comment with coordinates",      "Ctrl+Left mouse click",                         "Add comment with coordinates.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add move",                          "Left mouse click",                              "Set sequentially stones.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add alternative move",              "Right mouse click",                             "Create new brunch and add alternative move.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Go to the point",                   "Shift+Left mouse click onto a board position",  "Teleports you to the moment of the game forth or back, when the stone on this position has been played.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Change move order",                 "Ctrl+Shift+Left mouse click",                   "When sequentially stones are entered: changes the colour of the next stone to be set. What stone will appear on the board is shown by the tools field (useful e.g. after a problem has been set up).");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add comment with coordinates",      "Ctrl+Left mouse click",                         "Add comment with coordinates.");
 
-    this.private_AppendTableHeading2(oTBody,    "Count scores", "F2");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 113, ShiftKey : false},    "Count scores", "F2");
 
-    this.private_AppendTableCommonString(oTBody, "Mark dead groups",                  "Left mouse click",                              "Mark dead groups.");
-    this.private_AppendTableCommonString(oTBody, "End count scores",                  "Ctrl+Left mouse click onto board",              "Return to play mode.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Mark dead groups",                  "Left mouse click",                              "Mark dead groups.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "End count scores",                  "Ctrl+Left mouse click onto board",              "Return to play mode.");
 
-    this.private_AppendTableHeading2(oTBody,     "Set up a board position", "F3");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 114, ShiftKey : false},    "Set up a board position", "F3");
 
-    this.private_AppendTableCommonString(oTBody, "Add black stone or remove stone",   "Left mouse click",                              "Add black stone or remove stone.");
-    this.private_AppendTableCommonString(oTBody, "Add white stone or remove stone",   "Shift+Left mouse click",                        "Add white stone or remove stone.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add black stone or remove stone",   "Left mouse click",                              "Add black stone or remove stone.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add white stone or remove stone",   "Shift+Left mouse click",                        "Add white stone or remove stone.");
 
-    this.private_AppendTableHeading3(oTBody,     "Triangles",                         "F4",                                           "Add triangles.");
-    this.private_AppendTableHeading3(oTBody,     "Squares",                           "F5",                                           "Add squares.");
-    this.private_AppendTableHeading3(oTBody,     "Circles",                           "F6",                                           "Add circles.");
-    this.private_AppendTableHeading3(oTBody,     "X mark",                            "F7",                                           "Add \"X\" mark.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 115, ShiftKey : false},    "Triangles",                         "F4",                                           "Add triangles.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 116, ShiftKey : false},    "Squares",                           "F5",                                           "Add squares.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 117, ShiftKey : false},    "Circles",                           "F6",                                           "Add circles.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 118, ShiftKey : false},    "X mark",                            "F7",                                           "Add \"X\" mark.");
 
-    this.private_AppendTableHeading2(oTBody,     "Text label", "F8");
-    this.private_AppendTableCommonString(oTBody, "Letter",                            "Left mouse click",                             "Add letter.");
-    this.private_AppendTableCommonString(oTBody, "Text",                              "Shift+Left mouse click",                       "Add text entered by the user.");
-    this.private_AppendTableHeading2(oTBody,     "Numeric label", "F9");
-    this.private_AppendTableCommonString(oTBody, "Number",                            "Left mouse click",                             "Add the smallest positive number.");
-    this.private_AppendTableCommonString(oTBody, "Move number",                       "Shift+Left mouse click",                       "Add number of the first move which was played here.");
-    this.private_AppendTableHeading2(oTBody,     "Color mode", "F10");
-    this.private_AppendTableCommonString(oTBody, "Blue region",                       "Left mouse click",                             "Add blue region.");
-    this.private_AppendTableCommonString(oTBody, "Green region",                      "Shift+Left mouse click",                       "Add green region.");
-    this.private_AppendTableCommonString(oTBody, "Red region",                        "Ctrl+Left mouse click",                        "Add red region.");
-    this.private_AppendTableCommonString(oTBody, "Gray region",                       "Ctrl+Shift+Left mouse click",                  "Add gray region.");
-    this.private_AppendTableCommonString(oTBody, "Clear region",                      "Right mouse click",                            "Clear region.");
-    this.private_AppendTableCommonString(oTBody, "Continue",                          "Ctrl+C",                                       "Copy all colors from previous node.");
-    this.private_AppendTableCommonString(oTBody, "Count colors",                      "Ctrl+O",                                       "Count all colors with depth.");
-    this.private_AppendTableCommonString(oTBody, "Clear colors",                      "Ctrl+R",                                       "Clear all colors in the current node.");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 119, ShiftKey : false},    "Text label", "F8");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Letter",                            "Left mouse click",                             "Add letter.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Text",                              "Shift+Left mouse click",                       "Add text entered by the user.");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 120, ShiftKey : false},    "Numeric label", "F9");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Number",                            "Left mouse click",                             "Add the smallest positive number.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Move number",                       "Shift+Left mouse click",                       "Add number of the first move which was played here.");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 121, ShiftKey : false},    "Color mode", "F10");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Blue region",                       "Left mouse click",                             "Add blue region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Green region",                      "Shift+Left mouse click",                       "Add green region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Red region",                        "Ctrl+Left mouse click",                        "Add red region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Gray region",                       "Ctrl+Shift+Left mouse click",                  "Add gray region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Clear region",                      "Right mouse click",                            "Clear region.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true, KeyCode : 67, ShiftKey : false},  "Continue",                          "Ctrl+C",                                       "Copy all colors from previous node.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true, KeyCode : 79, ShiftKey : false},  "Count colors",                      "Ctrl+O",                                       "Count all colors with depth.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true, KeyCode : 82, ShiftKey : false},  "Clear colors",                      "Ctrl+R",                                       "Clear all colors in the current node.");
     this.private_AppendTableHeading1(oTBody, "Miscellaneous");
-    this.private_AppendTableCommonString(oTBody, "Remove node",                       "Backspace/delete",                             "Deletes the current node and all of the following brunches.");
-    this.private_AppendTableCommonString(oTBody, "Score estimator",                   "Ctrl+E",                                       "Show window with score estimator (you can mark dead groups by click on them).");
-    this.private_AppendTableCommonString(oTBody, "View mode change of the next move", "Ctrl+V",                                       "There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.");
-    this.private_AppendTableCommonString(oTBody, "Show/Hide coordinates",             "Ctrl+R",                                       "Show/Hide coordinates. (Not in color mode, see above)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode :  8, ShiftKey : false}, "Remove node",                       "Backspace/Delete",                             "Deletes the current node and all of the following brunches.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 69, ShiftKey : false}, "Score estimator",                   "Ctrl+E",                                       "Show window with score estimator (you can mark dead groups by click on them).");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 86, ShiftKey : false}, "View mode change of the next move", "Ctrl+V",                                       "There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 82, ShiftKey : false}, "Show/Hide coordinates",             "Ctrl+R",                                       "Show/Hide coordinates. (Not in color mode, see above)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 77, ShiftKey : true }, "Make the current variant mainly",   "Ctrl+Shift+M",                                 "Make the current variant mainly by uplifting it to the root of the game tree.");
 };
 CDrawingAboutWindow.prototype.private_AppendTR = function(oTBody)
 {
@@ -1484,6 +1490,7 @@ CDrawingAboutWindow.prototype.private_AppendTR = function(oTBody)
     oTr.style.padding        = "8px";
     oTr.style.fontSize       = "12px";
     oTr.style.textAlign      = "left";
+    oTr.style.cursor         = "default";
 
     return oTr;
 };
@@ -1500,8 +1507,23 @@ CDrawingAboutWindow.prototype.private_AppendTD = function(oTR, sText)
     oTd.style.padding        = "8px";
     oTd.style.fontSize       = "12px";
     oTd.style.textAlign      = "left";
+    oTd.style.cursor         = "default";
 
     return oTd;
+};
+CDrawingAboutWindow.prototype.private_SetEventListener = function(oElement, oEventPr)
+{
+    var oDrawingBoard = this.m_oDrawingBoard;
+    if (oDrawingBoard && oEventPr.KeyCode)
+    {
+        oElement.title = "Click to do it";
+        oElement.style.cursor = "pointer";
+        oElement.style.textDecoration = "underline";
+        oElement.addEventListener("click", function()
+        {
+            oDrawingBoard.private_HandleKeyDown(oEventPr);
+        }, false);
+    }
 };
 CDrawingAboutWindow.prototype.private_AppendTableHeading1 = function(oTBody, sText)
 {
@@ -1513,25 +1535,30 @@ CDrawingAboutWindow.prototype.private_AppendTableHeading1 = function(oTBody, sTe
     oTd.style.fontWeight = "bold";
     oTd.style.paddingTop = "20px";
 };
-CDrawingAboutWindow.prototype.private_AppendTableHeading2 = function(oTBody, sText1, sText2)
+CDrawingAboutWindow.prototype.private_AppendTableHeading2 = function(oTBody, oEventPr, sText1, sText2)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    var oTd1 = this.private_AppendTD(oTr, sText1);
+    oTd1.style.fontWeight = "bold";
+    var oTd2 = this.private_AppendTD(oTr, sText2);
+    this.private_SetEventListener(oTd2, oEventPr);
+    oTd2.colSpan = "2";
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading3 = function(oTBody, oEventPr, sText1, sText2, sText3)
 {
     var oTr = this.private_AppendTR(oTBody);
     this.private_AppendTD(oTr, sText1).style.fontWeight = "bold";
     var oTd = this.private_AppendTD(oTr, sText2);
-    oTd.colSpan = "2";
-};
-CDrawingAboutWindow.prototype.private_AppendTableHeading3 = function(oTBody, sText1, sText2, sText3)
-{
-    var oTr = this.private_AppendTR(oTBody);
-    this.private_AppendTD(oTr, sText1).style.fontWeight = "bold";
-    this.private_AppendTD(oTr, sText2);
+    this.private_SetEventListener(oTd, oEventPr);
     this.private_AppendTD(oTr, sText3);
 };
-CDrawingAboutWindow.prototype.private_AppendTableCommonString = function(oTBody, sText1, sText2, sText3)
+CDrawingAboutWindow.prototype.private_AppendTableCommonString = function(oTBody, oEventPr, sText1, sText2, sText3)
 {
     var oTr = this.private_AppendTR(oTBody);
     this.private_AppendTD(oTr, sText1).style.width = "35%";
-    this.private_AppendTD(oTr, sText2).style.width = "15%";
+    var oTd = this.private_AppendTD(oTr, sText2);
+    oTd.style.width = "15%";
+    this.private_SetEventListener(oTd, oEventPr);
     this.private_AppendTD(oTr, sText3).style.width = "50%";
 };
 

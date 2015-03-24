@@ -2074,3 +2074,14 @@ CGameTree.prototype.GoTo_MoveReference = function(sReference)
     else
         this.GoTo_Node(oFirstNode, true);
 };
+CGameTree.prototype.Make_CurrentVariantMainly = function()
+{
+    // Делаем текущий вариант основным
+    this.m_oFirstNode.Make_CurrentVariantMainly();
+
+    if (this.m_oDrawingNavigator)
+    {
+        this.m_oDrawingNavigator.Create_FromGameTree();
+        this.m_oDrawingNavigator.Update();
+    }
+};

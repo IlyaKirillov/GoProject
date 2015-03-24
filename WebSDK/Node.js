@@ -460,3 +460,23 @@ CNode.prototype.Get_ColorTable = function(oTable)
         this.m_aNext[nNextNode].Get_ColorTable(oTable);
     }
 };
+CNode.prototype.Make_CurrentVariantMainly = function()
+{
+    var oCurNode  = this;
+    var nCurNext  = this.Get_NextCur();
+    var oNextNode = this.Get_Next(nCurNext);
+
+    while (null !== oNextNode && undefined !== oNextNode)
+    {
+        if (0 !== nCurNext)
+        {
+            oCurNode.m_aNext.splice(nCurNext, 1);
+            oCurNode.m_aNext.splice(0, 0, oNextNode);
+            oCurNode.Set_NextCur(0);
+        }
+
+        oCurNode  = oNextNode;
+        nCurNext  = oCurNode.Get_NextCur();
+        oNextNode = oCurNode.Get_Next(nCurNext);
+    }
+};

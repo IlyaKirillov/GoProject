@@ -2822,6 +2822,10 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
         else
             this.m_oGameTree.Download_GifForCurVariant();
     }
+    else if (77 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey)
+    {
+        this.m_oGameTree.Make_CurrentVariantMainly();
+    }
     else if (79 === KeyCode && true === Event.CtrlKey) // Ctrl + O
     {
         if (EBoardMode.AddMarkColor === this.m_eMode)
@@ -2905,7 +2909,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
         }
     }
-    else if (86 === KeyCode)
+    else if (86 === KeyCode && true === Event.CtrlKey) // Ctrl + V
     {
         var eType = this.m_oGameTree.Get_ShowVariants();
 
