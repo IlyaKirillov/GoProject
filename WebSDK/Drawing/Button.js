@@ -928,7 +928,7 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         case EDrawingButtonType.WindowClose    : this.m_oGameTree.Close(); break;
         case EDrawingButtonType.GameInfo       :
         {
-            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.GameInfo, {GameTree : this.m_oGameTree});
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.GameInfo, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
             break;
         }
         case EDrawingButtonType.WindowOK:
@@ -947,7 +947,7 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
         }
         case EDrawingButtonType.Settings:
         {
-            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.Settings, {GameTree : this.m_oGameTree});
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.Settings, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
             break;
         }
         case EDrawingButtonType.Pass:

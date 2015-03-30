@@ -34,6 +34,8 @@ function CDrawingWindow()
     this.m_oInnerBorderColor = new CColor(185, 185, 185, 255);
     this.m_oBackColor        = new CColor(217, 217, 217, 255);
 
+    this.m_oDrawing = null;
+
     this.m_nW = -1;
     this.m_nH = -1;
 
@@ -464,7 +466,8 @@ CDrawingWindow.prototype.Update_Size = function(bForce)
 CDrawingWindow.prototype.Close = function()
 {
     var oMainDiv = this.HtmlElement.Control.HtmlElement;
-    oMainDiv.parentNode.removeChild(oMainDiv);
+
+    oMainDiv.style.display = "none";
 
     if (this.m_oGameTree)
         this.m_oGameTree.Focus();
@@ -485,6 +488,31 @@ CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, s
     oElement.setAttribute("oncontextmenu", "return false;");
     oParentElement.appendChild(oElement);
     return oElement;
+};
+CDrawingWindow.prototype.protected_UpdateSizeAndPosition = function(oDrawing)
+{
+    if (!oDrawing)
+        return;
+
+    this.m_oDrawing = oDrawing;
+    var oWindowDiv = this.HtmlElement.Control.HtmlElement;
+
+    var oSize = this.Get_DefaultWindowSize();
+    if (null !== oSize && undefined !== oSize)
+    {
+        oWindowDiv.style.width  = oSize.W + "px";
+        oWindowDiv.style.height = oSize.H + "px";
+    }
+
+    var nWindowW = parseInt(oWindowDiv.style.width);
+    var nWindowH = parseInt(oWindowDiv.style.height);
+
+    oWindowDiv.style.left = ((this.m_oDrawing.Get_Width()  - nWindowW) / 2) + "px";
+    oWindowDiv.style.top  = ((this.m_oDrawing.Get_Height() - nWindowH) / 2) + "px";
+};
+CDrawingWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return null;
 };
 
 function CDrawingConfirmWindow()
@@ -596,6 +624,9 @@ function CDrawingInfoWindow()
 
     this.HtmlElement2 = {};
     this.m_oGameTree = null;
+    this.m_nBottomOffset = 10;
+    this.m_nRowHeight    = 20;
+    this.m_nLineSpacing  = 5;
 }
 
 CommonExtend(CDrawingInfoWindow, CDrawingConfirmWindow);
@@ -604,12 +635,13 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
 
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
     var oGameTree = oPr.GameTree;
     this.m_oGameTree = oGameTree;
 
     if (true !== oGameTree.Can_EditGameInfo())
         this.HtmlElement.OKButton.Set_Enabled(false);
-
 
     this.Set_Caption("Game info");
 
@@ -620,10 +652,10 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     oMainDiv.style.overflowX = "hidden";
     oMainDiv.style.overflowY = "scroll";
 
-    var RowHeight   = 20;
-    var TopOffset   = 10;
-    var LineSpacing = 5;
-    var BottomOffset = 10;
+    var RowHeight    = this.m_nRowHeight;
+    var TopOffset    = 10;
+    var LineSpacing  = this.m_nLineSpacing;
+    var BottomOffset = this.m_nBottomOffset;
 
     var bCanEdit = oGameTree.Can_EditGameInfo();
     this.HtmlElement2.GameName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Game name", oGameTree.Get_GameName(), TopOffset, RowHeight, bCanEdit);
@@ -650,8 +682,6 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 
     this.HtmlElement2.Copyright = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Copyright", oGameTree.Get_Copyright(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.GameInfo = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Game info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
     this.HtmlElement2.Date = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Date", oGameTree.Get_DateTime(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
     this.HtmlElement2.Event = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Event", oGameTree.Get_GameEvent(), TopOffset, RowHeight, bCanEdit);
@@ -669,6 +699,10 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     TopOffset += RowHeight + LineSpacing;
     this.HtmlElement2.Transcriber = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Transcriber", oGameTree.Get_GameTranscriber(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
+
+    this.HtmlElement2.Transcriber = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game Info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += 3 * RowHeight;
+
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
     var BottomControl = CreateControlContainer(sDivId + "Bottom");
     BottomControl.Bounds.SetParams(0, TopOffset, 1000, 1000, true, true, false, false, 0, BottomOffset);
@@ -684,6 +718,15 @@ CDrawingInfoWindow.prototype.Update_Size = function(bForce)
 
     if (this.HtmlElement.CancelButton)
         this.HtmlElement.CancelButton.Update_Size();
+
+    var nOverallHeight  = parseInt(this.HtmlElement.ConfirmInnerDiv.style.height) | 0;
+    var nGameInfoY      = parseInt(this.HtmlElement2.GameInfo.style.top) | 0;
+    var nGameInfoYLimit = nOverallHeight - this.m_nBottomOffset;
+
+    if (nGameInfoYLimit - nGameInfoY < 3 * this.m_nRowHeight)
+        this.HtmlElement2.GameInfo.style.height = 3 * this.m_nRowHeight + "px";
+    else
+        this.HtmlElement2.GameInfo.style.height = (nGameInfoYLimit - nGameInfoY) + "px";
 };
 CDrawingInfoWindow.prototype.Handle_Cancel = function()
 {
@@ -744,6 +787,7 @@ CDrawingInfoWindow.prototype.private_CreateInputElement = function(oParentElemen
     oElement.style.fontFamily  = "Tahoma, Sans serif";
     oElement.style.fontSize    = "10pt";
     oElement.style.outline     = "none";
+    oElement.style.border      = "1px solid rgb(169,169,169)";
 
     if (false === bCanEdit)
         oElement.disabled = "disabled";
@@ -777,6 +821,52 @@ CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMai
 
     return oValueElement;
 };
+CDrawingInfoWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight, bCanEdit)
+{
+    var LeftWidth  = 100;
+    var LeftOffset = 10;
+    var RightOffset = 10;
+
+    RightOffset += 20; // Scroll
+
+    var sNameId      = sDivId + sName;
+
+
+    var oNameElement = this.private_CreateDivElement(oMainDiv, sNameId, RowHeight);
+    var oNameControl = CreateControlContainer(sNameId);
+    oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
+    oNameControl.Anchor = (g_anchor_left | g_anchor_top);
+    oMainControl.AddControl(oNameControl);
+    Common.Set_InnerTextToElement(oNameElement, sName);
+
+    var sValueId      = sNameId + "Value";
+
+    var oValueElement = document.createElement("textarea");
+    oValueElement.setAttribute("id", sValueId);
+    oValueElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oValueElement.setAttribute("oncontextmenu", "return false;");
+    oValueElement.style.fontFamily  = "Tahoma, Sans serif";
+    oValueElement.style.fontSize    = "10pt";
+    oValueElement.style.resize      = "none";
+    oValueElement.style.outline     = "none";
+    oValueElement.style.border      = "1px solid rgb(169,169,169)";
+    oValueElement.style.height      = 3 * RowHeight + "px";
+
+    this.HtmlElement2.GameInfo = oValueElement;
+
+    if (false === bCanEdit)
+        oValueElement.disabled = "disabled";
+
+    oMainDiv.appendChild(oValueElement);
+
+    var oValueControl = CreateControlContainer(sValueId);
+    oValueControl.Bounds.SetParams(LeftOffset + LeftWidth, TopOffset + 1, RightOffset, 1000, true, true, true, false, -1, 3 * RowHeight);
+    oValueControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
+    oMainControl.AddControl(oValueControl);
+    oValueElement.value = sValue;
+
+    return oValueElement;
+};
 
 function CDrawingErrorWindow()
 {
@@ -788,6 +878,8 @@ CommonExtend(CDrawingErrorWindow, CDrawingWindow);
 CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId, false);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     var sText = oPr.ErrorText;
 
@@ -816,7 +908,9 @@ function CDrawingSettingsWindow()
             Dark        : null
         },
 
-        Sound : null
+        Sound : null,
+
+        LoadUnfinishedSgf : null
     };
 }
 
@@ -825,75 +919,67 @@ CommonExtend(CDrawingSettingsWindow, CDrawingConfirmWindow);
 CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingSettingsWindow.superclass.Init.call(this, _sDivId, false);
-    var oWindowDiv = document.getElementById(_sDivId);
-    oWindowDiv.style.width  = "170px";
-    oWindowDiv.style.height = "230px";
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     this.m_oGameTree = oPr.GameTree;
 
-    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
-    var oMainControl = this.HtmlElement.ConfirmInnerControl;
-    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id;
-
     this.Set_Caption("Settings");
+
+    var oTabs = new CDrawingVerticalTabs();
+    oTabs.Init(this.HtmlElement.ConfirmInnerDiv.id, ["Color Scheme", "Sound", "Loading Settings"], 0, 150);
+
+    this.private_CreateColorSchemePage(oTabs.Get_TabContent(0), oPr);
+    this.private_CreateSoundPage(oTabs.Get_TabContent(1), oPr);
+    this.private_CreateLoadingSettingsPage(oTabs.Get_TabContent(2), oPr);
+};
+CDrawingSettingsWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 400, H : 180};
+};
+CDrawingSettingsWindow.prototype.private_CreatePage = function(oDiv)
+{
+    var oDivMainPart = document.createElement("div");
+    oDiv.appendChild(oDivMainPart);
+    oDivMainPart.style.margin  = "0";
+    oDivMainPart.style.padding = "10px 20px";
+
+    oDivMainPart.style.fontFamily = "Tahoma, Arial, Verdana";
+    oDivMainPart.style.fontSize   = "10px";
+    oDivMainPart.style.color      = "#666";
+    oDivMainPart.style.background = "#fff";
+
+    return oDivMainPart;
+};
+CDrawingSettingsWindow.prototype.private_CreateColorSchemePage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    this.m_oGameTree = oPr.GameTree;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "CS";
 
     var sThemeId = "ThemeId";
 
-    var nTop = 17;
-    var nGBT = 110;
-
-    var sThemeGroupBox = sDivId + "TGB";
-    var oGroupBoxElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBox);
-    var oGroupBoxControl = CreateControlContainer(sThemeGroupBox);
-    oGroupBoxControl.Bounds.SetParams(6, nTop, 8, 1000, true, true, true, false, -1, nGBT);
-    oGroupBoxControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
-    oMainControl.AddControl(oGroupBoxControl);
-    oGroupBoxElement.style.border = "1px solid rgb(221,221,221)";
-
-    nTop += nGBT;
-
-    var sThemeGroupBoxName = sThemeGroupBox + "N";
-    var oGroupBoxNameElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBoxName);
-    var oGroupBoxNameControl = CreateControlContainer(sThemeGroupBoxName);
-    oGroupBoxNameControl.Bounds.SetParams(20, 10, 1000, 1000, true, true, false, false, 100, 15);
-    oGroupBoxNameControl.Anchor = (g_anchor_top | g_anchor_left);
-    oMainControl.AddControl(oGroupBoxNameControl);
-    oGroupBoxNameElement.style.backgroundColor = "rgb(255,255,255)";
-    oGroupBoxNameElement.style.fontFamily          = "Tahoma, Sans serif";
-    oGroupBoxNameElement.style.fontSize            = "10pt";
-    oGroupBoxNameElement.style.textAlign           = "center";
-    oGroupBoxNameElement.style.height              = "15px";
-    oGroupBoxNameElement.style.lineHeight          = "15px";
-    oGroupBoxNameElement.style.overflow            = "hidden";
-    oGroupBoxNameElement.style.textOverflow        = "ellipsis";
-    oGroupBoxNameElement.style['-o-text-overflow'] = "ellipsis";
-    oGroupBoxNameElement.style.cursor              = "default";
-    Common.Set_InnerTextToElement(oGroupBoxNameElement, "Color scheme");
-
-    var oTopPaddingElement = document.createElement("div");
-    oTopPaddingElement.style.width  = "100%";
-    oTopPaddingElement.style.height = "10px";
-    oGroupBoxElement.appendChild(oTopPaddingElement)
-
-    this.HtmlElement2.Theme.TrueColor   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "TC", sThemeId, "TrueColor");
-    this.HtmlElement2.Theme.SimpleColor = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "SC", sThemeId, "SimpleColor");
-    this.HtmlElement2.Theme.BookStyle   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "BS", sThemeId, "BookStyle");
-    this.HtmlElement2.Theme.Dark        = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "D",  sThemeId, "Dark");
-
-    nTop += 5; // отступ
-
-    var nGBS = 15;
-    var sGroupBoxSound = sDivId + "S";
-    var oGroupBoxSoundElement = this.protected_CreateDivElement(oMainDiv, sGroupBoxSound);
-    var oGroupBoxSoundControl = CreateControlContainer(sGroupBoxSound);
-    oGroupBoxSoundControl.Bounds.SetParams(6, nTop, 8, 8, true, true, true, false, -1, 15);
-    oGroupBoxSoundControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
-    oMainControl.AddControl(oGroupBoxSoundControl);
-    this.HtmlElement2.Sound = this.private_CreateCheckBox(oGroupBoxSoundElement, sGroupBoxSound + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
-
-    nTop += nGBS;
+    this.HtmlElement2.Theme.TrueColor   = this.private_CreateRadioButton(oDivMainPart, sDivId + "TC", sThemeId, "TrueColor");
+    this.HtmlElement2.Theme.SimpleColor = this.private_CreateRadioButton(oDivMainPart, sDivId + "SC", sThemeId, "SimpleColor");
+    this.HtmlElement2.Theme.BookStyle   = this.private_CreateRadioButton(oDivMainPart, sDivId + "BS", sThemeId, "BookStyle");
+    this.HtmlElement2.Theme.Dark        = this.private_CreateRadioButton(oDivMainPart, sDivId + "D",  sThemeId, "Dark");
 
     this.private_CheckColorTheme();
+};
+CDrawingSettingsWindow.prototype.private_CreateSoundPage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    this.m_oGameTree = oPr.GameTree;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "S";
+
+    this.HtmlElement2.Sound = this.private_CreateCheckBox(oDivMainPart, sDivId + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
+};
+CDrawingSettingsWindow.prototype.private_CreateLoadingSettingsPage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    this.m_oGameTree = oPr.GameTree;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "LS";
+
+    this.HtmlElement2.LoadUnfinishedSgf = this.private_CreateCheckBox(oDivMainPart, sDivId + "U", this.m_oGameTree.Is_LoadUnfinishedFilesOnLastNode(), "Load unfinished files on the last node");
 };
 CDrawingSettingsWindow.prototype.Handle_OK = function()
 {
@@ -913,6 +999,8 @@ CDrawingSettingsWindow.prototype.Handle_OK = function()
         this.m_oGameTree.TurnOn_Sound();
     else
         this.m_oGameTree.TurnOff_Sound();
+
+    this.m_oGameTree.Set_LoadUnfinishedFilesOnLastNode(this.HtmlElement2.LoadUnfinishedSgf.checked ? true : false);
 
     var oBoard     = this.m_oGameTree.Get_DrawingBoard();
     var oNavigator = this.m_oGameTree.Get_DrawingNavigator();
@@ -945,7 +1033,7 @@ CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentEle
     oSpan.style.fontFamily  = "Tahoma, Sans serif";
     Common.Set_InnerTextToElement(oSpan, sRadioValue);
     oSpan.style.fontFamily          = "Tahoma, Sans serif";
-    oSpan.style.fontSize            = "13pt";
+    oSpan.style.fontSize            = "12pt";
     oSpan.style.height              = "15px";
     oSpan.style.lineHeight          = "15px";
     oSpan.style.cursor = "default";
@@ -980,7 +1068,7 @@ CDrawingSettingsWindow.prototype.private_CreateCheckBox = function(oParentElemen
     oSpan.style.fontFamily  = "Tahoma, Sans serif";
     Common.Set_InnerTextToElement(oSpan, sCheckboxName);
     oSpan.style.fontFamily          = "Tahoma, Sans serif";
-    oSpan.style.fontSize            = "13pt";
+    oSpan.style.fontSize            = "12pt";
     oSpan.style.height              = "15px";
     oSpan.style.lineHeight          = "15px";
     oSpan.style.cursor = "default";
@@ -1033,6 +1121,8 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingScoreEstimateWindow.superclass.Init.call(this, _sDivId, true);
 
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
     this.m_oGameTree = oPr.GameTree;
 
     this.Set_Caption("Score estimate");
@@ -1080,6 +1170,8 @@ CommonExtend(CDrawingCountColorsWindow, CDrawingWindow);
 CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     this.Set_Caption("Colors counter");
 
@@ -1246,20 +1338,9 @@ CommonExtend(CDrawingGifWriterWindow, CDrawingWindow);
 CDrawingGifWriterWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, false);
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     this.Set_Caption("Creating Gif file...");
-
-    var oWindowDiv = document.getElementById(_sDivId);
-    oWindowDiv.style.width  = "240px";
-    oWindowDiv.style.height = "100px";
-
-    if (oPr.Drawing)
-    {
-        this.m_oDrawing = oPr.Drawing;
-
-        oWindowDiv.style.left = (this.m_oDrawing.Get_Width() / 2  - 120) + "px";
-        oWindowDiv.style.top  = (this.m_oDrawing.Get_Height() / 2 -  50) + "px";
-    }
 
     if (oPr.GameTree)
         this.m_oGameTree = oPr.GameTree;
@@ -1301,6 +1382,10 @@ CDrawingGifWriterWindow.prototype.Init = function(_sDivId, oPr)
     oDigitProgressElement.style.textAlign   = "center";
 
     this.m_oProgressValueElement = oDigitProgressElement;
+};
+CDrawingGifWriterWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 240, H : 100};
 };
 CDrawingGifWriterWindow.prototype.On_Progress = function(Progress)
 {
@@ -1356,31 +1441,81 @@ CommonExtend(CDrawingAboutWindow, CDrawingWindow);
 CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, true);
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
-    var oWindowDiv = document.getElementById(_sDivId);
+    this.Set_Caption("About");
 
-    if (oPr.Drawing)
+    var oTabs = new CDrawingVerticalTabs();
+    oTabs.Init(this.HtmlElement.InnerDiv.id, ["About Web Go Board", "Keyboard Shortcuts"], 1);
+
+    this.private_InitAboutPage(oTabs.Get_TabContent(0));
+    this.private_InitKeyBoardShortcutsPage(oTabs.Get_TabContent(1), oPr);
+};
+CDrawingAboutWindow.prototype.Get_DefaultWindowSize = function()
+{
+    if (this.m_oDrawing)
     {
-        this.m_oDrawing = oPr.Drawing;
+        var nDrawingW = this.m_oDrawing.Get_Width();
+        var nDrawingH = this.m_oDrawing.Get_Height();
 
-        var DrawingW = this.m_oDrawing.Get_Width();
-        var DrawingH = this.m_oDrawing.Get_Height();
+        var nWindowW = Math.max(100, Math.min(700, nDrawingW * 0.9));
+        var nWindowH = Math.max(100, Math.min(600, nDrawingH * 0.9));
 
-        var WindowW = Math.max(100, Math.min(700, DrawingW * 0.9));
-        var WindowH = Math.max(100, Math.min(600, DrawingH * 0.9));
-
-        oWindowDiv.style.width  = WindowW + "px";
-        oWindowDiv.style.height = WindowH + "px";
-        oWindowDiv.style.left = Math.max(0, (DrawingW / 2 - WindowW / 2)) + "px";
-        oWindowDiv.style.top  = Math.max(0, (DrawingH / 2 - WindowH / 2)) + "px";
+        return {W : nWindowW, H : nWindowH};
     }
 
-    this.Set_Caption("Web Html Go Board Help");
+    return null;
+};
+CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
+{
+    var oDivMainPart = document.createElement("div");
+    oDiv.appendChild(oDivMainPart);
+    oDivMainPart.style.margin  = "0";
+    oDivMainPart.style.padding = "10px 20px";
 
-    var oMainDiv     = this.HtmlElement.InnerDiv;
-    var oMainControl = this.HtmlElement.InnerControl;
-    var sDivId       = this.HtmlElement.InnerDiv.id;
+    oDivMainPart.style.fontFamily = "Tahoma, Arial, Verdana";
+    oDivMainPart.style.fontSize   = "12px";
+    oDivMainPart.style.color      = "#666";
+    oDivMainPart.style.background = "#fff";
 
+    var oLogo = document.createElement("img");
+    oLogo.src            = g_sLogo100;
+    oLogo.width          = 100;
+    oLogo.height         = 100;
+    oLogo.style['float'] = "left";
+    oDivMainPart.appendChild(oLogo);
+
+    var oMargin = document.createElement("div");
+    oMargin.style.width    = "10px";
+    oMargin.style.height   = "100px";
+    oMargin.style['float'] = "left";
+    oDivMainPart.appendChild(oMargin);
+
+    var oHeading = document.createElement("h1");
+    oDivMainPart.appendChild(oHeading);
+    Common.Set_InnerTextToElement(oHeading, "Web Go/Baduk Board");
+
+    var oVersion = document.createElement("div");
+    oDivMainPart.appendChild(oVersion);
+    Common.Set_InnerTextToElement(oVersion, "Version " + GoBoardApi.Get_Version());
+
+    var oString = document.createElement("div");
+    oString.style.paddingTop = "40px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "Visit our Github project for feedback and issue reports:");
+    oString = document.createElement("a");
+    oString.href = "https://github.com/IlyaKirillov/GoProject";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "https://github.com/IlyaKirillov/GoProject");
+
+    oString = document.createElement("div");
+    oString.style.paddingTop = "30px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2015. All rights reserved.");
+};
+CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv, oPr)
+{
+    var oMainDiv = oDiv;
     oMainDiv.style.overflowX = "hidden";
     oMainDiv.style.overflowY = "scroll";
 
@@ -1432,6 +1567,7 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 37, ShiftKey : true }, "Start of the file",                 "Ctrl+Shift+Right arrow",                        "Jump to the start of the file.");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 38, ShiftKey : false}, "Previous variant",                  "Up arrow",                                      "Jump to previous variant.");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 40, ShiftKey : false}, "Next variant",                      "Down arrow",                                    "Jump to next variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey :  true, KeyCode : 36, ShiftKey :  true}, "Start node",                        "Ctrl+Shift+Home",                               "Jump to the start node of the file. This node can be different from the first node. See \"load unfinished files\" checkbox in settings.");
 
     this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 112, ShiftKey : false},    "Play mode", "F1");
 
@@ -1589,13 +1725,36 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
         case EWindowType.GifWriter     : sApp = "GifWriter"; break;
         case EWindowType.About         : sApp = "About"; break;
     }
-    var sId = sDrawingId + sApp;
+    var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
 
     var oDiv = document.getElementById(sId);
     if (oDiv)
     {
-        oDiv.style.left    = "300px";
-        oDiv.style.top     = "300px";
+        oDiv.style.display = "block";
+
+        var nLeft = parseInt(oDiv.style.left);
+        var nTop  = parseInt(oDiv.style.top);
+
+        if (oPr.Drawing)
+        {
+            var oDrawing = oPr.Drawing;
+            var DrawingW = oDrawing.Get_Width();
+            var DrawingH = oDrawing.Get_Height();
+
+            var nThreshold = 100;
+
+            if (nTop > DrawingH - nThreshold)
+                oDiv.style.top = (DrawingH - nThreshold) + "px";
+
+            if (nLeft > DrawingW - nThreshold)
+                oDiv.style.left = (DrawingW - nThreshold) + "px";
+        }
+
+        if (nLeft < 0)
+            oDiv.style.left = "0px";
+
+        if (nTop < 0)
+            oDiv.style.top = "0px";
     }
     else
     {

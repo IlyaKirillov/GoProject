@@ -94,6 +94,9 @@ function CDrawingNavigator(oDrawing)
         Y : 0
     };
 
+    this.m_nHorScrollTimerId = null;
+    this.m_nVerScrollTimerId = null;
+
     var oThis = this;
 
     this.private_StartDrawingTimer = function()
@@ -175,32 +178,176 @@ function CDrawingNavigator(oDrawing)
             oThis.m_oGameTree.Focus();
     };
 
+    this.private_ClearHorScrollTimer = function()
+    {
+        if (null !== oThis.m_nHorScrollTimerId)
+        {
+            clearTimeout(oThis.m_nHorScrollTimerId);
+            oThis.m_nHorScrollTimerId = null;
+        }
+    };
+
+    this.private_OnMouseDownHorScrollBG = function(e)
+    {
+        oThis.private_ClearHorScrollTimer();
+
+        check_MouseDownEvent(e, true);
+
+        var oPos = Common_FindPosition(oThis.HtmlElement.HorScrollBG);
+        var X = global_mouseEvent.X - oPos.X;
+
+        var LogicXMax = oThis.m_oMap.Get_Width() + 1;
+        var ScrollW   = oThis.HtmlElement.ScrollW;
+        var NavW      = oThis.m_oImageData.W - 4;
+
+        X -= ScrollW / 2;
+        X = Math.max(0, Math.min(NavW - ScrollW, X));
+
+        var nSpeed = 200;
+        var nEndXOffset = (20 + LogicXMax * 24 - NavW) * (X / (NavW - ScrollW));
+
+        function HorScrollTimer(bFirstTime)
+        {
+            var nCurX = -oThis.m_oOffset.X;
+            if (nCurX !== nEndXOffset)
+            {
+                if (nCurX < nEndXOffset)
+                {
+                    nCurX = Math.min(nEndXOffset, nCurX + nSpeed);
+                }
+                else
+                {
+                    nCurX = Math.max(nEndXOffset, nCurX - nSpeed);
+                }
+
+                oThis.m_oOffset.X = -nCurX;
+                oThis.private_DrawMap();
+                oThis.private_UpdateScrollsPos();
+
+                if (nCurX !== nEndXOffset)
+                    oThis.m_nHorScrollTimerId = setTimeout(HorScrollTimer, true === bFirstTime ? 300 : 30);
+                else
+                    oThis.m_nHorScrollTimerId = null;
+            }
+            else
+                oThis.m_nHorScrollTimerId = null;
+        };
+
+        HorScrollTimer(true);
+    };
+
+    this.private_OnMouseUpHorScrollBG = function(e)
+    {
+        oThis.private_ClearHorScrollTimer();
+    };
+
+    this.private_OnMouseOverHorScrollBG = function()
+    {
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
+    };
+
+    this.private_OnMouseOutHorScrollBG = function()
+    {
+        oThis.private_ClearHorScrollTimer();
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+    };
+
+    this.private_ClearVerScrollTimer = function()
+    {
+        if (null !== oThis.m_nVerScrollTimerId)
+        {
+            clearTimeout(oThis.m_nVerScrollTimerId);
+            oThis.m_nVerScrollTimerId = null;
+        }
+    };
+
+    this.private_OnMouseDownVerScrollBG = function(e)
+    {
+        oThis.private_ClearVerScrollTimer();
+
+        check_MouseDownEvent(e, true);
+
+        var oPos = Common_FindPosition(oThis.HtmlElement.VerScrollBG);
+        var Y = global_mouseEvent.Y - oPos.Y;
+
+        var LogicYMax = oThis.m_oMap.Get_Height() + 1;
+        var ScrollH   = oThis.HtmlElement.ScrollH;
+        var NavH      = oThis.m_oImageData.H - 4;
+
+        Y -= ScrollH / 2;
+        Y = Math.max(0, Math.min(NavH - ScrollH, Y));
+
+        var nSpeed = 48;
+        var nEndYOffset = (20 + LogicYMax * 24 - NavH) * (Y / (NavH - ScrollH));
+
+        function VerScrollTimer(bFirstTime)
+        {
+            var nCurY = -oThis.m_oOffset.Y;
+            if (nCurY !== nEndYOffset)
+            {
+                if (nCurY < nEndYOffset)
+                {
+                    nCurY = Math.min(nEndYOffset, nCurY + nSpeed);
+                }
+                else
+                {
+                    nCurY = Math.max(nEndYOffset, nCurY - nSpeed);
+                }
+
+                oThis.m_oOffset.Y = -nCurY;
+                oThis.private_DrawMap();
+                oThis.private_UpdateScrollsPos();
+
+                if (nCurY !== nEndYOffset)
+                    oThis.m_nVerScrollTimerId = setTimeout(VerScrollTimer, true === bFirstTime ? 300 : 30);
+                else
+                    oThis.m_nVerScrollTimerId = null;
+            }
+            else
+                oThis.m_nVerScrollTimerId = null;
+        };
+
+        VerScrollTimer(true);
+    };
+
+    this.private_OnMouseUpVerScrollBG = function(e)
+    {
+        oThis.private_ClearVerScrollTimer();
+    };
+
+    this.private_OnMouseOverVerScrollBG = function()
+    {
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
+    };
+
+    this.private_OnMouseOutVerScrollBG = function()
+    {
+        oThis.private_ClearVerScrollTimer();
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
+    };
+
     this.private_OnMouseOverHorScroll = function()
     {
         oThis.HtmlElement.HorScroll.style.opacity   = 0.7;
         oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
-        oThis.HtmlElement.HorScrollBG.style.display = "block";
     };
 
     this.private_OnMouseOutHorScroll = function()
     {
         oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
         oThis.HtmlElement.HorScrollBG.style.opacity = 0;
-        oThis.HtmlElement.HorScrollBG.style.display = "none";
     };
 
     this.private_OnMouseOverVerScroll = function()
     {
         oThis.HtmlElement.VerScroll.style.opacity   = 0.7;
         oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
-        oThis.HtmlElement.VerScrollBG.style.display = "block";
     };
 
     this.private_OnMouseOutVerScroll = function()
     {
         oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
         oThis.HtmlElement.VerScrollBG.style.opacity = 0;
-        oThis.HtmlElement.VerScrollBG.style.display = "none";
     };
 
     this.private_OnDragStartScroll = function()
@@ -273,9 +420,19 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.VerScroll   = this.private_CreateDivElement(oMainElement, sDivId + "VerScroll");
 
     this.HtmlElement.HorScrollBG.style.background = "rgb(0,0,0)";
-    this.HtmlElement.HorScrollBG.style.display = "none";
+    this.HtmlElement.HorScrollBG.style.opacity = "0";
     this.HtmlElement.VerScrollBG.style.background = "rgb(0,0,0)";
-    this.HtmlElement.VerScrollBG.style.display = "none";
+    this.HtmlElement.VerScrollBG.style.opacity = "0";
+
+    this.HtmlElement.HorScrollBG['onmousedown'] = this.private_OnMouseDownHorScrollBG;
+    this.HtmlElement.HorScrollBG['onmouseup']   = this.private_OnMouseUpHorScrollBG;
+    this.HtmlElement.HorScrollBG['onmouseover'] = this.private_OnMouseOverHorScrollBG;
+    this.HtmlElement.HorScrollBG['onmouseout']  = this.private_OnMouseOutHorScrollBG;
+
+    this.HtmlElement.VerScrollBG['onmousedown'] = this.private_OnMouseDownVerScrollBG;
+    this.HtmlElement.VerScrollBG['onmouseup']   = this.private_OnMouseUpVerScrollBG;
+    this.HtmlElement.VerScrollBG['onmouseover'] = this.private_OnMouseOverVerScrollBG;
+    this.HtmlElement.VerScrollBG['onmouseout']  = this.private_OnMouseOutVerScrollBG;
 
     this.HtmlElement.HorScroll['onmouseover'] = this.private_OnMouseOverHorScroll;
     this.HtmlElement.HorScroll['onmouseout']  = this.private_OnMouseOutHorScroll;
@@ -1490,9 +1647,21 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
                             if ("" === sComment)
                             {
-                                Nodes.font = "bold 10px sans-serif";
+                                var nAdd = 0;
+                                if (sMove.length <= 2)
+                                {
+                                    Nodes.font = "bold 10px sans-serif";
+                                    nTextW = Nodes.measureText(sMove).width;
+                                }
+                                else
+                                {
+                                    Nodes.font = "bold 9px sans-serif";
+                                    nTextW = Nodes.measureText(sMove).width;
+                                    nAdd = -1;
+                                }
+
                                 Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
-                                Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                                Nodes.fillText( sMove, _x + 12 - nTextW / 2 + nAdd, _y + 24 / 2 + 3 );
                             }
                             else
                             {
@@ -1508,9 +1677,21 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
                             if ("" === sComment)
                             {
-                                Nodes.font = "bold 10px sans-serif";
+                                var nAdd = 0;
+                                if (sMove.length <= 2)
+                                {
+                                    Nodes.font = "bold 10px sans-serif";
+                                    nTextW = Nodes.measureText(sMove).width;
+                                }
+                                else
+                                {
+                                    Nodes.font = "bold 9px sans-serif";
+                                    nTextW = Nodes.measureText(sMove).width;
+                                    nAdd = -1;
+                                }
+
                                 Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
-                                Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                                Nodes.fillText( sMove, _x + 12 - nTextW / 2 + nAdd, _y + 24 / 2 + 3 );
                             }
                             else
                             {

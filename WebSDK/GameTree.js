@@ -33,6 +33,7 @@ function CGameTree(Drawing)
 
     this.m_oFirstNode        = new CNode(this);   // Первая нода
     this.m_oCurNode          = this.m_oFirstNode; // Текущая нода
+    this.m_oStartNode        = this.m_oFirstNode; // Стартовая нода для просмотра файла
 
     this.m_nBlackCapt        = 0; // количество пленников черного игрока
     this.m_nWhiteCapt        = 0; // количество пленников белого игрока
@@ -360,7 +361,16 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
     if (sMoveReference)
         this.GoTo_MoveReference(sMoveReference);
     else
-        this.GoTo_Node(this.m_oFirstNode);
+    {
+        var oStartNode;
+        if (this.Is_LoadUnfinishedFilesOnLastNode() && this.Is_Unfinished())
+            oStartNode = this.m_oFirstNode.Get_LastNodeInMainVariant();
+        else
+            oStartNode = this.m_oFirstNode;
+
+        this.m_oStartNode = oStartNode;
+        this.GoTo_Node(oStartNode);
+    }
 
     this.m_nEditingFlags = nEditingFlags;
 
@@ -409,6 +419,10 @@ CGameTree.prototype.Reset = function()
     this.m_eShowVariants = EShowVariants.None;
 
     this.Init_Match();
+};
+CGameTree.prototype.GoTo_StartNode = function()
+{
+    this.GoTo_Node(this.m_oStartNode);
 };
 CGameTree.prototype.Step_BackwardToStart = function()
 {
@@ -1847,6 +1861,21 @@ CGameTree.prototype.TurnOff_Sound = function()
 CGameTree.prototype.Is_SoundOn = function()
 {
     return g_oGlobalSettings.Is_SoundOn();
+};
+CGameTree.prototype.Set_LoadUnfinishedFilesOnLastNode = function(Value)
+{
+    g_oGlobalSettings.Set_LoadUnfinishedFilesOnLastNode(Value);
+};
+CGameTree.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
+{
+    return g_oGlobalSettings.Is_LoadUnfinishedFilesOnLastNode();
+};
+CGameTree.prototype.Is_Unfinished = function()
+{
+    if ("" === this.m_sResult || null === this.m_sResult || undefined === this.m_sResult)
+        return true;
+
+    return false;
 };
 CGameTree.prototype.Add_ColorMark = function(X, Y, Color)
 {

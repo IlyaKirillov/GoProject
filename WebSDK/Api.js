@@ -213,6 +213,14 @@ CGoBoardApi.prototype.Focus = function(oGameTree)
         oGameTree.Focus();
 };
 
+/*
+ Получить текущую версию библиотеки.
+ */
+CGoBoardApi.prototype.Get_Version = function()
+{
+    return this.Version;
+};
+
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
@@ -231,3 +239,4 @@ CGoBoardApi.prototype['Start_AutoPlay']                       = CGoBoardApi.prot
 CGoBoardApi.prototype['Stop_AutoPlay']                        = CGoBoardApi.prototype.Stop_AutoPlay;
 CGoBoardApi.prototype['Focus']                                = CGoBoardApi.prototype.Focus;
 CGoBoardApi.prototype['Get_MatchName']                        = CGoBoardApi.prototype.Get_MatchName;
+CGoBoardApi.prototype['Get_Version']                          = CGoBoardApi.prototype.Get_Version;

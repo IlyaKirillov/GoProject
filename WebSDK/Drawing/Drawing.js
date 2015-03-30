@@ -46,12 +46,17 @@ function CSettings()
         oLinesColor       : new CColor(0, 0, 0, 255),
         bDarkBoard        : false
     };
+
+    this.m_bLoadUnfinishedFilesOnLastNode = false;
+    this.m_bRulers                        = false;
 }
 CSettings.prototype.Load_FromLocalStorage = function()
 {
+    // Sound
     var sSound = Common.Get_LocalStorageItem("Sound");
     this.m_bSound = (sSound === "0" ? false : true);
 
+    // ColorScheme
     var eColorScheme = EColorScheme.TrueColor;
     var sColorScheme = Common.Get_LocalStorageItem("ColorScheme");
     if ("BookStyle" === sColorScheme)
@@ -62,6 +67,14 @@ CSettings.prototype.Load_FromLocalStorage = function()
         eColorScheme = EColorScheme.Dark;
 
     this.Set_ColorScheme(eColorScheme);
+
+    // Loading Settings
+    var sLoadUnfinishedFilesOnLastNode = Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode");
+    this.m_bLoadUnfinishedFilesOnLastNode = (sLoadUnfinishedFilesOnLastNode === "1" ? true : false);
+
+    // Rulers
+    var sRulers = Common.Get_LocalStorageItem("Rulers");
+    this.m_bRulers = (sRulers === "1" ? true : false);
 };
 CSettings.prototype.Set_Sound = function(Value)
 {
@@ -71,6 +84,24 @@ CSettings.prototype.Set_Sound = function(Value)
 CSettings.prototype.Is_SoundOn = function()
 {
     return this.m_bSound;
+};
+CSettings.prototype.Set_Rulers = function(Value)
+{
+    this.m_bRulers = Value;
+    Common.Set_LocalStorageItem("Rulers", Value === true ? "1" : "0");
+};
+CSettings.prototype.Is_Rulers = function()
+{
+    return this.m_bRulers;
+};
+CSettings.prototype.Set_LoadUnfinishedFilesOnLastNode = function(Value)
+{
+    this.m_bLoadUnfinishedFilesOnLastNode = Value;
+    Common.Set_LocalStorageItem("LoadUnfinishedFilesOnLastNode", Value === true ? "1" : "0");
+};
+CSettings.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
+{
+    return this.m_bLoadUnfinishedFilesOnLastNode;
 };
 CSettings.prototype.Set_ColorScheme = function(eScheme)
 {

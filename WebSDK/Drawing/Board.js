@@ -31,7 +31,7 @@ function CDrawingBoard(oDrawing)
     this.m_oLogicBoard = null;
 
     this.m_eMode       = EBoardMode.Move;
-    this.m_bRulers     = false;
+    this.m_bRulers     = g_oGlobalSettings.Is_Rulers();
 
     this.m_dKoeffOffsetY = 0;
     this.m_dKoeffOffsetX = 0;
@@ -150,14 +150,15 @@ function CDrawingBoard(oDrawing)
     };
     this.private_OnKeyDown = function(e)
     {
-        oThis.private_HideTarget();
         check_KeyboardEvent(e);
 
+        var bPreventDefault = false;
         // Обрабатываем Shift при добавлении/удалении камней
         if (16 === global_keyboardEvent.KeyCode && EBoardMode.AddRemove === oThis.Get_Mode())
         {
             global_mouseEvent.ShiftKey = true;
             oThis.private_UpdateTarget();
+            bPreventDefault = true;
         }
         else if ((16 === global_keyboardEvent.KeyCode || 17 === global_keyboardEvent.KeyCode) && EBoardMode.AddMarkColor === oThis.Get_Mode())
         {
@@ -167,12 +168,19 @@ function CDrawingBoard(oDrawing)
                 global_mouseEvent.CtrlKey = true;
 
             oThis.private_UpdateTarget();
+            bPreventDefault = true;
         }
         else
-            oThis.private_HandleKeyDown(global_keyboardEvent);
+        {
+            bPreventDefault = oThis.private_HandleKeyDown(global_keyboardEvent);
+            if (true === bPreventDefault)
+                oThis.private_HideTarget();
+        }
 
-        e.preventDefault();
-        return false;
+        if (true === bPreventDefault)
+            e.preventDefault();
+
+        return (bPreventDefault ? false : true);
     };
     this.private_OnKeyUp = function(e)
     {
@@ -196,8 +204,6 @@ function CDrawingBoard(oDrawing)
     };
     this.private_OnKeyPress = function(e)
     {
-        e.preventDefault();
-        return false;
     };
     this.private_StartDrawingTimer = function()
     {
@@ -312,6 +318,7 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
 {
     if (bRulers !== this.m_bRulers)
     {
+        g_oGlobalSettings.Set_Rulers(bRulers);
         this.m_bRulers = bRulers;
 
         for (var Index = 0, Count = this.HtmlElement.LinkedControls.length; Index < Count; Index++)
@@ -599,6 +606,11 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
 CDrawingBoard.prototype.Get_Mode = function()
 {
     return this.m_eMode;
+};
+CDrawingBoard.prototype.private_DrawVariants = function()
+{
+    if (this.m_oGameTree)
+        this.m_oGameTree.Show_Variants();
 };
 CDrawingBoard.prototype.Draw_Variant = function(X, Y)
 {
@@ -1012,6 +1024,7 @@ CDrawingBoard.prototype.private_DrawTrueColorFullBoard = function()
     this.private_RedrawTrueColorAllStones();
     this.private_DrawAllColorMarks();
     this.private_DrawMarks();
+    this.private_DrawVariants();
 };
 CDrawingBoard.prototype.private_DrawTrueColorBoard = function()
 {
@@ -1320,7 +1333,7 @@ CDrawingBoard.prototype.private_PutVerLine = function(ImageData, y1, y2,alpha, x
     for (var y = y1; y <= y2; y++)
         this.private_PutPixel(ImageData, x, y, alpha, w, h, Color);
 };
-CDrawingBoard.prototype.private_CreateTrueColorStones = function()
+CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
 {
     if (!this.m_oImageData.Lines)
         return;
@@ -1332,7 +1345,7 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function()
 
     var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
 
-    var DWidth = Math.floor(this.m_dKoeffCellW * W);
+    var DWidth = (dForceDiam ? dForceDiam : Math.floor(this.m_dKoeffCellW * W));
 
     var d = Math.floor(DWidth / 2) * 2 + 1;
     this.m_oImageData.StoneDiam = d;
@@ -2626,7 +2639,7 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
             {
                 return alert("Sorry, no move has been made at that location, so you can't mark it with the move number!");
 
-                CreateWindow("tesetste", EWindowType.Error, {ErrorText : "Sorry, no move has been made at that location, so you can't mark it with the move number!"});
+                CreateWindow("tesetste", EWindowType.Error, {ErrorText : "Sorry, no move has been made at that location, so you can't mark it with the move number!"}, {Drawing : this.m_oDrawing});
                 return;
             }
             else
@@ -2767,9 +2780,19 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 
     var KeyCode = Event.KeyCode;
 
+    var bRetValue = false;
     if (8 === KeyCode || 46 === KeyCode) // backspace/delete
     {
         this.m_oGameTree.Remove_CurNode();
+        bRetValue = true;
+    }
+    else if (36 === KeyCode) // Home
+    {
+        if (true === Event.CtrlKey && true === Event.ShiftKey)
+        {
+            this.m_oGameTree.GoTo_StartNode();
+            bRetValue = true;
+        }
     }
     else if (37 === KeyCode) // Left Arrow
     {
@@ -2779,6 +2802,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.Step_Backward(5);
         else
             this.m_oGameTree.Step_Backward(1);
+        bRetValue = true;
     }
     else if (38 === KeyCode) // Up Arrow
     {
@@ -2786,6 +2810,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.GoTo_MainVariant();
         else
             this.m_oGameTree.GoTo_PrevVariant();
+        bRetValue = true;
     }
     else if (39 === KeyCode) // Right Arrow
     {
@@ -2795,18 +2820,22 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.Step_Forward(5);
         else
             this.m_oGameTree.Step_Forward(1);
+        bRetValue = true;
     }
     else if (40 === KeyCode ) // Down Arrow
     {
         this.m_oGameTree.GoTo_NextVariant();
+        bRetValue = true;
     }
     else if (67 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + C
     {
         this.m_oGameTree.Copy_ColorMapFromPrevNode();
+        bRetValue = true;
     }
     else if (69 === KeyCode && true === Event.CtrlKey) // Ctrl + E
     {
-        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree});
+        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+        bRetValue = true;
     }
     else if (72 === KeyCode && true === Event.CtrlKey) // Ctrl + H
     {
@@ -2814,6 +2843,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.Download_GifBoardScreenShot();
         else
             this.m_oGameTree.Download_PngBoardScreenShot();
+        bRetValue = true;
     }
     else if (73 === KeyCode && true === Event.CtrlKey) // Ctrl + I
     {
@@ -2821,15 +2851,17 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.Download_GifForProblem();
         else
             this.m_oGameTree.Download_GifForCurVariant();
+        bRetValue = true;
     }
     else if (77 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey)
     {
         this.m_oGameTree.Make_CurrentVariantMainly();
+        bRetValue = true;
     }
     else if (79 === KeyCode && true === Event.CtrlKey) // Ctrl + O
     {
         if (EBoardMode.AddMarkColor === this.m_eMode)
-            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this});
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this, Drawing : this.m_oDrawing});
         else
         {
             if (true === Event.ShiftKey)
@@ -2879,6 +2911,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
                 }
             }
         }
+        bRetValue = true;
     }
     else if (82 === KeyCode && true === Event.CtrlKey) // Ctrl + R
     {
@@ -2891,6 +2924,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
         {
             this.Set_Rulers(true === this.m_bRulers ? false : true);
         }
+        bRetValue = true;
     }
     else if (83 === KeyCode && true === Event.CtrlKey) // Ctrl + S
     {
@@ -2908,6 +2942,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
             Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
         }
+        bRetValue = true;
     }
     else if (86 === KeyCode && true === Event.CtrlKey) // Ctrl + V
     {
@@ -2918,49 +2953,60 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             eType = EShowVariants.Min;
 
         this.m_oGameTree.Set_ShowVariants(eType);
+        bRetValue = true;
     }
     else if (112 === KeyCode) // F1
     {
         this.Set_Mode(EBoardMode.Move);
+        bRetValue = true;
     }
     else if (113 === KeyCode) // F2
     {
         this.Set_Mode(EBoardMode.CountScores);
+        bRetValue = true;
     }
     else if (114 === KeyCode) // F3
     {
         this.Set_Mode(EBoardMode.AddRemove);
+        bRetValue = true;
     }
     else if (115 === KeyCode) // F4
     {
         this.Set_Mode(EBoardMode.AddMarkTr);
+        bRetValue = true;
     }
     else if (116 === KeyCode) // F5
     {
         this.Set_Mode(EBoardMode.AddMarkSq);
+        bRetValue = true;
     }
     else if (117 === KeyCode) // F6
     {
         this.Set_Mode(EBoardMode.AddMarkCr);
+        bRetValue = true;
     }
     else if (118 === KeyCode) // F7
     {
         this.Set_Mode(EBoardMode.AddMarkX);
+        bRetValue = true;
     }
     else if (119 === KeyCode) // F8
     {
         this.Set_Mode(EBoardMode.AddMarkTx);
+        bRetValue = true;
     }
     else if (120 === KeyCode) // F9
     {
         this.Set_Mode(EBoardMode.AddMarkNum);
+        bRetValue = true;
     }
     else if (121 === KeyCode) // F10
     {
         this.Set_Mode(EBoardMode.AddMarkColor);
+        bRetValue = true;
     }
 
-    return false;
+    return bRetValue;
 };
 CDrawingBoard.prototype.private_IsPointInViewPort = function(X, Y)
 {
@@ -3019,5 +3065,97 @@ CDrawingBoard.prototype.private_GetSettings_DarkBoard = function()
 {
     return g_oGlobalSettings.m_oBoardPr.bDarkBoard;
 };
+CDrawingBoard.prototype.private_DrawLogo = function()
+{
+    //-----------------------------------------------------------------------------------------------------------------
+    // 1. Рисуем текстуру доски
+    //-----------------------------------------------------------------------------------------------------------------
+    this.private_DrawTrueColorBoard();
 
-var g_sBackground = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAg3SURBVHhe7ZpLltw2DEVdNfPQ83gLnmYp3kLWkiwkC0syztAzd54ICgJBEPxXVef0PXJZLeL7SH1aXbdf//ztU+DHX/8e/93w743+84EF7Kp8/uVL3EOKv0OK1cgUoDeL1UhyjOPf6T/w+Ws4dNjcLstLtFS+tzyBgWpD/biEPGZvFqsRQylwiQWEXidhP+jUIk6CWfRavUrRVmVRce5q0Ua9UgydbhXtnHI3daIbmc6Sxz9Wlq1XRY30rEzJ0yzvREHxVZYZzJm4ffvjO/2sh3G9Z0Eg3M3o0CzOTEM4Q73IUCqOM0RUGynVefv2+3cWRRudeuXRFRyulIbxDcxEfpB8FJQMzPgMWToVXiuL8MM5IKiTRmKaVfNyNGlZSgGUWTW+iYqvxQJjcRVOG2BZinB9KFHKktdmWuZmp1hp1slmfKWIxk48M7oFlcUCyl0Gh5+6h0ljo4U3fs5yU3bRohSAmbLMjwD74D84EiruKTuJYz1USwNjkm7pQylRmsxG2t0rMynQoz/xL2vWFU5HKBj7eqVi5WoPUwvVrhSRtIEnQcRXDWcZOUVLfMYxTsWyHqYGiEHapG/vJLEsraOF851hnIZroGZQulX98JSwXjoCZzlFHFtWRCnLNrEA6mbJCgx0YoD4vNDKuSaI0bdds5iaXrNIpYDcX0asXop125Npp1775sDiFOvoZ2fmHXpRtE0TbBHEQr4HTJGl1/CVPvJApcBdKbXkilsMcuo1nOW6x9FfDMqU7mgtlO6k90esKUm2vtqb0ZaPXVbAeHSYXFzRHXK8He2p7RgKTc5kOXxPpVR8bHFApJAHZzDEQjfDnVz1ff1ivs5X/RDmQUmXlzh+rT3T0oQtcxGy91mIH86R9ugK5Gj0NS1VicNlmOT9K4pKQRM8WSViTSv1LnAkk43Ht+pBJi3WKdSIUpR+WGKUZZ6zkpkU8B10lHpd16zzZZgKijS0xZ8z/NEWqCB8luJwiuHJgGNjkaoM9S4oea2cKxX3TEjdM9BwJyAmEmUlwek47q211efD7eSlHhMGRDppw47Xrzt9SgFubDnpNBCTSknQ2rXRUkIuVip8HgdPWJkoVrdSBBKE6PlcdXG40/IBtEP7hNxfCOkCsMMb5coyUoOHWINK7UO1MT0ZxBWE4xM0N7SxXpkOcL/PKnWGnoXiUBsqpuptBhkfn0IaM7VSI3mCf/6aylHCTeJIU0gkNUnEeiaoXjbAP+JzrV4IeO94zSnPvESsJZeGKVQPa2UiEPMnzUMdJUj2ZbYn6sXS8Gpavqx6yK/mx8qa12vyYkcP8RESKJVpMj7RFSRXCp/xNGzRCwfVFgfWcYT9GoKfn3HgsajWWJz46w7NZclIHVccZmEh+GYlyN3XhSoZi8847fAQKIkAglhizQ8XhKCTzWzl6Ln/t0upFAin4YqrwysrBVDepFIgffl3knfuiPjiMuWUepGNmDb1h1K4OUoBNVq1B/GVyH66aquWHcR6w0XLpupPSDOan1JZxysR+aCwExQwvOpNx/QCn97UGpViDEdx6zg4J2X+mYAVz7vi7HKovRfHq34ajqOUYpYuK/SjtjggMA+WcIy1WMPLCrBLPtsSf7SR6tpckyUNkoq1cM7zZVVaaJuZmXXFttPQVOpJeq1i5zWLgEDEO1cKnGJxS8shgfD5zpUC4StH77+NxxC+zAZOvRrvaCbs4l9TB664OUeQtrNhphGFuGbtOxM34Z4Qy6ZEYFzg2aJrTrqMl3RCIK/a4sAoToTK3bAxtzSTQlD1cosDc1CKUkA+PjDr0jKfUVss1XDcK2Aa4GDX8S5agiibRpe4V8B+nwVyz1zpavQHMFBVu4uybH359wqgdFlY3jOj6leOXcgsxmk4EBcRndJ9Gh1//FVrWNzNVT1wbM2SNSKT6pWlClIp496JE7ed1hTpnxtU6hIyILmUivR7odFELNOikVIRLehE/EuF+O2C43dVBeYdCbhfp+GMUovhp03sPO9RWSkAfaJYk0op914896AXGwxMIbsMFKnSHWJNKrUXcSY+BanG9Df/dvPUM1GRPDq8nFLEU1eWXEzGc9YHJRKxBi6B/2+kIDjtXumbf2W4yIHy2KX3IqOUwuexsub16q1D0eX+mOnMlQLXE7wqoqrgvMSMDOWUwUMqtYOM1vIXfyLxEkPXNavkgJ08Oigd74XzmgFLB+OeizQ7soSvcZi+8rj2ElR+kX5lVCeK+Uby+Mb7rFIa6fw6muYtVWtrcTFnwnjOyu1wRB3MjxDmwbWoFOhTbXEgkNczU3b9odQJpIboR3xWc5NN1axEo+Nhlv6q5Di2xKychi0hHHs1z0Aa5KON+EHM0ZZGgNML8FZWYwLHDENqiwPrUPGxxYEyziT57lqs4dkm2t1nEtV9w9nHZkoCXxEezbMUV1bLFDFdxo9gz4uK+gX+A+ZDrA4+xOrgQ6wOimJ13a0Gbm0z94RGX+e+5lC6hwIt1uR9bdL96fiyeqfhwHrpYkzZLi82bulF2phZDLGkXVeO3uZ3T4YC6ZyMLcXMXuBljq7mu4wlk1lMd9ss+3tl6/usfNWYZqBlfUlf2JdCOfRmGUNl2fKm1O9EKUU71by5psuzkJmTJRHLtGtJAJwcEmmW25i5pNmmLMqmlOUSy6+jmgB0RcjdG6nGmU0UvopiBoli7e5kVXzCiTaeKGgkyUMdd8OFnShfirwwPmFmkTtEXyJSStwB8yzrv3JU6oSYj0/kWdYkgmSkV/hUQZLnrE2dMKviE060qUSsV0CGusTa3cna+IQZc0Ei6IXtTmfmGfDTp/8Aysg4kH9KLq0AAAAASUVORK5CYII=";
+    //-----------------------------------------------------------------------------------------------------------------
+    // 2. Рисуем сетку в виде паутины
+    //-----------------------------------------------------------------------------------------------------------------
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    var LinesCanvas = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
+    LinesCanvas.clearRect(0, 0, W, H);
+
+    var dKoefX = W / 406, dKoefY = H / 348;
+
+    var PointCenter = [207, 193, 1];
+    var BoundPoints = [{X : 0, Y : 49}, {X : 0, Y : 198}, {X : 71, Y : 348}, {X : 178, Y : 348}, {X : 318, Y : 348}, {X : 406, Y : 238}, {X : 406, Y : 41}, {X : 247, Y : 0}];
+    var Lines =[[[162, 162, 2], [221, 125, 2], [256, 156, 2], [250, 203, 1], [234, 231, 2], [199, 236, 0], [177, 228, 1], [150, 195, 1]],
+                [[133, 141, 2], [229,  89, 1], [283, 136, 1], [282, 210, 2], [247, 249, 0], [195, 261, 2], [158, 250, 0], [124, 196, 0]],
+                [[106, 122, 0], [238,  45, 0], [309, 115, 0], [312, 216, 2], [260, 267, 0], [187, 300, 1], [138, 272, 0], [ 96, 197, 1]],
+                [[ 72,  99, 2], [246,  10, 0], [346,  88, 1], [344, 224, 0], [272, 291, 0], [182, 329, 0], [115, 298, 0], [ 60, 197, 0]],
+                [[ 28,  67, 0], [259, -40, 0], [373,  66, 0], [385, 233, 0], [298, 319, 2], [170, 380, 0], [ 81, 336, 0], [ 14, 198]]];
+
+    for (var nIndex = 0, nCount = BoundPoints.length; nIndex < nCount; nIndex++)
+    {
+        LinesCanvas.beginPath();
+        LinesCanvas.moveTo(PointCenter[0] * dKoefX, PointCenter[1] * dKoefY);
+        LinesCanvas.lineTo(BoundPoints[nIndex].X * dKoefX, BoundPoints[nIndex].Y * dKoefY);
+        LinesCanvas.stroke();
+    }
+
+    for (var nLineIndex = 0, nLinesCount = Lines.length; nLineIndex < nLinesCount; nLineIndex++)
+    {
+        var Line = Lines[nLineIndex];
+        LinesCanvas.beginPath();
+        for (var nPointIndex = 0, nPointsCount = Line.length; nPointIndex < nPointsCount; nPointIndex++)
+        {
+            var oPoint = Line[nPointIndex];
+            if (0 === nPointIndex)
+                LinesCanvas.moveTo(oPoint[0] * dKoefX, oPoint[1] * dKoefY);
+            else
+                LinesCanvas.lineTo(oPoint[0] * dKoefX, oPoint[1] * dKoefY);
+        }
+        LinesCanvas.closePath();
+        LinesCanvas.stroke();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+    // 3. Рисуем камни
+    //-----------------------------------------------------------------------------------------------------------------
+    Lines.push([PointCenter]);
+
+    this.private_CreateTrueColorStones(30 * dKoefX);
+    this.private_CreateShadows();
+
+
+    var StonesCanvas = this.HtmlElement.Stones.Control.HtmlElement.getContext("2d");
+    var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
+
+    StonesCanvas.clearRect(0, 0, W, H);
+    ShadowCanvas.clearRect(0, 0, W, H);
+
+    var d   = this.m_oImageData.StoneDiam;
+    var Rad = (d - 1) / 2;
+    var Off = this.m_oImageData.ShadowOff;
+
+    for (var nLineIndex = 0, nLinesCount = Lines.length; nLineIndex < nLinesCount; nLineIndex++)
+    {
+        var Line = Lines[nLineIndex];
+        for (var nPointIndex = 0, nPointsCount = Line.length; nPointIndex < nPointsCount; nPointIndex++)
+        {
+            var oPoint = Line[nPointIndex];
+
+            var _X = ((oPoint[0] * dKoefX) | 0) - Rad;
+            var _Y = ((oPoint[1] * dKoefY) | 0) - Rad;
+
+            if (BOARD_BLACK === oPoint[2])
+                StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y);
+            else if (BOARD_WHITE === oPoint[2])
+            {
+                var nRand = (Math.random() * (this.m_oImageData.WhiteStones.length - 1)) | 0;
+                StonesCanvas.putImageData(this.m_oImageData.WhiteStones[nRand], _X, _Y);
+            }
+
+            if (BOARD_BLACK === oPoint[2] || BOARD_WHITE === oPoint[2])
+                ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+        }
+
+    }
+};
+

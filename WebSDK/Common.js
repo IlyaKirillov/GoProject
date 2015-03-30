@@ -366,8 +366,8 @@ var Common_DragHandler =
         nx = x + ((ex - o.lastMouseX) * (o.hmode ? 1 : -1));
         ny = y + ((ey - o.lastMouseY) * (o.vmode ? 1 : -1));
 
-        if (o.xMapper)      nx = o.xMapper(y)
-        else if (o.yMapper) ny = o.yMapper(x)
+        if (o.xMapper)      nx = o.xMapper(y);
+        else if (o.yMapper) ny = o.yMapper(x);
 
         if (o.minX != null) nx = Math.max( nx, o.minX );
         if (o.maxX != null) nx = Math.min( nx, o.maxX );
