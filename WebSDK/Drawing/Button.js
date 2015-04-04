@@ -36,7 +36,9 @@ var EDrawingButtonType =
     WindowCancel    : 22,
     Settings        : 23,
     Pass            : 24,
-    About           : 25
+    About           : 25,
+    TabComments     : 26,
+    TabNavigator    : 27
 };
 
 var EDrawingButtonState =
@@ -850,6 +852,77 @@ CDrawingButton.prototype.private_Draw = function(BackColor, FillColor, W, H, bSe
 
             break;
         }
+        case EDrawingButtonType.TabComments:
+        {
+            var X_0 = Math.ceil(X_off +  3 * Size / 20 + 0.5);
+            var X_1 = Math.ceil(X_off + 16 * Size / 20 + 0.5);
+            var X_2 = Math.ceil(X_off + 14 * Size / 20 + 0.5);
+            var X_3 = Math.ceil(X_off + 11 * Size / 20 + 0.5);
+            var Y_0 = Math.ceil(Y_off +  5 * Size / 20 + 0.5);
+            var Y_1 = Math.ceil(Y_off + 14 * Size / 20 + 0.5);
+            var Y_2 = Math.ceil(Y_off + 18 * Size / 20 + 0.5);
+
+            Canvas.lineWidth = 2;
+
+            Canvas.beginPath();
+            Canvas.moveTo(X_0, Y_0);
+            Canvas.lineTo(X_1, Y_0);
+            Canvas.lineTo(X_1, Y_1);
+            Canvas.lineTo(X_2, Y_1);
+            Canvas.lineTo(X_2, Y_2);
+            Canvas.lineTo(X_3, Y_1);
+            Canvas.lineTo(X_0, Y_1);
+            Canvas.closePath();
+            Canvas.stroke();
+
+            break;
+        }
+        case EDrawingButtonType.TabNavigator:
+        {
+            var X_0 = X_off + 0;
+            var X_1 = X_off +  6 * Size / 20;
+            var X_2 = X_off + 14 * Size / 20;
+            var X_3 = X_off + Size;
+
+            var Y_1 = Y_off +  6 * Size / 20;
+            var Y_2 = Y_off + 14 * Size / 20;
+
+            var R = Size / 7;
+
+            Canvas.lineWidth = 2;
+            Canvas.strokeStyle = FillColor.ToString();
+
+            Canvas.beginPath();
+            Canvas.moveTo(X_0, Y_1);
+            Canvas.lineTo(X_3, Y_1);
+            Canvas.stroke();
+
+            Canvas.beginPath();
+            Canvas.moveTo(X_1, Y_1);
+            Canvas.lineTo(X_1, Y_2);
+            Canvas.lineTo(X_3, Y_2);
+            Canvas.stroke();
+
+            Canvas.lineWidth = 1;
+            Canvas.strokeStyle = (new CColor(0, 0, 0)).ToString();
+            Canvas.fillStyle   = (new CColor(255, 255, 255)).ToString();
+            Canvas.beginPath();
+            Canvas.arc(X_2, Y_1, R, 0, 2 * Math.PI, false);
+            Canvas.fill();
+            Canvas.stroke();
+
+            Canvas.beginPath();
+            Canvas.arc(X_2, Y_2, R, 0, 2 * Math.PI, false);
+            Canvas.fill();
+            Canvas.stroke();
+
+            Canvas.fillStyle = (new CColor(0, 0, 0)).ToString();
+            Canvas.beginPath();
+            Canvas.arc(X_1, Y_1, R, 0, 2 * Math.PI, false);
+            Canvas.fill();
+
+            break;
+        }
     };
 
     //return Canvas.toDataURL();
@@ -960,6 +1033,12 @@ CDrawingButton.prototype.private_HandleMouseDown = function()
             CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.About, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
             break;
         }
+        case EDrawingButtonType.TabComments:
+        case EDrawingButtonType.TabNavigator:
+        {
+            this.m_oParent.Select(this);
+            break;
+        }
     };
 };
 CDrawingButton.prototype.private_GetHint = function()
@@ -991,6 +1070,8 @@ CDrawingButton.prototype.private_GetHint = function()
         case EDrawingButtonType.Settings       : return "Settings";
         case EDrawingButtonType.Pass           : return "Pass";
         case EDrawingButtonType.About          : return "About";
+        case EDrawingButtonType.TabComments    : return "Comments";
+        case EDrawingButtonType.TabNavigator   : return "Navigator";
     };
 };
 CDrawingButton.prototype.private_RegisterButton = function()

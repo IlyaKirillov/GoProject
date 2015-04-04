@@ -349,6 +349,8 @@ var Common_DragHandler =
 
     Drag : function(e)
     {
+        check_MouseMoveEvent(e);
+
         e = Common_DragHandler.FixE(e);
         var o = Common_DragHandler.Obj;
 

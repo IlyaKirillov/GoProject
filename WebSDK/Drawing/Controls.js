@@ -220,9 +220,9 @@ CControlContainer.prototype.Resize = function(_width,_height)
         _b = _y;
 
     if ( -2 === this.Bounds.AbsW )
-        _r = _x + ( _b - _y ) * g_dKoef_Board_W_to_H;
+        _r = _x + ( _b - _y ) * 1;//g_dKoef_Board_W_to_H;
     else if ( -3 === this.Bounds.AbsW )
-        _x = ( _b - _y ) * g_dKoef_Board_W_to_H;
+        _x = ( _b - _y ) * 1;//g_dKoef_Board_W_to_H;
 
     this.AbsolutePosition.L = _x;
     this.AbsolutePosition.T = _y;
@@ -329,11 +329,61 @@ CControlContainer.prototype.private_ResizeControls = function(_w, _h)
 
         }
     }
+    else if (3 === this.Type && 2 === lCount)
+    {
+        // Случай, когда сверху место под доску, а внизу сколько останется, но не меньше определенного значения
+
+        var dKoef = (this.DrawingElement ? this.DrawingElement.Get_AspectRatio() : 1);
+
+        // Специальный случай, слева место под доску, справа что останется с заданным минимумом.
+        var ControlT = this.Controls[0];
+        var ControlB = this.Controls[1];
+
+        var nMin = this.RMin;
+
+        var W = _w;
+        var H = _h;
+
+        H -= nMin;
+
+        var __w = H * dKoef;
+        var __h = W / dKoef;
+
+        var w, h, x, y;
+        if (__w <= W)
+        {
+            h = H;
+            w = __w;
+
+            y = 0;
+            x = (W - w) / 2;
+        }
+        else
+        {
+            w = W;
+            h = __h;
+
+            x = 0;
+            y = 0;
+        }
+
+        ControlT.Bounds.SetParams(x, y, 1000, 1000, true, true, false, false, w, h);
+        ControlT.Anchor = (g_anchor_left | g_anchor_top);
+        ControlB.Bounds.SetParams(0, h, 1000, 1000, false, true, false, false, -1, -1);
+        ControlB.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    }
 
     for (var i = 0; i < lCount; i++)
     {
         this.Controls[i].Resize(_w, _h);
     }
+};
+CControlContainer.prototype.Clear = function()
+{
+    this.Controls       = [];
+    this.Type           = 0;
+    this.DrawingElement = null;
+    this.RMin           = 400;
 };
 
 function CreateControlContainer(name)

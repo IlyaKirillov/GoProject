@@ -70,7 +70,7 @@ CSettings.prototype.Load_FromLocalStorage = function()
 
     // Loading Settings
     var sLoadUnfinishedFilesOnLastNode = Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode");
-    this.m_bLoadUnfinishedFilesOnLastNode = (sLoadUnfinishedFilesOnLastNode === "1" ? true : false);
+    this.m_bLoadUnfinishedFilesOnLastNode = (sLoadUnfinishedFilesOnLastNode === "0" ? false : true);
 
     // Rulers
     var sRulers = Common.Get_LocalStorageItem("Rulers");
@@ -229,7 +229,8 @@ function CDrawing(oGameTree)
     if (oGameTree)
         oGameTree.Set_Drawing(this);
 
-    this.m_oMainDiv        = null
+    this.m_oMainDiv        = null;
+    this.m_oMainControl    = null;
     this.m_oDisableElement = null;
 
     this.m_oControl = null;
@@ -274,6 +275,12 @@ function CDrawing(oGameTree)
 
     var oThis = this;
     this.m_bNeedUpdateSize = true;
+
+    this.m_bMixedTemplate      = false;
+    this.m_nMixedTemplateIndex = -1;
+    this.m_nMixedRightSide     = 400;
+    this.m_nMixedBotSize       = 200;
+
 
     this.private_OnTimerDraw = function()
     {
@@ -387,23 +394,51 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 
     this.Update_Size();
 };
-CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
+CDrawing.prototype.Create_MixedFullTemplate = function(sDivId)
+{
+    this.m_bMixedTemplate = true;
+    this.m_nMixedRightSide = 400;
+    this.m_nMixedBotSize   = 200;
+    this.private_CreateWrappingMainDiv(sDivId);
+    this.private_UpdateSize(true);
+};
+CDrawing.prototype.Create_HorizontalFullTemplate = function(sDivId)
+{
+    this.m_bMixedTemplate = false;
+    this.private_CreateWrappingMainDiv(sDivId);
+    this.private_CreateHorFullTemplate();
+};
+CDrawing.prototype.Create_VerticalFullTemplate = function(sDivId)
+{
+    this.m_bMixedTemplate = false;
+    this.private_CreateWrappingMainDiv(sDivId);
+    this.private_CreateVerFullTemplate();
+};
+CDrawing.prototype.private_CreateWrappingMainDiv = function(sDivId)
 {
     g_oGlobalSettings.Load_FromLocalStorage();
-
-    var oGameTree = this.m_oGameTree;
-    var oDrawingBoard = new CDrawingBoard(this);
-
+    //------------------------------------------------------------------------------------------------------------------
+    // Создаем оберточную div для всего редактора, которая будет главной для нас.
+    //------------------------------------------------------------------------------------------------------------------
     var oParentControl = CreateControlContainer(sDivId);
-    var sMainDivId = sDivId + "GoBoard";
-
+    this.m_oControl = oParentControl;
+    var sMainDivId = sDivId + "GB";
     this.private_CreateDiv(oParentControl.HtmlElement, sMainDivId);
     var oMainControl = CreateControlContainer(sMainDivId);
     oMainControl.Bounds.SetParams(0, 0, 1, 1, false, false, true, true, -1, -1);
     oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oParentControl.AddControl(oMainControl);
+    this.private_SetMainDiv(sMainDivId, oMainControl);
+};
+CDrawing.prototype.private_CreateHorFullTemplate = function()
+{
+    var oGameTree    = this.m_oGameTree;
+    var oMainControl = this.m_oMainControl;
+    var sMainDivId   = this.m_oMainDiv.id;
+    var sDivId       = sMainDivId;
 
-    oMainControl.Set_Type(1, oDrawingBoard, {RMin : 400});
+    var oDrawingBoard = new CDrawingBoard(this);
+    oMainControl.Set_Type(1, oDrawingBoard, {RMin : this.m_nMixedRightSide});
 
     var sBoardDivId = sDivId + "_Board";
     var sPanelDivId = sDivId + "_Panel";
@@ -551,13 +586,155 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
     this.m_aElements.push(oDrawingBlackInfo);
     this.m_aElements.push(oDrawingWhiteInfo);
 
-    this.m_oControl = oParentControl;
-
     this.Update_Size();
-
     oGameTree.On_EndLoadDrawing();
+};
+CDrawing.prototype.private_CreateVerFullTemplate = function()
+{
+    var oGameTree    = this.m_oGameTree;
+    var oMainControl = this.m_oMainControl;
+    var sMainDivId   = this.m_oMainDiv.id;
+    //------------------------------------------------------------------------------------------------------------------
+    // Делим главную дивку на 2 части сверху 50px под информацию об игрока, а снизу все остальное.
+    //------------------------------------------------------------------------------------------------------------------
+    var sInfoDivId = sMainDivId + "I";
+    this.private_CreateDiv(oMainControl.HtmlElement, sInfoDivId);
 
-    this.private_SetMainDiv(sMainDivId);
+    var InfoH    = 50;
+    var oInfoControl = CreateControlContainer(sInfoDivId);
+    oInfoControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, InfoH);
+    oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oInfoControl);
+
+    var sNotInfoDivId = sMainDivId + "O";
+    this.private_CreateDiv(oMainControl.HtmlElement, sNotInfoDivId);
+    var oNotInfoControl = CreateControlContainer(sNotInfoDivId);
+    oNotInfoControl.Bounds.SetParams(0, InfoH, 1000, 1000, false, true, false, false, -1, -1);
+    oNotInfoControl.Anchor = (g_anchor_bottom | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oNotInfoControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Заполняем контрол с информацией (слева информация о белом, справ о черном).
+    //------------------------------------------------------------------------------------------------------------------
+    var sWhiteInfo = sInfoDivId + "W";
+    this.private_CreateDiv(oInfoControl.HtmlElement, sWhiteInfo);
+    var oInfoWhiteControl = CreateControlContainer(sWhiteInfo);
+    oInfoWhiteControl.Bounds.SetParams(0, 0, 500, 1000, false, false, false, false, -1, -1);
+    oInfoWhiteControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oInfoControl.AddControl(oInfoWhiteControl);
+    var oDrawingWhiteInfo = new CDrawingPlayerInfo(this);
+    oDrawingWhiteInfo.Init(sWhiteInfo, oGameTree, BOARD_WHITE);
+    this.m_aElements.push(oDrawingWhiteInfo);
+
+    var sBlackInfo = sInfoDivId + "B";
+    this.private_CreateDiv(oInfoControl.HtmlElement, sBlackInfo);
+    var oInfoBlackControl = CreateControlContainer(sBlackInfo);
+    oInfoBlackControl.Bounds.SetParams(500, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oInfoBlackControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oInfoControl.AddControl(oInfoBlackControl);
+    var oDrawingBlackInfo = new CDrawingPlayerInfo(this);
+    oDrawingBlackInfo.Init(sBlackInfo, oGameTree, BOARD_BLACK);
+    this.m_aElements.push(oDrawingBlackInfo);
+    //------------------------------------------------------------------------------------------------------------------
+    // Нижний контрол будет специального типа, вверху у него место под доску, внизу под все остальное.
+    //------------------------------------------------------------------------------------------------------------------
+    var oDrawingBoard = new CDrawingBoard(this);
+    this.m_aElements.push(oDrawingBoard);
+    oNotInfoControl.Set_Type(3, oDrawingBoard, {RMin : this.m_nMixedBotSize - 50});
+    var sBoardDivId = sNotInfoDivId  + "B";
+    this.private_CreateDiv(oNotInfoControl.HtmlElement, sBoardDivId);
+    var oBoardControl = CreateControlContainer(sBoardDivId);
+    oNotInfoControl.AddControl(oBoardControl);
+    oDrawingBoard.Init(sBoardDivId, oGameTree);
+    oDrawingBoard.Focus();
+
+    var sNotBoardDivId = sNotInfoDivId + "N";
+    this.private_CreateDiv(oNotInfoControl.HtmlElement, sNotBoardDivId);
+    var oNotBoardControl = CreateControlContainer(sNotBoardDivId);
+    oNotInfoControl.AddControl(oNotBoardControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Контрол под доской тоже делим на 2 части: сверху 25px под кнопки, а снизу все остальное под навигатор.
+    //------------------------------------------------------------------------------------------------------------------
+    var ToolbarH = 25;
+    var sToolbarDivId = sNotBoardDivId + "T";
+    this.private_CreateDiv(oNotBoardControl.HtmlElement, sToolbarDivId);
+    var oToolsControl = CreateControlContainer(sToolbarDivId);
+    oToolsControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, ToolbarH);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top);
+    oNotBoardControl.AddControl(oToolsControl);
+
+    var sUnderToolbarDivId = sNotBoardDivId + "U";
+    this.private_CreateDiv(oNotBoardControl.HtmlElement, sUnderToolbarDivId);
+    var oUnderToolBarControl = CreateControlContainer(sUnderToolbarDivId);
+    oUnderToolBarControl.Bounds.SetParams(0, ToolbarH, 1000, 1000, false, true, false, false, -1, -1);
+    oUnderToolBarControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oNotBoardControl.AddControl(oUnderToolBarControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Заполняем контрол с кнопками.
+    //------------------------------------------------------------------------------------------------------------------
+    var oDrawingToolbar = new CDrawingToolbar(this);
+    oDrawingToolbar.Init(sToolbarDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings, EDrawingButtonType.About]});
+    this.m_aElements.push(oDrawingToolbar);
+    //------------------------------------------------------------------------------------------------------------------
+    // Контрол под панелью управления делим на 2 части, справа панель 30px с кнопками для переключения, слева все
+    // остальное.
+    //------------------------------------------------------------------------------------------------------------------
+    var ToolbarW = 30;
+    var sVerticalToolbarDivId = sUnderToolbarDivId + "L";
+    this.private_CreateDiv(oUnderToolBarControl.HtmlElement, sVerticalToolbarDivId);
+    var oRightToolbarControl = CreateControlContainer(sVerticalToolbarDivId);
+    oRightToolbarControl.Bounds.SetParams(0, 0, 0, 1000, false, false, false, false, ToolbarW, -1);
+    oRightToolbarControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
+    oUnderToolBarControl.AddControl(oRightToolbarControl);
+
+    var sNavComDivId = sUnderToolbarDivId + "R";
+    this.private_CreateDiv(oUnderToolBarControl.HtmlElement, sNavComDivId);
+    var oNavComControl = CreateControlContainer(sNavComDivId);
+    oNavComControl.Bounds.SetParams(ToolbarW, 0, 1000, 1000, true, false, false, false, -1, -1);
+    oNavComControl.Anchor = (g_anchor_right | g_anchor_top | g_anchor_bottom);
+    oUnderToolBarControl.AddControl(oNavComControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Заполняем контрол справа. Туда добавим 2 контрола, которые оба будут занимать все место и перекрывать друг друга.
+    //------------------------------------------------------------------------------------------------------------------
+    var sNavigatorDivId = sNavComDivId + "N";
+    this.private_CreateDiv(oNavComControl.HtmlElement, sNavigatorDivId);
+    var oNavigatorControl = CreateControlContainer(sNavigatorDivId);
+    oNavigatorControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oNavigatorControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top | g_anchor_bottom);
+    oNavComControl.AddControl(oNavigatorControl);
+
+    var sCommentsDivId = sNavComDivId + "C";
+    this.private_CreateDiv(oNavComControl.HtmlElement, sCommentsDivId);
+    var oCommentsControl = CreateControlContainer(sCommentsDivId);
+    oCommentsControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oCommentsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top | g_anchor_bottom);
+    oNavComControl.AddControl(oCommentsControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Заполняем навигатор.
+    //------------------------------------------------------------------------------------------------------------------
+    var oDrawingNavigator = new CDrawingNavigator(this);
+    oDrawingNavigator.Init(sNavigatorDivId, oGameTree);
+    this.m_aElements.push(oDrawingNavigator);
+    //------------------------------------------------------------------------------------------------------------------
+    // Заполняем окно с комментариями.
+    //------------------------------------------------------------------------------------------------------------------
+    var oDrawingComments = new CDrawingComments(this);
+    oDrawingComments.Init(sCommentsDivId, oGameTree);
+    this.m_aElements.push(oDrawingComments);
+    //------------------------------------------------------------------------------------------------------------------
+    // Заполняем контрол с кнопками слева.
+    //------------------------------------------------------------------------------------------------------------------
+    var oDrawingVerticalToolbar = new CDrawingNavigatorCommentsTabs(this);
+    oDrawingVerticalToolbar.Init(sVerticalToolbarDivId, oGameTree, sNavigatorDivId, sCommentsDivId);
+    this.m_aElements.push(oDrawingVerticalToolbar);
+    //------------------------------------------------------------------------------------------------------------------
+    // Обновляем размер и сообщаем основному классу, что построение закончилось.
+    //------------------------------------------------------------------------------------------------------------------
+    this.Update_Size();
+    oGameTree.On_EndLoadDrawing();
+};
+CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
+{
+    return this.Create_HorizontalFullTemplate(sDivId);
 };
 CDrawing.prototype.Create_Problems = function(sDivId)
 {
@@ -632,12 +809,52 @@ CDrawing.prototype.Update_Size = function(bForce)
     else
         this.m_bNeedUpdateSize = true;
 };
-CDrawing.prototype.private_SetMainDiv = function(sDivId)
+CDrawing.prototype.private_SetMainDiv = function(sDivId, oMainControl)
 {
-    this.m_oMainDiv = document.getElementById(sDivId);
+    this.m_oMainDiv     = document.getElementById(sDivId);
+    this.m_oMainControl = oMainControl;
+};
+CDrawing.prototype.private_ClearMainDiv = function()
+{
+    while (this.m_oMainDiv.firstChild)
+        this.m_oMainDiv.removeChild(this.m_oMainDiv.firstChild);
+
+    if (this.m_oMainControl)
+        this.m_oMainControl.Clear();
 };
 CDrawing.prototype.private_UpdateSize = function(bForce)
 {
+    if (true === this.m_bMixedTemplate)
+    {
+        // Сначала  определим какой тип тимплейта должен быть сейчас
+        var W = this.m_oControl.HtmlElement.clientWidth;
+        var H = this.m_oControl.HtmlElement.clientHeight;
+
+        var nNewTemplateIndex = -1;
+        if (H - (W - this.m_nMixedRightSide) > this.m_nMixedBotSize + 100)
+        {
+            // Вертикальный
+            nNewTemplateIndex = 1;
+        }
+        else
+        {
+            // Горизонтальный
+            nNewTemplateIndex = 0;
+        }
+
+        if (this.m_nMixedTemplateIndex !== nNewTemplateIndex)
+        {
+            this.m_nMixedTemplateIndex = nNewTemplateIndex;
+
+            this.private_ClearMainDiv();
+
+            if (0 === this.m_nMixedTemplateIndex)
+                this.private_CreateHorFullTemplate();
+            else
+                this.private_CreateVerFullTemplate();
+        }
+    }
+
     this.m_bNeedUpdateSize = false;
 
     if (this.m_oControl)

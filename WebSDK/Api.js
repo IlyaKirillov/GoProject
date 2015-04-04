@@ -46,7 +46,7 @@ CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDiv
 CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator = function(oGameTree, sDivId)
 {
     var oDrawing = new CDrawing(oGameTree);
-    oDrawing.Create_BoardCommentsButtonsNavigator(sDivId);
+    oDrawing.Create_MixedFullTemplate(sDivId);
 };
 
 /*

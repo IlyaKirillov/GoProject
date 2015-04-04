@@ -97,7 +97,57 @@ function CDrawingNavigator(oDrawing)
     this.m_nHorScrollTimerId = null;
     this.m_nVerScrollTimerId = null;
 
+    this.m_nHorScrollBlurTimerId = null;
+    this.m_nVerScrollBlurTimerId = null;
+
     var oThis = this;
+
+    var dBlurSpeed = 0.01;
+    function HorScrollBlur()
+    {
+        if (oThis.m_bMouseLock)
+        {
+            oThis.m_nHorScrollBlurTimerId = null;
+            return;
+        }
+
+        var dScrollOpacity   = parseFloat(oThis.HtmlElement.HorScroll.style.opacity);
+        var dScrollBgOpacity = parseFloat(oThis.HtmlElement.HorScrollBG.style.opacity);
+
+        dScrollOpacity   = Math.max(dScrollOpacity - dBlurSpeed, 0);
+        dScrollBgOpacity = Math.max(dScrollBgOpacity - dBlurSpeed, 0);
+
+        oThis.HtmlElement.HorScroll.style.opacity   = dScrollOpacity;
+        oThis.HtmlElement.HorScrollBG.style.opacity = dScrollBgOpacity;
+
+        if (dScrollOpacity > 0.001)
+            oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
+        else
+            oThis.m_nHorScrollBlurTimerId = null;
+    };
+
+    function VerScrollBlur()
+    {
+        if (oThis.m_bMouseLock)
+        {
+            oThis.m_nHorScrollBlurTimerId = null;
+            return;
+        }
+
+        var dScrollOpacity   = parseFloat(oThis.HtmlElement.VerScroll.style.opacity);
+        var dScrollBgOpacity = parseFloat(oThis.HtmlElement.VerScrollBG.style.opacity);
+
+        dScrollOpacity   = Math.max(dScrollOpacity - dBlurSpeed, 0);
+        dScrollBgOpacity = Math.max(dScrollBgOpacity - dBlurSpeed, 0);
+
+        oThis.HtmlElement.VerScroll.style.opacity   = dScrollOpacity;
+        oThis.HtmlElement.VerScrollBG.style.opacity = dScrollBgOpacity;
+
+        if (dScrollOpacity > 0.001)
+            oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
+        else
+            oThis.m_nVerScrollBlurTimerId = null;
+    }
 
     this.private_StartDrawingTimer = function()
     {
@@ -169,6 +219,11 @@ function CDrawingNavigator(oDrawing)
         oThis.private_OnMouseMove(Event);
         oThis.private_UpdateScrollsPos();
 
+        oThis.private_ClearVerScrollBlurTimer();
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
+        oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 500);
+
         return false;
     };
 
@@ -184,6 +239,15 @@ function CDrawingNavigator(oDrawing)
         {
             clearTimeout(oThis.m_nHorScrollTimerId);
             oThis.m_nHorScrollTimerId = null;
+        }
+    };
+
+    this.private_ClearHorScrollBlurTimer = function()
+    {
+        if (null !== oThis.m_nHorScrollBlurTimerId)
+        {
+            clearTimeout(oThis.m_nHorScrollBlurTimerId);
+            oThis.m_nHorScrollBlurTimerId = null;
         }
     };
 
@@ -243,13 +307,16 @@ function CDrawingNavigator(oDrawing)
 
     this.private_OnMouseOverHorScrollBG = function()
     {
+        oThis.private_ClearHorScrollBlurTimer();
+
         oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
     };
 
     this.private_OnMouseOutHorScrollBG = function()
     {
         oThis.private_ClearHorScrollTimer();
-        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+        oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
     };
 
     this.private_ClearVerScrollTimer = function()
@@ -258,6 +325,15 @@ function CDrawingNavigator(oDrawing)
         {
             clearTimeout(oThis.m_nVerScrollTimerId);
             oThis.m_nVerScrollTimerId = null;
+        }
+    };
+
+    this.private_ClearVerScrollBlurTimer = function()
+    {
+        if (null !== oThis.m_nVerScrollBlurTimerId)
+        {
+            clearTimeout(oThis.m_nVerScrollBlurTimerId);
+            oThis.m_nVerScrollBlurTimerId = null;
         }
     };
 
@@ -317,29 +393,34 @@ function CDrawingNavigator(oDrawing)
 
     this.private_OnMouseOverVerScrollBG = function()
     {
+        oThis.private_ClearVerScrollBlurTimer();
         oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
     };
 
     this.private_OnMouseOutVerScrollBG = function()
     {
         oThis.private_ClearVerScrollTimer();
-        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
+        oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
 
     this.private_OnMouseOverHorScroll = function()
     {
+        oThis.private_ClearHorScrollBlurTimer();
+
         oThis.HtmlElement.HorScroll.style.opacity   = 0.7;
         oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
     };
 
     this.private_OnMouseOutHorScroll = function()
     {
-        oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
-        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+        oThis.private_ClearHorScrollTimer();
+        oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
     };
 
     this.private_OnMouseOverVerScroll = function()
     {
+        oThis.private_ClearVerScrollBlurTimer();
         oThis.HtmlElement.VerScroll.style.opacity   = 0.7;
         oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
     };
@@ -347,7 +428,7 @@ function CDrawingNavigator(oDrawing)
     this.private_OnMouseOutVerScroll = function()
     {
         oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
-        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
+        oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
 
     this.private_OnDragStartScroll = function()
@@ -358,6 +439,19 @@ function CDrawingNavigator(oDrawing)
     this.private_OnDragEndScroll = function()
     {
         oThis.m_bMouseLock = false;
+
+        var X = global_mouseEvent.X;
+        var Y = global_mouseEvent.Y;
+
+        var oHorPos = Common_FindPosition(oThis.HtmlElement.HorScrollBG);
+        var nHorX = oHorPos.X, nHorY = oHorPos.Y, nHorW = oThis.HtmlElement.HorScrollBG.clientWidth, nHorH = oThis.HtmlElement.HorScrollBG.clientHeight;
+        if (X < nHorX || X > nHorX + nHorW || Y < nHorY || Y > nHorY + nHorH)
+            oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
+
+        var oVerPos = Common_FindPosition(oThis.HtmlElement.VerScrollBG);
+        var nVerX = oVerPos.X, nVerY = oVerPos.Y, nVerW = oThis.HtmlElement.VerScrollBG.clientWidth, nVerH = oThis.HtmlElement.VerScrollBG.clientHeight;
+        if (X < nVerX || X > nVerX + nVerW || Y < nVerY || Y > nVerY + nVerH)
+            oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
 
     this.private_OnDragHorScroll = function(X, Y)
@@ -515,17 +609,20 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
         this.HtmlElement.HorScroll.style.height     = 8 + "px";
         this.HtmlElement.HorScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
-        this.HtmlElement.HorScroll.style.opacity    = 0.5;
+        this.HtmlElement.HorScroll.style.opacity    = 0;
 
         Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 12, NavH - 12);
 
         this.HtmlElement.HorScroll.onDrag         = this.private_OnDragHorScroll;
         this.HtmlElement.HorScroll.onDragStart    = this.private_OnDragStartScroll;
         this.HtmlElement.HorScroll.onDragEnd      = this.private_OnDragEndScroll;
+
+        this.HtmlElement.HorScrollBG.style.display = "block";
     }
     else
     {
-        this.HtmlElement.HorScroll.style.display = "none";
+        this.HtmlElement.HorScrollBG.style.display = "none";
+        this.HtmlElement.HorScroll.style.display   = "none";
     }
 
     if (_NavH > NavH)
@@ -537,17 +634,20 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
         this.HtmlElement.VerScroll.style.width      = 8 + "px";
         this.HtmlElement.VerScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
-        this.HtmlElement.VerScroll.style.opacity    = 0.5;
+        this.HtmlElement.VerScroll.style.opacity    = 0;
 
         Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 12, NavW - 12, 2, NavH - this.HtmlElement.ScrollH - 2);
 
         this.HtmlElement.VerScroll.onDrag         = this.private_OnDragVerScroll;
         this.HtmlElement.VerScroll.onDragStart    = this.private_OnDragStartScroll;
         this.HtmlElement.VerScroll.onDragEnd      = this.private_OnDragEndScroll;
+
+        this.HtmlElement.VerScrollBG.style.display = "block";
     }
     else
     {
-        this.HtmlElement.VerScroll.style.display = "none";
+        this.HtmlElement.VerScrollBG.style.display = "none";
+        this.HtmlElement.VerScroll.style.display   = "none";
     }
 
     // Этими строками мы сбрасываем последнее состояние отрисовщика, чтобы перерисовка точно состоялась
