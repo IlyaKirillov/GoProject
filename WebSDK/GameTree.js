@@ -686,6 +686,9 @@ CGameTree.prototype.Add_Comment = function(sComment)
     var sOldComment = this.m_oCurNode.Get_Comment();
     this.m_oCurNode.Add_Comment(sComment);
 
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_Comments(this.m_oCurNode.Get_Comment());
+
     if (this.m_oDrawingNavigator && "" === sOldComment && "" !== sComment)
         this.m_oDrawingNavigator.Update();
 };

@@ -12,8 +12,7 @@
 
 function Get_EditorURL(sFileUrl)
 {
-    //return chrome.extension.getURL('content/editor.html') + '?file=' + encodeURIComponent(sFileUrl);
-    return chrome.extension.getURL('editor.html') + '?file=' + encodeURIComponent(sFileUrl);
+    return chrome.extension.getURL('content/editor.html') + '?file=' + encodeURIComponent(sFileUrl);
 }
 
 function Get_HeaderFromHeaders(aHeaders, sHeaderName)
