@@ -2145,20 +2145,27 @@ CDrawingBoard.prototype.private_DrawRulers = function()
         var W = this.m_oImageData.W;
         var H = this.m_oImageData.H;
         var oSize = this.m_oLogicBoard.Get_Size();
+
+        var d        = 2 * this.m_oImageData.StoneDiam / 3;
+        var Rad      = (d - 1) / 2;
+        var Lines    = this.m_oImageData.Lines;
+        var FontSize =  2 * d / 3;
+
+        var bDarkBoard = this.private_GetSettings_DarkBoard();
+        if (bDarkBoard)
+            BoardCanvas.fillStyle = "rgb(255,255,255)";
+        else
+            BoardCanvas.fillStyle = "rgb(0,0,0)";
+
         for (var X = this.m_oViewPort.X0; X <= this.m_oViewPort.X1; X++)
         {
-            var d = 2 * this.m_oImageData.StoneDiam / 3;
-            var Rad = (d - 1) / 2;
-            var Lines = this.m_oImageData.Lines;
             var _X = Lines[X].X - Rad;
             var _Y = this.m_dKoeffOffsetY * H / 3 - Rad;
 
             var Text = Common_X_to_String(X + 1);
-            var FontSize = 2 * d / 3;
             var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
             var sFont = FontSize + "px " + FontFamily;
 
-            BoardCanvas.fillStyle = "rgb(0,0,0)";
             BoardCanvas.font = sFont;
 
             var y_offset = d / 2 + FontSize / 3;
@@ -2172,18 +2179,13 @@ CDrawingBoard.prototype.private_DrawRulers = function()
 
         for (var Y = this.m_oViewPort.Y0; Y <= this.m_oViewPort.Y1; Y++)
         {
-            var d     = 2 * this.m_oImageData.StoneDiam / 3;
-            var Rad   = (d - 1) / 2;
-            var Lines = this.m_oImageData.Lines;
             var _X    = this.m_dKoeffOffsetX * W / 3 - Rad;
             var _Y    = Lines[Y].Y - Rad;
 
             var Text       = (oSize.Y - Y) + "";
-            var FontSize   =  2 * d / 3;
             var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
             var sFont     = FontSize + "px " + FontFamily;
 
-            BoardCanvas.fillStyle = "rgb(0,0,0)";
             BoardCanvas.font      = sFont;
 
             var y_offset = d / 2 + FontSize / 3;
@@ -2499,7 +2501,8 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
     else if (true === event.CtrlKey)
     {
         // Добавляем комментарий с позицией хода.
-        var sComment = Common_XYtoString(X, Y);
+        var nSize = this.m_oLogicBoard.Get_Size().Y;
+        var sComment = Common_XYtoString(X, Y, nSize);
         this.m_oGameTree.Add_Comment(sComment);
     }
     else if (event.ShiftKey)

@@ -94,13 +94,13 @@ function Common_FindPosition( oElement )
     }
 }
 
-function Common_PosValueToString(Value)
+function Common_PosValueToString(Value, nSize)
 {
     var oPos = Common_ValuetoXY(Value);
-    return Common_XYtoString(oPos.X, oPos.Y);
+    return Common_XYtoString(oPos.X, oPos.Y, nSize);
 }
 
-function Common_XYtoString(X,Y)
+function Common_XYtoString(X, Y, nSize)
 {
     var Res = new String();
     switch(X)
@@ -125,7 +125,7 @@ function Common_XYtoString(X,Y)
         case 18: Res = "S"; break;
         case 19: Res = "T"; break;
     }
-    Res += Y;
+    Res += nSize + 1 - Y;
     return Res;
 }
 

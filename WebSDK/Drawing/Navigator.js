@@ -1778,7 +1778,8 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             }
                             case ESettingsNavigatorLabels.MoveCoordinates:
                             {
-                                sText = Common_PosValueToString(oMove.Get_Value());
+                                var nSize = this.m_oGameTree.Get_Board().Get_Size().Y;
+                                sText = Common_PosValueToString(oMove.Get_Value(), nSize);
 
                                 if (sText.length <= 2)
                                     Nodes.font = "bold 10px sans-serif";
