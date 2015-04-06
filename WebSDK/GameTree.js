@@ -372,6 +372,10 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
         this.GoTo_Node(oStartNode);
     }
 
+    var eShowVariants = this.Get_LoadShowVariants();
+    if (ESettingsLoadShowVariants.FromFile !== this.Get_LoadShowVariants())
+        this.m_eShowVariants = eShowVariants;
+
     this.m_nEditingFlags = nEditingFlags;
 
     if (this.m_oDrawingBoard)
@@ -490,11 +494,28 @@ CGameTree.prototype.GoTo_PrevVariant = function()
     if (null !== PrevNode)
     {
         // Ищем ветку с предыдущим вариантом
-        var NextCur = PrevNode.Get_NextCur();
-        if (PrevNode.Get_NextsCount() > 0 && NextCur > 0)
+        var NextCur    = PrevNode.Get_NextCur();
+        var NextsCount = PrevNode.Get_NextsCount();
+        if (NextsCount > 1)
         {
-            var Node = PrevNode.Get_Next(NextCur - 1);
-            this.GoTo_Node(Node);
+            if (this.Is_CycleThroughVariants())
+            {
+                var Node;
+                if (NextCur > 0)
+                    Node = PrevNode.Get_Next(NextCur - 1);
+                else
+                    Node = PrevNode.Get_Next(NextsCount - 1);
+
+                this.GoTo_Node(Node);
+            }
+            else
+            {
+                if (NextCur > 0)
+                {
+                    Node = PrevNode.Get_Next(NextCur - 1);
+                    this.GoTo_Node(Node);
+                }
+            }
         }
     }
 };
@@ -506,10 +527,27 @@ CGameTree.prototype.GoTo_NextVariant = function()
         // Ищем ветку со следующим вариантом
         var NextCur    = PrevNode.Get_NextCur();
         var NextsCount = PrevNode.Get_NextsCount();
-        if (NextCur < NextsCount - 1)
+
+        if (NextsCount > 1)
         {
-            var Node = PrevNode.Get_Next(NextCur + 1);
-            this.GoTo_Node(Node);
+            if (this.Is_CycleThroughVariants())
+            {
+                var Node;
+                if (NextCur < NextsCount - 1)
+                    Node = PrevNode.Get_Next(NextCur + 1);
+                else
+                    Node = PrevNode.Get_Next(0);
+
+                this.GoTo_Node(Node);
+            }
+            else
+            {
+                if (NextCur < NextsCount - 1)
+                {
+                    var Node = PrevNode.Get_Next(NextCur + 1);
+                    this.GoTo_Node(Node);
+                }
+            }
         }
     }
 };
@@ -1532,8 +1570,17 @@ CGameTree.prototype.Update_InterfaceState = function()
         {
             var PrevNextCur = PrevNode.Get_NextCur();
             var PrevNextsCount = PrevNode.Get_NextsCount();
-            oIState.NextVariant = PrevNextCur < PrevNextsCount - 1 ? true : false;
-            oIState.PrevVariant = PrevNextCur > 0 ? true : false;
+
+            if (this.Is_CycleThroughVariants())
+            {
+                oIState.NextVariant = PrevNextsCount > 1 ? true : false;
+                oIState.PrevVariant = PrevNextsCount > 1 ? true : false;
+            }
+            else
+            {
+                oIState.NextVariant = PrevNextCur < PrevNextsCount - 1 ? true : false;
+                oIState.PrevVariant = PrevNextCur > 0 ? true : false;
+            }
         }
         else
         {
@@ -1869,6 +1916,40 @@ CGameTree.prototype.Set_LoadUnfinishedFilesOnLastNode = function(Value)
 CGameTree.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
 {
     return g_oGlobalSettings.Is_LoadUnfinishedFilesOnLastNode();
+};
+CGameTree.prototype.Is_CycleThroughVariants = function()
+{
+    return g_oGlobalSettings.Is_CycleThroughVariants();
+};
+CGameTree.prototype.Set_CycleThroughVariants = function(Value)
+{
+    g_oGlobalSettings.Set_CycleThroughVariants(Value);
+    this.Update_InterfaceState();
+};
+CGameTree.prototype.Get_NavigatorLabel = function()
+{
+    return g_oGlobalSettings.Get_NavigatorLabel();
+};
+CGameTree.prototype.Set_NavigatorLabel = function(eValue)
+{
+    if (eValue !== this.Get_NavigatorLabel())
+    {
+        g_oGlobalSettings.Set_NavigatorLabel(eValue);
+
+        if (this.m_oDrawingNavigator)
+            this.m_oDrawingNavigator.Update();
+    }
+};
+CGameTree.prototype.Get_LoadShowVariants = function()
+{
+    return g_oGlobalSettings.Get_LoadShowVariants();
+};
+CGameTree.prototype.Set_LoadShowVariants = function(eValue)
+{
+    if (eValue !== this.Get_LoadShowVariants())
+    {
+        g_oGlobalSettings.Set_LoadShowVariants(eValue);
+    }
 };
 CGameTree.prototype.Is_Unfinished = function()
 {

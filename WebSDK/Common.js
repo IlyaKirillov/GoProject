@@ -94,6 +94,12 @@ function Common_FindPosition( oElement )
     }
 }
 
+function Common_PosValueToString(Value)
+{
+    var oPos = Common_ValuetoXY(Value);
+    return Common_XYtoString(oPos.X, oPos.Y);
+}
+
 function Common_XYtoString(X,Y)
 {
     var Res = new String();

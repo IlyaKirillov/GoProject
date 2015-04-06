@@ -192,8 +192,6 @@ CDrawingButton.prototype.Init = function(sDivId, oGameTree, nButtonType)
     oDivElement.draggable   = "true";
     oDivElement.ondragstart = this.private_OnDragStart;
 
-    //oDivElement.style.backgroundImage = "url('')";
-
     this.Update_Size();
 };
 CDrawingButton.prototype.Update_Size = function()

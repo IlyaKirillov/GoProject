@@ -472,6 +472,36 @@ CDrawingWindow.prototype.Close = function()
     if (this.m_oGameTree)
         this.m_oGameTree.Focus();
 };
+CDrawingWindow.prototype.Show = function(oPr)
+{
+    var oDiv = this.HtmlElement.Control.HtmlElement;
+
+    oDiv.style.display = "block";
+
+    var nLeft = parseInt(oDiv.style.left);
+    var nTop  = parseInt(oDiv.style.top);
+
+    if (oPr.Drawing)
+    {
+        var oDrawing = oPr.Drawing;
+        var DrawingW = oDrawing.Get_Width();
+        var DrawingH = oDrawing.Get_Height();
+
+        var nThreshold = 100;
+
+        if (nTop > DrawingH - nThreshold)
+            oDiv.style.top = (DrawingH - nThreshold) + "px";
+
+        if (nLeft > DrawingW - nThreshold)
+            oDiv.style.left = (DrawingW - nThreshold) + "px";
+    }
+
+    if (nLeft < 0)
+        oDiv.style.left = "0px";
+
+    if (nTop < 0)
+        oDiv.style.top = "0px";
+};
 CDrawingWindow.prototype.Focus = function()
 {
 
@@ -908,9 +938,11 @@ function CDrawingSettingsWindow()
             Dark        : null
         },
 
-        Sound : null,
-
-        LoadUnfinishedSgf : null
+        Sound                : null,
+        LoadUnfinishedSgf    : null,
+        NavigatorLabel       : null,
+        CycleThroughVariants : null,
+        LoadShowVariants     : null
     };
 }
 
@@ -926,15 +958,31 @@ CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
     this.Set_Caption("Settings");
 
     var oTabs = new CDrawingVerticalTabs();
-    oTabs.Init(this.HtmlElement.ConfirmInnerDiv.id, ["Color Scheme", "Sound", "Loading Settings"], 0, 150);
+    oTabs.Init(this.HtmlElement.ConfirmInnerDiv.id, ["Appearance", "Color Scheme", "Loading Settings"], 0, 150);
 
-    this.private_CreateColorSchemePage(oTabs.Get_TabContent(0), oPr);
-    this.private_CreateSoundPage(oTabs.Get_TabContent(1), oPr);
+    this.private_CreateAppearancePage(oTabs.Get_TabContent(0), oPr);
+    this.private_CreateColorSchemePage(oTabs.Get_TabContent(1), oPr);
     this.private_CreateLoadingSettingsPage(oTabs.Get_TabContent(2), oPr);
 };
 CDrawingSettingsWindow.prototype.Get_DefaultWindowSize = function()
 {
     return {W : 400, H : 180};
+};
+CDrawingSettingsWindow.prototype.Show = function(oPr)
+{
+    CDrawingSettingsWindow.superclass.Show.call(this, oPr);
+
+    // Appearance
+    this.HtmlElement2.CycleThroughVariants.checked = this.m_oGameTree.Is_CycleThroughVariants();
+    this.HtmlElement2.Sound.checked                = this.m_oGameTree.Is_SoundOn();
+    this.HtmlElement2.NavigatorLabel.selectedIndex = this.m_oGameTree.Get_NavigatorLabel();
+
+    // ColorScheme
+    this.private_CheckColorTheme();
+
+    // LoadingSettings
+    this.HtmlElement2.LoadUnfinishedSgf.checked      = this.m_oGameTree.Is_LoadUnfinishedFilesOnLastNode();
+    this.HtmlElement2.LoadShowVariants.selectedIndex = this.m_oGameTree.Get_LoadShowVariants();
 };
 CDrawingSettingsWindow.prototype.private_CreatePage = function(oDiv)
 {
@@ -950,10 +998,18 @@ CDrawingSettingsWindow.prototype.private_CreatePage = function(oDiv)
 
     return oDivMainPart;
 };
+CDrawingSettingsWindow.prototype.private_CreateAppearancePage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "A";
+
+    this.HtmlElement2.CycleThroughVariants = this.private_CreateCheckBox(oDivMainPart, sDivId + "C", this.m_oGameTree.Is_CycleThroughVariants(), "Cycle through variants");
+    this.HtmlElement2.Sound                = this.private_CreateCheckBox(oDivMainPart, sDivId + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
+    this.HtmlElement2.NavigatorLabel       = this.private_CreateSelect(oDivMainPart, sDivId + "N", this.m_oGameTree.Get_NavigatorLabel(), ["No labels", "Move numbers", "Move numbers current variant only", "Move coordinates"], "Labels in navigator");
+};
 CDrawingSettingsWindow.prototype.private_CreateColorSchemePage = function(oDiv, oPr)
 {
     var oDivMainPart = this.private_CreatePage(oDiv);
-    this.m_oGameTree = oPr.GameTree;
     var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "CS";
 
     var sThemeId = "ThemeId";
@@ -965,21 +1021,13 @@ CDrawingSettingsWindow.prototype.private_CreateColorSchemePage = function(oDiv, 
 
     this.private_CheckColorTheme();
 };
-CDrawingSettingsWindow.prototype.private_CreateSoundPage = function(oDiv, oPr)
-{
-    var oDivMainPart = this.private_CreatePage(oDiv);
-    this.m_oGameTree = oPr.GameTree;
-    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "S";
-
-    this.HtmlElement2.Sound = this.private_CreateCheckBox(oDivMainPart, sDivId + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
-};
 CDrawingSettingsWindow.prototype.private_CreateLoadingSettingsPage = function(oDiv, oPr)
 {
     var oDivMainPart = this.private_CreatePage(oDiv);
-    this.m_oGameTree = oPr.GameTree;
     var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "LS";
 
     this.HtmlElement2.LoadUnfinishedSgf = this.private_CreateCheckBox(oDivMainPart, sDivId + "U", this.m_oGameTree.Is_LoadUnfinishedFilesOnLastNode(), "Load unfinished files on the last node");
+    this.HtmlElement2.LoadShowVariants  = this.private_CreateSelect(oDivMainPart, sDivId + "V", this.m_oGameTree.Get_LoadShowVariants(), ["Don't show variants", "Show variations of successor node (children)", "Show variations of current node   (siblings)", "Load option from file"], "Show variants");
 };
 CDrawingSettingsWindow.prototype.Handle_OK = function()
 {
@@ -1001,6 +1049,9 @@ CDrawingSettingsWindow.prototype.Handle_OK = function()
         this.m_oGameTree.TurnOff_Sound();
 
     this.m_oGameTree.Set_LoadUnfinishedFilesOnLastNode(this.HtmlElement2.LoadUnfinishedSgf.checked ? true : false);
+    this.m_oGameTree.Set_NavigatorLabel(this.HtmlElement2.NavigatorLabel.selectedIndex);
+    this.m_oGameTree.Set_CycleThroughVariants(this.HtmlElement2.CycleThroughVariants.checked ? true : false);
+    this.m_oGameTree.Set_LoadShowVariants(this.HtmlElement2.LoadShowVariants.selectedIndex);
 
     var oBoard     = this.m_oGameTree.Get_DrawingBoard();
     var oNavigator = this.m_oGameTree.Get_DrawingNavigator();
@@ -1010,6 +1061,8 @@ CDrawingSettingsWindow.prototype.Handle_OK = function()
 
     if (oNavigator && true === oSchemeChange.Navigator)
         oNavigator.Update_All();
+
+
 
     this.Close();
 };
@@ -1081,6 +1134,38 @@ CDrawingSettingsWindow.prototype.private_CreateCheckBox = function(oParentElemen
     }, false);
 
     return oElement;
+};
+CDrawingSettingsWindow.prototype.private_CreateSelect = function(oParentElement, sName, nSelectedIndex, aElements, sLabelText)
+{
+    var oMainElement = document.createElement("div");
+    oMainElement.style.paddingLeft   = "10px";
+    oMainElement.style.paddingBottom = "5px";
+
+    oMainElement.style.fontFamily          = "Tahoma, Sans serif";
+    oMainElement.style.fontSize            = "9pt";
+    oMainElement.style.height              = "12px";
+    oMainElement.style.lineHeight          = "12px";
+
+    oParentElement.appendChild(oMainElement);
+
+    var oLabel = document.createElement("div");
+    Common.Set_InnerTextToElement(oLabel, sLabelText);
+    oLabel.style.paddingBottom = "5px";
+    oMainElement.appendChild(oLabel);
+
+    var oSelect = document.createElement("select");
+    oSelect.style.width = "170px";
+    for (var nIndex = 0, nCount = aElements.length; nIndex < nCount; nIndex++)
+    {
+        var oOption = document.createElement("option");
+        oOption.value = aElements[nIndex];
+        Common.Set_InnerTextToElement(oOption, aElements[nIndex]);
+        oSelect.appendChild(oOption);
+    }
+    oSelect.selectedIndex = nSelectedIndex;
+    oMainElement.appendChild(oSelect);
+
+    return oSelect;
 };
 CDrawingSettingsWindow.prototype.private_CheckColorTheme = function()
 {
@@ -1711,63 +1796,39 @@ var EWindowType =
     About         : 8
 };
 
-
+var g_aWindows = {};
 function CreateWindow(sDrawingId, nWindowType, oPr)
 {
-    var sApp = "unknownwindow";
-    switch (nWindowType)
+    if (g_aWindows[nWindowType])
     {
-        case EWindowType.GameInfo      : sApp = "Info"; break;
-        case EWindowType.Settings      : sApp = "Settings"; break;
-        case EWindowType.Error         : sApp = "Error"; break;
-        case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
-        case EWindowType.CountColors   : sApp = "CountColors"; break;
-        case EWindowType.GifWriter     : sApp = "GifWriter"; break;
-        case EWindowType.About         : sApp = "About"; break;
-    }
-    var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
-
-    var oDiv = document.getElementById(sId);
-    if (oDiv)
-    {
-        oDiv.style.display = "block";
-
-        var nLeft = parseInt(oDiv.style.left);
-        var nTop  = parseInt(oDiv.style.top);
-
-        if (oPr.Drawing)
-        {
-            var oDrawing = oPr.Drawing;
-            var DrawingW = oDrawing.Get_Width();
-            var DrawingH = oDrawing.Get_Height();
-
-            var nThreshold = 100;
-
-            if (nTop > DrawingH - nThreshold)
-                oDiv.style.top = (DrawingH - nThreshold) + "px";
-
-            if (nLeft > DrawingW - nThreshold)
-                oDiv.style.left = (DrawingW - nThreshold) + "px";
-        }
-
-        if (nLeft < 0)
-            oDiv.style.left = "0px";
-
-        if (nTop < 0)
-            oDiv.style.top = "0px";
+        var oWindow = g_aWindows[nWindowType];
+        oWindow.Show(oPr);
+        return oWindow;
     }
     else
     {
-        oDiv = document.createElement("div");
+        var sApp = "unknownwindow";
+        switch (nWindowType)
+        {
+            case EWindowType.GameInfo      : sApp = "Info"; break;
+            case EWindowType.Settings      : sApp = "Settings"; break;
+            case EWindowType.Error         : sApp = "Error"; break;
+            case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
+            case EWindowType.CountColors   : sApp = "CountColors"; break;
+            case EWindowType.GifWriter     : sApp = "GifWriter"; break;
+            case EWindowType.About         : sApp = "About"; break;
+        }
+        var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
+
+        var oDiv = document.createElement("div");
         oDiv.setAttribute("id", sId);
         oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:500px;height:500px;left:300px;top:300px;");
         oDiv.setAttribute("oncontextmenu", "return false;");
-        var aBody = document.getElementsByTagName('body');
 
-        if (aBody.length > 0)
+        if (oPr.Drawing)
         {
-            var oBody = aBody[0];
-            oBody.appendChild(oDiv);
+            var oDrawingDiv = oPr.Drawing.Get_MainDiv();
+            oDrawingDiv.appendChild(oDiv);
 
             var oWindow = null;
 
@@ -1787,6 +1848,8 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 oWindow.Init(sId, oPr);
                 oWindow.Update_Size(true);
             }
+
+            g_aWindows[nWindowType] = oWindow;
 
             return oWindow;
         }

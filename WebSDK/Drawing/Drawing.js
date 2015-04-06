@@ -18,6 +18,22 @@ var EColorScheme =
     Dark        : 4
 };
 
+var ESettingsNavigatorLabels =
+{
+    Empty                     : 0,
+    MoveNumbers               : 1,
+    MoveNumbersCurrentVariant : 2,
+    MoveCoordinates           : 3
+};
+
+var ESettingsLoadShowVariants =
+{
+    None     : 0,
+    Curr     : 1,
+    Next     : 2,
+    FromFile : 3
+};
+
 function CSettings()
 {
     this.m_bSound = true;
@@ -49,12 +65,18 @@ function CSettings()
 
     this.m_bLoadUnfinishedFilesOnLastNode = false;
     this.m_bRulers                        = false;
+    this.m_bCycleThroughVariants          = false;
+    this.m_eNavigatorLabels               = ESettingsNavigatorLabels.MoveNumbers;
+    this.m_eLoadShowVariants              = ESettingsLoadShowVariants.FromFile;
 }
 CSettings.prototype.Load_FromLocalStorage = function()
 {
-    // Sound
-    var sSound = Common.Get_LocalStorageItem("Sound");
-    this.m_bSound = (sSound === "0" ? false : true);
+    // Appearance
+    this.m_bCycleThroughVariants = ("1" === Common.Get_LocalStorageItem("CycleThroughVariants") ? true : false);
+    this.m_bSound                = ("0" === Common.Get_LocalStorageItem("Sound") ? false : true);
+
+    var sNavigatorLabels = Common.Get_LocalStorageItem("NavigatorLabels");
+    this.m_eNavigatorLabels = (!sNavigatorLabels || "" === sNavigatorLabels ? ESettingsNavigatorLabels.MoveNumbers : parseInt(sNavigatorLabels));
 
     // ColorScheme
     var eColorScheme = EColorScheme.TrueColor;
@@ -69,8 +91,10 @@ CSettings.prototype.Load_FromLocalStorage = function()
     this.Set_ColorScheme(eColorScheme);
 
     // Loading Settings
-    var sLoadUnfinishedFilesOnLastNode = Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode");
-    this.m_bLoadUnfinishedFilesOnLastNode = (sLoadUnfinishedFilesOnLastNode === "0" ? false : true);
+    this.m_bLoadUnfinishedFilesOnLastNode = ("0" === Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode") ? false : true);
+
+    var sLoadShowVariants = Common.Get_LocalStorageItem("ShowVariants");
+    this.m_eLoadShowVariants = (!sLoadShowVariants || "" === sLoadShowVariants ? ESettingsLoadShowVariants.FromFile : parseInt(sLoadShowVariants));
 
     // Rulers
     var sRulers = Common.Get_LocalStorageItem("Rulers");
@@ -102,6 +126,15 @@ CSettings.prototype.Set_LoadUnfinishedFilesOnLastNode = function(Value)
 CSettings.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
 {
     return this.m_bLoadUnfinishedFilesOnLastNode;
+};
+CSettings.prototype.Set_CycleThroughVariants = function(Value)
+{
+    this.m_bCycleThroughVariants = Value;
+    Common.Set_LocalStorageItem("CycleThroughVariants", Value === true ? "1" : "0");
+};
+CSettings.prototype.Is_CycleThroughVariants = function()
+{
+    return this.m_bCycleThroughVariants;
 };
 CSettings.prototype.Set_ColorScheme = function(eScheme)
 {
@@ -219,7 +252,24 @@ CSettings.prototype.Set_ColorScheme = function(eScheme)
 
     return {Board : bBoardChange, Navigator : bNavigatorChange};
 };
-
+CSettings.prototype.Get_NavigatorLabel = function()
+{
+    return this.m_eNavigatorLabels;
+};
+CSettings.prototype.Set_NavigatorLabel = function(eValue)
+{
+    this.m_eNavigatorLabels = eValue;
+    Common.Set_LocalStorageItem("NavigatorLabels", eValue);
+};
+CSettings.prototype.Get_LoadShowVariants = function()
+{
+    return this.m_eLoadShowVariants;
+};
+CSettings.prototype.Set_LoadShowVariants = function(eValue)
+{
+    this.m_eLoadShowVariants = eValue;
+    Common.Set_LocalStorageItem("ShowVariants", eValue);
+};
 var g_oGlobalSettings = new CSettings();
 
 function CDrawing(oGameTree)
@@ -335,6 +385,10 @@ CDrawing.prototype.Get_Height = function()
         return parseInt(this.m_oMainDiv.clientHeight);
 
     return 0;
+};
+CDrawing.prototype.Get_MainDiv = function()
+{
+    return this.m_oMainDiv;
 };
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {
@@ -813,6 +867,8 @@ CDrawing.prototype.private_SetMainDiv = function(sDivId, oMainControl)
 {
     this.m_oMainDiv     = document.getElementById(sDivId);
     this.m_oMainControl = oMainControl;
+
+    this.m_oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
 };
 CDrawing.prototype.private_ClearMainDiv = function()
 {
@@ -821,6 +877,8 @@ CDrawing.prototype.private_ClearMainDiv = function()
 
     if (this.m_oMainControl)
         this.m_oMainControl.Clear();
+
+    g_aWindows = {};
 };
 CDrawing.prototype.private_UpdateSize = function(bForce)
 {

@@ -1732,11 +1732,63 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         var bCurVariant = Value.Is_OnCurrentVariant();
 
                         // Value - нода
-                        var oMove = Value.Get_Move();
+                        var oMove     = Value.Get_Move();
                         var nMoveType = oMove.Get_Type();
-                        var sMove = "" +  Value.Get_NavigatorInfo().Num;
-                        var nTextW = Nodes.measureText(sMove).width;
-                        var sComment = Value.Get_Comment();
+                        var sComment  = Value.Get_Comment();
+
+                        var sText = "";
+                        var nTextShift = 0;
+                        switch(g_oGlobalSettings.Get_NavigatorLabel())
+                        {
+                            case ESettingsNavigatorLabels.Empty:
+                            {
+                                sText = "";
+                                break;
+                            }
+                            case ESettingsNavigatorLabels.MoveNumbers:
+                            {
+                                sText = "" +  Value.Get_NavigatorInfo().Num;
+
+                                if (sText.length <= 2)
+                                    Nodes.font = "bold 10px sans-serif";
+                                else
+                                {
+                                    Nodes.font = "bold 9px sans-serif";
+                                    nTextShift = -1;
+                                }
+
+                                break;
+                            }
+                            case ESettingsNavigatorLabels.MoveNumbersCurrentVariant:
+                            {
+                                if (bCurVariant)
+                                    sText = "" +  Value.Get_NavigatorInfo().Num;
+                                else
+                                    sText = "";
+
+                                if (sText.length <= 2)
+                                    Nodes.font = "bold 10px sans-serif";
+                                else
+                                {
+                                    Nodes.font = "bold 9px sans-serif";
+                                    nTextShift = -1;
+                                }
+
+                                break;
+                            }
+                            case ESettingsNavigatorLabels.MoveCoordinates:
+                            {
+                                sText = Common_PosValueToString(oMove.Get_Value());
+
+                                if (sText.length <= 2)
+                                    Nodes.font = "bold 10px sans-serif";
+                                else
+                                    Nodes.font = "bold 8px sans-serif";
+
+                                break;
+                            }
+                        }
+                        var nTextW = Nodes.measureText(sText).width;
 
                         if (BOARD_BLACK === nMoveType)
                         {
@@ -1747,21 +1799,11 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
                             if ("" === sComment)
                             {
-                                var nAdd = 0;
-                                if (sMove.length <= 2)
+                                if ("" !== sText)
                                 {
-                                    Nodes.font = "bold 10px sans-serif";
-                                    nTextW = Nodes.measureText(sMove).width;
+                                    Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
+                                    Nodes.fillText(sText, _x + 12 - nTextW / 2 + nTextShift, _y + 24 / 2 + 3);
                                 }
-                                else
-                                {
-                                    Nodes.font = "bold 9px sans-serif";
-                                    nTextW = Nodes.measureText(sMove).width;
-                                    nAdd = -1;
-                                }
-
-                                Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
-                                Nodes.fillText( sMove, _x + 12 - nTextW / 2 + nAdd, _y + 24 / 2 + 3 );
                             }
                             else
                             {
@@ -1777,21 +1819,11 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
                             if ("" === sComment)
                             {
-                                var nAdd = 0;
-                                if (sMove.length <= 2)
+                                if ("" !== sText)
                                 {
-                                    Nodes.font = "bold 10px sans-serif";
-                                    nTextW = Nodes.measureText(sMove).width;
+                                    Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );
+                                    Nodes.fillText(sText, _x + 12 - nTextW / 2 + nTextShift, _y + 24 / 2 + 3);
                                 }
-                                else
-                                {
-                                    Nodes.font = "bold 9px sans-serif";
-                                    nTextW = Nodes.measureText(sMove).width;
-                                    nAdd = -1;
-                                }
-
-                                Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
-                                Nodes.fillText( sMove, _x + 12 - nTextW / 2 + nAdd, _y + 24 / 2 + 3 );
                             }
                             else
                             {
