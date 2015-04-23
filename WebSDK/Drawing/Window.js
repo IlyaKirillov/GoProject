@@ -1226,6 +1226,9 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
     oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oBoardControl);
 
+    this.m_oBoardDiv = oBoardElement;
+    this.m_oBoardControl = oBoardControl;
+
     var oDrawingBoard = new CDrawingBoard();
     oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
     oDrawingBoard.Set_EstimateMode(this);
@@ -1244,6 +1247,24 @@ CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, White
     var sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ")";
     this.Set_Caption(sCaption);
 };
+CDrawingScoreEstimateWindow.prototype.Show = function(oPr)
+{
+    while (this.m_oBoardDiv.firstChild)
+        this.m_oBoardDiv.removeChild(this.m_oBoardDiv.firstChild);
+
+    if (this.m_oBoardControl)
+        this.m_oBoardControl.Clear();
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(this.m_oBoardDiv.id, oPr.GameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_EstimateMode(this);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+
+    CDrawingScoreEstimateWindow.superclass.Show.apply(this, arguments);
+    // Для перерисовки позиции
+    this.Update_Size(true);
+}
 
 function CDrawingCountColorsWindow()
 {

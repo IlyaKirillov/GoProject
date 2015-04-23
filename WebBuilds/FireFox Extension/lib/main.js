@@ -77,7 +77,13 @@ CSgfListener.prototype =
     onStopRequest: function(request, context, statusCode)
     {
         var sExt = (this.ext ? this.ext : "sgf");
-        var sFileText = Encode_Base64_UrlSafe(Encode_UTF8(sExt + Decode_UTF8(this.receivedData.join())));
+        var sData = "";
+        for (var nIndex = 0, nCount = this.receivedData.length; nIndex < nCount; nIndex++)
+        {
+            sData += this.receivedData[nIndex];
+        }
+
+        var sFileText = Encode_Base64_UrlSafe(Encode_UTF8(sExt + Decode_UTF8(sData)));
         var sUrl = self.data.url('editor.html') + '?file=' + sFileText;
 
         if (null !== this.tab)

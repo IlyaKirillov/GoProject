@@ -250,9 +250,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     if (this.m_oDrawing)
         this.m_oDrawing.Register_Board(this);
 
-    this.m_oGameTree   = GameTree;
-    this.m_oLogicBoard = GameTree.Get_Board();
-    this.m_oGameTree.Set_DrawingBoard(this);
+    this.Set_GameTree(GameTree);
 
     this.HtmlElement.Control = CreateControlContainer(sName);
     var oElement = this.HtmlElement.Control.HtmlElement;
@@ -574,6 +572,21 @@ CDrawingBoard.prototype.Set_EstimateMode = function(oEventsCatcher)
     this.m_oEstimateEventsCatcher = oEventsCatcher;
     this.Set_Mode(EBoardMode.ScoreEstimate);
 };
+CDrawingBoard.prototype.Set_GameTree = function(oGameTree)
+{
+    this.m_oGameTree   = oGameTree;
+    this.m_oLogicBoard = oGameTree.Get_Board();
+    oGameTree.Set_DrawingBoard(this);
+}
+CDrawingBoard.prototype.Estimate_Scores = function()
+{
+    this.m_oLogicBoard.Init_ScoreEstimate();
+    var oResult = this.m_oLogicBoard.Estimate_Scores(this);
+    if (this.m_oEstimateEventsCatcher)
+        this.m_oEstimateEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
+
+    this.m_oGameTree.Update_InterfaceState();
+}
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
     if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE) && eMode !== EBoardMode.ScoreEstimate)
@@ -594,10 +607,7 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
         }
         else if (EBoardMode.ScoreEstimate === eMode)
         {
-            this.m_oLogicBoard.Init_ScoreEstimate();
-            var oResult = this.m_oLogicBoard.Estimate_Scores(this);
-            if (this.m_oEstimateEventsCatcher)
-                this.m_oEstimateEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
+            this.Estimate_Scores();
         }
 
         this.m_oGameTree.Update_InterfaceState();
@@ -2830,6 +2840,11 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
         this.m_oGameTree.GoTo_NextVariant();
         bRetValue = true;
     }
+    else if (65 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey)
+    {
+        this.private_DrawLogo();
+        bRetValue = true;
+    }
     else if (67 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + C
     {
         this.m_oGameTree.Copy_ColorMapFromPrevNode();
@@ -3160,5 +3175,19 @@ CDrawingBoard.prototype.private_DrawLogo = function()
         }
 
     }
+};
+CDrawingBoard.prototype.Clear_Board = function()
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    this.HtmlElement.Board    .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Lines    .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Stones   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Colors   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Shadow   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Variants .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Marks    .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Target   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
 };
 
