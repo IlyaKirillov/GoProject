@@ -21,7 +21,8 @@ var EBoardMode =
     AddMarkTx     : 7,
     AddMarkNum    : 8,
     ScoreEstimate : 9,
-    AddMarkColor  : 10
+    AddMarkColor  : 10,
+    ViewPort      : 11
 };
 
 function CDrawingBoard(oDrawing)
@@ -98,6 +99,7 @@ function CDrawingBoard(oDrawing)
         Shadow   : {Control : null}, // Канва для теней от камней.
         Variants : {Control : null}, // Канва для отрисовки вариантов.
         Marks    : {Control : null}, // Канва для отрисовки отметок
+        Select   : {Control : null}, // Канва для отрисовки селекта
         Target   : {Control : null}, // Канва для отрисовки курсора в виде камня.
         Event    : {Control : null}, // Div для обработки сообщений мыши и клавиатуры.
 
@@ -112,7 +114,9 @@ function CDrawingBoard(oDrawing)
 
     // Параметры, которые контролируют, какую часть доски мы отрисовываем
     this.m_oViewPort = {X0 : 0, Y0 : 0, X1 : 18, Y1 : 18};
+    this.m_oViewPortSelection = {Start : false, StartX : -1, StartY : -1, EndX : -1, EndY : -1};
 
+    this.m_oEventsCatcher = null;
     this.m_oPresentation = null;
 
     this.m_bMouseDown = false;
@@ -125,11 +129,17 @@ function CDrawingBoard(oDrawing)
         var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
         oPos = oThis.private_GetBoardPosByXY(oPos.X, oPos.Y);
         oThis.private_MoveTarget(oPos.X, oPos.Y, global_mouseEvent, false);
+        oThis.private_HandleMouseMove(oPos.X, oPos.Y, global_mouseEvent);
     };
     this.private_OnMouseOut = function(e)
     {
         check_MouseMoveEvent(e);
-        oThis.m_bMouseDown = false;
+
+        if (true === oThis.m_bMouseDown)
+        {
+            oThis.m_bMouseDown = false;
+            oThis.private_OnMouseUp(e);
+        }
         oThis.private_HideTarget();
     };
     this.private_OnMouseDown = function(e)
@@ -146,7 +156,12 @@ function CDrawingBoard(oDrawing)
     };
     this.private_OnMouseUp = function(e)
     {
+        check_MouseMoveEvent(e);
         oThis.m_bMouseDown = false;
+
+        var oPos = oThis.private_UpdateMousePos(global_mouseEvent.X, global_mouseEvent.Y);
+        oPos = oThis.private_GetBoardPosByXY(oPos.X, oPos.Y);
+        oThis.private_HandleMouseUp(oPos.X, oPos.Y, global_mouseEvent);
     };
     this.private_OnKeyDown = function(e)
     {
@@ -263,6 +278,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     var sVariantsName = sName + "_VariantsCanvas";
     var sMarksName    = sName + "_MarksCanvas";
     var sTargetName   = sName + "_TargetCanvas";
+    var sSelectName   = sName + "_SelectCanvas";
     var sEventName    = sName + "_EventDiv";
 
     // Сначала заполняем Div нужными нам элементами
@@ -273,6 +289,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     this.private_CreateCanvasElement(oElement, sStonesName);
     this.private_CreateCanvasElement(oElement, sVariantsName);
     this.private_CreateCanvasElement(oElement, sMarksName);
+    this.private_CreateCanvasElement(oElement, sSelectName);
     this.private_CreateCanvasElement(oElement, sTargetName);
     var oEventDiv = this.private_CreateDivElement(oElement, sEventName);
 
@@ -286,6 +303,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     this.private_FillHtmlElement(this.HtmlElement.Stones,   oControl, sStonesName);
     this.private_FillHtmlElement(this.HtmlElement.Variants, oControl, sVariantsName);
     this.private_FillHtmlElement(this.HtmlElement.Marks,    oControl, sMarksName);
+    this.private_FillHtmlElement(this.HtmlElement.Select,   oControl, sSelectName);
     this.private_FillHtmlElement(this.HtmlElement.Target,   oControl, sTargetName);
     this.private_FillHtmlElement(this.HtmlElement.Event,    oControl, sEventName);
 
@@ -327,6 +345,10 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
 
         this.On_Resize(true);
     }
+};
+CDrawingBoard.prototype.Get_Rulers = function()
+{
+    return this.m_bRulers;
 };
 CDrawingBoard.prototype.Set_ShellWhiteStones = function(Value)
 {
@@ -419,6 +441,19 @@ CDrawingBoard.prototype.Set_ViewPort = function(X0, Y0, X1, Y1)
         this.m_oViewPort.Y0 = 0;
         this.m_oViewPort.Y1 = nSize - 1;
     }
+};
+CDrawingBoard.prototype.Get_ViewPort = function()
+{
+    return this.m_oViewPort;
+};
+CDrawingBoard.prototype.Get_SelectedViewPort = function()
+{
+    var X0 = Math.min(this.m_oViewPortSelection.StartX, this.m_oViewPortSelection.EndX);
+    var X1 = Math.max(this.m_oViewPortSelection.StartX, this.m_oViewPortSelection.EndX);
+    var Y0 = Math.min(this.m_oViewPortSelection.StartY, this.m_oViewPortSelection.EndY);
+    var Y1 = Math.max(this.m_oViewPortSelection.StartY, this.m_oViewPortSelection.EndY);
+
+    return {X0 : X0, Y0 : Y0, X1 : X1, Y1 : Y1};
 };
 CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 {
@@ -547,6 +582,16 @@ CDrawingBoard.prototype.Remove_Mark = function(X, Y)
     if (Place === this.m_oLastMoveMark)
         this.m_oMarks["" + Place] = new CDrawingMark(X, Y, EDrawingMark.Lm, "");
 };
+CDrawingBoard.prototype.Get_Mark = function(X, Y)
+{
+    var Place = Common_XYtoValue(X, Y);
+    var Mark = this.m_oMarks["" + Place];
+
+    if (Mark)
+        return Mark;
+
+    return null;
+};
 CDrawingBoard.prototype.Add_Mark = function(Mark)
 {
     this.private_SetMark(Mark.Get_X(), Mark.Get_Y(), Mark);
@@ -569,8 +614,12 @@ CDrawingBoard.prototype.Set_LastMoveMark = function(X, Y)
 };
 CDrawingBoard.prototype.Set_EstimateMode = function(oEventsCatcher)
 {
-    this.m_oEstimateEventsCatcher = oEventsCatcher;
+    this.m_oEventsCatcher = oEventsCatcher;
     this.Set_Mode(EBoardMode.ScoreEstimate);
+};
+CDrawingBoard.prototype.Set_ViewPortMode = function()
+{
+    this.Set_Mode(EBoardMode.ViewPort);
 };
 CDrawingBoard.prototype.Set_GameTree = function(oGameTree)
 {
@@ -582,14 +631,14 @@ CDrawingBoard.prototype.Estimate_Scores = function()
 {
     this.m_oLogicBoard.Init_ScoreEstimate();
     var oResult = this.m_oLogicBoard.Estimate_Scores(this);
-    if (this.m_oEstimateEventsCatcher)
-        this.m_oEstimateEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
+    if (this.m_oEventsCatcher)
+        this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
 
     this.m_oGameTree.Update_InterfaceState();
 }
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
-    if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE) && eMode !== EBoardMode.ScoreEstimate)
+    if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE) && eMode !== EBoardMode.ScoreEstimate && eMode !== EBoardMode.ViewPort)
         return;
 
     if (this.m_eMode !== eMode)
@@ -919,6 +968,7 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     this.HtmlElement.Variants.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Marks.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Target.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Select.Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
 };
 CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
 {
@@ -2488,6 +2538,91 @@ CDrawingBoard.prototype.private_HandleMouseDown = function(X, Y, event)
         case EBoardMode.AddMarkNum   : this.private_AddNum           (X,Y, event); break;
         case EBoardMode.ScoreEstimate: this.private_ScoreEstimate    (X,Y, event); break;
         case EBoardMode.AddMarkColor : this.private_AddColorMark     (X,Y, event); break;
+        case EBoardMode.ViewPort     : this.private_StartViewPortSelection(X,Y, event); break;
+    }
+};
+CDrawingBoard.prototype.private_HandleMouseUp = function(X, Y, event)
+{
+    if (EBoardMode.ViewPort === this.m_eMode)
+        this.private_EndViewPortSelection(X, Y);
+
+    this.private_UpdateSelectCanvas();
+};
+CDrawingBoard.prototype.private_HandleMouseMove = function(X, Y, event)
+{
+    if (EBoardMode.ViewPort === this.m_eMode)
+        this.private_MoveViewPortSelection(X, Y);
+
+    this.private_UpdateSelectCanvas();
+};
+CDrawingBoard.prototype.private_StartViewPortSelection = function(X, Y, event)
+{
+    this.m_oViewPortSelection.Start  = true;
+    this.m_oViewPortSelection.StartX = X;
+    this.m_oViewPortSelection.StartY = Y;
+    this.m_oViewPortSelection.EndX   = X;
+    this.m_oViewPortSelection.EndY   = Y;
+
+    this.private_UpdateSelectCanvas();
+
+};
+CDrawingBoard.prototype.private_MoveViewPortSelection = function(X, Y)
+{
+    if (true === this.m_oViewPortSelection.Start)
+    {
+        this.m_oViewPortSelection.EndX   = X;
+        this.m_oViewPortSelection.EndY   = Y;
+    }
+};
+CDrawingBoard.prototype.private_EndViewPortSelection = function(X, Y)
+{
+    if (true === this.m_oViewPortSelection.Start)
+    {
+        this.m_oViewPortSelection.Start  = false;
+        this.m_oViewPortSelection.EndX   = X;
+        this.m_oViewPortSelection.EndY   = Y;
+    }
+};
+CDrawingBoard.prototype.private_UpdateSelectCanvas = function()
+{
+    if (EBoardMode.ViewPort === this.m_eMode && true === this.m_oViewPortSelection.Start)
+    {
+        var W = this.m_oImageData.W;
+        var H = this.m_oImageData.H;
+        var Lines = this.m_oImageData.Lines;
+
+        var oCanvas = this.HtmlElement.Select.Control.HtmlElement.getContext("2d");
+        oCanvas.clearRect(0, 0, W, H);
+
+        var X0 = this.m_oViewPortSelection.StartX - 1;
+        var Y0 = this.m_oViewPortSelection.StartY - 1;
+        var X1 = this.m_oViewPortSelection.EndX - 1;
+        var Y1 = this.m_oViewPortSelection.EndY - 1;
+
+        if (X0 > X1)
+        {
+            var Temp = X1;
+            X1 = X0;
+            X0 = Temp;
+        }
+
+        if (Y0 > Y1)
+        {
+            var Temp = Y1;
+            Y1 = Y0;
+            Y0 = Temp;
+        }
+
+        var oColor = new CColor(107, 112, 122, 128);
+
+        oCanvas.fillStyle = oColor.ToString();
+        oCanvas.beginPath();
+        oCanvas.moveTo(Lines[X0].X_L2, Lines[Y0].Y_L2);
+        oCanvas.lineTo(Lines[X1].X_G2, Lines[Y0].Y_L2);
+        oCanvas.lineTo(Lines[X1].X_G2, Lines[Y1].Y_G2);
+        oCanvas.lineTo(Lines[X0].X_L2, Lines[Y1].Y_G2);
+        oCanvas.closePath();
+        oCanvas.fill();
     }
 };
 CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
@@ -2781,14 +2916,14 @@ CDrawingBoard.prototype.private_ScoreEstimate = function(X, Y, event)
 {
     this.m_oLogicBoard.Mark_DeadGroupForEstimate(X, Y);
     var oResult = this.m_oLogicBoard.Estimate_Scores(this);
-    if (this.m_oEstimateEventsCatcher)
-        this.m_oEstimateEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
+    if (this.m_oEventsCatcher)
+        this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
     this.Draw_Marks();
     this.private_UpdateTarget();
 };
 CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 {
-    if (EBoardMode.ScoreEstimate === this.m_eMode)
+    if (EBoardMode.ScoreEstimate === this.m_eMode || EBoardMode.ViewPort === this.m_eMode)
         return;
 
     var KeyCode = Event.KeyCode;
@@ -2848,6 +2983,11 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     else if (67 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + C
     {
         this.m_oGameTree.Copy_ColorMapFromPrevNode();
+        bRetValue = true;
+    }
+    else if (68 === KeyCode && true === Event.CtrlKey) // Ctrl + D
+    {
+        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.DiagramSL, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
         bRetValue = true;
     }
     else if (69 === KeyCode && true === Event.CtrlKey) // Ctrl + E
@@ -2964,13 +3104,20 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     }
     else if (86 === KeyCode && true === Event.CtrlKey) // Ctrl + V
     {
-        var eType = this.m_oGameTree.Get_ShowVariants();
+        if (true === Event.ShiftKey)
+        {
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ViewPort, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+        }
+        else
+        {
+            var eType = this.m_oGameTree.Get_ShowVariants();
 
-        eType++;
-        if (eType > EShowVariants.Max)
-            eType = EShowVariants.Min;
+            eType++;
+            if (eType > EShowVariants.Max)
+                eType = EShowVariants.Min;
 
-        this.m_oGameTree.Set_ShowVariants(eType);
+            this.m_oGameTree.Set_ShowVariants(eType);
+        }
         bRetValue = true;
     }
     else if (112 === KeyCode) // F1
@@ -3189,5 +3336,6 @@ CDrawingBoard.prototype.Clear_Board = function()
     this.HtmlElement.Variants .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Marks    .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Target   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+    this.HtmlElement.Select   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
 };
 

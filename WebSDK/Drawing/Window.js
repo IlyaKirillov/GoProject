@@ -1719,6 +1719,8 @@ CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv,
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 86, ShiftKey : false}, "View mode change of the next move", "Ctrl+V",                                       "There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 82, ShiftKey : false}, "Show/Hide coordinates",             "Ctrl+R",                                       "Show/Hide coordinates. (Not in color mode, see above)");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 77, ShiftKey : true }, "Make the current variant mainly",   "Ctrl+Shift+M",                                 "Make the current variant mainly by uplifting it to the root of the game tree.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 86, ShiftKey : true }, "Setting up view port",              "Ctrl+Shift+V",                                 "Setting up visible part of the board.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 68, ShiftKey : false}, "Ascii Diagram",                     "Ctrl+V",                                       "Make ascii diagram by current position.");
 };
 CDrawingAboutWindow.prototype.private_AppendTR = function(oTBody)
 {
@@ -1804,6 +1806,359 @@ CDrawingAboutWindow.prototype.private_AppendTableCommonString = function(oTBody,
     this.private_AppendTD(oTr, sText3).style.width = "50%";
 };
 
+function CDrawingDiagramSLWindow()
+{
+    CDrawingDiagramSLWindow.superclass.constructor.call(this);
+
+    this.m_oTextArea = null;
+}
+
+CommonExtend(CDrawingDiagramSLWindow, CDrawingWindow);
+
+CDrawingDiagramSLWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingDiagramSLWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.Set_Caption("Ascii Diagram");
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sDivId       = this.HtmlElement.InnerDiv.id;
+
+    this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId);
+    this.private_FillTextArea(oPr.GameTree);
+};
+CDrawingDiagramSLWindow.prototype.Show = function(oPr)
+{
+    CDrawingDiagramSLWindow.superclass.Show.call(this, oPr);
+    this.private_FillTextArea(oPr.GameTree);
+};
+CDrawingDiagramSLWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId)
+{
+    var oElement   = document.createElement("textarea");
+    var sElementId = sDivId + "TA";
+    oElement.setAttribute("id", sElementId);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.style.fontFamily  = "Courier New, monospacef";
+    oElement.style.fontSize    = "10pt";
+    oElement.style.resize      = "none";
+    oElement.style.outline     = "none";
+    oElement.style.border      = "1px solid rgb(169,169,169)";
+    oElement.style.height      = "100%";
+    oElement.style.width       = "100%";
+    this.m_oTextArea = oElement;
+
+    oMainDiv.appendChild(oElement);
+
+    var oControl = CreateControlContainer(sElementId);
+    oControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oMainControl.AddControl(oControl);
+
+    return oElement;
+};
+CDrawingDiagramSLWindow.prototype.private_FillTextArea = function(oGameTree)
+{
+    this.m_oTextArea.value = "";
+
+    if (undefined === oGameTree)
+        return;
+
+    var oDrawingBoard = oGameTree.Get_DrawingBoard();
+    var oLogicBoard   = oGameTree.Get_Board();
+
+    if (!oDrawingBoard || !oLogicBoard)
+        return;
+
+    var sDiagram = "";
+
+    var nSizeX = oLogicBoard.Get_Size().X;
+    var nSizeY = oLogicBoard.Get_Size().Y;
+    var oViewPort = oDrawingBoard.Get_ViewPort();
+    var X0 = oViewPort.X0;
+    var Y0 = oViewPort.Y0;
+    var X1 = oViewPort.X1;
+    var Y1 = oViewPort.Y1;
+
+    // Определяем какие границы нам нужны
+    var bLeft   = (0 == X0 ? true : false);
+    var bRight  = (nSizeX - 1 == X1 ? true : false);
+    var bTop    = (0 == Y0 ? true : false);
+    var bBottom = (nSizeY - 1 == Y1 ? true : false);
+
+    // Определяем очередность хода и нумерацию
+
+    var arrNumbers = [];
+    for (var nY = Y0; nY < Y1; nY++)
+    {
+        for (var nX = X0; nX < X1; nX++)
+        {
+            var Mark  = oDrawingBoard.Get_Mark(nX + 1, nY + 1);
+            var MarkType = (null != Mark ? Mark.Get_Type() : EDrawingMark.Lm);
+            var MarkText = (null != Mark ? Mark.Get_Text() : "");
+
+            if (MarkType == EDrawingMark.Tx && Common_IsInt(MarkText))
+            {
+                var nValue = parseInt(MarkText);
+                var oElement =
+                {
+                    Number : nValue,
+                    Value  : oLogicBoard.Get(nX + 1, nY + 1)
+                };
+
+                if (BOARD_EMPTY != oElement.Value)
+                    arrNumbers.push(oElement);
+            }
+        }
+    }
+
+    var bBlackFirst  = true;
+    var bCoordinates = oDrawingBoard.Get_Rulers();
+    var nFirstMove = -1;
+    if (arrNumbers.length > 0)
+    {
+        var nMin = -1, nMinValue = BOARD_EMPTY;
+        var nMax = -1;
+        for (var nIndex = 0, nCount = arrNumbers.length; nIndex < nCount; nIndex++)
+        {
+            var oElement = arrNumbers[nIndex];
+
+            if (-1 == nMin || oElement.Number < nMin)
+            {
+                nMin      = oElement.Number;
+                nMinValue = oElement.Value;
+            }
+
+            if (-1 == nMax || oElement.Number > nMax)
+                nMax      = oElement.Number;
+        }
+
+        if (nMax - nMin < 10)
+        {
+            var bValid = true;
+            for (var nIndex = 0, nCount = arrNumbers.length; nIndex < nCount; nIndex++)
+            {
+                var oElement = arrNumbers[nIndex];
+
+                var nOst = (oElement.Number - nMin) % 2;
+                if ((0 == nOst && nMinValue != oElement.Value) ||
+                    (1 == nOst && nMinValue == oElement.Value))
+                {
+                    bValid = false;
+                    break;
+                }
+            }
+
+            if (true === bValid)
+            {
+                nFirstMove = nMin;
+                if (BOARD_BLACK === nMinValue)
+                    bBlackFirst = true;
+                else
+                    bBlackFirst = false;
+            }
+        }
+    }
+
+    var sVerticalLine = bLeft ? "$$  --" : "$$ -";
+    for (var nX = X0 + 1; nX <= X1; nX++)
+        sVerticalLine += "--";
+    sVerticalLine += bRight ? "- \n" : "\n";
+
+    var sLineStart = bLeft ? "$$ |" : "$$";
+    var sLineEnd   = bRight ? " |\n" : "\n";
+
+    // Header
+    if (bBlackFirst)
+        sDiagram += "$$B";
+    else
+        sDiagram += "$$W";
+
+    if (bCoordinates)
+        sDiagram += "c";
+
+    if (-1 != nFirstMove)
+        sDiagram += "m" + nFirstMove;
+
+    sDiagram += '\n';
+
+    // enf of header
+
+    if (bTop)
+        sDiagram += sVerticalLine;
+
+    for (var nY = Y0; nY <= Y1; nY++)
+    {
+        sDiagram += sLineStart;
+        for (var nX = X0; nX <= X1; nX++)
+        {
+            var Mark  = oDrawingBoard.Get_Mark(nX + 1, nY + 1);
+            var MarkType = (null != Mark ? Mark.Get_Type() : EDrawingMark.Lm);
+            var MarkText = (null != Mark ? Mark.Get_Text() : "");
+            var Value = oLogicBoard.Get(nX + 1, nY + 1);
+
+            if (BOARD_EMPTY == Value)
+            {
+                if (EDrawingMark.Tr === MarkType)
+                    sDiagram += " T";
+                else if (EDrawingMark.Cr === MarkType)
+                    sDiagram += " C";
+                else if (EDrawingMark.Sq === MarkType)
+                    sDiagram += " S";
+                else if (EDrawingMark.X === MarkType)
+                    sDiagram += " M";
+                else if (EDrawingMark.Tx === MarkType && 1 === MarkText.length && 97 <= MarkText.charCodeAt(0) && MarkText.charCodeAt(0) <= 122)
+                    sDiagram += String.fromCharCode(0x20, MarkText.charCodeAt(0));
+                else if (EDrawingMark.Tx === MarkType && 1 === MarkText.length && 65 <= MarkText.charCodeAt(0) && MarkText.charCodeAt(0) <= 90)
+                    sDiagram += String.fromCharCode(0x20, MarkText.charCodeAt(0) + 0x20);
+                else
+                {
+                    if (oLogicBoard.Is_HandiPoint(nX + 1, nY + 1))
+                        sDiagram += " ,";
+                    else
+                        sDiagram += " .";
+                }
+            }
+            else
+            {
+                if (-1 !== nFirstMove && MarkType == EDrawingMark.Tx && Common_IsInt(MarkText))
+                {
+                    var nValue = parseInt(MarkText) - nFirstMove + 1;
+
+                    if (10 == nValue)
+                        sDiagram += ' 0';
+                    else
+                        sDiagram += ' ' + nValue;
+                }
+                else if (BOARD_BLACK == Value)
+                {
+                    if (EDrawingMark.Tr === MarkType)
+                        sDiagram += " Y";
+                    else if (EDrawingMark.Cr === MarkType)
+                        sDiagram += " B";
+                    else if (EDrawingMark.Sq === MarkType)
+                        sDiagram += " #";
+                    else if (EDrawingMark.X === MarkType)
+                        sDiagram += " Z";
+                    else
+                        sDiagram += " X";
+                }
+                else if (BOARD_WHITE == Value)
+                {
+                    if (EDrawingMark.Tr === MarkType)
+                        sDiagram += " Q";
+                    else if (EDrawingMark.Cr === MarkType)
+                        sDiagram += " W";
+                    else if (EDrawingMark.Sq === MarkType)
+                        sDiagram += " @";
+                    else if (EDrawingMark.X === MarkType)
+                        sDiagram += " P";
+                    else
+                        sDiagram += " O";
+                }
+            }
+        }
+        sDiagram += sLineEnd;
+    }
+
+    if (bBottom)
+        sDiagram += sVerticalLine;
+
+    this.m_oTextArea.value = sDiagram;
+};
+
+function CDrawingViewPortWindow()
+{
+    CDrawingViewPortWindow.superclass.constructor.call(this);
+}
+
+CommonExtend(CDrawingViewPortWindow, CDrawingConfirmWindow);
+
+CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingViewPortWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
+    this.m_oGameTree = oPr.GameTree;
+    this.m_oDrawing  = oPr.Drawing;
+
+    this.Set_Caption("Setting up view port...");
+
+    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
+    var oMainControl = this.HtmlElement.ConfirmInnerControl;
+    var sMainId      = this.HtmlElement.ConfirmInnerDiv.id;
+
+    oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
+    oMainControl.Set_Type(2);
+
+    var sBoard = sMainId + "B";
+    var oBoardElement = this.protected_CreateDivElement(oMainDiv, sBoard);
+    var oBoardControl = CreateControlContainer(sBoard);
+    oBoardControl.Bounds.SetParams(0, 0, 1000, 1000, true, true, false, false, -1, -1);
+    oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oBoardControl);
+
+    this.m_oBoardDiv = oBoardElement;
+    this.m_oBoardControl = oBoardControl;
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_ViewPortMode(this);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+};
+CDrawingViewPortWindow.prototype.Update_Size = function(bForce)
+{
+    CDrawingViewPortWindow.superclass.Update_Size.call(this, bForce);
+
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Update_Size(bForce);
+};
+CDrawingViewPortWindow.prototype.Show = function(oPr)
+{
+    while (this.m_oBoardDiv.firstChild)
+        this.m_oBoardDiv.removeChild(this.m_oBoardDiv.firstChild);
+
+    if (this.m_oBoardControl)
+        this.m_oBoardControl.Clear();
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(this.m_oBoardDiv.id, oPr.GameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_ViewPortMode(this);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+
+    CDrawingViewPortWindow.superclass.Show.apply(this, arguments);
+    // Для перерисовки позиции
+    this.Update_Size(true);
+};
+CDrawingViewPortWindow.prototype.Handle_OK = function()
+{
+    if (this.m_oGameTree)
+    {
+        var oDrawingBoard = this.m_oGameTree.Get_DrawingBoard();
+        if (oDrawingBoard)
+        {
+            var oViewPort = this.m_oDrawingBoard.Get_SelectedViewPort();
+            if (oViewPort.X1 - oViewPort.X0 < 3 || oViewPort.Y1 - oViewPort.Y0 < 3)
+            {
+                // TODO: Заменить на нормальное сообщение с окном
+                alert("Sorry, viewport can't be so small");
+                return;
+            }
+
+            oDrawingBoard.Set_ViewPort(oViewPort.X0 - 1, oViewPort.Y0 - 1, oViewPort.X1 - 1, oViewPort.Y1 - 1);
+
+            this.m_oDrawing.Update_Size(true);
+        }
+    }
+
+    this.Close();
+};
+
+
 var EWindowType =
 {
     Common        : 0,
@@ -1814,7 +2169,9 @@ var EWindowType =
     ScoreEstimate : 5,
     CountColors   : 6,
     GifWriter     : 7,
-    About         : 8
+    About         : 8,
+    DiagramSL     : 9,
+    ViewPort      : 10
 };
 
 var g_aWindows = {};
@@ -1838,6 +2195,8 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
             case EWindowType.CountColors   : sApp = "CountColors"; break;
             case EWindowType.GifWriter     : sApp = "GifWriter"; break;
             case EWindowType.About         : sApp = "About"; break;
+            case EWindowType.DiagramSL     : sApp = "DiagramSL"; break;
+            case EWindowType.ViewPort      : sApp = "ViewPort"; break;
         }
         var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
 
@@ -1862,6 +2221,8 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
                 case EWindowType.GifWriter     : oWindow = new CDrawingGifWriterWindow(); break;
                 case EWindowType.About         : oWindow = new CDrawingAboutWindow(); break;
+                case EWindowType.DiagramSL     : oWindow = new CDrawingDiagramSLWindow(); break;
+                case EWindowType.ViewPort      : oWindow = new CDrawingViewPortWindow(); break;
             }
 
             if (null !== oWindow)

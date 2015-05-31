@@ -455,6 +455,9 @@ CGameTree.prototype.Step_Backward = function(Count)
     {
         ParentNode = ParentNode.Get_Prev();
         Count--;
+
+        if (ParentNode.Get_NextsCount() > 1)
+            break;
     }
 
     this.GoTo_Node(ParentNode);
@@ -471,7 +474,12 @@ CGameTree.prototype.Step_Forward = function(Count, bForce)
     else
     {
         for (var Index = 0; Index < Count; Index++)
+        {
             this.GoTo_Next();
+
+            if (this.Get_CurNode().Get_NextsCount() > 1)
+                break;
+        }
 
         this.GoTo_Node(this.Get_CurNode());
     }
