@@ -107,19 +107,19 @@ CPresentation.prototype.Init = function(sDivId, aSlides)
     oPrevSgfButtonElement.style.display = "none";
 
     var oThis = this;
-    oNextSgfButtonElement.onclick = function()
+    oNextSgfButtonElement.addEventListener("click", function()
     {
         oThis.HtmlElement.NextSgf.style.display = "none";
         oThis.HtmlElement.PrevSgf.style.display = "none";
         oThis.private_NextStep();
-    };
+    }, false);
 
-    oPrevSgfButtonElement.onclick = function()
+    oPrevSgfButtonElement.addEventListener("click", function()
     {
         oThis.HtmlElement.NextSgf.style.display = "none";
         oThis.HtmlElement.PrevSgf.style.display = "none";
         oThis.private_PrevStep();
-    };
+    }, false);
 
     var oNextSgfButtonControl = CreateControlContainer(sNextSgfButton);
     oNextSgfButtonControl.Bounds.SetParams(501,  0, 2, 2, false, false, true, true, -1, 25);
@@ -147,8 +147,8 @@ CPresentation.prototype.Init = function(sDivId, aSlides)
     var oNextButtonElement = this.private_CreateButton(oMessageDiv, sNextButton);
     var oPrevButtonElement = this.private_CreateButton(oMessageDiv, sPrevButton);
 
-    oPrevButtonElement.onclick = function(){oThis.private_PrevStep();};
-    oNextButtonElement.onclick = function(){oThis.private_NextStep();};
+    oPrevButtonElement.addEventListener("click", function(){oThis.private_PrevStep();}, false);
+    oNextButtonElement.addEventListener("click", function(){oThis.private_NextStep();}, false);
 
     var oTextAreaControl = CreateControlContainer(sTextDiv);
     oTextAreaControl.Bounds.SetParams(0, 0, 1000, 35, false, false, false, true, -1, -1);
@@ -180,7 +180,7 @@ CPresentation.prototype.Init = function(sDivId, aSlides)
 
     this.private_GoToStep(0, 0);
 };
-CPresentation.prototype.Update_Size = function()
+CPresentation.prototype.Update_Size = function(bForce)
 {
     if (this.m_oControl)
     {
@@ -191,7 +191,7 @@ CPresentation.prototype.Update_Size = function()
     }
 
     for (var Index = 0, Count = this.m_aElements.length; Index < Count; Index++)
-        this.m_aElements[Index].Update_Size();
+        this.m_aElements[Index].Update_Size(bForce);
 };
 CPresentation.prototype.Get_NodesCountInSlide = function()
 {
@@ -379,7 +379,16 @@ CPresentation.prototype.private_ShowMessage = function(sText, sBack, sNext)
     var oNextButton = this.HtmlElement.NextButton;
 
     this.HtmlElement.MessageElement.style.display = "block";
-    this.HtmlElement.TextElement.innerHTML = sText;
+
+    while (this.HtmlElement.TextElement.firstChild)
+        this.HtmlElement.TextElement.removeChild(this.HtmlElement.TextElement.firstChild);
+
+    Common.Set_InnerTextToElement(this.HtmlElement.TextElement, "");
+
+    if ("string" === typeof(sText))
+        Common.Set_InnerTextToElement(this.HtmlElement.TextElement, sText);
+    else
+        this.HtmlElement.TextElement.appendChild(sText);
 
     if (null === sBack)
         oPrevButton.style.display = "none";

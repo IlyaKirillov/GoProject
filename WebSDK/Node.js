@@ -12,10 +12,20 @@ function CNodeIdCounter()
     this.m_nCounter = 0;
 }
 
+CNodeIdCounter.prototype.Get_NextId = function()
+{
+    return ((++this.m_nCounter) + "");
+};
+CNodeIdCounter.prototype.Reset = function()
+{
+    this.m_nCounter = 0;
+};
+
+var g_oIdCounter = new CNodeIdCounter();
 
 function CNode()
 {
-    this.m_nId        = 0;
+    this.m_sId        = g_oIdCounter.Get_NextId();
     this.m_aNext      = [];                        // Массив следующих нод
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
     this.m_oPrev      = null;                      // Родительская нода
@@ -25,7 +35,30 @@ function CNode()
     this.m_oTerritory = new CTerritory(false, {}); // Метки территории (если в данной ноде есть подсчет очков)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
     this.m_bLoaded    = false;                     // Была ли данная нода в исходном загруженном файле.
+    this.m_oColorMap  = {};                        // Карта цветов
 }
+CNode.prototype.Get_Id = function()
+{
+    return this.m_sId;
+};
+CNode.prototype.Is_FromFile = function()
+{
+    return this.m_bLoaded;
+};
+CNode.prototype.Get_NodeById = function(sId)
+{
+    if (sId === this.m_sId)
+        return this;
+
+    for (var nIndex = 0, nNextsCount = this.Get_NextsCount(); nIndex < nNextsCount; nIndex++)
+    {
+        var oNode = this.m_aNext[nIndex].Get_NodeById(sId);
+        if (null !== oNode)
+            return oNode;
+    }
+
+    return null;
+};
 CNode.prototype.Copy_CurrentVariant = function(LastNode)
 {
     var oNode = new CNode();
@@ -289,11 +322,12 @@ CNode.prototype.Add_Mark = function(MarkType, arrPos)
     switch(MarkType)
     {
         case EDrawingMark.Cr: CommandType = ECommand.CR; break;
-        case EDrawingMark.Lm: CommandType = ECommand.LM; break;
+        case EDrawingMark.Lm: return;
         case EDrawingMark.Sq: CommandType = ECommand.SQ; break;
         case EDrawingMark.Tr: CommandType = ECommand.TR; break;
         case EDrawingMark.Tx: CommandType = ECommand.LB; break;
-        case EDrawingMark.X : CommandType = ECommand.MA;  break;
+        case EDrawingMark.X : CommandType = ECommand.MA; break;
+        case ECommand.RM    : CommandType = ECommand.RM; break;
     }
 
     this.Add_Command(new CCommand(CommandType, Common_CopyArray(arrPos), arrPos.length));
@@ -377,5 +411,72 @@ CNode.prototype.Find_RightNodes = function(aNodes)
     for (var nIndex = 0, nCount = this.Get_NextsCount(); nIndex < nCount; nIndex++)
     {
         this.Get_Next(nIndex).Find_RightNodes(aNodes);
+    }
+};
+CNode.prototype.Add_ColorMark = function(X, Y, Color)
+{
+    this.m_oColorMap[Common_XYtoValue(X, Y)] = Color;
+};
+CNode.prototype.Remove_ColorMark = function(X, Y)
+{
+    delete this.m_oColorMap[Common_XYtoValue(X, Y)];
+};
+CNode.prototype.Remove_AllColorMarks = function()
+{
+    this.m_oColorMap = {};
+};
+CNode.prototype.Draw_ColorMap = function(oDrawingBoard)
+{
+    oDrawingBoard.Clear_AllColorMarks();
+
+    for (var nPos in this.m_oColorMap)
+    {
+        oDrawingBoard.m_oColorMarks[nPos] = this.m_oColorMap[nPos];
+    }
+
+    oDrawingBoard.Draw_AllColorMarks();
+};
+CNode.prototype.Copy_ColorMapFromPrevNode = function()
+{
+    this.m_oColorMap = {};
+    if (null !== this.m_oPrev)
+    {
+        var oPrevMap = this.m_oPrev.m_oColorMap;
+        for (var nPos in oPrevMap)
+        {
+            this.m_oColorMap[nPos] = oPrevMap[nPos].Copy();
+        }
+    }
+};
+CNode.prototype.Get_ColorTable = function(oTable)
+{
+    for (var nPos in this.m_oColorMap)
+    {
+        var nColor = this.m_oColorMap[nPos].ToLong();
+        oTable[nColor] = true;
+    }
+    for (var nNextNode = 0, nNextsCount = this.Get_NextsCount(); nNextNode < nNextsCount; nNextNode++)
+    {
+        this.m_aNext[nNextNode].Get_ColorTable(oTable);
+    }
+};
+CNode.prototype.Make_CurrentVariantMainly = function()
+{
+    var oCurNode  = this;
+    var nCurNext  = this.Get_NextCur();
+    var oNextNode = this.Get_Next(nCurNext);
+
+    while (null !== oNextNode && undefined !== oNextNode)
+    {
+        if (0 !== nCurNext)
+        {
+            oCurNode.m_aNext.splice(nCurNext, 1);
+            oCurNode.m_aNext.splice(0, 0, oNextNode);
+            oCurNode.Set_NextCur(0);
+        }
+
+        oCurNode  = oNextNode;
+        nCurNext  = oCurNode.Get_NextCur();
+        oNextNode = oCurNode.Get_Next(nCurNext);
     }
 };

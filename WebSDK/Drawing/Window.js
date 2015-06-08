@@ -34,6 +34,8 @@ function CDrawingWindow()
     this.m_oInnerBorderColor = new CColor(185, 185, 185, 255);
     this.m_oBackColor        = new CColor(217, 217, 217, 255);
 
+    this.m_oDrawing = null;
+
     this.m_nW = -1;
     this.m_nH = -1;
 
@@ -285,7 +287,6 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCaptionTextControl.Bounds.SetParams(15, 0, 55, 1000, true, false, true, false, -1, 30);
     oCaptionTextControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaptionControl.AddControl(oCaptionTextControl);
-    oCaptionTextElement.innerText = "Caption";
     oCaptionTextElement.style.fontFamily          = "Tahoma, Sans serif";
     oCaptionTextElement.style.fontSize            = "13pt";
     oCaptionTextElement.style.textAlign           = "center";
@@ -295,6 +296,7 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCaptionTextElement.style.textOverflow        = "ellipsis";
     oCaptionTextElement.style['-o-text-overflow'] = "ellipsis";
     oCaptionTextElement.style.cursor              = "default";
+    Common.Set_InnerTextToElement(oCaptionTextElement, "Caption");
     this.HtmlElement.CaptionText = oCaptionTextElement;
 
     // Caption
@@ -464,10 +466,41 @@ CDrawingWindow.prototype.Update_Size = function(bForce)
 CDrawingWindow.prototype.Close = function()
 {
     var oMainDiv = this.HtmlElement.Control.HtmlElement;
-    oMainDiv.parentNode.removeChild(oMainDiv);
+
+    oMainDiv.style.display = "none";
 
     if (this.m_oGameTree)
         this.m_oGameTree.Focus();
+};
+CDrawingWindow.prototype.Show = function(oPr)
+{
+    var oDiv = this.HtmlElement.Control.HtmlElement;
+
+    oDiv.style.display = "block";
+
+    var nLeft = parseInt(oDiv.style.left);
+    var nTop  = parseInt(oDiv.style.top);
+
+    if (oPr.Drawing)
+    {
+        var oDrawing = oPr.Drawing;
+        var DrawingW = oDrawing.Get_Width();
+        var DrawingH = oDrawing.Get_Height();
+
+        var nThreshold = 100;
+
+        if (nTop > DrawingH - nThreshold)
+            oDiv.style.top = (DrawingH - nThreshold) + "px";
+
+        if (nLeft > DrawingW - nThreshold)
+            oDiv.style.left = (DrawingW - nThreshold) + "px";
+    }
+
+    if (nLeft < 0)
+        oDiv.style.left = "0px";
+
+    if (nTop < 0)
+        oDiv.style.top = "0px";
 };
 CDrawingWindow.prototype.Focus = function()
 {
@@ -475,8 +508,7 @@ CDrawingWindow.prototype.Focus = function()
 };
 CDrawingWindow.prototype.Set_Caption = function(sCaption)
 {
-    this.HtmlElement.CaptionText.innerText = sCaption;
-    this.HtmlElement.CaptionText.innerHTML = sCaption;
+    Common.Set_InnerTextToElement(this.HtmlElement.CaptionText, sCaption);
 };
 CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, sName)
 {
@@ -486,6 +518,31 @@ CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, s
     oElement.setAttribute("oncontextmenu", "return false;");
     oParentElement.appendChild(oElement);
     return oElement;
+};
+CDrawingWindow.prototype.protected_UpdateSizeAndPosition = function(oDrawing)
+{
+    if (!oDrawing)
+        return;
+
+    this.m_oDrawing = oDrawing;
+    var oWindowDiv = this.HtmlElement.Control.HtmlElement;
+
+    var oSize = this.Get_DefaultWindowSize();
+    if (null !== oSize && undefined !== oSize)
+    {
+        oWindowDiv.style.width  = oSize.W + "px";
+        oWindowDiv.style.height = oSize.H + "px";
+    }
+
+    var nWindowW = parseInt(oWindowDiv.style.width);
+    var nWindowH = parseInt(oWindowDiv.style.height);
+
+    oWindowDiv.style.left = ((this.m_oDrawing.Get_Width()  - nWindowW) / 2) + "px";
+    oWindowDiv.style.top  = ((this.m_oDrawing.Get_Height() - nWindowH) / 2) + "px";
+};
+CDrawingWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return null;
 };
 
 function CDrawingConfirmWindow()
@@ -597,6 +654,9 @@ function CDrawingInfoWindow()
 
     this.HtmlElement2 = {};
     this.m_oGameTree = null;
+    this.m_nBottomOffset = 10;
+    this.m_nRowHeight    = 20;
+    this.m_nLineSpacing  = 5;
 }
 
 CommonExtend(CDrawingInfoWindow, CDrawingConfirmWindow);
@@ -605,12 +665,13 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
 
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
     var oGameTree = oPr.GameTree;
     this.m_oGameTree = oGameTree;
 
     if (true !== oGameTree.Can_EditGameInfo())
         this.HtmlElement.OKButton.Set_Enabled(false);
-
 
     this.Set_Caption("Game info");
 
@@ -621,10 +682,10 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     oMainDiv.style.overflowX = "hidden";
     oMainDiv.style.overflowY = "scroll";
 
-    var RowHeight   = 20;
-    var TopOffset   = 10;
-    var LineSpacing = 5;
-    var BottomOffset = 10;
+    var RowHeight    = this.m_nRowHeight;
+    var TopOffset    = 10;
+    var LineSpacing  = this.m_nLineSpacing;
+    var BottomOffset = this.m_nBottomOffset;
 
     var bCanEdit = oGameTree.Can_EditGameInfo();
     this.HtmlElement2.GameName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Game name", oGameTree.Get_GameName(), TopOffset, RowHeight, bCanEdit);
@@ -651,8 +712,6 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 
     this.HtmlElement2.Copyright = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Copyright", oGameTree.Get_Copyright(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.GameInfo = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Game info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
     this.HtmlElement2.Date = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Date", oGameTree.Get_DateTime(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
     this.HtmlElement2.Event = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Event", oGameTree.Get_GameEvent(), TopOffset, RowHeight, bCanEdit);
@@ -670,6 +729,10 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     TopOffset += RowHeight + LineSpacing;
     this.HtmlElement2.Transcriber = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Transcriber", oGameTree.Get_GameTranscriber(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
+
+    this.HtmlElement2.Transcriber = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game Info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += 3 * RowHeight;
+
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
     var BottomControl = CreateControlContainer(sDivId + "Bottom");
     BottomControl.Bounds.SetParams(0, TopOffset, 1000, 1000, true, true, false, false, 0, BottomOffset);
@@ -685,6 +748,15 @@ CDrawingInfoWindow.prototype.Update_Size = function(bForce)
 
     if (this.HtmlElement.CancelButton)
         this.HtmlElement.CancelButton.Update_Size();
+
+    var nOverallHeight  = parseInt(this.HtmlElement.ConfirmInnerDiv.style.height) | 0;
+    var nGameInfoY      = parseInt(this.HtmlElement2.GameInfo.style.top) | 0;
+    var nGameInfoYLimit = nOverallHeight - this.m_nBottomOffset;
+
+    if (nGameInfoYLimit - nGameInfoY < 3 * this.m_nRowHeight)
+        this.HtmlElement2.GameInfo.style.height = 3 * this.m_nRowHeight + "px";
+    else
+        this.HtmlElement2.GameInfo.style.height = (nGameInfoYLimit - nGameInfoY) + "px";
 };
 CDrawingInfoWindow.prototype.Handle_Cancel = function()
 {
@@ -745,6 +817,7 @@ CDrawingInfoWindow.prototype.private_CreateInputElement = function(oParentElemen
     oElement.style.fontFamily  = "Tahoma, Sans serif";
     oElement.style.fontSize    = "10pt";
     oElement.style.outline     = "none";
+    oElement.style.border      = "1px solid rgb(169,169,169)";
 
     if (false === bCanEdit)
         oElement.disabled = "disabled";
@@ -766,13 +839,58 @@ CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMai
     oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
     oNameControl.Anchor = (g_anchor_left | g_anchor_top);
     oMainControl.AddControl(oNameControl);
-    oNameElement.innerText = sName;
-    oNameElement.innerHTML = sName;
+    Common.Set_InnerTextToElement(oNameElement, sName);
 
     var sValueId      = sNameId + "Value";
     var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId, bCanEdit);
     var oValueControl = CreateControlContainer(sValueId);
     oValueControl.Bounds.SetParams(LeftOffset + LeftWidth, TopOffset + 1, RightOffset, 1000, true, true, true, false, -1, RowHeight - 2);
+    oValueControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
+    oMainControl.AddControl(oValueControl);
+    oValueElement.value = sValue;
+
+    return oValueElement;
+};
+CDrawingInfoWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight, bCanEdit)
+{
+    var LeftWidth  = 100;
+    var LeftOffset = 10;
+    var RightOffset = 10;
+
+    RightOffset += 20; // Scroll
+
+    var sNameId      = sDivId + sName;
+
+
+    var oNameElement = this.private_CreateDivElement(oMainDiv, sNameId, RowHeight);
+    var oNameControl = CreateControlContainer(sNameId);
+    oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
+    oNameControl.Anchor = (g_anchor_left | g_anchor_top);
+    oMainControl.AddControl(oNameControl);
+    Common.Set_InnerTextToElement(oNameElement, sName);
+
+    var sValueId      = sNameId + "Value";
+
+    var oValueElement = document.createElement("textarea");
+    oValueElement.setAttribute("id", sValueId);
+    oValueElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oValueElement.setAttribute("oncontextmenu", "return false;");
+    oValueElement.style.fontFamily  = "Tahoma, Sans serif";
+    oValueElement.style.fontSize    = "10pt";
+    oValueElement.style.resize      = "none";
+    oValueElement.style.outline     = "none";
+    oValueElement.style.border      = "1px solid rgb(169,169,169)";
+    oValueElement.style.height      = 3 * RowHeight + "px";
+
+    this.HtmlElement2.GameInfo = oValueElement;
+
+    if (false === bCanEdit)
+        oValueElement.disabled = "disabled";
+
+    oMainDiv.appendChild(oValueElement);
+
+    var oValueControl = CreateControlContainer(sValueId);
+    oValueControl.Bounds.SetParams(LeftOffset + LeftWidth, TopOffset + 1, RightOffset, 1000, true, true, true, false, -1, 3 * RowHeight);
     oValueControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
     oMainControl.AddControl(oValueControl);
     oValueElement.value = sValue;
@@ -791,6 +909,8 @@ CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId, false);
 
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
     var sText = oPr.ErrorText;
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
@@ -799,8 +919,7 @@ CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
     oMainDiv.style.fontFamily = "Tahoma, Sans serif";
     oMainDiv.style.fontSize   = 16 + "px";
 
-    oMainDiv.innerHTML = sText;
-    oMainDiv.innerText = sText;
+    Common.Set_InnerTextToElement(oMainDiv, sText);
 };
 
 function CDrawingSettingsWindow()
@@ -817,7 +936,13 @@ function CDrawingSettingsWindow()
             SimpleColor : null,
             BookStyle   : null,
             Dark        : null
-        }
+        },
+
+        Sound                : null,
+        LoadUnfinishedSgf    : null,
+        NavigatorLabel       : null,
+        CycleThroughVariants : null,
+        LoadShowVariants     : null
     };
 }
 
@@ -826,147 +951,118 @@ CommonExtend(CDrawingSettingsWindow, CDrawingConfirmWindow);
 CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingSettingsWindow.superclass.Init.call(this, _sDivId, false);
-    var oWindowDiv = document.getElementById(_sDivId);
-    oWindowDiv.style.width  = "240px";
-    oWindowDiv.style.height = "230px";
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     this.m_oGameTree = oPr.GameTree;
 
-    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
-    var oMainControl = this.HtmlElement.ConfirmInnerControl;
-    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id;
-
     this.Set_Caption("Settings");
+
+    var oTabs = new CDrawingVerticalTabs();
+    oTabs.Init(this.HtmlElement.ConfirmInnerDiv.id, ["Appearance", "Color Scheme", "Loading Settings"], 0, 150);
+
+    this.private_CreateAppearancePage(oTabs.Get_TabContent(0), oPr);
+    this.private_CreateColorSchemePage(oTabs.Get_TabContent(1), oPr);
+    this.private_CreateLoadingSettingsPage(oTabs.Get_TabContent(2), oPr);
+};
+CDrawingSettingsWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 400, H : 180};
+};
+CDrawingSettingsWindow.prototype.Show = function(oPr)
+{
+    CDrawingSettingsWindow.superclass.Show.call(this, oPr);
+
+    // Appearance
+    this.HtmlElement2.CycleThroughVariants.checked = this.m_oGameTree.Is_CycleThroughVariants();
+    this.HtmlElement2.Sound.checked                = this.m_oGameTree.Is_SoundOn();
+    this.HtmlElement2.NavigatorLabel.selectedIndex = this.m_oGameTree.Get_NavigatorLabel();
+
+    // ColorScheme
+    this.private_CheckColorTheme();
+
+    // LoadingSettings
+    this.HtmlElement2.LoadUnfinishedSgf.checked      = this.m_oGameTree.Is_LoadUnfinishedFilesOnLastNode();
+    this.HtmlElement2.LoadShowVariants.selectedIndex = this.m_oGameTree.Get_LoadShowVariants();
+};
+CDrawingSettingsWindow.prototype.private_CreatePage = function(oDiv)
+{
+    var oDivMainPart = document.createElement("div");
+    oDiv.appendChild(oDivMainPart);
+    oDivMainPart.style.margin  = "0";
+    oDivMainPart.style.padding = "10px 20px";
+
+    oDivMainPart.style.fontFamily = "Tahoma, Arial, Verdana";
+    oDivMainPart.style.fontSize   = "10px";
+    oDivMainPart.style.color      = "#666";
+    oDivMainPart.style.background = "#fff";
+
+    return oDivMainPart;
+};
+CDrawingSettingsWindow.prototype.private_CreateAppearancePage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "A";
+
+    this.HtmlElement2.CycleThroughVariants = this.private_CreateCheckBox(oDivMainPart, sDivId + "C", this.m_oGameTree.Is_CycleThroughVariants(), "Cycle through variants");
+    this.HtmlElement2.Sound                = this.private_CreateCheckBox(oDivMainPart, sDivId + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
+    this.HtmlElement2.NavigatorLabel       = this.private_CreateSelect(oDivMainPart, sDivId + "N", this.m_oGameTree.Get_NavigatorLabel(), ["No labels", "Move numbers", "Move numbers current variant only", "Move coordinates"], "Labels in navigator");
+};
+CDrawingSettingsWindow.prototype.private_CreateColorSchemePage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "CS";
 
     var sThemeId = "ThemeId";
 
-    var sThemeGroupBox = sDivId + "TGB";
-    var oGroupBoxElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBox);
-    var oGroupBoxControl = CreateControlContainer(sThemeGroupBox);
-    oGroupBoxControl.Bounds.SetParams(6, 17, 8, 8, true, true, true, true, -1,-1);
-    oGroupBoxControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
-    oMainControl.AddControl(oGroupBoxControl);
-    oGroupBoxElement.style.border = "1px solid rgb(221,221,221)";
-
-    var sThemeGroupBoxName = sThemeGroupBox + "N";
-    var oGroupBoxNameElement = this.protected_CreateDivElement(oMainDiv, sThemeGroupBoxName);
-    var oGroupBoxNameControl = CreateControlContainer(sThemeGroupBoxName);
-    oGroupBoxNameControl.Bounds.SetParams(20, 10, 1000, 1000, true, true, false, false, 100, 15);
-    oGroupBoxNameControl.Anchor = (g_anchor_top | g_anchor_left);
-    oMainControl.AddControl(oGroupBoxNameControl);
-    oGroupBoxNameElement.style.backgroundColor = "rgb(255,255,255)";
-    oGroupBoxNameElement.style.fontFamily          = "Tahoma, Sans serif";
-    oGroupBoxNameElement.style.fontSize            = "10pt";
-    oGroupBoxNameElement.style.textAlign           = "center";
-    oGroupBoxNameElement.style.height              = "15px";
-    oGroupBoxNameElement.style.lineHeight          = "15px";
-    oGroupBoxNameElement.style.overflow            = "hidden";
-    oGroupBoxNameElement.style.textOverflow        = "ellipsis";
-    oGroupBoxNameElement.style['-o-text-overflow'] = "ellipsis";
-    oGroupBoxNameElement.style.cursor              = "default";
-    oGroupBoxNameElement.innerHTML = "Color scheme";
-    oGroupBoxNameElement.innerText = "Color scheme";
-
-    var oTopPaddingElement = document.createElement("div");
-    oTopPaddingElement.style.width  = "100%";
-    oTopPaddingElement.style.height = "10px";
-    oGroupBoxElement.appendChild(oTopPaddingElement)
-
-    this.HtmlElement2.Theme.TrueColor   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "TC", sThemeId, "TrueColor");
-    this.HtmlElement2.Theme.SimpleColor = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "SC", sThemeId, "SimpleColor");
-    this.HtmlElement2.Theme.BookStyle   = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "BS", sThemeId, "BookStyle");
-    this.HtmlElement2.Theme.Dark        = this.private_CreateRadioButton(oGroupBoxElement, sThemeGroupBox + "D",  sThemeId, "Dark");
+    this.HtmlElement2.Theme.TrueColor   = this.private_CreateRadioButton(oDivMainPart, sDivId + "TC", sThemeId, "TrueColor");
+    this.HtmlElement2.Theme.SimpleColor = this.private_CreateRadioButton(oDivMainPart, sDivId + "SC", sThemeId, "SimpleColor");
+    this.HtmlElement2.Theme.BookStyle   = this.private_CreateRadioButton(oDivMainPart, sDivId + "BS", sThemeId, "BookStyle");
+    this.HtmlElement2.Theme.Dark        = this.private_CreateRadioButton(oDivMainPart, sDivId + "D",  sThemeId, "Dark");
 
     this.private_CheckColorTheme();
 };
+CDrawingSettingsWindow.prototype.private_CreateLoadingSettingsPage = function(oDiv, oPr)
+{
+    var oDivMainPart = this.private_CreatePage(oDiv);
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "LS";
+
+    this.HtmlElement2.LoadUnfinishedSgf = this.private_CreateCheckBox(oDivMainPart, sDivId + "U", this.m_oGameTree.Is_LoadUnfinishedFilesOnLastNode(), "Load unfinished files on the last node");
+    this.HtmlElement2.LoadShowVariants  = this.private_CreateSelect(oDivMainPart, sDivId + "V", this.m_oGameTree.Get_LoadShowVariants(), ["Don't show variants", "Show variations of successor node (children)", "Show variations of current node   (siblings)", "Load option from file"], "Show variants");
+};
 CDrawingSettingsWindow.prototype.Handle_OK = function()
 {
+    var eColorScheme = EColorScheme.TrueColor;
+    if (this.HtmlElement2.Theme.SimpleColor.checked)
+        eColorScheme = EColorScheme.SimpleColor;
+    else if (this.HtmlElement2.Theme.BookStyle.checked)
+        eColorScheme = EColorScheme.BookStyle;
+    else if (this.HtmlElement2.Theme.Dark.checked)
+        eColorScheme = EColorScheme.Dark;
+    else // TrueColor
+        eColorScheme = EColorScheme.TrueColor;
+
+    var oSchemeChange = g_oGlobalSettings.Set_ColorScheme(eColorScheme);
+
+    if (this.HtmlElement2.Sound.checked)
+        this.m_oGameTree.TurnOn_Sound();
+    else
+        this.m_oGameTree.TurnOff_Sound();
+
+    this.m_oGameTree.Set_LoadUnfinishedFilesOnLastNode(this.HtmlElement2.LoadUnfinishedSgf.checked ? true : false);
+    this.m_oGameTree.Set_NavigatorLabel(this.HtmlElement2.NavigatorLabel.selectedIndex);
+    this.m_oGameTree.Set_CycleThroughVariants(this.HtmlElement2.CycleThroughVariants.checked ? true : false);
+    this.m_oGameTree.Set_LoadShowVariants(this.HtmlElement2.LoadShowVariants.selectedIndex);
+
     var oBoard     = this.m_oGameTree.Get_DrawingBoard();
     var oNavigator = this.m_oGameTree.Get_DrawingNavigator();
 
-    var bTrueColorBoard   = true;
-    var bTrueColorStones  = true;
-    var oBoardColor       = null;
-    var bShellWhiteStones = true;
-    var bShadows          = true;
-    var oWhiteColor       = new CColor(255, 255, 255, 255);
-    var oBlackColor       = new CColor(0, 0, 0, 255);
-    var oLinesColor       = new CColor(0, 0, 0, 255);
-    var bDarkTheme        = false;
-
-
-    if (this.HtmlElement2.Theme.SimpleColor.checked)
-    {
-        bTrueColorBoard   = false;
-        bTrueColorStones  = false;
-        bShellWhiteStones = false;
-        bShadows          = false;
-
-        oBoardColor       = new CColor(231, 188, 95, 255);
-        oLinesColor       = new CColor(0, 0, 0, 255);
-    }
-    else if (this.HtmlElement2.Theme.BookStyle.checked)
-    {
-        bTrueColorBoard   = false;
-        bTrueColorStones  = false;
-        bShellWhiteStones = false;
-        bShadows          = false;
-
-        oBoardColor       = new CColor(255, 255, 255, 255);
-        oLinesColor       = new CColor(0, 0, 0, 255);
-    }
-    else if (this.HtmlElement2.Theme.Dark.checked)
-    {
-        bTrueColorBoard   = false;
-        bTrueColorStones  = false;
-        bShellWhiteStones = false;
-        bShadows          = false;
-
-        oBoardColor       = new CColor(30, 30, 30, 255);
-        oWhiteColor       = new CColor(220, 220, 220, 220);
-        oLinesColor       = new CColor(255, 255, 255, 255);
-
-        bDarkTheme        = true;
-    }
-    else // TrueColor
-    {
-        bTrueColorBoard   = true;
-        bTrueColorStones  = true;
-        bShellWhiteStones = true;
-        bShadows          = true;
-
-        oBoardColor       = new CColor(231, 188, 95, 255);
-        oLinesColor       = new CColor(0, 0, 0, 255);
-    }
-
-    if (oBoard)
-    {
-        oBoard.m_bTrueColorBoard   = bTrueColorBoard   ;
-        oBoard.m_bTrueColorStones  = bTrueColorStones  ;
-        oBoard.m_oBoardColor       = oBoardColor       ;
-        oBoard.m_bShellWhiteStones = bShellWhiteStones ;
-        oBoard.m_bShadows          = bShadows          ;
-        oBoard.m_oWhiteColor       = oWhiteColor       ;
-        oBoard.m_oBlackColor       = oBlackColor       ;
-        oBoard.m_oLinesColor       = oLinesColor       ;
-        oBoard.m_bDarkBoard        = bDarkTheme        ;
-
+    if (oBoard && true === oSchemeChange.Board)
         oBoard.Update_Size(true);
-    }
 
-    if (oNavigator)
-    {
-        oNavigator.m_bTrueColorBoard   = bTrueColorBoard   ;
-        oNavigator.m_bTrueColorStones  = bTrueColorStones  ;
-        oNavigator.m_oBoardColor       = oBoardColor       ;
-        oNavigator.m_bShadows          = bShadows          ;
-        oNavigator.m_oWhiteColor       = oWhiteColor       ;
-        oNavigator.m_oBlackColor       = oBlackColor       ;
-        oNavigator.m_oLinesColor       = oLinesColor       ;
-        oNavigator.m_bDarkBoard        = bDarkTheme        ;
-
+    if (oNavigator && true === oSchemeChange.Navigator)
         oNavigator.Update_All();
-    }
+
+
 
     this.Close();
 };
@@ -988,10 +1084,9 @@ CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentEle
     var oSpan = document.createElement("span");
     oSpan.setAttribute("oncontextmenu", "return false;");
     oSpan.style.fontFamily  = "Tahoma, Sans serif";
-    oSpan.innerHTML = sRadioValue;
-    oSpan.innerText = sRadioValue;
+    Common.Set_InnerTextToElement(oSpan, sRadioValue);
     oSpan.style.fontFamily          = "Tahoma, Sans serif";
-    oSpan.style.fontSize            = "13pt";
+    oSpan.style.fontSize            = "12pt";
     oSpan.style.height              = "15px";
     oSpan.style.lineHeight          = "15px";
     oSpan.style.cursor = "default";
@@ -1000,33 +1095,95 @@ CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentEle
 
     oMainElement.appendChild(oSpan);
 
-    oSpan.onclick = function()
+    oSpan.addEventListener("click", function()
     {
         oElement.checked = true;
-    };
+    }, false);
 
     return oElement;
 };
+CDrawingSettingsWindow.prototype.private_CreateCheckBox = function(oParentElement, sName, bChecked, sCheckboxName)
+{
+    var oMainElement = document.createElement("div");
+    oMainElement.style.paddingLeft   = "10px";
+    oMainElement.style.paddingBottom = "5px";
+    oParentElement.appendChild(oMainElement);
+
+    var oElement = document.createElement("input");
+    oElement.type    = "checkbox";
+    oElement.checked = bChecked;
+    oElement.setAttribute("id", sName);
+
+    oMainElement.appendChild(oElement);
+
+    var oSpan = document.createElement("span");
+    oSpan.setAttribute("oncontextmenu", "return false;");
+    oSpan.style.fontFamily  = "Tahoma, Sans serif";
+    Common.Set_InnerTextToElement(oSpan, sCheckboxName);
+    oSpan.style.fontFamily          = "Tahoma, Sans serif";
+    oSpan.style.fontSize            = "12pt";
+    oSpan.style.height              = "15px";
+    oSpan.style.lineHeight          = "15px";
+    oSpan.style.cursor = "default";
+
+    oMainElement.appendChild(oSpan);
+
+    oSpan.addEventListener("click", function()
+    {
+        oElement.checked = !oElement.checked;
+    }, false);
+
+    return oElement;
+};
+CDrawingSettingsWindow.prototype.private_CreateSelect = function(oParentElement, sName, nSelectedIndex, aElements, sLabelText)
+{
+    var oMainElement = document.createElement("div");
+    oMainElement.style.paddingLeft   = "10px";
+    oMainElement.style.paddingBottom = "5px";
+
+    oMainElement.style.fontFamily          = "Tahoma, Sans serif";
+    oMainElement.style.fontSize            = "9pt";
+    oMainElement.style.height              = "12px";
+    oMainElement.style.lineHeight          = "12px";
+
+    oParentElement.appendChild(oMainElement);
+
+    var oLabel = document.createElement("div");
+    Common.Set_InnerTextToElement(oLabel, sLabelText);
+    oLabel.style.paddingBottom = "5px";
+    oMainElement.appendChild(oLabel);
+
+    var oSelect = document.createElement("select");
+    oSelect.style.width = "170px";
+    for (var nIndex = 0, nCount = aElements.length; nIndex < nCount; nIndex++)
+    {
+        var oOption = document.createElement("option");
+        oOption.value = aElements[nIndex];
+        Common.Set_InnerTextToElement(oOption, aElements[nIndex]);
+        oSelect.appendChild(oOption);
+    }
+    oSelect.selectedIndex = nSelectedIndex;
+    oMainElement.appendChild(oSelect);
+
+    return oSelect;
+};
 CDrawingSettingsWindow.prototype.private_CheckColorTheme = function()
 {
-    var oBoard     = this.m_oGameTree.Get_DrawingBoard();
+    var oBoardColorR = g_oGlobalSettings.m_oBoardPr.oBoardColor.r;
 
-    if (!oBoard)
-        return;
-
-    if (231 === oBoard.m_oBoardColor.r)
+    if (231 === oBoardColorR)
     {
         // Simple or TrueColor
-        if (oBoard.m_bTrueColorBoard)
+        if (g_oGlobalSettings.m_oBoardPr.bTrueColorBoard)
             this.HtmlElement2.Theme.TrueColor.checked = true;
         else
             this.HtmlElement2.Theme.SimpleColor.checked = true;
     }
-    else if (255 === oBoard.m_oBoardColor.r)
+    else if (255 === oBoardColorR)
     {
         this.HtmlElement2.Theme.BookStyle.checked = true;
     }
-    else if (30 === oBoard.m_oBoardColor.r)
+    else if (30 === oBoardColorR)
     {
         this.HtmlElement2.Theme.Dark.checked = true;
     }
@@ -1049,6 +1206,8 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingScoreEstimateWindow.superclass.Init.call(this, _sDivId, true);
 
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
     this.m_oGameTree = oPr.GameTree;
 
     this.Set_Caption("Score estimate");
@@ -1066,6 +1225,9 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
     oBoardControl.Bounds.SetParams(0, 0, 1000, 1000, true, true, false, false, -1, -1);
     oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oBoardControl);
+
+    this.m_oBoardDiv = oBoardElement;
+    this.m_oBoardControl = oBoardControl;
 
     var oDrawingBoard = new CDrawingBoard();
     oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
@@ -1085,6 +1247,24 @@ CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, White
     var sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ")";
     this.Set_Caption(sCaption);
 };
+CDrawingScoreEstimateWindow.prototype.Show = function(oPr)
+{
+    while (this.m_oBoardDiv.firstChild)
+        this.m_oBoardDiv.removeChild(this.m_oBoardDiv.firstChild);
+
+    if (this.m_oBoardControl)
+        this.m_oBoardControl.Clear();
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(this.m_oBoardDiv.id, oPr.GameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_EstimateMode(this);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+
+    CDrawingScoreEstimateWindow.superclass.Show.apply(this, arguments);
+    // Для перерисовки позиции
+    this.Update_Size(true);
+}
 
 function CDrawingCountColorsWindow()
 {
@@ -1096,6 +1276,8 @@ CommonExtend(CDrawingCountColorsWindow, CDrawingWindow);
 CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     this.Set_Caption("Colors counter");
 
@@ -1113,7 +1295,7 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 
     var oColorsMap = oPr.DrawingBoard.m_oColorMarks;
 
-    var Red = [0, 0, 0], Green = [0, 0, 0], Blue = [0, 0, 0], Gray = [0, 0, 0];
+    var Red = [0, 0, 0, 0], Green = [0, 0, 0, 0], Blue = [0, 0, 0, 0], Gray = [0, 0, 0, 0];
     var bRed = false, bGreen = false, bBlue = false, bGray = false;
 
     for (var oPos in oColorsMap)
@@ -1143,12 +1325,14 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
         }
 
         var Index = 0;
-        if (oColor.a <= 60)
+        if (oColor.a <= 50)
             Index = 0;
-        else if (oColor.a <= 120)
+        else if (oColor.a <= 100)
             Index = 1;
-        else
+        else if (oColor.a <= 150)
             Index = 2;
+        else
+            Index = 3;
 
         switch (nNum)
         {
@@ -1161,25 +1345,25 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 
     if (bRed)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bGreen)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bBlue)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
     if (bGray)
     {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
+        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
         TopOffset += RowHeight + LineSpacing;
     }
 
@@ -1232,8 +1416,7 @@ CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDi
     oNameControl.Bounds.SetParams(LeftOffset, TopOffset, 1000, 1000, true, true, false, false, LeftWidth, RowHeight);
     oNameControl.Anchor = (g_anchor_left | g_anchor_top);
     oMainControl.AddControl(oNameControl);
-    oNameElement.innerText = sName;
-    oNameElement.innerHTML = sName;
+    Common.Set_InnerTextToElement(oNameElement, sName);
 
     var sValueId      = sNameId + "Value";
     var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId, bCanEdit);
@@ -1246,59 +1429,800 @@ CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDi
     return oValueElement;
 };
 
-var EWindowType =
+function CDrawingGifWriterWindow()
 {
-    Common   : 0,
-    Confirm  : 1,
-    Error    : 2,
-    GameInfo : 3,
-    Settings : 4,
-    ScoreEstimate : 5,
-    CountColors   : 6
+    CDrawingGifWriterWindow.superclass.constructor.call(this);
+
+    this.m_oProgressSliderElement = null;
+    this.m_oProgressValueElement  = null;
+    this.m_oDrawing               = null;
+    this.m_oGameTree              = null;
+}
+
+CommonExtend(CDrawingGifWriterWindow, CDrawingWindow);
+
+CDrawingGifWriterWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, false);
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
+    this.Set_Caption("Creating Gif file...");
+
+    if (oPr.GameTree)
+        this.m_oGameTree = oPr.GameTree;
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sDivId       = this.HtmlElement.InnerDiv.id;
+
+    var sProgressBack = sDivId + "PB";
+    var oProgressBackElement = this.protected_CreateDivElement(oMainDiv, sProgressBack);
+    var oProgressBackControl = CreateControlContainer(sProgressBack);
+    oProgressBackControl.Bounds.SetParams(6, 30, 8, 8, true, true, true, true, -1,-1);
+    oProgressBackControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oProgressBackControl);
+    oProgressBackElement.style.border = "1px solid rgb(221,221,221)";
+    oProgressBackElement.style.backgroundColor = "rgb(140, 140, 140)";
+
+    var sProgress = sDivId + "P";
+    var oProgressElement = this.protected_CreateDivElement(oMainDiv, sProgress);
+    var oProgressControl = CreateControlContainer(sProgress);
+    oProgressControl.Bounds.SetParams(7, 31, 0, 7, true, true, false, true, 10,-1);
+    oProgressControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    oMainControl.AddControl(oProgressControl);
+    oProgressElement.style.backgroundColor = "rgb(54, 101, 179)";
+
+    this.m_oProgressSliderElement = oProgressElement;
+
+    var sDigitProgress = sDivId + "PV";
+    var oDigitProgressElement = this.protected_CreateDivElement(oMainDiv, sDigitProgress);
+    var oDigitProgressControl = CreateControlContainer(sDigitProgress);
+    oDigitProgressControl.Bounds.SetParams(0, 7, 1000, 32, false, false, false, true, -1, -1);
+    oDigitProgressControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    oMainControl.AddControl(oDigitProgressControl);
+    oDigitProgressElement.style.fontFamily  = "Tahoma, Sans serif";
+    oDigitProgressElement.style.fontSize    = 20 * 15 / 20 + "px";
+    oDigitProgressElement.style.lineHeight  = 20 + "px";
+    oDigitProgressElement.style.height      = 20 + "px";
+    oDigitProgressElement.style.color       = "rgb(0, 0, 0)";
+    oDigitProgressElement.style.textAlign   = "center";
+
+    this.m_oProgressValueElement = oDigitProgressElement;
+};
+CDrawingGifWriterWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 240, H : 100};
+};
+CDrawingGifWriterWindow.prototype.On_Progress = function(Progress)
+{
+    var dWidth = 214;
+    this.m_oProgressSliderElement.style.width = (Progress / 100 * dWidth) + "px";
+
+    var dValue = (Progress * 100 | 0) / 100;
+    Common.Set_InnerTextToElement(this.m_oProgressValueElement, dValue + "%");
+};
+CDrawingGifWriterWindow.prototype.On_Start = function()
+{
+    this.On_Progress(0);
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Disable();
+};
+CDrawingGifWriterWindow.prototype.On_End = function()
+{
+    this.On_Progress(100);
+
+    var oThis = this;
+    function Close()
+    {
+        oThis.Close(true);
+    }
+
+    // Закрываем окно не сразу, чтобы показать 100%
+    setTimeout(Close, 300);
+};
+CDrawingGifWriterWindow.prototype.Close = function(bEnd)
+{
+    if (true !== bEnd)
+    {
+        if (this.m_oGameTree)
+            this.m_oGameTree.Abort_DownloadGid();
+    }
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Enable();
+
+    CDrawingGifWriterWindow.superclass.Close.apply(this);
+};
+
+function CDrawingAboutWindow()
+{
+    CDrawingAboutWindow.superclass.constructor.call(this);
+
+    this.m_oDrawingBoard = null;
+}
+
+CommonExtend(CDrawingAboutWindow, CDrawingWindow);
+
+CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, true);
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
+    this.Set_Caption("About");
+
+    var oTabs = new CDrawingVerticalTabs();
+    oTabs.Init(this.HtmlElement.InnerDiv.id, ["About Web Go Board", "Keyboard Shortcuts"], 1);
+
+    this.private_InitAboutPage(oTabs.Get_TabContent(0));
+    this.private_InitKeyBoardShortcutsPage(oTabs.Get_TabContent(1), oPr);
+};
+CDrawingAboutWindow.prototype.Get_DefaultWindowSize = function()
+{
+    if (this.m_oDrawing)
+    {
+        var nDrawingW = this.m_oDrawing.Get_Width();
+        var nDrawingH = this.m_oDrawing.Get_Height();
+
+        var nWindowW = Math.max(100, Math.min(700, nDrawingW * 0.9));
+        var nWindowH = Math.max(100, Math.min(600, nDrawingH * 0.9));
+
+        return {W : nWindowW, H : nWindowH};
+    }
+
+    return null;
+};
+CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
+{
+    var oDivMainPart = document.createElement("div");
+    oDiv.appendChild(oDivMainPart);
+    oDivMainPart.style.margin  = "0";
+    oDivMainPart.style.padding = "10px 20px";
+
+    oDivMainPart.style.fontFamily = "Tahoma, Arial, Verdana";
+    oDivMainPart.style.fontSize   = "12px";
+    oDivMainPart.style.color      = "#666";
+    oDivMainPart.style.background = "#fff";
+
+    var oLogo = document.createElement("img");
+    oLogo.src            = g_sLogo100;
+    oLogo.width          = 100;
+    oLogo.height         = 100;
+    oLogo.style['float'] = "left";
+    oDivMainPart.appendChild(oLogo);
+
+    var oMargin = document.createElement("div");
+    oMargin.style.width    = "10px";
+    oMargin.style.height   = "100px";
+    oMargin.style['float'] = "left";
+    oDivMainPart.appendChild(oMargin);
+
+    var oHeading = document.createElement("h1");
+    oDivMainPart.appendChild(oHeading);
+    Common.Set_InnerTextToElement(oHeading, "Web Go/Baduk Board");
+
+    var oVersion = document.createElement("div");
+    oDivMainPart.appendChild(oVersion);
+    Common.Set_InnerTextToElement(oVersion, "Version " + GoBoardApi.Get_Version());
+
+    var oString = document.createElement("div");
+    oString.style.paddingTop = "40px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "Visit our Github project for feedback and issue reports:");
+    oString = document.createElement("a");
+    oString.href = "https://github.com/IlyaKirillov/GoProject";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "https://github.com/IlyaKirillov/GoProject");
+
+    oString = document.createElement("div");
+    oString.style.paddingTop = "30px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2015. All rights reserved.");
+};
+CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv, oPr)
+{
+    var oMainDiv = oDiv;
+    oMainDiv.style.overflowX = "hidden";
+    oMainDiv.style.overflowY = "scroll";
+
+    var oDivMainPart = document.createElement("div");
+    oMainDiv.appendChild(oDivMainPart);
+    oDivMainPart.style.margin  = "0";
+    oDivMainPart.style.padding = "10px 20px";
+
+    oDivMainPart.style.fontFamily = "Tahoma, Arial, Verdana";
+    oDivMainPart.style.fontSize   = "12px";
+    oDivMainPart.style.color      = "#666";
+    oDivMainPart.style.background = "#fff";
+
+    var oHeading = document.createElement("h1");
+    oDivMainPart.appendChild(oHeading);
+    Common.Set_InnerTextToElement(oHeading, "Keyboard Shortcuts");
+    oHeading.style.fontSize   = "16px";
+    oHeading.style.fontWeight = "bold";
+
+    var oTable = document.createElement("table");
+    oDivMainPart.appendChild(oTable);
+    oTable.style.margin = "20px 0";
+    oTable.style.width  = "100%";
+
+    var oTBody = document.createElement("tbody");
+    oTable.appendChild(oTBody);
+
+    this.m_oDrawingBoard = null;
+    if (oPr.GameTree)
+        this.m_oDrawingBoard = oPr.GameTree.Get_DrawingBoard();
+
+    this.private_AppendTableHeading1(oTBody,     "Working with Files");
+
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 79, ShiftKey : false}, "Open Sgf/Gib/Ngf",                  "Ctrl+O",                                        "Open the Sgf/Gib/Ngf file from disk. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 79, ShiftKey : true }, "Open Sgf",                          "Ctrl+Shift+O",                                  "Open the Sgf file from source. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 83, ShiftKey : false}, "Save Sgf",                          "Ctrl+S",                                        "Save Sgf file.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 72, ShiftKey : false}, "Save png shot",                     "Ctrl+H",                                        "Save board shot in png format.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 72, ShiftKey : true }, "Save gif shot",                     "Ctrl+Shift+H",                                  "Save board shot in gif format.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 73, ShiftKey : false}, "Save multipage gif file.",          "Ctrl+I",                                        "Save gif file for current variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 73, ShiftKey : true }, "Save multipage gif file.",          "Ctrl+Shift+I",                                  "Save gif file for all branches with comment RIGHT (for problem mode).");
+
+    this.private_AppendTableHeading1(oTBody,     "Navigation");
+
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 39, ShiftKey : false}, "Next node",                         "Right arrow",                                   "Jump to next node.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 39, ShiftKey : false}, "Next 5 node",                       "Ctrl+Right arrow",                              "Jump over 5 nodes.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 39, ShiftKey : true }, "End of the variant",                "Ctrl+Shift+Right arrow",                        "Jump to the end of the current variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 37, ShiftKey : false}, "Previous node",                     "Left arrow",                                    "Jump to previous node.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 37, ShiftKey : false}, "Previous 5 node",                   "Shift+Left arrow",                              "Jump back over 5 nodes.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 37, ShiftKey : true }, "Start of the file",                 "Ctrl+Shift+Right arrow",                        "Jump to the start of the file.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 38, ShiftKey : false}, "Previous variant",                  "Up arrow",                                      "Jump to previous variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode : 40, ShiftKey : false}, "Next variant",                      "Down arrow",                                    "Jump to next variant.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey :  true, KeyCode : 36, ShiftKey :  true}, "Start node",                        "Ctrl+Shift+Home",                               "Jump to the start node of the file. This node can be different from the first node. See \"load unfinished files\" checkbox in settings.");
+
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 112, ShiftKey : false},    "Play mode", "F1");
+
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add move",                          "Left mouse click",                              "Set sequentially stones.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add alternative move",              "Right mouse click",                             "Create new brunch and add alternative move.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Go to the point",                   "Shift+Left mouse click onto a board position",  "Teleports you to the moment of the game forth or back, when the stone on this position has been played.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Change move order",                 "Ctrl+Shift+Left mouse click",                   "When sequentially stones are entered: changes the colour of the next stone to be set. What stone will appear on the board is shown by the tools field (useful e.g. after a problem has been set up).");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add comment with coordinates",      "Ctrl+Left mouse click",                         "Add comment with coordinates.");
+
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 113, ShiftKey : false},    "Count scores", "F2");
+
+    this.private_AppendTableCommonString(oTBody, {},                                                "Mark dead groups",                  "Left mouse click",                              "Mark dead groups.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "End count scores",                  "Ctrl+Left mouse click onto board",              "Return to play mode.");
+
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 114, ShiftKey : false},    "Set up a board position", "F3");
+
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add black stone or remove stone",   "Left mouse click",                              "Add black stone or remove stone.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Add white stone or remove stone",   "Shift+Left mouse click",                        "Add white stone or remove stone.");
+
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 115, ShiftKey : false},    "Triangles",                         "F4",                                           "Add triangles.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 116, ShiftKey : false},    "Squares",                           "F5",                                           "Add squares.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 117, ShiftKey : false},    "Circles",                           "F6",                                           "Add circles.");
+    this.private_AppendTableHeading3(oTBody, {CtrlKey : false, KeyCode : 118, ShiftKey : false},    "X mark",                            "F7",                                           "Add \"X\" mark.");
+
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 119, ShiftKey : false},    "Text label", "F8");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Letter",                            "Left mouse click",                             "Add letter.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Text",                              "Shift+Left mouse click",                       "Add text entered by the user.");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 120, ShiftKey : false},    "Numeric label", "F9");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Number",                            "Left mouse click",                             "Add the smallest positive number.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Move number",                       "Shift+Left mouse click",                       "Add number of the first move which was played here.");
+    this.private_AppendTableHeading2(oTBody, {CtrlKey : false, KeyCode : 121, ShiftKey : false},    "Color mode", "F10");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Blue region",                       "Left mouse click",                             "Add blue region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Green region",                      "Shift+Left mouse click",                       "Add green region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Red region",                        "Ctrl+Left mouse click",                        "Add red region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Gray region",                       "Ctrl+Shift+Left mouse click",                  "Add gray region.");
+    this.private_AppendTableCommonString(oTBody, {},                                                "Clear region",                      "Right mouse click",                            "Clear region.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true, KeyCode : 67, ShiftKey : false},  "Continue",                          "Ctrl+C",                                       "Copy all colors from previous node.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true, KeyCode : 79, ShiftKey : false},  "Count colors",                      "Ctrl+O",                                       "Count all colors with depth.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true, KeyCode : 82, ShiftKey : false},  "Clear colors",                      "Ctrl+R",                                       "Clear all colors in the current node.");
+    this.private_AppendTableHeading1(oTBody, "Miscellaneous");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : false, KeyCode :  8, ShiftKey : false}, "Remove node",                       "Backspace/Delete",                             "Deletes the current node and all of the following brunches.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 69, ShiftKey : false}, "Score estimator",                   "Ctrl+E",                                       "Show window with score estimator (you can mark dead groups by click on them).");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 86, ShiftKey : false}, "View mode change of the next move", "Ctrl+V",                                       "There are 3 mods: Show all next move variants, show all alternative variants of the current move, show nothing.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 82, ShiftKey : false}, "Show/Hide coordinates",             "Ctrl+R",                                       "Show/Hide coordinates. (Not in color mode, see above)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 77, ShiftKey : true }, "Make the current variant mainly",   "Ctrl+Shift+M",                                 "Make the current variant mainly by uplifting it to the root of the game tree.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 86, ShiftKey : true }, "Setting up view port",              "Ctrl+Shift+V",                                 "Setting up visible part of the board.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 68, ShiftKey : false}, "Ascii Diagram",                     "Ctrl+V",                                       "Make ascii diagram by current position.");
+};
+CDrawingAboutWindow.prototype.private_AppendTR = function(oTBody)
+{
+    var oTr = document.createElement("tr");
+    oTBody.appendChild(oTr);
+
+    oTr.style.borderLeft     = "0";
+    oTr.style.borderRight    = "0";
+    oTr.style.borderBottom   = "solid 1px #E4E4E4";
+    oTr.style.borderCollapse = "collapse";
+    oTr.style.padding        = "8px";
+    oTr.style.fontSize       = "12px";
+    oTr.style.textAlign      = "left";
+    oTr.style.cursor         = "default";
+
+    return oTr;
+};
+CDrawingAboutWindow.prototype.private_AppendTD = function(oTR, sText)
+{
+    var oTd = document.createElement("td");
+    oTR.appendChild(oTd);
+    Common.Set_InnerTextToElement(oTd, sText);
+
+    oTd.style.borderLeft     = "0";
+    oTd.style.borderRight    = "0";
+    oTd.style.borderBottom   = "solid 1px #E4E4E4";
+    oTd.style.borderCollapse = "collapse";
+    oTd.style.padding        = "8px";
+    oTd.style.fontSize       = "12px";
+    oTd.style.textAlign      = "left";
+    oTd.style.cursor         = "default";
+
+    return oTd;
+};
+CDrawingAboutWindow.prototype.private_SetEventListener = function(oElement, oEventPr)
+{
+    var oDrawingBoard = this.m_oDrawingBoard;
+    if (oDrawingBoard && oEventPr.KeyCode)
+    {
+        oElement.title = "Click to do it";
+        oElement.style.cursor = "pointer";
+        oElement.style.textDecoration = "underline";
+        oElement.addEventListener("click", function()
+        {
+            oDrawingBoard.private_HandleKeyDown(oEventPr);
+        }, false);
+    }
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading1 = function(oTBody, sText)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    var oTd = this.private_AppendTD(oTr, sText);
+    oTd.colSpan = "3";
+
+    oTd.style.fontSize   = "14px";
+    oTd.style.fontWeight = "bold";
+    oTd.style.paddingTop = "20px";
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading2 = function(oTBody, oEventPr, sText1, sText2)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    var oTd1 = this.private_AppendTD(oTr, sText1);
+    oTd1.style.fontWeight = "bold";
+    var oTd2 = this.private_AppendTD(oTr, sText2);
+    this.private_SetEventListener(oTd2, oEventPr);
+    oTd2.colSpan = "2";
+};
+CDrawingAboutWindow.prototype.private_AppendTableHeading3 = function(oTBody, oEventPr, sText1, sText2, sText3)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    this.private_AppendTD(oTr, sText1).style.fontWeight = "bold";
+    var oTd = this.private_AppendTD(oTr, sText2);
+    this.private_SetEventListener(oTd, oEventPr);
+    this.private_AppendTD(oTr, sText3);
+};
+CDrawingAboutWindow.prototype.private_AppendTableCommonString = function(oTBody, oEventPr, sText1, sText2, sText3)
+{
+    var oTr = this.private_AppendTR(oTBody);
+    this.private_AppendTD(oTr, sText1).style.width = "35%";
+    var oTd = this.private_AppendTD(oTr, sText2);
+    oTd.style.width = "15%";
+    this.private_SetEventListener(oTd, oEventPr);
+    this.private_AppendTD(oTr, sText3).style.width = "50%";
+};
+
+function CDrawingDiagramSLWindow()
+{
+    CDrawingDiagramSLWindow.superclass.constructor.call(this);
+
+    this.m_oTextArea = null;
+}
+
+CommonExtend(CDrawingDiagramSLWindow, CDrawingWindow);
+
+CDrawingDiagramSLWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingDiagramSLWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.Set_Caption("Ascii Diagram");
+
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
+    var sDivId       = this.HtmlElement.InnerDiv.id;
+
+    this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId);
+    this.private_FillTextArea(oPr.GameTree);
+};
+CDrawingDiagramSLWindow.prototype.Show = function(oPr)
+{
+    CDrawingDiagramSLWindow.superclass.Show.call(this, oPr);
+    this.private_FillTextArea(oPr.GameTree);
+};
+CDrawingDiagramSLWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId)
+{
+    var oElement   = document.createElement("textarea");
+    var sElementId = sDivId + "TA";
+    oElement.setAttribute("id", sElementId);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.style.fontFamily  = "Courier New, monospacef";
+    oElement.style.fontSize    = "10pt";
+    oElement.style.resize      = "none";
+    oElement.style.outline     = "none";
+    oElement.style.border      = "1px solid rgb(169,169,169)";
+    oElement.style.height      = "100%";
+    oElement.style.width       = "100%";
+    this.m_oTextArea = oElement;
+
+    oMainDiv.appendChild(oElement);
+
+    var oControl = CreateControlContainer(sElementId);
+    oControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oMainControl.AddControl(oControl);
+
+    return oElement;
+};
+CDrawingDiagramSLWindow.prototype.private_FillTextArea = function(oGameTree)
+{
+    this.m_oTextArea.value = "";
+
+    if (undefined === oGameTree)
+        return;
+
+    var oDrawingBoard = oGameTree.Get_DrawingBoard();
+    var oLogicBoard   = oGameTree.Get_Board();
+
+    if (!oDrawingBoard || !oLogicBoard)
+        return;
+
+    var sDiagram = "";
+
+    var nSizeX = oLogicBoard.Get_Size().X;
+    var nSizeY = oLogicBoard.Get_Size().Y;
+    var oViewPort = oDrawingBoard.Get_ViewPort();
+    var X0 = oViewPort.X0;
+    var Y0 = oViewPort.Y0;
+    var X1 = oViewPort.X1;
+    var Y1 = oViewPort.Y1;
+
+    // Определяем какие границы нам нужны
+    var bLeft   = (0 == X0 ? true : false);
+    var bRight  = (nSizeX - 1 == X1 ? true : false);
+    var bTop    = (0 == Y0 ? true : false);
+    var bBottom = (nSizeY - 1 == Y1 ? true : false);
+
+    // Определяем очередность хода и нумерацию
+
+    var arrNumbers = [];
+    for (var nY = Y0; nY < Y1; nY++)
+    {
+        for (var nX = X0; nX < X1; nX++)
+        {
+            var Mark  = oDrawingBoard.Get_Mark(nX + 1, nY + 1);
+            var MarkType = (null != Mark ? Mark.Get_Type() : EDrawingMark.Lm);
+            var MarkText = (null != Mark ? Mark.Get_Text() : "");
+
+            if (MarkType == EDrawingMark.Tx && Common_IsInt(MarkText))
+            {
+                var nValue = parseInt(MarkText);
+                var oElement =
+                {
+                    Number : nValue,
+                    Value  : oLogicBoard.Get(nX + 1, nY + 1)
+                };
+
+                if (BOARD_EMPTY != oElement.Value)
+                    arrNumbers.push(oElement);
+            }
+        }
+    }
+
+    var bBlackFirst  = true;
+    var bCoordinates = oDrawingBoard.Get_Rulers();
+    var nFirstMove = -1;
+    if (arrNumbers.length > 0)
+    {
+        var nMin = -1, nMinValue = BOARD_EMPTY;
+        var nMax = -1;
+        for (var nIndex = 0, nCount = arrNumbers.length; nIndex < nCount; nIndex++)
+        {
+            var oElement = arrNumbers[nIndex];
+
+            if (-1 == nMin || oElement.Number < nMin)
+            {
+                nMin      = oElement.Number;
+                nMinValue = oElement.Value;
+            }
+
+            if (-1 == nMax || oElement.Number > nMax)
+                nMax      = oElement.Number;
+        }
+
+        if (nMax - nMin < 10)
+        {
+            var bValid = true;
+            for (var nIndex = 0, nCount = arrNumbers.length; nIndex < nCount; nIndex++)
+            {
+                var oElement = arrNumbers[nIndex];
+
+                var nOst = (oElement.Number - nMin) % 2;
+                if ((0 == nOst && nMinValue != oElement.Value) ||
+                    (1 == nOst && nMinValue == oElement.Value))
+                {
+                    bValid = false;
+                    break;
+                }
+            }
+
+            if (true === bValid)
+            {
+                nFirstMove = nMin;
+                if (BOARD_BLACK === nMinValue)
+                    bBlackFirst = true;
+                else
+                    bBlackFirst = false;
+            }
+        }
+    }
+
+    var sVerticalLine = bLeft ? "$$  --" : "$$ -";
+    for (var nX = X0 + 1; nX <= X1; nX++)
+        sVerticalLine += "--";
+    sVerticalLine += bRight ? "- \n" : "\n";
+
+    var sLineStart = bLeft ? "$$ |" : "$$";
+    var sLineEnd   = bRight ? " |\n" : "\n";
+
+    // Header
+    if (bBlackFirst)
+        sDiagram += "$$B";
+    else
+        sDiagram += "$$W";
+
+    if (bCoordinates)
+        sDiagram += "c";
+
+    if (-1 != nFirstMove)
+        sDiagram += "m" + nFirstMove;
+
+    sDiagram += '\n';
+
+    // enf of header
+
+    if (bTop)
+        sDiagram += sVerticalLine;
+
+    for (var nY = Y0; nY <= Y1; nY++)
+    {
+        sDiagram += sLineStart;
+        for (var nX = X0; nX <= X1; nX++)
+        {
+            var Mark  = oDrawingBoard.Get_Mark(nX + 1, nY + 1);
+            var MarkType = (null != Mark ? Mark.Get_Type() : EDrawingMark.Lm);
+            var MarkText = (null != Mark ? Mark.Get_Text() : "");
+            var Value = oLogicBoard.Get(nX + 1, nY + 1);
+
+            if (BOARD_EMPTY == Value)
+            {
+                if (EDrawingMark.Tr === MarkType)
+                    sDiagram += " T";
+                else if (EDrawingMark.Cr === MarkType)
+                    sDiagram += " C";
+                else if (EDrawingMark.Sq === MarkType)
+                    sDiagram += " S";
+                else if (EDrawingMark.X === MarkType)
+                    sDiagram += " M";
+                else if (EDrawingMark.Tx === MarkType && 1 === MarkText.length && 97 <= MarkText.charCodeAt(0) && MarkText.charCodeAt(0) <= 122)
+                    sDiagram += String.fromCharCode(0x20, MarkText.charCodeAt(0));
+                else if (EDrawingMark.Tx === MarkType && 1 === MarkText.length && 65 <= MarkText.charCodeAt(0) && MarkText.charCodeAt(0) <= 90)
+                    sDiagram += String.fromCharCode(0x20, MarkText.charCodeAt(0) + 0x20);
+                else
+                {
+                    if (oLogicBoard.Is_HandiPoint(nX + 1, nY + 1))
+                        sDiagram += " ,";
+                    else
+                        sDiagram += " .";
+                }
+            }
+            else
+            {
+                if (-1 !== nFirstMove && MarkType == EDrawingMark.Tx && Common_IsInt(MarkText))
+                {
+                    var nValue = parseInt(MarkText) - nFirstMove + 1;
+
+                    if (10 == nValue)
+                        sDiagram += ' 0';
+                    else
+                        sDiagram += ' ' + nValue;
+                }
+                else if (BOARD_BLACK == Value)
+                {
+                    if (EDrawingMark.Tr === MarkType)
+                        sDiagram += " Y";
+                    else if (EDrawingMark.Cr === MarkType)
+                        sDiagram += " B";
+                    else if (EDrawingMark.Sq === MarkType)
+                        sDiagram += " #";
+                    else if (EDrawingMark.X === MarkType)
+                        sDiagram += " Z";
+                    else
+                        sDiagram += " X";
+                }
+                else if (BOARD_WHITE == Value)
+                {
+                    if (EDrawingMark.Tr === MarkType)
+                        sDiagram += " Q";
+                    else if (EDrawingMark.Cr === MarkType)
+                        sDiagram += " W";
+                    else if (EDrawingMark.Sq === MarkType)
+                        sDiagram += " @";
+                    else if (EDrawingMark.X === MarkType)
+                        sDiagram += " P";
+                    else
+                        sDiagram += " O";
+                }
+            }
+        }
+        sDiagram += sLineEnd;
+    }
+
+    if (bBottom)
+        sDiagram += sVerticalLine;
+
+    this.m_oTextArea.value = sDiagram;
+};
+
+function CDrawingViewPortWindow()
+{
+    CDrawingViewPortWindow.superclass.constructor.call(this);
+}
+
+CommonExtend(CDrawingViewPortWindow, CDrawingConfirmWindow);
+
+CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingViewPortWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
+    this.m_oGameTree = oPr.GameTree;
+    this.m_oDrawing  = oPr.Drawing;
+
+    this.Set_Caption("Setting up view port...");
+
+    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
+    var oMainControl = this.HtmlElement.ConfirmInnerControl;
+    var sMainId      = this.HtmlElement.ConfirmInnerDiv.id;
+
+    oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
+    oMainControl.Set_Type(2);
+
+    var sBoard = sMainId + "B";
+    var oBoardElement = this.protected_CreateDivElement(oMainDiv, sBoard);
+    var oBoardControl = CreateControlContainer(sBoard);
+    oBoardControl.Bounds.SetParams(0, 0, 1000, 1000, true, true, false, false, -1, -1);
+    oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oMainControl.AddControl(oBoardControl);
+
+    this.m_oBoardDiv = oBoardElement;
+    this.m_oBoardControl = oBoardControl;
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_ViewPortMode(this);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+};
+CDrawingViewPortWindow.prototype.Update_Size = function(bForce)
+{
+    CDrawingViewPortWindow.superclass.Update_Size.call(this, bForce);
+
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Update_Size(bForce);
+};
+CDrawingViewPortWindow.prototype.Show = function(oPr)
+{
+    while (this.m_oBoardDiv.firstChild)
+        this.m_oBoardDiv.removeChild(this.m_oBoardDiv.firstChild);
+
+    if (this.m_oBoardControl)
+        this.m_oBoardControl.Clear();
+
+    var oDrawingBoard = new CDrawingBoard();
+    oDrawingBoard.Init(this.m_oBoardDiv.id, oPr.GameTree.Copy_ForScoreEstimate());
+    oDrawingBoard.Set_ViewPortMode(this);
+
+    this.m_oDrawingBoard = oDrawingBoard;
+
+    CDrawingViewPortWindow.superclass.Show.apply(this, arguments);
+    // Для перерисовки позиции
+    this.Update_Size(true);
+};
+CDrawingViewPortWindow.prototype.Handle_OK = function()
+{
+    if (this.m_oGameTree)
+    {
+        var oDrawingBoard = this.m_oGameTree.Get_DrawingBoard();
+        if (oDrawingBoard)
+        {
+            var oViewPort = this.m_oDrawingBoard.Get_SelectedViewPort();
+            if (oViewPort.X1 - oViewPort.X0 < 3 || oViewPort.Y1 - oViewPort.Y0 < 3)
+            {
+                // TODO: Заменить на нормальное сообщение с окном
+                alert("Sorry, viewport can't be so small");
+                return;
+            }
+
+            oDrawingBoard.Set_ViewPort(oViewPort.X0 - 1, oViewPort.Y0 - 1, oViewPort.X1 - 1, oViewPort.Y1 - 1);
+
+            this.m_oDrawing.Update_Size(true);
+        }
+    }
+
+    this.Close();
 };
 
 
+var EWindowType =
+{
+    Common        : 0,
+    Confirm       : 1,
+    Error         : 2,
+    GameInfo      : 3,
+    Settings      : 4,
+    ScoreEstimate : 5,
+    CountColors   : 6,
+    GifWriter     : 7,
+    About         : 8,
+    DiagramSL     : 9,
+    ViewPort      : 10
+};
+
+var g_aWindows = {};
 function CreateWindow(sDrawingId, nWindowType, oPr)
 {
-    var sApp = "unknownwindow";
-    switch (nWindowType)
+    if (g_aWindows[nWindowType])
     {
-        case EWindowType.GameInfo: sApp = "Info"; break;
-        case EWindowType.Settings: sApp = "Settings"; break;
-        case EWindowType.Error   : sApp = "Error"; break;
-        case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
-        case EWindowType.CountColors   : sApp = "CountColors"; break;
-    }
-    var sId = sDrawingId + sApp;
-
-    var oDiv = document.getElementById(sId);
-    if (oDiv)
-    {
-        oDiv.style.left    = "300px";
-        oDiv.style.top     = "300px";
+        var oWindow = g_aWindows[nWindowType];
+        oWindow.Show(oPr);
+        return oWindow;
     }
     else
     {
-        oDiv = document.createElement("div");
+        var sApp = "unknownwindow";
+        switch (nWindowType)
+        {
+            case EWindowType.GameInfo      : sApp = "Info"; break;
+            case EWindowType.Settings      : sApp = "Settings"; break;
+            case EWindowType.Error         : sApp = "Error"; break;
+            case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
+            case EWindowType.CountColors   : sApp = "CountColors"; break;
+            case EWindowType.GifWriter     : sApp = "GifWriter"; break;
+            case EWindowType.About         : sApp = "About"; break;
+            case EWindowType.DiagramSL     : sApp = "DiagramSL"; break;
+            case EWindowType.ViewPort      : sApp = "ViewPort"; break;
+        }
+        var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
+
+        var oDiv = document.createElement("div");
         oDiv.setAttribute("id", sId);
         oDiv.setAttribute("style", "position:absolute;padding:0;margin:0;width:500px;height:500px;left:300px;top:300px;");
         oDiv.setAttribute("oncontextmenu", "return false;");
-        var aBody = document.getElementsByTagName('body');
 
-        if (aBody.length > 0)
+        if (oPr.Drawing)
         {
-            var oBody = aBody[0];
-            oBody.appendChild(oDiv);
+            var oDrawingDiv = oPr.Drawing.Get_MainDiv();
+            oDrawingDiv.appendChild(oDiv);
 
             var oWindow = null;
 
             switch (nWindowType)
             {
-                case EWindowType.GameInfo: oWindow = new CDrawingInfoWindow(); break;
-                case EWindowType.Settings: oWindow = new CDrawingSettingsWindow(); break;
-                case EWindowType.Error   : oWindow = new CDrawingErrorWindow(); break;
+                case EWindowType.GameInfo      : oWindow = new CDrawingInfoWindow(); break;
+                case EWindowType.Settings      : oWindow = new CDrawingSettingsWindow(); break;
+                case EWindowType.Error         : oWindow = new CDrawingErrorWindow(); break;
                 case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
                 case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
+                case EWindowType.GifWriter     : oWindow = new CDrawingGifWriterWindow(); break;
+                case EWindowType.About         : oWindow = new CDrawingAboutWindow(); break;
+                case EWindowType.DiagramSL     : oWindow = new CDrawingDiagramSLWindow(); break;
+                case EWindowType.ViewPort      : oWindow = new CDrawingViewPortWindow(); break;
             }
 
             if (null !== oWindow)
@@ -1306,6 +2230,12 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 oWindow.Init(sId, oPr);
                 oWindow.Update_Size(true);
             }
+
+            g_aWindows[nWindowType] = oWindow;
+
+            return oWindow;
         }
     }
+
+    return null;
 };

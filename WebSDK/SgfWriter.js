@@ -11,13 +11,16 @@
 
 function CSgfWriter()
 {
-    this.m_sFile     = null;
-    this.m_oGameTree = null;
+    this.m_sFile       = null;
+    this.m_oGameTree   = null;
+    this.m_oColorTable = null;
 }
 CSgfWriter.prototype.Write = function(oGameTree)
 {
-    this.m_oGameTree = oGameTree;
-    this.m_sFile     = "";
+    this.m_oGameTree   = oGameTree;
+    this.m_sFile       = "";
+    this.m_oColorTable = null;
+
     this.private_Write(oGameTree.Get_FirstNode());
 };
 CSgfWriter.prototype.private_WriteString = function(sString)
@@ -100,6 +103,27 @@ CSgfWriter.prototype.private_WriteGameInfo = function()
     this.private_WriteNonEmptyCommand("ON", oGameTree.Get_GameFuseki());
     this.private_WriteNonEmptyCommand("SO", oGameTree.Get_GameSource());
     this.private_WriteNonEmptyCommand("US", oGameTree.Get_GameTranscriber());
+
+    // Пробегаемся по всем нодам, чтобы составить таблицу цветов
+    var oColorTable = {};
+    this.m_oGameTree.Get_FirstNode().Get_ColorTable(oColorTable);
+
+    // цвет с 0 индеском всегда 0x00000000 (прозрачный)
+    var nColorTableLen = 1, aColorTable = [];
+    for (var nColor in oColorTable)
+    {
+        oColorTable[nColor] = nColorTableLen;
+        aColorTable[nColorTableLen++] = nColor | 0;
+    }
+
+    if (nColorTableLen > 1)
+    {
+        oColorTable[0] = 0;
+        aColorTable[0] = 0;
+
+        this.m_oColorTable = oColorTable;
+        this.private_WriteColorTable(aColorTable);
+    }
 };
 CSgfWriter.prototype.private_WriteNode = function(oNode)
 {
@@ -107,6 +131,8 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
 
     if (oNode === this.m_oGameTree.Get_FirstNode())
         this.private_WriteGameInfo();
+
+    this.private_WriteAddOrRemoveStones(oNode);
 
     for (var nIndex = 0, nCount = oNode.Get_CommandsCount(); nIndex < nCount; nIndex++)
     {
@@ -116,9 +142,9 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
 
         switch (nCommandType)
         {
-            case ECommand.AB: this.private_WriteCommandName("AB"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.AW: this.private_WriteCommandName("AW"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.AE: this.private_WriteCommandName("AE"); this.private_WritePosArray(oCommandValue); break;
+            case ECommand.AB: break; //this.private_WriteCommandName("AB"); this.private_WritePosArray(oCommandValue); break;
+            case ECommand.AW: break; //this.private_WriteCommandName("AW"); this.private_WritePosArray(oCommandValue); break;
+            case ECommand.AE: break; //this.private_WriteCommandName("AE"); this.private_WritePosArray(oCommandValue); break;
             case ECommand.B:  this.private_WriteCommandName("B");  this.private_WritePos(oCommandValue); break;
             case ECommand.W:  this.private_WriteCommandName("W");  this.private_WritePos(oCommandValue); break;
             case ECommand.BL: this.private_WriteCommandName("BL"); this.private_WriteReal(oCommandValue); break;
@@ -136,12 +162,17 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
     var sComment = oNode.Get_Comment();
     if ("" !== sComment)
     {
-        sComment = sComment.replace("]", "\\]");
+        sComment = sComment.replace(new RegExp("]", "g"), "\\]");
 
         this.private_WriteCommandName("C");
         this.private_WriteString("[");
         this.private_WriteString(sComment);
         this.private_WriteString("]");
+    }
+
+    if (null !== this.m_oColorTable)
+    {
+        this.private_WriteNodeColorMap(oNode);
     }
 };
 CSgfWriter.prototype.private_Write = function(oNode)
@@ -162,4 +193,142 @@ CSgfWriter.prototype.private_Write = function(oNode)
 
     if (bVariant)
         this.private_WriteString(")");
+};
+CSgfWriter.prototype.private_WriteColorTable = function(aColorTable)
+{
+    var oStream = new CStreamWriter();
+    oStream.Write_String("SGFCT");           // SGF color table (сигнатура)
+    oStream.Write_Short(1);                  // Версия
+    oStream.Write_Long(aColorTable.length); // Количество цветов в таблице
+
+    for (var nColorIndex = 0, nColorsCount = aColorTable.length; nColorIndex < nColorsCount; nColorIndex++)
+    {
+        oStream.Write_Long(aColorTable[nColorIndex]);
+    }
+
+    var sOutput = Common.Encode_Base64(oStream.Get_Bytes());
+    this.private_WriteCommand("CT", sOutput);
+};
+CSgfWriter.prototype.private_WriteNodeColorMap = function(oNode)
+{
+    // TODO: Тут пока рассчет на то что в таблице цветов не более 255
+
+    var oStream = new CStreamWriter();
+    oStream.Write_String("SGFCM");   // SGF color map (сигнатура)
+    oStream.Write_Short(1);          // версия
+
+    var oSize = this.m_oGameTree.Get_Board().Get_Size();
+    var nW = oSize.X, nH = oSize.Y;
+
+    oStream.Write_Short(nW);
+    oStream.Write_Short(nH);
+
+    // Проверяем есть ли в данной ноде хоть какие-либо цвета
+    var bColorMap = false;
+    for (var nY = 0; nY < nH; nY++)
+    {
+        for (var nX = 0; nX < nW; nX++)
+        {
+            var oColor = oNode.m_oColorMap[Common_XYtoValue(nX + 1, nY + 1)];
+            if (!oColor)
+                oStream.Write_Byte(0);
+            else
+            {
+                var nColor = oColor.ToLong();
+                if (undefined !== this.m_oColorTable[nColor])
+                {
+                    oStream.Write_Byte(this.m_oColorTable[nColor]);
+                    bColorMap = true;
+                }
+                else
+                    oStream.Write_Byte(0);
+            }
+        }
+    }
+
+    if (true === bColorMap)
+    {
+        var sOutput = Common.Encode_Base64(oStream.Get_Bytes());
+        this.private_WriteCommand("CM", sOutput);
+    }
+};
+CSgfWriter.prototype.private_WriteAddOrRemoveStones = function(oNode)
+{
+    var AB = [], AW = [], AE = [];
+
+    for (var nIndex = 0, nCount = oNode.Get_CommandsCount(); nIndex < nCount; nIndex++)
+    {
+        var oCommand = oNode.Get_Command(nIndex);
+        var nCommandType  = oCommand.Get_Type();
+        var oCommandValue = oCommand.Get_Value();
+
+        switch (nCommandType)
+        {
+            case ECommand.AB:
+            case ECommand.AW:
+            case ECommand.AE:
+            {
+                for (var nPos = 0, nPointsCount = oCommandValue.length; nPos < nPointsCount; nPos++)
+                {
+                    var nPosValue = oCommandValue[nPos];
+                    for (var nTempPos = 0, nTempCount = AB.length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === AB[nTempPos])
+                        {
+                            AB.splice(nTempPos, 1);
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+
+                    for (var nTempPos = 0, nTempCount = AW.length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === AW[nTempPos])
+                        {
+                            AW.splice(nTempPos, 1);
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+
+                    for (var nTempPos = 0, nTempCount = AE.length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === AE[nTempPos])
+                        {
+                            AE.splice(nTempPos, 1);
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+
+                    if (ECommand.AB === nCommandType)
+                        AB.push(nPosValue);
+                    else if (ECommand.AW === nCommandType)
+                        AW.push(nPosValue);
+                    else if (ECommand.AE === nCommandType)
+                        AE.push(nPosValue);
+                }
+
+                break;
+            }
+        }
+    }
+
+    if (AB.length > 0)
+    {
+        this.private_WriteCommandName("AB");
+        this.private_WritePosArray(AB);
+    }
+
+    if (AW.length > 0)
+    {
+        this.private_WriteCommandName("AW");
+        this.private_WritePosArray(AW);
+    }
+
+    if (AE.length > 0)
+    {
+        this.private_WriteCommandName("AE");
+        this.private_WritePosArray(AE);
+    }
 };

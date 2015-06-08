@@ -223,10 +223,8 @@ CDrawingPlayerInfo.prototype.private_Update = function()
     var sNameText   = ("" === this.m_sName ? (BOARD_BLACK === this.m_nPlayer ? "Black " : "White ") : this.m_sName) + ("" === this.m_sRank ? "" : "[" + this.m_sRank +  "]");
     var sScoresText = (true === this.m_bScores ? "Scores " : "Captured ") + this.m_dScores;
 
-    oNameDiv.innerText   = sNameText;
-    oNameDiv.innerHTML   = sNameText;
-    oScoresDiv.innerText = sScoresText;
-    oScoresDiv.innerHTML = sScoresText;
+    Common.Set_InnerTextToElement(oNameDiv, sNameText);
+    Common.Set_InnerTextToElement(oScoresDiv, sScoresText);
 
     var Canvas = document.createElement("canvas").getContext("2d");
     Canvas.font = "14pt Times New Roman";

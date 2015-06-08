@@ -26,6 +26,32 @@ CColor.prototype =
     ToString : function()
     {
         return "rgba(" + this.r + "," + this.g + "," + this.b + "," + this.a / 255 +")";
+    },
+
+    Compare : function(oColor)
+    {
+        if (this.r !== oColor.r || this.g !== oColor.g || this.b !== oColor.b || this.a !== oColor.a)
+            return false;
+
+        return true;
+    },
+
+    Copy : function()
+    {
+        return new CColor(this.r, this.g, this.b, this.a);
+    },
+
+    ToLong : function()
+    {
+        return ((this.r << 24 & 0xFF000000 ) | (this.g << 16 & 0x00FF0000) | (this.b << 8 & 0x0000FF00) | (this.a & 0x000000FF));
+    },
+
+    FromLong : function(nLong)
+    {
+        this.r = (nLong >> 24) & 0xFF;
+        this.g = (nLong >> 16) & 0xFF;
+        this.b = (nLong >>  8) & 0xFF;
+        this.a = (nLong      ) & 0xFF;
     }
 };
 
@@ -68,7 +94,13 @@ function Common_FindPosition( oElement )
     }
 }
 
-function Common_XYtoString(X,Y)
+function Common_PosValueToString(Value, nSize)
+{
+    var oPos = Common_ValuetoXY(Value);
+    return Common_XYtoString(oPos.X, oPos.Y, nSize);
+}
+
+function Common_XYtoString(X, Y, nSize)
 {
     var Res = new String();
     switch(X)
@@ -93,7 +125,7 @@ function Common_XYtoString(X,Y)
         case 18: Res = "S"; break;
         case 19: Res = "T"; break;
     }
-    Res += Y;
+    Res += nSize + 1 - Y;
     return Res;
 }
 
@@ -169,40 +201,72 @@ function Common_SortIncrease(First, Second)
         return 0;
 }
 
-function Common_UTF8_Decode(utftext)
+function Common_UTF8_Decode(sUtf8Text)
 {
-    var string = "";
-    var i = 0;
-    var c = c1 = c2 = 0;
+    var sString = "";
+    var nPos = 0;
+    var nCharCode1 = 0, nCharCode2 = 0, nCharCode3 = 0;
 
-    while (i < utftext.length)
+    var nLen = sUtf8Text.length;
+    while (nPos < nLen)
     {
-        c = utftext.charCodeAt(i);
+        nCharCode1 = sUtf8Text.charCodeAt(nPos);
 
-        if (c < 128)
+        if (nCharCode1 < 128)
         {
-            string += String.fromCharCode(c);
-            i++;
+            sString += String.fromCharCode(nCharCode1);
+            nPos++;
         }
-        else if((c > 191) && (c < 224))
+        else if((nCharCode1 > 191) && (nCharCode1 < 224))
         {
-            c2 = utftext.charCodeAt(i+1);
-            var charCode = ((c & 31) << 6) | (c2 & 63);
-            string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-            i += 2;
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            sString += String.fromCharCode(((nCharCode1 & 31) << 6) | (nCharCode2 & 63));
+            nPos += 2;
         }
         else
         {
-            c2 = utftext.charCodeAt(i+1);
-            c3 = utftext.charCodeAt(i+2);
-            var charCode = ((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63);
-            string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-            i += 3;
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            nCharCode3 = sUtf8Text.charCodeAt(nPos + 2);
+            sString += String.fromCharCode(((nCharCode1 & 15) << 12) | ((nCharCode2 & 63) << 6) | (nCharCode3 & 63));
+            nPos += 3;
         }
-
     }
 
-    return string;
+    return sString;
+}
+
+function Common_UTF8_Encode(sUtf8Text)
+{
+    var sString = "";
+    var nPos = 0;
+    var nCharCode1 = 0, nCharCode2 = 0, nCharCode3 = 0;
+
+    var nLen = sUtf8Text.length;
+    while (nPos < nLen)
+    {
+        nCharCode1 = sUtf8Text.charCodeAt(nPos);
+
+        if (nCharCode1 < 128)
+        {
+            sString += String.fromCharCode(nCharCode1);
+            nPos++;
+        }
+        else if((nCharCode1 > 191) && (nCharCode1 < 224))
+        {
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            sString += String.fromCharCode(((nCharCode1 & 31) << 6) | (nCharCode2 & 63));
+            nPos += 2;
+        }
+        else
+        {
+            nCharCode2 = sUtf8Text.charCodeAt(nPos + 1);
+            nCharCode3 = sUtf8Text.charCodeAt(nPos + 2);
+            sString += String.fromCharCode(((nCharCode1 & 15) << 12) | ((nCharCode2 & 63) << 6) | (nCharCode3 & 63));
+            nPos += 3;
+        }
+    }
+
+    return sString;
 }
 
 function Common_EncodeString(string, Encoding)
@@ -251,9 +315,9 @@ var Common_DragHandler =
         o.xMapper = fXMapper ? fXMapper : null;
         o.yMapper = fYMapper ? fYMapper : null;
 
-        o.root.onDragStart  = new Function();
-        o.root.onDragEnd    = new Function();
-        o.root.onDrag       = new Function();
+        o.root.onDragStart  = function(){};//= new Function();
+        o.root.onDragEnd    = function(){};//= new Function();
+        o.root.onDrag       = function(){};//= new Function();
     },
 
     Start : function(e)
@@ -291,6 +355,8 @@ var Common_DragHandler =
 
     Drag : function(e)
     {
+        check_MouseMoveEvent(e);
+
         e = Common_DragHandler.FixE(e);
         var o = Common_DragHandler.Obj;
 
@@ -308,8 +374,8 @@ var Common_DragHandler =
         nx = x + ((ex - o.lastMouseX) * (o.hmode ? 1 : -1));
         ny = y + ((ey - o.lastMouseY) * (o.vmode ? 1 : -1));
 
-        if (o.xMapper)      nx = o.xMapper(y)
-        else if (o.yMapper) ny = o.yMapper(x)
+        if (o.xMapper)      nx = o.xMapper(y);
+        else if (o.yMapper) ny = o.yMapper(x);
 
         if (o.minX != null) nx = Math.max( nx, o.minX );
         if (o.maxX != null) nx = Math.min( nx, o.maxX );
@@ -351,7 +417,22 @@ function CommonExtend(Child, Parent)
     Child.superclass = Parent.prototype;
 }
 
-function Common_GetBrowser()
+var Common_RequestAnimationFrame = (window['requestAnimationFrame'] ? window['requestAnimationFrame'] : (function()
+{
+    return window['webkitRequestAnimationFrame'] ||
+           window['mozRequestAnimationFrame']    ||
+           window['oRequestAnimationFrame']      ||
+           window['msRequestAnimationFrame']     ||
+           function(callback)
+           {
+               window.setTimeout(callback, 1000 / 60);
+           };
+})());
+
+function CCommon()
+{
+}
+CCommon.prototype.Get_Browser = function()
 {
     var sBrowser = "";
 
@@ -369,15 +450,136 @@ function Common_GetBrowser()
 
     return sBrowser;
 };
-
-var Common_RequestAnimationFrame = (window.requestAnimationFrame ? window.requestAnimationFrame : (function()
+CCommon.prototype.SaveAs = function(oBlob, sName, sMimeType)
 {
-    return window.webkitRequestAnimationFrame ||
-           window.mozRequestAnimationFrame    ||
-           window.oRequestAnimationFrame      ||
-           window.msRequestAnimationFrame     ||
-           function(callback)
-           {
-               window.setTimeout(callback, 1000 / 60);
-           };
-})());
+    if (typeof navigator !== "undefined" && navigator['msSaveOrOpenBlob'])
+        return navigator['msSaveOrOpenBlob'](oBlob, sName);
+
+    var oLink = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+    var oURL = (window['URL'] || window['webkitURL'] || window).createObjectURL(oBlob);
+    oLink['href']     = oURL;
+    oLink['download'] = sName;
+
+    if (sMimeType)
+        oLink['type'] = sMimeType;
+
+    this.Click(oLink);
+};
+CCommon.prototype.Click = function(oNode)
+{
+    var oEvent = document.createEvent("MouseEvents");
+    oEvent.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    oNode.dispatchEvent(oEvent);
+};
+CCommon.prototype.Get_LocalStorageItem = function(_name)
+{
+    if (undefined !== window.localStorage)
+    {
+        var name = "HTMLGoBoard" + _name;
+        return localStorage.getItem(name);
+    }
+    return "";
+};
+CCommon.prototype.Set_LocalStorageItem = function(_name, value)
+{
+    if (undefined !== window.localStorage)
+    {
+        var name = "HTMLGoBoard" + _name;
+        localStorage.setItem(name, value);
+    }
+};
+CCommon.prototype.Encode_Base64 = function(aBytes)
+{
+    var sOutput = "";
+    var nByte1, nByte2, nByte3 = 0;
+    var nEnc1, nEnc2, nEnc3, nEnc4 = 0;
+    var nPos = 0;
+
+    do
+    {
+        nByte1 = aBytes[nPos++];
+        nByte2 = aBytes[nPos++];
+        nByte3 = aBytes[nPos++];
+
+        nEnc1 = nByte1 >> 2;
+        nEnc2 = ((nByte1 &  3) << 4) | (nByte2 >> 4);
+        nEnc3 = ((nByte2 & 15) << 2) | (nByte3 >> 6);
+        nEnc4 = nByte3 & 63;
+
+        if (isNaN(nByte2))
+        {
+            nEnc3 = nEnc4 = 64;
+        }
+        else if (isNaN(nByte3))
+        {
+            nEnc4 = 64;
+        }
+
+        sOutput = sOutput + g_oBase64String.charAt(nEnc1) + g_oBase64String.charAt(nEnc2) + g_oBase64String.charAt(nEnc3) + g_oBase64String.charAt(nEnc4);
+    } while (nPos < aBytes.length);
+
+    return sOutput;
+};
+CCommon.prototype.Decode_Base64 = function(_sInput)
+{
+    var nByte1, nByte2, nByte3 = 0;
+    var nEnc1, nEnc2, nEnc3, nEnc4 = "";
+    var nPos = 0;
+
+    // Удаляем все невалидные символы A-Z, a-z, 0-9, +, /, or =
+    var sInput = _sInput.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    var aOut = [];
+
+    do
+    {
+        nEnc1 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+        nEnc2 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+        nEnc3 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+        nEnc4 = g_oBase64String.indexOf(sInput.charAt(nPos++));
+
+        nByte1 = (nEnc1 << 2) | (nEnc2 >> 4);
+        nByte2 = ((nEnc2 & 15) << 4) | (nEnc3 >> 2);
+        nByte3 = ((nEnc3 & 3) << 6) | nEnc4;
+
+        aOut.push(nByte1);
+
+        if (nEnc3 != 64)
+            aOut.push(nByte2);
+
+        if (nEnc4 != 64)
+            aOut.push(nByte3);
+
+    } while (nPos < sInput.length);
+
+    return aOut;
+};
+CCommon.prototype.Encode_Base64_UrlSafe = function(aBytes)
+{
+    var sOutput = this.Encode_Base64(aBytes);
+    sOutput = sOutput.replace(new RegExp("\\+", 'g'), '~');
+    sOutput = sOutput.replace(new RegExp("\\/", 'g'), '-');
+    sOutput = sOutput.replace(new RegExp("=", 'g'), '_');
+    return sOutput;
+};
+CCommon.prototype.Decode_Base64_UrlSafe = function(sInput)
+{
+    sInput = sInput.replace(new RegExp("~", 'g'), '+');
+    sInput = sInput.replace(new RegExp("-", 'g'), '/');
+    sInput = sInput.replace(new RegExp("_", 'g'), '=');
+    return this.Decode_Base64(sInput);
+};
+CCommon.prototype.Set_InnerTextToElement = function(oElement, sText)
+{
+    if (oElement.innerText)
+        oElement.innerText = sText;
+    else
+        oElement.textContent = sText;
+};
+
+var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+var Common = new CCommon();
+
+
+
+

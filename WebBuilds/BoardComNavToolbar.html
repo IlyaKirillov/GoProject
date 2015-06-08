@@ -6,7 +6,7 @@
     <script type="text/javascript" language="JavaScript" src="goboardmin.js"></script>
 </head>
 <body style="position:absolute;padding:0;margin:0;">
-<div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
+<div id="divId" style="position:relative; height: 100vh;width: 100vw" onfocus="BodyFocus()" tabindex="-1"></div>
 <script>
     var oGameTree = GoBoardApi.Create_GameTree();
     GoBoardApi.Set_Sound(oGameTree, "../Resources/Sound");
@@ -17,6 +17,12 @@
     {
         GoBoardApi.Update_Size(oGameTree);
     };
+
+    function BodyFocus()
+    {
+        if (oGameTree)
+            GoBoardApi.Focus(oGameTree);
+    }
 </script>
 </body>
 </html>

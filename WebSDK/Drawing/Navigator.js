@@ -37,16 +37,6 @@ function CDrawingNavigator(oDrawing)
         ScrollH     : 0
     };
 
-
-    this.m_bTrueColorBoard   = true;
-    this.m_bTrueColorStones  = true;
-    this.m_bShadows          = true;
-    this.m_oWhiteColor       = new CColor(255, 255, 255, 255);
-    this.m_oBlackColor       = new CColor(0, 0, 0, 255);
-    this.m_oBoardColor       = new CColor(231, 188, 95, 255);
-    this.m_oLinesColor       = new CColor(0, 0, 0, 255);
-    this.m_bDarkBoard        = false;
-
     this.m_oCreateWoodyId = null;
     this.m_oImageData =
     {
@@ -104,7 +94,60 @@ function CDrawingNavigator(oDrawing)
         Y : 0
     };
 
+    this.m_nHorScrollTimerId = null;
+    this.m_nVerScrollTimerId = null;
+
+    this.m_nHorScrollBlurTimerId = null;
+    this.m_nVerScrollBlurTimerId = null;
+
     var oThis = this;
+
+    var dBlurSpeed = 0.01;
+    function HorScrollBlur()
+    {
+        if (oThis.m_bMouseLock)
+        {
+            oThis.m_nHorScrollBlurTimerId = null;
+            return;
+        }
+
+        var dScrollOpacity   = parseFloat(oThis.HtmlElement.HorScroll.style.opacity);
+        var dScrollBgOpacity = parseFloat(oThis.HtmlElement.HorScrollBG.style.opacity);
+
+        dScrollOpacity   = Math.max(dScrollOpacity - dBlurSpeed, 0);
+        dScrollBgOpacity = Math.max(dScrollBgOpacity - dBlurSpeed, 0);
+
+        oThis.HtmlElement.HorScroll.style.opacity   = dScrollOpacity;
+        oThis.HtmlElement.HorScrollBG.style.opacity = dScrollBgOpacity;
+
+        if (dScrollOpacity > 0.001)
+            oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
+        else
+            oThis.m_nHorScrollBlurTimerId = null;
+    };
+
+    function VerScrollBlur()
+    {
+        if (oThis.m_bMouseLock)
+        {
+            oThis.m_nHorScrollBlurTimerId = null;
+            return;
+        }
+
+        var dScrollOpacity   = parseFloat(oThis.HtmlElement.VerScroll.style.opacity);
+        var dScrollBgOpacity = parseFloat(oThis.HtmlElement.VerScrollBG.style.opacity);
+
+        dScrollOpacity   = Math.max(dScrollOpacity - dBlurSpeed, 0);
+        dScrollBgOpacity = Math.max(dScrollBgOpacity - dBlurSpeed, 0);
+
+        oThis.HtmlElement.VerScroll.style.opacity   = dScrollOpacity;
+        oThis.HtmlElement.VerScrollBG.style.opacity = dScrollBgOpacity;
+
+        if (dScrollOpacity > 0.001)
+            oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
+        else
+            oThis.m_nVerScrollBlurTimerId = null;
+    }
 
     this.private_StartDrawingTimer = function()
     {
@@ -176,6 +219,11 @@ function CDrawingNavigator(oDrawing)
         oThis.private_OnMouseMove(Event);
         oThis.private_UpdateScrollsPos();
 
+        oThis.private_ClearVerScrollBlurTimer();
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
+        oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 500);
+
         return false;
     };
 
@@ -185,32 +233,202 @@ function CDrawingNavigator(oDrawing)
             oThis.m_oGameTree.Focus();
     };
 
+    this.private_ClearHorScrollTimer = function()
+    {
+        if (null !== oThis.m_nHorScrollTimerId)
+        {
+            clearTimeout(oThis.m_nHorScrollTimerId);
+            oThis.m_nHorScrollTimerId = null;
+        }
+    };
+
+    this.private_ClearHorScrollBlurTimer = function()
+    {
+        if (null !== oThis.m_nHorScrollBlurTimerId)
+        {
+            clearTimeout(oThis.m_nHorScrollBlurTimerId);
+            oThis.m_nHorScrollBlurTimerId = null;
+        }
+    };
+
+    this.private_OnMouseDownHorScrollBG = function(e)
+    {
+        oThis.private_ClearHorScrollTimer();
+
+        check_MouseDownEvent(e, true);
+
+        var oPos = Common_FindPosition(oThis.HtmlElement.HorScrollBG);
+        var X = global_mouseEvent.X - oPos.X;
+
+        var LogicXMax = oThis.m_oMap.Get_Width() + 1;
+        var ScrollW   = oThis.HtmlElement.ScrollW;
+        var NavW      = oThis.m_oImageData.W - 4;
+
+        X -= ScrollW / 2;
+        X = Math.max(0, Math.min(NavW - ScrollW, X));
+
+        var nSpeed = 200;
+        var nEndXOffset = (20 + LogicXMax * 24 - NavW) * (X / (NavW - ScrollW));
+
+        function HorScrollTimer(bFirstTime)
+        {
+            var nCurX = -oThis.m_oOffset.X;
+            if (nCurX !== nEndXOffset)
+            {
+                if (nCurX < nEndXOffset)
+                {
+                    nCurX = Math.min(nEndXOffset, nCurX + nSpeed);
+                }
+                else
+                {
+                    nCurX = Math.max(nEndXOffset, nCurX - nSpeed);
+                }
+
+                oThis.m_oOffset.X = -nCurX;
+                oThis.private_DrawMap();
+                oThis.private_UpdateScrollsPos();
+
+                if (nCurX !== nEndXOffset)
+                    oThis.m_nHorScrollTimerId = setTimeout(HorScrollTimer, true === bFirstTime ? 300 : 30);
+                else
+                    oThis.m_nHorScrollTimerId = null;
+            }
+            else
+                oThis.m_nHorScrollTimerId = null;
+        };
+
+        HorScrollTimer(true);
+    };
+
+    this.private_OnMouseUpHorScrollBG = function(e)
+    {
+        oThis.private_ClearHorScrollTimer();
+    };
+
+    this.private_OnMouseOverHorScrollBG = function()
+    {
+        oThis.private_ClearHorScrollBlurTimer();
+
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
+    };
+
+    this.private_OnMouseOutHorScrollBG = function()
+    {
+        oThis.private_ClearHorScrollTimer();
+        oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
+    };
+
+    this.private_ClearVerScrollTimer = function()
+    {
+        if (null !== oThis.m_nVerScrollTimerId)
+        {
+            clearTimeout(oThis.m_nVerScrollTimerId);
+            oThis.m_nVerScrollTimerId = null;
+        }
+    };
+
+    this.private_ClearVerScrollBlurTimer = function()
+    {
+        if (null !== oThis.m_nVerScrollBlurTimerId)
+        {
+            clearTimeout(oThis.m_nVerScrollBlurTimerId);
+            oThis.m_nVerScrollBlurTimerId = null;
+        }
+    };
+
+    this.private_OnMouseDownVerScrollBG = function(e)
+    {
+        oThis.private_ClearVerScrollTimer();
+
+        check_MouseDownEvent(e, true);
+
+        var oPos = Common_FindPosition(oThis.HtmlElement.VerScrollBG);
+        var Y = global_mouseEvent.Y - oPos.Y;
+
+        var LogicYMax = oThis.m_oMap.Get_Height() + 1;
+        var ScrollH   = oThis.HtmlElement.ScrollH;
+        var NavH      = oThis.m_oImageData.H - 4;
+
+        Y -= ScrollH / 2;
+        Y = Math.max(0, Math.min(NavH - ScrollH, Y));
+
+        var nSpeed = 48;
+        var nEndYOffset = (20 + LogicYMax * 24 - NavH) * (Y / (NavH - ScrollH));
+
+        function VerScrollTimer(bFirstTime)
+        {
+            var nCurY = -oThis.m_oOffset.Y;
+            if (nCurY !== nEndYOffset)
+            {
+                if (nCurY < nEndYOffset)
+                {
+                    nCurY = Math.min(nEndYOffset, nCurY + nSpeed);
+                }
+                else
+                {
+                    nCurY = Math.max(nEndYOffset, nCurY - nSpeed);
+                }
+
+                oThis.m_oOffset.Y = -nCurY;
+                oThis.private_DrawMap();
+                oThis.private_UpdateScrollsPos();
+
+                if (nCurY !== nEndYOffset)
+                    oThis.m_nVerScrollTimerId = setTimeout(VerScrollTimer, true === bFirstTime ? 300 : 30);
+                else
+                    oThis.m_nVerScrollTimerId = null;
+            }
+            else
+                oThis.m_nVerScrollTimerId = null;
+        };
+
+        VerScrollTimer(true);
+    };
+
+    this.private_OnMouseUpVerScrollBG = function(e)
+    {
+        oThis.private_ClearVerScrollTimer();
+    };
+
+    this.private_OnMouseOverVerScrollBG = function()
+    {
+        oThis.private_ClearVerScrollBlurTimer();
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
+        oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
+    };
+
+    this.private_OnMouseOutVerScrollBG = function()
+    {
+        oThis.private_ClearVerScrollTimer();
+        oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
+    };
+
     this.private_OnMouseOverHorScroll = function()
     {
+        oThis.private_ClearHorScrollBlurTimer();
+
         oThis.HtmlElement.HorScroll.style.opacity   = 0.7;
         oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
-        oThis.HtmlElement.HorScrollBG.style.display = "block";
     };
 
     this.private_OnMouseOutHorScroll = function()
     {
-        oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
-        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
-        oThis.HtmlElement.HorScrollBG.style.display = "none";
+        oThis.private_ClearHorScrollTimer();
+        oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
     };
 
     this.private_OnMouseOverVerScroll = function()
     {
+        oThis.private_ClearVerScrollBlurTimer();
         oThis.HtmlElement.VerScroll.style.opacity   = 0.7;
         oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
-        oThis.HtmlElement.VerScrollBG.style.display = "block";
     };
 
     this.private_OnMouseOutVerScroll = function()
     {
         oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
-        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
-        oThis.HtmlElement.VerScrollBG.style.display = "none";
+        oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
 
     this.private_OnDragStartScroll = function()
@@ -221,6 +439,19 @@ function CDrawingNavigator(oDrawing)
     this.private_OnDragEndScroll = function()
     {
         oThis.m_bMouseLock = false;
+
+        var X = global_mouseEvent.X;
+        var Y = global_mouseEvent.Y;
+
+        var oHorPos = Common_FindPosition(oThis.HtmlElement.HorScrollBG);
+        var nHorX = oHorPos.X, nHorY = oHorPos.Y, nHorW = oThis.HtmlElement.HorScrollBG.clientWidth, nHorH = oThis.HtmlElement.HorScrollBG.clientHeight;
+        if (X < nHorX || X > nHorX + nHorW || Y < nHorY || Y > nHorY + nHorH)
+            oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
+
+        var oVerPos = Common_FindPosition(oThis.HtmlElement.VerScrollBG);
+        var nVerX = oVerPos.X, nVerY = oVerPos.Y, nVerW = oThis.HtmlElement.VerScrollBG.clientWidth, nVerH = oThis.HtmlElement.VerScrollBG.clientHeight;
+        if (X < nVerX || X > nVerX + nVerW || Y < nVerY || Y > nVerY + nVerH)
+            oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
 
     this.private_OnDragHorScroll = function(X, Y)
@@ -283,9 +514,19 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.VerScroll   = this.private_CreateDivElement(oMainElement, sDivId + "VerScroll");
 
     this.HtmlElement.HorScrollBG.style.background = "rgb(0,0,0)";
-    this.HtmlElement.HorScrollBG.style.display = "none";
+    this.HtmlElement.HorScrollBG.style.opacity = "0";
     this.HtmlElement.VerScrollBG.style.background = "rgb(0,0,0)";
-    this.HtmlElement.VerScrollBG.style.display = "none";
+    this.HtmlElement.VerScrollBG.style.opacity = "0";
+
+    this.HtmlElement.HorScrollBG['onmousedown'] = this.private_OnMouseDownHorScrollBG;
+    this.HtmlElement.HorScrollBG['onmouseup']   = this.private_OnMouseUpHorScrollBG;
+    this.HtmlElement.HorScrollBG['onmouseover'] = this.private_OnMouseOverHorScrollBG;
+    this.HtmlElement.HorScrollBG['onmouseout']  = this.private_OnMouseOutHorScrollBG;
+
+    this.HtmlElement.VerScrollBG['onmousedown'] = this.private_OnMouseDownVerScrollBG;
+    this.HtmlElement.VerScrollBG['onmouseup']   = this.private_OnMouseUpVerScrollBG;
+    this.HtmlElement.VerScrollBG['onmouseover'] = this.private_OnMouseOverVerScrollBG;
+    this.HtmlElement.VerScrollBG['onmouseout']  = this.private_OnMouseOutVerScrollBG;
 
     this.HtmlElement.HorScroll['onmouseover'] = this.private_OnMouseOverHorScroll;
     this.HtmlElement.HorScroll['onmouseout']  = this.private_OnMouseOutHorScroll;
@@ -367,18 +608,21 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.HorScroll.style.position   = "absolute";
         this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
         this.HtmlElement.HorScroll.style.height     = 8 + "px";
-        this.HtmlElement.HorScroll.style.background = this.m_bDarkBoard ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
-        this.HtmlElement.HorScroll.style.opacity    = 0.5;
+        this.HtmlElement.HorScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
+        this.HtmlElement.HorScroll.style.opacity    = 0;
 
         Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 12, NavH - 12);
 
         this.HtmlElement.HorScroll.onDrag         = this.private_OnDragHorScroll;
         this.HtmlElement.HorScroll.onDragStart    = this.private_OnDragStartScroll;
         this.HtmlElement.HorScroll.onDragEnd      = this.private_OnDragEndScroll;
+
+        this.HtmlElement.HorScrollBG.style.display = "block";
     }
     else
     {
-        this.HtmlElement.HorScroll.style.display = "none";
+        this.HtmlElement.HorScrollBG.style.display = "none";
+        this.HtmlElement.HorScroll.style.display   = "none";
     }
 
     if (_NavH > NavH)
@@ -389,18 +633,21 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.position   = "absolute";
         this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
         this.HtmlElement.VerScroll.style.width      = 8 + "px";
-        this.HtmlElement.VerScroll.style.background = this.m_bDarkBoard ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
-        this.HtmlElement.VerScroll.style.opacity    = 0.5;
+        this.HtmlElement.VerScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
+        this.HtmlElement.VerScroll.style.opacity    = 0;
 
         Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 12, NavW - 12, 2, NavH - this.HtmlElement.ScrollH - 2);
 
         this.HtmlElement.VerScroll.onDrag         = this.private_OnDragVerScroll;
         this.HtmlElement.VerScroll.onDragStart    = this.private_OnDragStartScroll;
         this.HtmlElement.VerScroll.onDragEnd      = this.private_OnDragEndScroll;
+
+        this.HtmlElement.VerScrollBG.style.display = "block";
     }
     else
     {
-        this.HtmlElement.VerScroll.style.display = "none";
+        this.HtmlElement.VerScrollBG.style.display = "none";
+        this.HtmlElement.VerScroll.style.display   = "none";
     }
 
     // Этими строками мы сбрасываем последнее состояние отрисовщика, чтобы перерисовка точно состоялась
@@ -516,7 +763,7 @@ CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
         this.m_oImageData.W = W;
         this.m_oImageData.H = H;
 
-        Canvas.fillStyle = this.m_oBoardColor.ToString();
+        Canvas.fillStyle = this.private_GetSettings_BoardColor().ToString();
         Canvas.fillRect(0, 0, W, H);
 
         if (null !== this.m_oCreateWoodyId)
@@ -542,9 +789,10 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
 
     var oImageData = Canvas.createImageData(W, H);
 
-    var Red   = this.m_oBoardColor.r;
-    var Green = this.m_oBoardColor.g;
-    var Blue  = this.m_oBoardColor.b;
+    var oBoardColor = this.private_GetSettings_BoardColor();
+    var Red   = oBoardColor.r;
+    var Green = oBoardColor.g;
+    var Blue  = oBoardColor.b;
 
     var dCoffWf = new Array(W);
     for (var X = 0; X < W; X++)
@@ -555,7 +803,8 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
         dCoffHf[Y] = 0.02 * Math.tan(Y / H);
 
     var r, g, b;
-    if (true === this.m_bTrueColorBoard)
+    var oLinesColor = this.private_GetSettings_LinesColor();
+    if (true === this.private_GetSettings_TrueColorBoard())
     {
         var f = 9e-1;
         for (var Y = 0; Y < H; Y++)
@@ -604,9 +853,9 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
             {
                 if (i == 0  || j == 0 || i === H - 1 || j === W - 1)
                 {
-                    r = this.m_oLinesColor.r;
-                    g = this.m_oLinesColor.g;
-                    b = this.m_oLinesColor.b;
+                    r = oLinesColor.r;
+                    g = oLinesColor.g;
+                    b = oLinesColor.b;
                 }
                 else
                 {
@@ -641,7 +890,11 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
     var BlackTBitmap = this.m_oImageData.BlackT.data;
     var WhiteTBitmap = this.m_oImageData.WhiteT.data;
 
-    if (true === this.m_bTrueColorStones)
+    var oWhiteColor = this.private_GetSettings_WhiteColor();
+    var oBlackColor = this.private_GetSettings_BlackColor();
+    var bDarkBoard  = this.private_GetSettings_DarkBoard();
+
+    if (true === this.private_GetSettings_TrueColorStones())
     {
         var d2 = d / 2.0 - 5e-1;
         var r = d2 - 2e-1;
@@ -751,7 +1004,7 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
 
                         alpha = parseInt((1 - _hh * shade ) * 255);
                     }
-                    else if (hh <= 2 *pixel && hh >= pixel && true === this.m_bDarkBoard)
+                    else if (hh <= 2 *pixel && hh >= pixel && true === bDarkBoard)
                     {
                         var _hh = (2 * pixel - hh) / (pixel);
                         var shade = shadow;
@@ -766,28 +1019,28 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
                         bBorder = true;
                     }
 
-                    if (false === bBorder || false === this.m_bDarkBoard)
+                    if (false === bBorder || false === bDarkBoard)
                     {
-                        BlackBitmap[Index + 0] = this.m_oBlackColor.r;
-                        BlackBitmap[Index + 1] = this.m_oBlackColor.g;
-                        BlackBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackBitmap[Index + 0] = oBlackColor.r;
+                        BlackBitmap[Index + 1] = oBlackColor.g;
+                        BlackBitmap[Index + 2] = oBlackColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTBitmap[Index + 0] = this.m_oBlackColor.r;
-                        BlackTBitmap[Index + 1] = this.m_oBlackColor.g;
-                        BlackTBitmap[Index + 2] = this.m_oBlackColor.b;
+                        BlackTBitmap[Index + 0] = oBlackColor.r;
+                        BlackTBitmap[Index + 1] = oBlackColor.g;
+                        BlackTBitmap[Index + 2] = oBlackColor.b;
                         BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
                     }
                     else
                     {
-                        BlackBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        BlackBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        BlackBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackBitmap[Index + 0] = oWhiteColor.r;
+                        BlackBitmap[Index + 1] = oWhiteColor.g;
+                        BlackBitmap[Index + 2] = oWhiteColor.b;
                         BlackBitmap[Index + 3] = alpha;
 
-                        BlackTBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        BlackTBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        BlackTBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        BlackTBitmap[Index + 0] = oWhiteColor.r;
+                        BlackTBitmap[Index + 1] = oWhiteColor.g;
+                        BlackTBitmap[Index + 2] = oWhiteColor.b;
                         BlackTBitmap[Index + 3] = parseInt(alpha * 0.5);
                     }
 
@@ -801,7 +1054,7 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
 
                         alpha = parseInt((1 - _hh * shade ) * 255);
                     }
-                    else if (hh <= 2 *pixel && hh >= pixel && false === this.m_bDarkBoard)
+                    else if (hh <= 2 *pixel && hh >= pixel && false === bDarkBoard)
                     {
                         var _hh = (2 * pixel - hh) / (pixel);
                         var shade = shadow;
@@ -810,28 +1063,28 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
                         alpha = parseInt(_hh * shade * 255);
                     }
 
-                    if (false === bBorder || true === this.m_bDarkBoard)
+                    if (false === bBorder || true === bDarkBoard)
                     {
-                        WhiteBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        WhiteBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        WhiteBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteBitmap[Index + 0] = oWhiteColor.r;
+                        WhiteBitmap[Index + 1] = oWhiteColor.g;
+                        WhiteBitmap[Index + 2] = oWhiteColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTBitmap[Index + 0] = this.m_oWhiteColor.r;
-                        WhiteTBitmap[Index + 1] = this.m_oWhiteColor.g;
-                        WhiteTBitmap[Index + 2] = this.m_oWhiteColor.b;
+                        WhiteTBitmap[Index + 0] = oWhiteColor.r;
+                        WhiteTBitmap[Index + 1] = oWhiteColor.g;
+                        WhiteTBitmap[Index + 2] = oWhiteColor.b;
                         WhiteTBitmap[Index + 3] = parseInt(alpha / 2);
                     }
                     else
                     {
-                        WhiteBitmap[Index + 0] = this.m_oBlackColor.r;
-                        WhiteBitmap[Index + 1] = this.m_oBlackColor.g;
-                        WhiteBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteBitmap[Index + 0] = oBlackColor.r;
+                        WhiteBitmap[Index + 1] = oBlackColor.g;
+                        WhiteBitmap[Index + 2] = oBlackColor.b;
                         WhiteBitmap[Index + 3] = alpha;
 
-                        WhiteTBitmap[Index + 0] = this.m_oBlackColor.r;
-                        WhiteTBitmap[Index + 1] = this.m_oBlackColor.g;
-                        WhiteTBitmap[Index + 2] = this.m_oBlackColor.b;
+                        WhiteTBitmap[Index + 0] = oBlackColor.r;
+                        WhiteTBitmap[Index + 1] = oBlackColor.g;
+                        WhiteTBitmap[Index + 2] = oBlackColor.b;
                         WhiteTBitmap[Index + 3] = parseInt(alpha / 2);
                     }
                 }
@@ -913,7 +1166,7 @@ CDrawingNavigator.prototype.private_CreateLines = function()
     var NV2_Bitmap_T_3  = this.m_oImageData.Ver2_T_3.data;
     var NV3_Bitmap_T    = this.m_oImageData.Ver3_T.data;
 
-    var nChannel = true === this.m_bDarkBoard ? 200 : 28;
+    var nChannel = true === this.private_GetSettings_DarkBoard() ? 200 : 28;
 
     var Color = new CColor(nChannel, nChannel, nChannel, 255);
     for ( var i = 0; i < 24; i++ )
@@ -1413,6 +1666,8 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
 
     var Height = this.m_oMap.Get_Height();
 
+    var bShadows = this.private_GetSettings_Shadows();
+
     for (var Y = 0; Y <= Height - 1 ; Y++)
     {
         var _y = y + 24 * Y;
@@ -1477,24 +1732,79 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         var bCurVariant = Value.Is_OnCurrentVariant();
 
                         // Value - нода
-                        var oMove = Value.Get_Move();
+                        var oMove     = Value.Get_Move();
                         var nMoveType = oMove.Get_Type();
-                        var sMove = "" +  Value.Get_NavigatorInfo().Num;
-                        var nTextW = Nodes.measureText(sMove).width;
-                        var sComment = Value.Get_Comment();
+                        var sComment  = Value.Get_Comment();
+
+                        var sText = "";
+                        var nTextShift = 0;
+                        switch(g_oGlobalSettings.Get_NavigatorLabel())
+                        {
+                            case ESettingsNavigatorLabels.Empty:
+                            {
+                                sText = "";
+                                break;
+                            }
+                            case ESettingsNavigatorLabels.MoveNumbers:
+                            {
+                                sText = "" +  Value.Get_NavigatorInfo().Num;
+
+                                if (sText.length <= 2)
+                                    Nodes.font = "bold 10px sans-serif";
+                                else
+                                {
+                                    Nodes.font = "bold 9px sans-serif";
+                                    nTextShift = -1;
+                                }
+
+                                break;
+                            }
+                            case ESettingsNavigatorLabels.MoveNumbersCurrentVariant:
+                            {
+                                if (bCurVariant)
+                                    sText = "" +  Value.Get_NavigatorInfo().Num;
+                                else
+                                    sText = "";
+
+                                if (sText.length <= 2)
+                                    Nodes.font = "bold 10px sans-serif";
+                                else
+                                {
+                                    Nodes.font = "bold 9px sans-serif";
+                                    nTextShift = -1;
+                                }
+
+                                break;
+                            }
+                            case ESettingsNavigatorLabels.MoveCoordinates:
+                            {
+                                var nSize = this.m_oGameTree.Get_Board().Get_Size().Y;
+                                sText = Common_PosValueToString(oMove.Get_Value(), nSize);
+
+                                if (sText.length <= 2)
+                                    Nodes.font = "bold 10px sans-serif";
+                                else
+                                    Nodes.font = "bold 8px sans-serif";
+
+                                break;
+                            }
+                        }
+                        var nTextW = Nodes.measureText(sText).width;
 
                         if (BOARD_BLACK === nMoveType)
                         {
-                            if (bCurVariant && true === this.m_bShadows)
+                            if (bCurVariant && true === bShadows)
                                 Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 
                             Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
 
                             if ("" === sComment)
                             {
-                                Nodes.font = "bold 10px sans-serif";
-                                Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
-                                Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                                if ("" !== sText)
+                                {
+                                    Nodes.fillStyle = ( bCurVariant ?  "#CCC" : "rgb(192, 192, 192)" );
+                                    Nodes.fillText(sText, _x + 12 - nTextW / 2 + nTextShift, _y + 24 / 2 + 3);
+                                }
                             }
                             else
                             {
@@ -1503,16 +1813,18 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         }
                         else if (BOARD_WHITE === nMoveType)
                         {
-                            if (bCurVariant && true === this.m_bShadows)
+                            if (bCurVariant && true === bShadows)
                                 Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
 
                             if ("" === sComment)
                             {
-                                Nodes.font = "bold 10px sans-serif";
-                                Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );;
-                                Nodes.fillText( sMove, _x + 12 - nTextW / 2, _y + 24 / 2 + 3 );
+                                if ("" !== sText)
+                                {
+                                    Nodes.fillStyle = ( bCurVariant ?  "#000" : "rgb(56, 56, 56)" );
+                                    Nodes.fillText(sText, _x + 12 - nTextW / 2 + nTextShift, _y + 24 / 2 + 3);
+                                }
                             }
                             else
                             {
@@ -1617,4 +1929,36 @@ CDrawingNavigator.prototype.private_DrawCurrentOnTimer = function()
     }
 
     this.m_bNeedRedrawCurrent = false;
+};
+CDrawingNavigator.prototype.private_GetSettings_TrueColorBoard = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bTrueColorBoard;
+};
+CDrawingNavigator.prototype.private_GetSettings_TrueColorStones = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bTrueColorStones;
+};
+CDrawingNavigator.prototype.private_GetSettings_Shadows = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bShadows;
+};
+CDrawingNavigator.prototype.private_GetSettings_WhiteColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oWhiteColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_BlackColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oBlackColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_BoardColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oBoardColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_LinesColor = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.oLinesColor;
+};
+CDrawingNavigator.prototype.private_GetSettings_DarkBoard = function()
+{
+    return g_oGlobalSettings.m_oNavigatorPr.bDarkBoard;
 };

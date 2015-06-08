@@ -198,13 +198,11 @@ CDrawingSlider.prototype.private_HandleOnChange = function(bEnd)
             if (!bEnd)
             {
                 var dSeconds = (((this.m_oGameTree.Get_AutoPlayInterval() / 1000) * 1000) | 0) / 1000;
-                this.HtmlElement.Left.innerText = dSeconds + " seconds for move";
-                this.HtmlElement.Left.innerHTML = dSeconds + " seconds for move";
+                Common.Set_InnerTextToElement(this.HtmlElement.Left, dSeconds + " seconds for move");
             }
             else
             {
-                this.HtmlElement.Left.innerText = "";
-                this.HtmlElement.Left.innerHTML = "";
+                Common.Set_InnerTextToElement(this.HtmlElement.Left, "");
             }
 
             break;

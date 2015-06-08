@@ -6,17 +6,22 @@
     <script type="text/javascript" language="JavaScript" src="goboardmin.js"></script>
 </head>
 <body style="position:absolute;padding:0;margin:0;">
-<div id="divId" style="position:relative; height: 100vh;width: 100vw"></div>
+<div id="divId" style="position:relative; height: 100vh;width: 100vw" onfocus="BodyFocus()" tabindex="-1"></div>
 <script>
     var oGameTree = GoBoardApi.Create_GameTree();
     GoBoardApi.Create_BoardWithNavigateButtons(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
-    GoBoardApi.Set_Permissions(oGameTree, {NewNode : false, Move : false, ChangeBoardMode : false, LoadFile : false});
 
     window.onresize = function()
     {
         GoBoardApi.Update_Size(oGameTree);
     };
+
+    function BodyFocus()
+    {
+        if (oGameTree)
+            GoBoardApi.Focus(oGameTree);
+    }
 </script>
 </body>
 </html>

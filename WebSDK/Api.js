@@ -46,7 +46,7 @@ CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDiv
 CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator = function(oGameTree, sDivId)
 {
     var oDrawing = new CDrawing(oGameTree);
-    oDrawing.Create_BoardCommentsButtonsNavigator(sDivId);
+    oDrawing.Create_MixedFullTemplate(sDivId);
 };
 
 /*
@@ -135,7 +135,7 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
 /*
  Загружаем Sgf в GameTree.
  */
-CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
+CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMoveReference, sExt)
 {
     var oViewPort = {};
 
@@ -159,7 +159,7 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort)
     // Через апи мы всегда даем грузить сгф
     var nOldFlags = oGameTree.m_nEditingFlags;
     oGameTree.Reset_EditingFlags();
-    oGameTree.Load_Sgf(sSgfFile, oViewPort);
+    oGameTree.Load_Sgf(sSgfFile, oViewPort, sMoveReference, sExt);
     oGameTree.m_nEditingFlags = nOldFlags;
 };
 
@@ -172,11 +172,30 @@ CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
 };
 
 /*
+ Получаем ссылку на ход, чтобы потом можно было переоткрыть файл с данной ссылкой
+ */
+CGoBoardApi.prototype.Get_MoveReference = function(oGameTree)
+{
+    return oGameTree.Get_MoveReference();
+};
+
+/*
  Функция обновления размеров всех графических объектов.
  */
 CGoBoardApi.prototype.Update_Size = function(oGameTree)
 {
     oGameTree.Update_Size();
+};
+
+/*
+ Получаем название матча.
+ */
+CGoBoardApi.prototype.Get_MatchName = function(oGameTree)
+{
+    if (oGameTree)
+        return oGameTree.Get_MatchName();
+
+    return "White vs. Black";
 };
 
 
@@ -188,6 +207,20 @@ CGoBoardApi.prototype.Set_Sound = function(oGameTree, sPath)
     oGameTree.Set_Sound(sPath);
 };
 
+CGoBoardApi.prototype.Focus = function(oGameTree)
+{
+    if (oGameTree)
+        oGameTree.Focus();
+};
+
+/*
+ Получить текущую версию библиотеки.
+ */
+CGoBoardApi.prototype.Get_Version = function()
+{
+    return this.Version;
+};
+
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
@@ -197,8 +230,13 @@ CGoBoardApi.prototype['Create_Presentation']                  = CGoBoardApi.prot
 CGoBoardApi.prototype['Create_Problems']                      = CGoBoardApi.prototype.Create_Problems;
 CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prototype.Set_Permissions;
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
+CGoBoardApi.prototype['Save_Sgf']                             = CGoBoardApi.prototype.Save_Sgf;
+CGoBoardApi.prototype['Get_MoveReference']                    = CGoBoardApi.prototype.Get_MoveReference;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;
 CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prototype.Set_Sound;
 CGoBoardApi.prototype['Find_ProblemRightVariant']             = CGoBoardApi.prototype.Find_ProblemRightVariant;
 CGoBoardApi.prototype['Start_AutoPlay']                       = CGoBoardApi.prototype.Start_AutoPlay;
 CGoBoardApi.prototype['Stop_AutoPlay']                        = CGoBoardApi.prototype.Stop_AutoPlay;
+CGoBoardApi.prototype['Focus']                                = CGoBoardApi.prototype.Focus;
+CGoBoardApi.prototype['Get_MatchName']                        = CGoBoardApi.prototype.Get_MatchName;
+CGoBoardApi.prototype['Get_Version']                          = CGoBoardApi.prototype.Get_Version;

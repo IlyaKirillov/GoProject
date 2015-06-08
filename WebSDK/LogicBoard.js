@@ -314,6 +314,36 @@ CLogicBoard.prototype.Get_Num = function(nX, nY)
 {
     return this.m_aBoard[this.private_GetPos(nX, nY)].Get_Num();
 };
+CLogicBoard.prototype.Is_HandiPoint = function(nX, nY)
+{
+    if (this.m_nW === this.m_nH)
+    {
+        if (19 === this.m_nW)
+        {
+            if ((4 === nX &&  4 === nY) || (10 === nX &&  4 === nY) || (16 === nX &&  4 == nY) ||
+                (4 === nX && 10 === nY) || (10 === nX && 10 === nY) || (16 === nX && 10 == nY) ||
+                (4 === nX && 16 === nY) || (10 === nX && 16 === nY) || (16 === nX && 16 == nY))
+            return true;
+        }
+        else if (13 === this.m_nW)
+        {
+            if ((4 === nX &&  4 === nY) || (7 === nX &&  4 === nY) || (10 === nX &&  4 == nY) ||
+                (4 === nX &&  7 === nY) || (7 === nX &&  7 === nY) || (10 === nX &&  7 == nY) ||
+                (4 === nX && 10 === nY) || (7 === nX && 10 === nY) || (10 === nX && 10 == nY))
+                return true;
+        }
+        else if (9 === this.m_nW)
+        {
+            if ((3 === nX && 3 === nY) || (7 === nX && 3 === nY) ||
+                (3 === nX && 7 === nY) || (7 === nX && 7 === nY) ||
+                (5 === nX && 5 === nY))
+            return true;
+
+        }
+    }
+
+    return false;
+};
 CLogicBoard.prototype.Check_Dead = function(nX, nY, eValue)
 {
     var oChecker = new CDeadGroupChecker();

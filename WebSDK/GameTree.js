@@ -33,6 +33,7 @@ function CGameTree(Drawing)
 
     this.m_oFirstNode        = new CNode(this);   // Первая нода
     this.m_oCurNode          = this.m_oFirstNode; // Текущая нода
+    this.m_oStartNode        = this.m_oFirstNode; // Стартовая нода для просмотра файла
 
     this.m_nBlackCapt        = 0; // количество пленников черного игрока
     this.m_nWhiteCapt        = 0; // количество пленников белого игрока
@@ -94,6 +95,8 @@ function CGameTree(Drawing)
     this.m_pTutorRightCallback = null;
     this.m_pTutorWrongCallback = null;
     this.m_pTutorResetCallback = null;
+
+    this.m_nGifId              = null;
 };
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -308,14 +311,25 @@ CGameTree.prototype.Focus = function()
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Focus();
 };
-CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
+CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_LOADFILE))
         return;
 
-    var oReader = new CSgfReader(this);
+    g_oIdCounter.Reset();
+
     var nEditingFlags = this.m_nEditingFlags;
     this.Reset_EditingFlags();
+
+    // Сначала определим тип файла
+    var oReader = null;
+    if ("gib" === sExt)
+        oReader = new CGibReader(this);
+    else if ("ngf" === sExt)
+        oReader = new CNgfReader(this);
+    else
+        oReader = new CSgfReader(this);
+
     oReader.Load(sFile);
 
     if (this.m_bTutorModeAuto)
@@ -332,7 +346,7 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
             var Y1 = (nSize - oReader.m_oViewPort.Y1 <= 3 ? nSize - 1 : oReader.m_oViewPort.Y1);
             this.m_oDrawingBoard.Set_ViewPort(X0, Y0, X1, Y1);
         }
-        else
+        else if (undefined !== oViewPort.X0 && undefined !== oViewPort.X1 && undefined !== oViewPort.Y0 && undefined !== oViewPort.Y1)
             this.m_oDrawingBoard.Set_ViewPort(oViewPort.X0, oViewPort.Y0, oViewPort.X1, oViewPort.Y1);
     }
     else if (this.m_oDrawingBoard)
@@ -344,7 +358,23 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort)
         this.m_oDrawingNavigator.Update();
     }
 
-    this.GoTo_Node(this.m_oFirstNode);
+    if (sMoveReference)
+        this.GoTo_MoveReference(sMoveReference);
+    else
+    {
+        var oStartNode;
+        if (this.Is_LoadUnfinishedFilesOnLastNode() && this.Is_Unfinished())
+            oStartNode = this.m_oFirstNode.Get_LastNodeInMainVariant();
+        else
+            oStartNode = this.m_oFirstNode;
+
+        this.m_oStartNode = oStartNode;
+        this.GoTo_Node(oStartNode);
+    }
+
+    var eShowVariants = this.Get_LoadShowVariants();
+    if (ESettingsLoadShowVariants.FromFile !== this.Get_LoadShowVariants())
+        this.m_eShowVariants = eShowVariants;
 
     this.m_nEditingFlags = nEditingFlags;
 
@@ -394,6 +424,10 @@ CGameTree.prototype.Reset = function()
 
     this.Init_Match();
 };
+CGameTree.prototype.GoTo_StartNode = function()
+{
+    this.GoTo_Node(this.m_oStartNode);
+};
 CGameTree.prototype.Step_BackwardToStart = function()
 {
     var nOldFlag = this.m_nEditingFlags;
@@ -410,7 +444,7 @@ CGameTree.prototype.Step_BackwardToStart = function()
     if (BOARD_EMPTY !== this.m_nTutorMode)
     {
         if (this.m_pTutorResetCallback)
-            this.m_pTutorResetCallback();
+            this.private_SendCallback(this.m_pTutorResetCallback)
     }
 
 };
@@ -421,6 +455,9 @@ CGameTree.prototype.Step_Backward = function(Count)
     {
         ParentNode = ParentNode.Get_Prev();
         Count--;
+
+        if (ParentNode.Get_NextsCount() > 1)
+            break;
     }
 
     this.GoTo_Node(ParentNode);
@@ -437,7 +474,12 @@ CGameTree.prototype.Step_Forward = function(Count, bForce)
     else
     {
         for (var Index = 0; Index < Count; Index++)
+        {
             this.GoTo_Next();
+
+            if (this.Get_CurNode().Get_NextsCount() > 1)
+                break;
+        }
 
         this.GoTo_Node(this.Get_CurNode());
     }
@@ -460,11 +502,28 @@ CGameTree.prototype.GoTo_PrevVariant = function()
     if (null !== PrevNode)
     {
         // Ищем ветку с предыдущим вариантом
-        var NextCur = PrevNode.Get_NextCur();
-        if (PrevNode.Get_NextsCount() > 0 && NextCur > 0)
+        var NextCur    = PrevNode.Get_NextCur();
+        var NextsCount = PrevNode.Get_NextsCount();
+        if (NextsCount > 1)
         {
-            var Node = PrevNode.Get_Next(NextCur - 1);
-            this.GoTo_Node(Node);
+            if (this.Is_CycleThroughVariants())
+            {
+                var Node;
+                if (NextCur > 0)
+                    Node = PrevNode.Get_Next(NextCur - 1);
+                else
+                    Node = PrevNode.Get_Next(NextsCount - 1);
+
+                this.GoTo_Node(Node);
+            }
+            else
+            {
+                if (NextCur > 0)
+                {
+                    Node = PrevNode.Get_Next(NextCur - 1);
+                    this.GoTo_Node(Node);
+                }
+            }
         }
     }
 };
@@ -476,10 +535,27 @@ CGameTree.prototype.GoTo_NextVariant = function()
         // Ищем ветку со следующим вариантом
         var NextCur    = PrevNode.Get_NextCur();
         var NextsCount = PrevNode.Get_NextsCount();
-        if (NextCur < NextsCount - 1)
+
+        if (NextsCount > 1)
         {
-            var Node = PrevNode.Get_Next(NextCur + 1);
-            this.GoTo_Node(Node);
+            if (this.Is_CycleThroughVariants())
+            {
+                var Node;
+                if (NextCur < NextsCount - 1)
+                    Node = PrevNode.Get_Next(NextCur + 1);
+                else
+                    Node = PrevNode.Get_Next(0);
+
+                this.GoTo_Node(Node);
+            }
+            else
+            {
+                if (NextCur < NextsCount - 1)
+                {
+                    var Node = PrevNode.Get_Next(NextCur + 1);
+                    this.GoTo_Node(Node);
+                }
+            }
         }
     }
 };
@@ -503,7 +579,7 @@ CGameTree.prototype.GoTo_MainVariant = function()
 CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
 {
     if (this.m_oSound)
-        this.m_oSound.Set_Silence( true );
+        this.m_oSound.Off();
 
     var CurNode = this.m_oCurNode;
     this.Step_BackwardToStart();
@@ -520,7 +596,7 @@ CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
         this.GoTo_Node(CurNode);
 
     if (this.m_oSound)
-        this.m_oSound.Set_Silence( false );
+        this.m_oSound.On();
 };
 CGameTree.prototype.Set_NextMove = function(Value)
 {
@@ -617,6 +693,9 @@ CGameTree.prototype.Add_Comment = function(sComment)
 {
     var sOldComment = this.m_oCurNode.Get_Comment();
     this.m_oCurNode.Add_Comment(sComment);
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_Comments(this.m_oCurNode.Get_Comment());
 
     if (this.m_oDrawingNavigator && "" === sOldComment && "" !== sComment)
         this.m_oDrawingNavigator.Update();
@@ -899,6 +978,7 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
             this.m_oDrawingBoard.Set_Mode(EBoardMode.CountScores);
 
         this.m_oDrawingBoard.Draw_Marks();
+        this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);
     }
 
     if (this.m_oDrawing)
@@ -916,13 +996,13 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
                 if (-1 !== sComment.indexOf("RIGHT") && null !== this.m_pTutorRightCallback)
                 {
                     this.m_oDrawing.Update_Comments(sComment.replace("RIGHT", ""));
-                    this.m_pTutorRightCallback();
+                    this.private_SendCallback(this.m_pTutorRightCallback)
                     bNeedUpdateComment = false;
                 }
                 else if (-1 === sComment.indexOf("RIGHT") && null !== this.m_pTutorWrongCallback)
                 {
                     this.m_oDrawing.Update_Comments(sComment);
-                    this.m_pTutorWrongCallback();
+                    this.private_SendCallback(this.m_pTutorWrongCallback)
                     bNeedUpdateComment = false;
                 }
             }
@@ -941,7 +1021,7 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
 
     if (this.m_nNextMove === this.m_nTutorMode)
     {
-        if (null !== this.m_nTutorId || null !== this.m_nAutoPlayTimer)
+        if (null !== this.m_nTutorId || null !== this.m_nAutoPlayTimer || null !== this.m_nGifId)
             return;
 
         if (this.m_oCurNode.Get_NextsCount() >= 0)
@@ -1083,9 +1163,9 @@ CGameTree.prototype.Set_Sound = function(sPath)
 {
     this.m_oSound.Init(sPath);
 };
-CGameTree.prototype.GoTo_Node = function(Node)
+CGameTree.prototype.GoTo_Node = function(Node, bForce)
 {
-    if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE))
+    if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE) && true !== bForce)
         return;
 
     this.Stop_AutoPlay();
@@ -1158,7 +1238,7 @@ CGameTree.prototype.GoTo_Node = function(Node)
             }
         }
 
-        if (!this.GoTo_Next())
+        if (!this.GoTo_Next(bForce))
             break;
     }
 
@@ -1326,6 +1406,16 @@ CGameTree.prototype.Get_GameName = function()
 {
     return this.m_sGameName;
 };
+CGameTree.prototype.Get_MatchName = function()
+{
+    var sGameName = this.Get_GameName();
+    if ("" === sGameName)
+        sGameName = this.Get_WhiteName() + " vs. " + this.Get_BlackName();
+    if ("" === sGameName)
+        sGameName = "White vs. Black";
+
+    return sGameName;
+};
 CGameTree.prototype.Set_GameInfo = function(sGameInfo)
 {
     this.m_sGameInfo = sGameInfo;
@@ -1435,7 +1525,7 @@ CGameTree.prototype.Get_WhiteTeam = function()
 CGameTree.prototype.Set_BoardSize = function(W, H)
 {
     // TODO: Пока мы работаем только с квадратными досками размера >= 2 (доска размером 1х1 бессмысленна)
-    var W = Math.max(W, H, 2);
+    var W = Math.min(50, Math.max(W, H, 2));
     var H = W;
 
     var OldSize = this.m_oBoard.Get_Size();
@@ -1491,8 +1581,17 @@ CGameTree.prototype.Update_InterfaceState = function()
         {
             var PrevNextCur = PrevNode.Get_NextCur();
             var PrevNextsCount = PrevNode.Get_NextsCount();
-            oIState.NextVariant = PrevNextCur < PrevNextsCount - 1 ? true : false;
-            oIState.PrevVariant = PrevNextCur > 0 ? true : false;
+
+            if (this.Is_CycleThroughVariants())
+            {
+                oIState.NextVariant = PrevNextsCount > 1 ? true : false;
+                oIState.PrevVariant = PrevNextsCount > 1 ? true : false;
+            }
+            else
+            {
+                oIState.NextVariant = PrevNextCur < PrevNextsCount - 1 ? true : false;
+                oIState.PrevVariant = PrevNextCur > 0 ? true : false;
+            }
         }
         else
         {
@@ -1556,18 +1655,555 @@ CGameTree.prototype.Can_EditGameInfo = function()
 {
     return (this.m_nEditingFlags & EDITINGFLAGS_GAMEINFO ? true : false);
 };
-CGameTree.prototype.Download_BoardScreenShot = function()
+CGameTree.prototype.Download_PngBoardScreenShot = function()
 {
     var oDrawingBoard = this.Get_DrawingBoard();
 
     if (oDrawingBoard)
     {
-        var oCanvas = oDrawingBoard.Get_FullImage();
+        var oCanvas = oDrawingBoard.Get_FullImage(true);
         var sImage  = oCanvas.toDataURL("image/png");
 
         var oHref = document.createElement("a");
         oHref['download'] = "BoardShot.png";
         oHref['href']     = "data:image/png;base64" + sImage;
-        oHref.click();
+        Common.Click(oHref);
+    }
+};
+CGameTree.prototype.Download_GifForCurVariant = function()
+{
+    var aNodes = [];
+    var oCurNode = this.m_oFirstNode;
+    aNodes.push(oCurNode);
+    while (oCurNode.Get_NextsCount() > 0)
+    {
+        oCurNode = oCurNode.Get_Next(oCurNode.Get_NextCur());
+        aNodes.push(oCurNode);
+    }
+
+    this.private_DownloadGif(aNodes);
+};
+CGameTree.prototype.Download_GifForProblem = function()
+{
+    var aNodes = [];
+    var aRightNodes = [];
+    this.m_oFirstNode.Find_RightNodes(aRightNodes);
+
+    for (var nIndex = 0, nLen = aRightNodes.length; nIndex < nLen; nIndex++)
+    {
+        var oRightNode = aRightNodes[nIndex];
+        oRightNode.Make_ThisNodeCurrent();
+
+        var oCurNode = this.m_oFirstNode;
+        aNodes.push(oCurNode);
+        while (oCurNode !== oRightNode && oCurNode.Get_NextsCount() > 0)
+        {
+            oCurNode = oCurNode.Get_Next(oCurNode.Get_NextCur());
+            aNodes.push(oCurNode);
+        }
+    }
+
+    this.private_DownloadGif(aNodes);
+};
+CGameTree.prototype.Download_GifBoardScreenShot = function()
+{
+    this.private_DownloadGif([this.m_oCurNode]);
+};
+CGameTree.prototype.Abort_DownloadGid = function()
+{
+    this.m_nGifId = null;
+};
+CGameTree.prototype.private_DownloadGif = function(aNodes)
+{
+    var oDrawingBoard = this.Get_DrawingBoard();
+    if (!oDrawingBoard)
+        return;
+
+    var oStartNode = this.m_oCurNode;
+
+    // Оценим сложность файла. Количество фреймов * W * H - постоянная величина равная 2.000.000
+    // 2000 * 1000 * 1 фрейм
+    // 100 * 100 * 200 фреймов
+
+    var nGifDifficult = 2000000;
+
+    var W = oDrawingBoard.m_oImageData.W;
+    var H = oDrawingBoard.m_oImageData.H;
+
+    var nOverallFramesCount = aNodes.length;
+    var nTimerFramesCount   = Math.max(1, Math.ceil(nGifDifficult / W / H));
+    var nCurrentFrame       = 0;
+    var oStones             = null;
+    var oMarks              = null;
+
+    var nIntervalsCount = Math.ceil(nOverallFramesCount / nTimerFramesCount);
+    var bUseTimeout = (nIntervalsCount > 5 ? true : false);
+
+    var oGifWindow = true === bUseTimeout ? CreateWindow(oDrawingBoard.HtmlElement.Control.HtmlElement.id, EWindowType.GifWriter, {Drawing : this.m_oDrawing, GameTree : this}) : null;
+
+    // Устанавливаем черно-белый цвет, чтобы уменьшить количество используемых цветов.
+    oDrawingBoard.Set_BlackWhiteLastMark(true);
+
+    var oGifWriter = new CGifWriter();
+
+    oGifWriter.Set_Delay(1500);
+    oGifWriter.Start();
+
+    var W = 0;
+    var H = 0;
+
+    if (null !== oGifWindow)
+        oGifWindow.On_Start();
+
+    var oThis = this;
+
+    this.m_nGifId = true;
+
+    var TimerFunction = function()
+    {
+        if (null === oThis.m_nGifId)
+        {
+            // Извне отменили запись гифки
+            oDrawingBoard.Set_BlackWhiteLastMark(false);
+            oThis.GoTo_Node(oStartNode, true);
+            return;
+        }
+
+        var nLastFrame = Math.min(nCurrentFrame + nTimerFramesCount, nOverallFramesCount);
+        for (; nCurrentFrame < nLastFrame; nCurrentFrame++)
+        {
+            oThis.GoTo_Node(aNodes[nCurrentFrame], true);
+
+            oCanvas  = oDrawingBoard.Get_FullImage(false);
+            oContext = oCanvas.getContext("2d");
+
+            // Теперь нам надо запоминать логическое состояние отрисовки, т.е. где что отрисовано (камни и метки)
+            // и перед отрисовкой следующего фрейма сравнивать его с предыдущим состоянием. При сравнении находим
+            // границы ректа, в котором произошли изменения, кроме того запоминаем измененные области.
+            // В итоге новый фрейм обрезаем по границам ректа, а пикселы вне измененных областей мы делаем прозрачными.
+
+            var oState = oDrawingBoard.Get_BoardState();
+            var oCurStones = oState.Stones;
+            var oCurMarks  = oState.Marks;
+
+            if (0 === W || 0 === H)
+            {
+                W = oCanvas.width;
+                H = oCanvas.height;
+            }
+
+            if (null === oStones || null === oMarks)
+            {
+                // Первый фрейм мы добавляем целиком
+                oGifWriter.Add_ContextFrame(oContext, 0, 0, W, H, [{X0 : 0, Y0 : 0, X1 : W, Y1 : H}]);
+            }
+            else
+            {
+                var oChangedAreas = {};
+                for (var nPos in oCurMarks)
+                    oChangedAreas[nPos] = oCurMarks[nPos];
+
+                for (var nPos in oMarks)
+                {
+                    if (undefined !== oChangedAreas[nPos] && (false === oChangedAreas[nPos] || false === oMarks[nPos]))
+                        oChangedAreas[nPos] = false;
+                    else
+                        oChangedAreas[nPos] = oMarks[nPos];
+                }
+
+                for (var nPos in oStones)
+                {
+                    if (oStones[nPos] !== oCurStones[nPos] && false !== oChangedAreas[nPos])
+                        oChangedAreas[nPos] = true;
+                }
+
+                // Теперь для всех найденных измененных точке высчитаем области, которые нужно перерисовать
+                var aAreas = [];
+                for (var nPos in oChangedAreas)
+                {
+                    var oPos = Common_ValuetoXY(nPos);
+                    var oArea = oDrawingBoard.Get_BoardAreaByPosition(oPos.X, oPos.Y, oDrawingBoard.private_GetSettings_Shadows(), oChangedAreas[nPos]);
+                    if (null !== oArea)
+                        aAreas.push(oArea);
+                }
+
+                if (aAreas.length > 0)
+                {
+                    // Найдем общие границы всех измененных участков
+                    var X0 = W, Y0 = H, X1 = 0, Y1 = 0;
+                    for (var nIndex = 0, nCount = aAreas.length; nIndex < nCount; nIndex++)
+                    {
+                        var oArea = aAreas[nIndex];
+
+                        if (oArea.X0 < X0)
+                            X0 = oArea.X0;
+
+                        if (oArea.Y0 < Y0)
+                            Y0 = oArea.Y0;
+
+                        if (oArea.X1 > X1)
+                            X1 = oArea.X1;
+
+                        if (oArea.Y1 > Y1)
+                            Y1 = oArea.Y1;
+                    }
+
+                    oGifWriter.Add_ContextFrame(oContext, X0, Y0, X1 - X0, Y1 - Y0, aAreas);
+                }
+                else
+                    oGifWriter.Add_ContextFrame(oContext, 0, 0, W, H, []);
+            }
+
+            oStones = oState.Stones;
+            oMarks  = oState.Marks;
+        }
+
+        if (null !== oGifWindow)
+            oGifWindow.On_Progress(Math.min(100, nCurrentFrame / nOverallFramesCount * 100));
+
+        if (nCurrentFrame < nOverallFramesCount)
+        {
+            if (true === bUseTimeout)
+                setTimeout(TimerFunction, 10);
+            else
+                TimerFunction();
+        }
+        else
+        {
+            if (oGifWindow)
+                oGifWindow.On_End();
+
+            oGifWriter.Finish();
+
+
+            var sGameName = oThis.Get_GameName();
+            if ("" === sGameName)
+                sGameName = oThis.Get_WhiteName() + " vs. " + oThis.Get_BlackName();
+            if ("" === sGameName)
+                sGameName = "download";
+
+            sGameName += ".gif";
+
+            var oBlob = new Blob([oGifWriter.Get_Stream().Get_Bytes()], {type: "image/gif"});
+            Common.SaveAs(oBlob, sGameName);
+
+            // Возвращаемся к ноде, в которой мы были изначально.
+            oThis.m_nGifId = null;
+            oDrawingBoard.Set_BlackWhiteLastMark(false);
+            oThis.GoTo_Node(oStartNode, true);
+        }
+    };
+
+    if (true === bUseTimeout)
+        setTimeout(TimerFunction, 10);
+    else
+        TimerFunction();
+};
+CGameTree.prototype.private_SendCallback = function(pCallback)
+{
+    // Не посылаем сообщения, когда создается Gif изображение
+    if (null !== this.m_nGifId)
+        return;
+
+    if (pCallback)
+        pCallback();
+};
+CGameTree.prototype.TurnOn_Sound = function()
+{
+    g_oGlobalSettings.Set_Sound(true);
+};
+CGameTree.prototype.TurnOff_Sound = function()
+{
+    g_oGlobalSettings.Set_Sound(false);
+};
+CGameTree.prototype.Is_SoundOn = function()
+{
+    return g_oGlobalSettings.Is_SoundOn();
+};
+CGameTree.prototype.Set_LoadUnfinishedFilesOnLastNode = function(Value)
+{
+    g_oGlobalSettings.Set_LoadUnfinishedFilesOnLastNode(Value);
+};
+CGameTree.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
+{
+    return g_oGlobalSettings.Is_LoadUnfinishedFilesOnLastNode();
+};
+CGameTree.prototype.Is_CycleThroughVariants = function()
+{
+    return g_oGlobalSettings.Is_CycleThroughVariants();
+};
+CGameTree.prototype.Set_CycleThroughVariants = function(Value)
+{
+    g_oGlobalSettings.Set_CycleThroughVariants(Value);
+    this.Update_InterfaceState();
+};
+CGameTree.prototype.Get_NavigatorLabel = function()
+{
+    return g_oGlobalSettings.Get_NavigatorLabel();
+};
+CGameTree.prototype.Set_NavigatorLabel = function(eValue)
+{
+    if (eValue !== this.Get_NavigatorLabel())
+    {
+        g_oGlobalSettings.Set_NavigatorLabel(eValue);
+
+        if (this.m_oDrawingNavigator)
+            this.m_oDrawingNavigator.Update();
+    }
+};
+CGameTree.prototype.Get_LoadShowVariants = function()
+{
+    return g_oGlobalSettings.Get_LoadShowVariants();
+};
+CGameTree.prototype.Set_LoadShowVariants = function(eValue)
+{
+    if (eValue !== this.Get_LoadShowVariants())
+    {
+        g_oGlobalSettings.Set_LoadShowVariants(eValue);
+    }
+};
+CGameTree.prototype.Is_Unfinished = function()
+{
+    if ("" === this.m_sResult || null === this.m_sResult || undefined === this.m_sResult)
+        return true;
+
+    return false;
+};
+CGameTree.prototype.Add_ColorMark = function(X, Y, Color)
+{
+    this.m_oCurNode.Add_ColorMark(X, Y, Color);
+};
+CGameTree.prototype.Remove_ColorMark = function(X, Y)
+{
+    this.m_oCurNode.Remove_ColorMark(X, Y);
+};
+CGameTree.prototype.Remove_AllColorMarks = function()
+{
+    this.m_oCurNode.Remove_AllColorMarks();
+};
+CGameTree.prototype.Copy_ColorMapFromPrevNode = function()
+{
+    this.m_oCurNode.Copy_ColorMapFromPrevNode();
+
+    if (this.m_oDrawingBoard)
+        this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);
+};
+CGameTree.prototype.Get_MoveReference = function()
+{
+    var oCurNode = this.Get_CurNode();
+    var oEndNode = oCurNode;
+
+    while (!oCurNode.Is_FromFile())
+    {
+        var oPrev = oCurNode.Get_Prev();
+        if (null === oPrev)
+            return "";
+
+        oCurNode = oPrev;
+    }
+
+    var oStream = new CStreamWriter();
+    oStream.Write_String("GBMR"); // GoBoard Move Reference (сигнатура)
+    oStream.Write_Short(1);       // версия
+    oStream.Write_String2(oCurNode.Get_Id());
+
+    // Значит добавленный вариант, которого не было в исходном файле
+    if (oCurNode !== oEndNode)
+    {
+        oStream.Write_Byte(0x01);
+
+        var aNodes = [];
+        var oTempCurNode = oEndNode;
+
+        while (oTempCurNode !== oCurNode)
+        {
+            aNodes.splice(0, 0, oTempCurNode);
+            oTempCurNode = oTempCurNode.Get_Prev();
+        }
+
+        oStream.Write_Long(aNodes.length);
+        for (var nIndex = 0, nCount = aNodes.length; nIndex < nCount; nIndex++)
+        {
+            var oNode = aNodes[nIndex];
+            oStream.Write_Short(0x01); // Начало ноды
+
+            // Мы записываем только команды добавления камней и ходов
+            var nStartPos = oStream.Get_CurPosition();
+            oStream.Skip(4);
+
+            var nWrittenCommansCount = 0;
+            for (var CommandIndex = 0, CommandsCount = oNode.Get_CommandsCount(); CommandIndex < CommandsCount; CommandIndex++)
+            {
+                var Command = oNode.Get_Command( CommandIndex );
+                var Command_Type  = Command.Get_Type();
+                var Command_Value = Command.Get_Value();
+                var Command_Count = Command.Get_Count();
+
+                // Начало всегда такое
+                // Short : тип команды
+                // Long  : длина бинарника под данную команду
+
+                switch(Command_Type)
+                {
+                    case ECommand.B:
+                    {
+                        oStream.Write_Short(0x10); // B
+                        oStream.Write_Long(4);
+                        oStream.Write_Long(Command_Value);
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    case ECommand.W:
+                    {
+                        oStream.Write_Short(0x11); // W
+                        oStream.Write_Long(4);
+                        oStream.Write_Long(Command_Value);
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    case ECommand.AB:
+                    case ECommand.AW:
+                    case ECommand.AE:
+                    {
+                        switch(Command_Type)
+                        {
+                            case ECommand.AB: oStream.Write_Short(0x20); break;
+                            case ECommand.AW: oStream.Write_Short(0x21); break;
+                            case ECommand.AE: oStream.Write_Short(0x22); break;
+                        }
+
+                        oStream.Write_Long(4 * (Command_Count + 1));
+                        oStream.Write_Long(Command_Count);
+
+                        for (var Index = 0; Index < Command_Count; Index++ )
+                            oStream.Write_Long(Command_Value[Index]);
+
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                }
+            }
+
+            var nEndPos = oStream.Get_CurPosition();
+            oStream.Seek(nStartPos);
+            oStream.Write_Long(nWrittenCommansCount);
+            oStream.Seek(nEndPos);
+            oStream.Write_Short(0x00);
+        }
+    }
+    else
+        oStream.Write_Byte(0x00);
+
+    return Common.Encode_Base64_UrlSafe(oStream.Get_Bytes());
+};
+CGameTree.prototype.GoTo_MoveReference = function(sReference)
+{
+    var oFirstNode = this.Get_FirstNode();
+
+    var aBytes = Common.Decode_Base64_UrlSafe(sReference);
+    var oReader = new CStreamReader(aBytes, aBytes.length);
+    var sSign = oReader.Get_String(4);
+
+    if ("GBMR" !== sSign)
+        return this.GoTo_Node(oFirstNode);
+
+    var nVersion = oReader.Get_Short();
+    var sId      = oReader.Get_String2();
+
+    var oNode = oFirstNode.Get_NodeById(sId);
+
+    if (null !== oNode)
+    {
+        var bUserVariant = oReader.Get_Byte();
+
+        this.m_oCurNode = oNode;
+
+        if (0x01 === bUserVariant)
+        {
+            var nUserNodesCount = oReader.Get_Long();
+            for (var nIndex = 0; nIndex < nUserNodesCount; nIndex++)
+            {
+                if (0x01 !== oReader.Get_Short())
+                    break;
+
+                this.Add_NewNode(false, false);
+
+                var nCommandsCount = oReader.Get_Long();
+                for (var nCommandIndex = 0; nCommandIndex < nCommandsCount; nCommandIndex++)
+                {
+                    var nCommandType = oReader.Get_Short();
+                    var nCommandLen  = oReader.Get_Long();
+
+                    switch(nCommandType)
+                    {
+                        case 0x10:
+                        {
+                            var oPos = Common_ValuetoXY(oReader.Get_Long());
+                            this.Add_Move(oPos.X, oPos.Y, BOARD_BLACK);
+                            break;
+                        }
+                        case 0x11:
+                        {
+                            var oPos = Common_ValuetoXY(oReader.Get_Long());
+                            this.Add_Move(oPos.X, oPos.Y, BOARD_WHITE);
+                            break;
+                        }
+                        case 0x20:
+                        case 0x21:
+                        case 0x22:
+                        {
+
+                            var Value = BOARD_BLACK;
+                            switch (nCommandType)
+                            {
+                                case 0x20: Value = BOARD_BLACK; break;
+                                case 0x21: Value = BOARD_WHITE; break;
+                                case 0x22: Value = BOARD_EMPTY; break;
+                            }
+
+                            var nPointsCount = oReader.Get_Long();
+
+                            var arrPos = [];
+                            for (var nPointIndex = 0; nPointIndex < nPointsCount; nPointIndex++)
+                                arrPos.push(oReader.Get_Long());
+
+                            this.AddOrRemove_Stones(Value, arrPos);
+
+                            break;
+                        }
+                        default  :
+                        {
+                            oReader.Skip(nCommandLen);
+                            break;
+                        }
+                    }
+                }
+
+                oReader.Get_Short(); // 0x00
+                oNode = this.Get_CurNode();
+
+                if (this.m_oDrawingNavigator)
+                {
+                    this.m_oDrawingNavigator.Create_FromGameTree();
+                    this.m_oDrawingNavigator.Update();
+                }
+            }
+        }
+
+        this.GoTo_Node(oNode, true);
+    }
+    else
+        this.GoTo_Node(oFirstNode, true);
+};
+CGameTree.prototype.Make_CurrentVariantMainly = function()
+{
+    // Делаем текущий вариант основным
+    this.m_oFirstNode.Make_CurrentVariantMainly();
+
+    if (this.m_oDrawingNavigator)
+    {
+        this.m_oDrawingNavigator.Create_FromGameTree();
+        this.m_oDrawingNavigator.Update();
+        this.m_oDrawingNavigator.Update_Current(true);
     }
 };

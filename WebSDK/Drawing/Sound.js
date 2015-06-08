@@ -18,6 +18,7 @@ function CBoardSound()
     this.CaptureN   = null;
 
     this.m_bIE      = false;
+    this.m_bOn      = true;
 };
 
 CBoardSound.prototype.Init = function(sPath, bIE)
@@ -28,7 +29,7 @@ CBoardSound.prototype.Init = function(sPath, bIE)
 
     this.m_bOn = true;
 
-    if ("IE" === Common_GetBrowser())
+    if ("IE" === Common.Get_Browser())
         this.m_bIE = true;
 
     var oBody = aBody[0];
@@ -79,7 +80,7 @@ CBoardSound.prototype.private_AddSound = function(oBody, sId, sPath)
 };
 CBoardSound.prototype.private_PlaySound = function(oAudio)
 {
-    if (!oAudio || !this.m_bOn)
+    if (!oAudio || !this.m_bOn || !g_oGlobalSettings.Is_SoundOn())
         return;
 
     try
