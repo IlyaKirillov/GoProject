@@ -221,6 +221,15 @@ CGoBoardApi.prototype.Get_Version = function()
     return this.Version;
 };
 
+/**
+ * Включение/выключение координат на доске
+ */
+CGoBoardApi.prototype.Toggle_Rulers = function (oGameTree)
+{
+    if (oGameTree)
+        oGameTree.Toggle_Rulers();
+}
+
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
@@ -240,3 +249,4 @@ CGoBoardApi.prototype['Stop_AutoPlay']                        = CGoBoardApi.prot
 CGoBoardApi.prototype['Focus']                                = CGoBoardApi.prototype.Focus;
 CGoBoardApi.prototype['Get_MatchName']                        = CGoBoardApi.prototype.Get_MatchName;
 CGoBoardApi.prototype['Get_Version']                          = CGoBoardApi.prototype.Get_Version;
+CGoBoardApi.prototype['Toggle_Rulers']                        = CGoBoardApi.prototype.Toggle_Rulers;

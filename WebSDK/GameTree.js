@@ -2207,3 +2207,10 @@ CGameTree.prototype.Make_CurrentVariantMainly = function()
         this.m_oDrawingNavigator.Update_Current(true);
     }
 };
+CGameTree.prototype.Toggle_Rulers = function()
+{
+    if (this.m_oDrawingBoard)
+    {
+        this.m_oDrawingBoard.Set_Rulers(!this.m_oDrawingBoard.Get_Rulers());
+    }
+}
