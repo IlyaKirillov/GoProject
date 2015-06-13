@@ -346,7 +346,7 @@ function CDrawing(oGameTree)
     };
 
     this.private_OnTimerDraw();
-};
+}
 CDrawing.prototype.Disable = function()
 {
     if (this.m_oMainDiv)
@@ -362,6 +362,16 @@ CDrawing.prototype.Disable = function()
 
         this.m_oMainDiv.appendChild(oDisable);
         this.m_oDisableElement = oDisable;
+
+        var oErrorWindow = g_aWindows[EWindowType.Error];
+        if (oErrorWindow)
+            oErrorWindow = oErrorWindow.HtmlElement.Control.HtmlElement;
+
+        if (Common.Is_NodeDescendant(this.m_oMainDiv, oErrorWindow, 0))
+        {
+            this.m_oMainDiv.removeChild(oErrorWindow);
+            this.m_oMainDiv.appendChild(oErrorWindow);
+        }
     }
 };
 CDrawing.prototype.Enable = function()

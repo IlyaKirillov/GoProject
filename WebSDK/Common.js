@@ -102,77 +102,27 @@ function Common_PosValueToString(Value, nSize)
 
 function Common_XYtoString(X, Y, nSize)
 {
-    var Res = new String();
-    switch(X)
-    {
-        case 1: Res = "A"; break;
-        case 2: Res = "B"; break;
-        case 3: Res = "C"; break;
-        case 4: Res = "D"; break;
-        case 5: Res = "E"; break;
-        case 6: Res = "F"; break;
-        case 7: Res = "G"; break;
-        case 8: Res = "H"; break;
-        case 9: Res = "J"; break;
-        case 10: Res = "K"; break;
-        case 11: Res = "L"; break;
-        case 12: Res = "M"; break;
-        case 13: Res = "N"; break;
-        case 14: Res = "O"; break;
-        case 15: Res = "P"; break;
-        case 16: Res = "Q"; break;
-        case 17: Res = "R"; break;
-        case 18: Res = "S"; break;
-        case 19: Res = "T"; break;
-    }
-    Res += nSize + 1 - Y;
+    var Res = Common_X_to_String(X, nSize);
+    Res += (nSize + 1 - Y);
     return Res;
 }
 
-function Common_X_to_String(X)
+function Common_X_to_String(_X, nSize)
 {
-    var Res = new String();
-    switch(X)
-    {
-        case 1: Res = "A"; break;
-        case 2: Res = "B"; break;
-        case 3: Res = "C"; break;
-        case 4: Res = "D"; break;
-        case 5: Res = "E"; break;
-        case 6: Res = "F"; break;
-        case 7: Res = "G"; break;
-        case 8: Res = "H"; break;
-        case 9: Res = "J"; break;
-        case 10: Res = "K"; break;
-        case 11: Res = "L"; break;
-        case 12: Res = "M"; break;
-        case 13: Res = "N"; break;
-        case 14: Res = "O"; break;
-        case 15: Res = "P"; break;
-        case 16: Res = "Q"; break;
-        case 17: Res = "R"; break;
-        case 18: Res = "S"; break;
-        case 19: Res = "T"; break;
-        case 20: Res = "a"; break;
-        case 21: Res = "b"; break;
-        case 22: Res = "c"; break;
-        case 23: Res = "d"; break;
-        case 24: Res = "e"; break;
-        case 25: Res = "f"; break;
-        case 26: Res = "g"; break;
-        case 27: Res = "h"; break;
-        case 28: Res = "j"; break;
-        case 29: Res = "k"; break;
-        case 30: Res = "l"; break;
-        case 31: Res = "m"; break;
-        case 32: Res = "n"; break;
-        case 33: Res = "o"; break;
-        case 34: Res = "p"; break;
-        case 35: Res = "q"; break;
-        case 36: Res = "r"; break;
-        case 37: Res = "s"; break;
-        case 38: Res = "t"; break;
-    }
+    var Res;
+    var X = Math.max(0, Math.min(_X - 1, nSize - 1));
+
+    if (X < 8)
+        Res = String.fromCharCode('A'.charCodeAt(0) + X);
+    else if (X <= 24)
+        Res = String.fromCharCode('A'.charCodeAt(0) + X + 1);
+    else if (X < 33)
+        Res = String.fromCharCode('A'.charCodeAt(0) + X - 25, 'A'.charCodeAt(0) + X - 25);
+    else if (X < 50)
+        Res = String.fromCharCode('A'.charCodeAt(0) + X - 24, 'A'.charCodeAt(0) + X - 24);
+    else
+        Res = String.fromCharCode('A'.charCodeAt(0) + X - 50, 'A'.charCodeAt(0) + X - 50, 'A'.charCodeAt(0) + X - 50);
+
     return Res;
 }
 
@@ -575,6 +525,29 @@ CCommon.prototype.Set_InnerTextToElement = function(oElement, sText)
     else
         oElement.textContent = sText;
 };
+CCommon.prototype.Is_NodeDescendant = function(oParent, oChild, _nDepth)
+{
+    if (!oParent || !oChild)
+        return false;
+
+    var nDepth = (_nDepth ? _nDepth : 0);
+
+    var oNode = oChild.parentNode;
+    while (oNode != null)
+    {
+        if (oNode == oParent)
+        {
+            return true;
+        }
+
+        nDepth--;
+        if (nDepth < 0)
+            return false;
+
+        oNode = oNode.parentNode;
+    }
+    return false;
+}
 
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 

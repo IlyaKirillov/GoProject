@@ -97,7 +97,7 @@ function CGameTree(Drawing)
     this.m_pTutorResetCallback = null;
 
     this.m_nGifId              = null;
-};
+}
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
     var oGameTree = new CGameTree();
@@ -297,6 +297,10 @@ CGameTree.prototype.Update_Size = function()
 {
     if (this.m_oDrawing)
         this.m_oDrawing.Update_Size();
+};
+CGameTree.prototype.Get_Drawing = function()
+{
+    return this.m_oDrawing;
 };
 CGameTree.prototype.Get_DrawingBoard = function()
 {
@@ -1522,10 +1526,10 @@ CGameTree.prototype.Get_WhiteTeam = function()
 {
     return this.m_sWhiteTeam;
 };
-CGameTree.prototype.Set_BoardSize = function(W, H)
+CGameTree.prototype.Set_BoardSize = function(_W, _H)
 {
     // TODO: Пока мы работаем только с квадратными досками размера >= 2 (доска размером 1х1 бессмысленна)
-    var W = Math.min(50, Math.max(W, H, 2));
+    var W = Math.min(52, Math.max(_W, _H, 2));
     var H = W;
 
     var OldSize = this.m_oBoard.Get_Size();

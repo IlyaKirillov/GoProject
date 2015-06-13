@@ -901,25 +901,79 @@ CDrawingInfoWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, 
 function CDrawingErrorWindow()
 {
     CDrawingErrorWindow.superclass.constructor.call(this);
+
+    this.m_nW = 300;
+    this.m_nH = 100;
+    this.m_oMainElement = null;
 }
 
 CommonExtend(CDrawingErrorWindow, CDrawingWindow);
 
 CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
 {
-    CDrawingInfoWindow.superclass.Init.call(this, _sDivId, false);
+    CDrawingErrorWindow.superclass.Init.call(this, _sDivId, false);
 
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     var sText = oPr.ErrorText;
 
+    this.Set_Caption(oPr.Caption ? oPr.Caption : "Error");
+
+    this.m_oGameTree = oPr.GameTree;
+    this.m_oDrawing  = oPr.Drawing;
+
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
 
-    oMainDiv.style.fontFamily = "Tahoma, Sans serif";
-    oMainDiv.style.fontSize   = 16 + "px";
+    var sErrorId      = _sDivId + "E";
+    var oErrorElement = this.private_CreateDivElement(oMainDiv, sErrorId, 20);
+    var oErrorControl = CreateControlContainer(sErrorId);
+    oErrorControl.Bounds.SetParams(10, 5, 10, 5, true, true, true, true, -1, -1);
+    oErrorControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom  | g_anchor_right);
+    oMainControl.AddControl(oErrorControl);
+    this.m_oMainElement = oErrorElement;
 
-    Common.Set_InnerTextToElement(oMainDiv, sText);
+    this.Show(oPr);
+};
+CDrawingErrorWindow.prototype.Close = function()
+{
+    if (this.m_oDrawing)
+        this.m_oDrawing.Enable();
+
+    CDrawingInfoWindow.superclass.Close.call(this);
+};
+CDrawingErrorWindow.prototype.Show = function(oPr)
+{
+    CDrawingErrorWindow.superclass.Show.call(this, oPr);
+
+    this.m_nW = oPr.W;
+    this.m_nH = oPr.H;
+    Common.Set_InnerTextToElement(this.m_oMainElement, oPr.ErrorText);
+
+    if (this.m_oDrawing)
+    {
+        this.m_oDrawing.Disable();
+        this.protected_UpdateSizeAndPosition(this.m_oDrawing);
+        this.Update_Size(true);
+    }
+};
+CDrawingErrorWindow.prototype.private_CreateDivElement = function(oParentElement, sName, Height)
+{
+    var oElement = document.createElement("div");
+    oElement.setAttribute("id", sName);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.style.fontFamily  = "Tahoma, Sans serif";
+    oElement.style.fontSize    = Height * 15 / 20 + "px";
+    oElement.style.lineHeight  = Height + "px";
+    oElement.style.height      = Height + "px";
+
+    oParentElement.appendChild(oElement);
+    return oElement;
+};
+CDrawingErrorWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return { W : this.m_nW, H : this.m_nH };
 };
 
 function CDrawingSettingsWindow()
@@ -1551,6 +1605,8 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
 
     this.Set_Caption("About");
 
+    this.m_oGameTree = oPr.GameTree;
+
     var oTabs = new CDrawingVerticalTabs();
     oTabs.Init(this.HtmlElement.InnerDiv.id, ["About Web Go Board", "Keyboard Shortcuts"], 1);
 
@@ -1657,6 +1713,7 @@ CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv,
 
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 79, ShiftKey : false}, "Open Sgf/Gib/Ngf",                  "Ctrl+O",                                        "Open the Sgf/Gib/Ngf file from disk. (Not in color mode, see below)");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 79, ShiftKey : true }, "Open Sgf",                          "Ctrl+Shift+O",                                  "Open the Sgf file from source. (Not in color mode, see below)");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 67, ShiftKey : false}, "Create new",                        "Ctrl+C",                                        "Create new empty board. (not in color mode see below)");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 83, ShiftKey : false}, "Save Sgf",                          "Ctrl+S",                                        "Save Sgf file.");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 72, ShiftKey : false}, "Save png shot",                     "Ctrl+H",                                        "Save board shot in png format.");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 72, ShiftKey : true }, "Save gif shot",                     "Ctrl+Shift+H",                                  "Save board shot in gif format.");
@@ -1720,7 +1777,7 @@ CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv,
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 82, ShiftKey : false}, "Show/Hide coordinates",             "Ctrl+R",                                       "Show/Hide coordinates. (Not in color mode, see above)");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 77, ShiftKey : true }, "Make the current variant mainly",   "Ctrl+Shift+M",                                 "Make the current variant mainly by uplifting it to the root of the game tree.");
     this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 86, ShiftKey : true }, "Setting up view port",              "Ctrl+Shift+V",                                 "Setting up visible part of the board.");
-    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 68, ShiftKey : false}, "Ascii Diagram",                     "Ctrl+V",                                       "Make ascii diagram by current position.");
+    this.private_AppendTableCommonString(oTBody, {CtrlKey : true,  KeyCode : 68, ShiftKey : false}, "Ascii Diagram",                     "Ctrl+D",                                       "Make ascii diagram by current position.");
 };
 CDrawingAboutWindow.prototype.private_AppendTR = function(oTBody)
 {
@@ -1825,13 +1882,17 @@ CDrawingDiagramSLWindow.prototype.Init = function(_sDivId, oPr)
     var oMainControl = this.HtmlElement.InnerControl;
     var sDivId       = this.HtmlElement.InnerDiv.id;
 
+    this.m_oGameTree = oPr.GameTree;
+
     this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId);
     this.private_FillTextArea(oPr.GameTree);
+    this.m_oTextArea.select();
 };
 CDrawingDiagramSLWindow.prototype.Show = function(oPr)
 {
     CDrawingDiagramSLWindow.superclass.Show.call(this, oPr);
     this.private_FillTextArea(oPr.GameTree);
+    this.m_oTextArea.select();
 };
 CDrawingDiagramSLWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId)
 {
@@ -2142,14 +2203,20 @@ CDrawingViewPortWindow.prototype.Handle_OK = function()
         if (oDrawingBoard)
         {
             var oViewPort = this.m_oDrawingBoard.Get_SelectedViewPort();
-            if (oViewPort.X1 - oViewPort.X0 < 3 || oViewPort.Y1 - oViewPort.Y0 < 3)
+
+            if (oViewPort.X1 === oViewPort.X0 && oViewPort.Y1 === oViewPort.Y0)
+                oDrawingBoard.Reset_ViewPort();
+            else if (oViewPort.X1 - oViewPort.X0 < 3 || oViewPort.Y1 - oViewPort.Y0 < 3)
             {
-                // TODO: Заменить на нормальное сообщение с окном
-                alert("Sorry, viewport can't be so small");
+                var oGameTree = this.m_oGameTree;
+                var oDrawing  = this.m_oDrawing;
+                if (oDrawing)
+                    CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : oGameTree, Drawing : oDrawing, ErrorText : "Sorry, viewport can't be so small.", W : 270, H : 80});
+
                 return;
             }
-
-            oDrawingBoard.Set_ViewPort(oViewPort.X0 - 1, oViewPort.Y0 - 1, oViewPort.X1 - 1, oViewPort.Y1 - 1);
+            else
+                oDrawingBoard.Set_ViewPort(oViewPort.X0 - 1, oViewPort.Y0 - 1, oViewPort.X1 - 1, oViewPort.Y1 - 1);
 
             this.m_oDrawing.Update_Size(true);
         }
@@ -2158,6 +2225,254 @@ CDrawingViewPortWindow.prototype.Handle_OK = function()
     this.Close();
 };
 
+function CDrawingCreateNewWindow()
+{
+    CDrawingCreateNewWindow.superclass.constructor.call(this);
+}
+
+CommonExtend(CDrawingCreateNewWindow, CDrawingConfirmWindow);
+
+CDrawingCreateNewWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingViewPortWindow.superclass.Init.call(this, _sDivId, false);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
+    this.m_oGameTree = oPr.GameTree;
+    this.m_oDrawing  = oPr.Drawing;
+
+    this.Set_Caption("Create new");
+
+    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
+    var oMainControl = this.HtmlElement.ConfirmInnerControl;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id;
+
+    var RowHeight   = 20;
+    var LineSpacing = 5;
+    var TopOffset   = 5;
+
+    this.BlackPlayer = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Black", "Black", TopOffset, RowHeight);
+    TopOffset += 2 * (RowHeight + LineSpacing);
+    this.WhitePlayer = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "White", "White", TopOffset, RowHeight);
+    TopOffset += 2 * (RowHeight + LineSpacing);
+    this.BoardSize = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Board size", "19", TopOffset, RowHeight);
+    TopOffset += 2 * (RowHeight + LineSpacing);
+    this.Handicap = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Handicap", "0", TopOffset, RowHeight);
+    TopOffset += 2 * (RowHeight + LineSpacing);
+    this.Komi = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Komi", "6.5", TopOffset, RowHeight);
+};
+CDrawingCreateNewWindow.prototype.private_CreateDivElement = function(oParentElement, sName, Height)
+{
+    var oElement = document.createElement("div");
+    oElement.setAttribute("id", sName);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.style.fontFamily  = "Tahoma, Sans serif";
+    oElement.style.fontSize    = Height * 15 / 20 + "px";
+    oElement.style.lineHeight  = Height + "px";
+    oElement.style.height      = Height + "px";
+    oElement.style.fontWeight  = 550;
+
+    oParentElement.appendChild(oElement);
+    return oElement;
+};
+CDrawingCreateNewWindow.prototype.private_CreateInputElement = function(oParentElement, sName)
+{
+    var oElement = document.createElement("input");
+    oElement.setAttribute("id", sName);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.setAttribute("type", "text");
+    oElement.style.fontFamily  = "Tahoma, Sans serif";
+    oElement.style.fontSize    = "10pt";
+    oElement.style.outline     = "none";
+    oElement.style.border      = "1px solid rgb(169,169,169)";
+
+    oParentElement.appendChild(oElement);
+    return oElement;
+};
+CDrawingCreateNewWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight)
+{
+    var LeftOffset = 10;
+    var RightOffset = 10;
+
+    var sNameId      = sDivId + sName;
+    var oNameElement = this.private_CreateDivElement(oMainDiv, sNameId, RowHeight);
+    var oNameControl = CreateControlContainer(sNameId);
+    oNameControl.Bounds.SetParams(LeftOffset + 10, TopOffset, RightOffset, 1000, true, true, false, false, -1, RowHeight);
+    oNameControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
+    oMainControl.AddControl(oNameControl);
+    Common.Set_InnerTextToElement(oNameElement, sName);
+
+    TopOffset += RowHeight;
+
+    var sValueId      = sNameId + "Value";
+    var oValueElement = this.private_CreateInputElement(oMainDiv, sValueId);
+    var oValueControl = CreateControlContainer(sValueId);
+    oValueControl.Bounds.SetParams(LeftOffset, TopOffset + 1, RightOffset, 1000, true, true, true, false, -1, RowHeight - 2);
+    oValueControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right);
+    oMainControl.AddControl(oValueControl);
+    oValueElement.value = sValue;
+
+    return oValueElement;
+};
+CDrawingCreateNewWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 195, H : 340};
+};
+CDrawingCreateNewWindow.prototype.Handle_OK = function()
+{
+    var nSize = parseInt(this.BoardSize.value);
+    if (isNaN(nSize) || nSize < 2 || nSize > 52)
+    {
+        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Size value must be an integer number from 2 to 52.", W : 300, H : 95});
+        return;
+    }
+
+    var nHandi = parseInt(this.Handicap.value);
+    if (isNaN(nHandi) || nHandi < 0 || nHandi > 9)
+    {
+        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Handicap value must be an integer number from 0 to 9.", W : 300, H : 95});
+        return;
+    }
+    if (nSize <= 6 && 0 != nHandi)
+    {
+        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Handicap value must be 0 for this board size.", W : 300, H : 95});
+        return;
+    }
+
+    if (nSize <= 10 && nHandi > 5)
+    {
+        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Handicap value must be an integer number from 0 to 5 for this board size.", W : 300, H : 95});
+        return;
+    }
+
+    var fKomi = parseFloat(this.Komi.value);
+    if (isNaN(fKomi) || Math.abs((2 * fKomi) - (2 * fKomi | 0)) > 0.001)
+    {
+        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Invalid komi value.", W : 175, H : 85});
+        return;
+    }
+
+    if (this.m_oGameTree)
+    {
+        var sSGF = "(;FF[4]";
+        sSGF += "SZ[" + nSize + "]";
+        sSGF += "KM[" + fKomi + "]";
+        sSGF += "PB[" + this.BlackPlayer.value + "]";
+        sSGF += "PW[" + this.WhitePlayer.value + "]";
+        sSGF += "HA[" + nHandi + "]";
+
+        var aHandiPoints = [];
+
+        var nVal0 = (nSize < 10 ? 2 : 3);
+        var nVal1 = ((nSize + 1) / 2 | 0) - 1;
+        var nVal2 = (nSize < 10 ? nSize - 3 : nSize - 4);
+
+        switch(nHandi)
+        {
+            case 2:
+            {
+                aHandiPoints.push([nVal2, nVal0]);
+                aHandiPoints.push([nVal0, nVal2]);
+                break;
+            }
+            case 3:
+            {
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                break;
+            }
+            case 4:
+            {
+                aHandiPoints.push([nVal0, nVal0]);
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                break;
+            }
+            case 5:
+            {
+                aHandiPoints.push([nVal0, nVal0]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal1, nVal1]);
+                break;
+            }
+            case 6:
+            {
+                aHandiPoints.push([nVal0, nVal0]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal0, nVal1]);
+                aHandiPoints.push([nVal2, nVal1]);
+                break;
+            }
+            case 7:
+            {
+                aHandiPoints.push([nVal0, nVal0]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal0, nVal1]);
+                aHandiPoints.push([nVal2, nVal1]);
+                aHandiPoints.push([nVal1, nVal1]);
+                break;
+            }
+            case 8:
+            {
+                aHandiPoints.push([nVal0, nVal0]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal0, nVal1]);
+                aHandiPoints.push([nVal2, nVal1]);
+                aHandiPoints.push([nVal1, nVal0]);
+                aHandiPoints.push([nVal1, nVal2]);
+                break;
+            }
+            case 9:
+            {
+                aHandiPoints.push([nVal0, nVal0]);
+                aHandiPoints.push([nVal0, nVal2]);
+                aHandiPoints.push([nVal2, nVal0]);
+                aHandiPoints.push([nVal2, nVal2]);
+                aHandiPoints.push([nVal0, nVal1]);
+                aHandiPoints.push([nVal2, nVal1]);
+                aHandiPoints.push([nVal1, nVal0]);
+                aHandiPoints.push([nVal1, nVal2]);
+                aHandiPoints.push([nVal1, nVal1]);
+                break;
+            }
+        }
+
+        var nCharCodeOffsetLo = 'a'.charCodeAt(0);
+        var nCharCodeOffsetHi = 'A'.charCodeAt(0);
+
+        if (aHandiPoints.length > 0)
+        {
+            sSGF += "AB";
+            for (var nIndex = 0, nCount = aHandiPoints.length; nIndex < nCount; nIndex++)
+            {
+                var nX = aHandiPoints[nIndex][0];
+                var nY = aHandiPoints[nIndex][1];
+
+                nX += (nX <= 25 ? nCharCodeOffsetLo : nCharCodeOffsetHi - 26);
+                nY += (nY <= 25 ? nCharCodeOffsetLo : nCharCodeOffsetHi - 26);
+
+                sSGF += String.fromCharCode(91, nX, nY, 93);
+            }
+        }
+
+        sSGF += ")";
+        this.m_oGameTree.Load_Sgf(sSGF, null, null, "sgf");
+    }
+
+    this.Close();
+};
 
 var EWindowType =
 {
@@ -2171,7 +2486,8 @@ var EWindowType =
     GifWriter     : 7,
     About         : 8,
     DiagramSL     : 9,
-    ViewPort      : 10
+    ViewPort      : 10,
+    CreateNew     : 11
 };
 
 var g_aWindows = {};
@@ -2197,6 +2513,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
             case EWindowType.About         : sApp = "About"; break;
             case EWindowType.DiagramSL     : sApp = "DiagramSL"; break;
             case EWindowType.ViewPort      : sApp = "ViewPort"; break;
+            case EWindowType.CreateNew     : sApp = "CreateNew"; break;
         }
         var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
 
@@ -2223,7 +2540,10 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.About         : oWindow = new CDrawingAboutWindow(); break;
                 case EWindowType.DiagramSL     : oWindow = new CDrawingDiagramSLWindow(); break;
                 case EWindowType.ViewPort      : oWindow = new CDrawingViewPortWindow(); break;
+                case EWindowType.CreateNew     : oWindow = new CDrawingCreateNewWindow(); break;
             }
+
+            g_aWindows[nWindowType] = oWindow;
 
             if (null !== oWindow)
             {
@@ -2231,11 +2551,9 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 oWindow.Update_Size(true);
             }
 
-            g_aWindows[nWindowType] = oWindow;
-
             return oWindow;
         }
     }
 
     return null;
-};
+}

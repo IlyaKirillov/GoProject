@@ -442,6 +442,18 @@ CDrawingBoard.prototype.Set_ViewPort = function(X0, Y0, X1, Y1)
         this.m_oViewPort.Y1 = nSize - 1;
     }
 };
+CDrawingBoard.prototype.Reset_ViewPort = function()
+{
+    var oSize = this.m_oLogicBoard.Get_Size();
+    var nW = oSize.X, nH = oSize.Y;
+
+    var nSize = Math.min(nW, nH);
+
+    this.m_oViewPort.X0 = 0;
+    this.m_oViewPort.Y0 = 0;
+    this.m_oViewPort.X1 = nW - 1;
+    this.m_oViewPort.Y1 = nH - 1;
+};
 CDrawingBoard.prototype.Get_ViewPort = function()
 {
     return this.m_oViewPort;
@@ -626,7 +638,9 @@ CDrawingBoard.prototype.Set_GameTree = function(oGameTree)
     this.m_oGameTree   = oGameTree;
     this.m_oLogicBoard = oGameTree.Get_Board();
     oGameTree.Set_DrawingBoard(this);
-}
+
+    this.Reset_ViewPort();
+};
 CDrawingBoard.prototype.Estimate_Scores = function()
 {
     this.m_oLogicBoard.Init_ScoreEstimate();
@@ -635,7 +649,7 @@ CDrawingBoard.prototype.Estimate_Scores = function()
         this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
 
     this.m_oGameTree.Update_InterfaceState();
-}
+};
 CDrawingBoard.prototype.Set_Mode = function(eMode)
 {
     if (!(this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_BOARDMODE) && eMode !== EBoardMode.ScoreEstimate && eMode !== EBoardMode.ViewPort)
@@ -1171,19 +1185,12 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
     LinesCanvas.clearRect(0, 0, W, H);
 
     // Рисуем форовые метки
-    if (oSize.X === oSize.Y && (9 === oSize.X || 13 === oSize.X || 19 === oSize.X))
+    if (oSize.X === oSize.Y)
     {
         var Handi = this.m_oImageData.Handi;
         var nRad  = this.m_oImageData.HandiRad;
 
-        var aPoints = [];
-        switch (oSize.X)
-        {
-            case 9:  aPoints = [[2, 2], [2, 6], [4, 4], [6, 2], [6, 6]]; break;
-            case 13: aPoints = [[3, 3], [3, 6], [3, 9], [6, 3], [6, 6], [6, 9], [9, 3], [9, 6], [9, 9]]; break;
-            case 19: aPoints = [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]]; break;
-        }
-
+        var aPoints = this.m_oLogicBoard.Get_HandiPoints();
         for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
         {
             if (true === this.private_IsPointInViewPort(aPoints[nPointIndex][0], aPoints[nPointIndex][1]))
@@ -2222,7 +2229,7 @@ CDrawingBoard.prototype.private_DrawRulers = function()
             var _X = Lines[X].X - Rad;
             var _Y = this.m_dKoeffOffsetY * H / 3 - Rad;
 
-            var Text = Common_X_to_String(X + 1);
+            var Text = Common_X_to_String(X + 1, oSize.X);
             var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
             var sFont = FontSize + "px " + FontFamily;
 
@@ -2755,7 +2762,10 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
             sText = this.private_GetNextTextMark();
             if (null === sText)
             {
-                alert("Sorry, all the standard labels are used up! To add more labels, you will have to shift click on the board and make up ur own labels to add.");
+                var oGameTree = this.m_oGameTree;
+                var oDrawing  = oGameTree.Get_Drawing();
+                if (oDrawing)
+                    CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : oGameTree, Drawing : oDrawing, ErrorText : "Sorry, all standard labels are used up! To add more labels, use shift and click on the board to make up ur own labels.", W : 305, H : 115});
                 return;
             }
         }
@@ -2785,9 +2795,11 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
             var MoveNum = this.m_oLogicBoard.Get_Num(X, Y);
             if (-1 == MoveNum)
             {
-                return alert("Sorry, no move has been made at that location, so you can't mark it with the move number!");
+                var oGameTree = this.m_oGameTree;
+                var oDrawing  = oGameTree.Get_Drawing();
+                if (oDrawing)
+                    CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : oGameTree, Drawing : oDrawing, ErrorText : "Sorry, no move has been made at that location, so you can't mark it with the move number.", W : 305, H : 115});
 
-                CreateWindow("tesetste", EWindowType.Error, {ErrorText : "Sorry, no move has been made at that location, so you can't mark it with the move number!"}, {Drawing : this.m_oDrawing});
                 return;
             }
             else
@@ -2980,9 +2992,16 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
         this.private_DrawLogo();
         bRetValue = true;
     }
-    else if (67 === KeyCode && true === Event.CtrlKey && EBoardMode.AddMarkColor === this.m_eMode) // Ctrl + C
+    else if (67 === KeyCode && true === Event.CtrlKey) // Ctrl + C
     {
-        this.m_oGameTree.Copy_ColorMapFromPrevNode();
+        if (EBoardMode.AddMarkColor === this.m_eMode)
+        {
+            this.m_oGameTree.Copy_ColorMapFromPrevNode();
+        }
+        else
+        {
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CreateNew, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+        }
         bRetValue = true;
     }
     else if (68 === KeyCode && true === Event.CtrlKey) // Ctrl + D

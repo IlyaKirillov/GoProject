@@ -9,24 +9,24 @@
  * Time     0:29
  */
 
-/*
- Апи для работы с данной библиотекой.
+/**
+ * Апи для работы с данной библиотекой.
  */
 function CGoBoardApi()
 {
 
 }
 
-/*
- Создаем основной объект GameTree, который будет хранит саму партию.
+/**
+ * Создаем основной объект GameTree, который будет хранит саму партию.
  */
 CGoBoardApi.prototype.Create_GameTree = function()
 {
     return new CGameTree();
 };
 
-/*
- Создаем графическую доску в заданной div и привязываем ее к GameTree.
+/**
+ * Создаем графическую доску в заданной div и привязываем ее к GameTree.
  */
 CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
 {
@@ -34,8 +34,8 @@ CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
     oDrawing.Create_SimpleBoard(sDivId);
 };
 
-/*
- Создаем графическую доску и кнопки управления снизу.
+/**
+ * Создаем графическую доску и кнопки управления снизу.
  */
 CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDivId)
 {
@@ -49,8 +49,8 @@ CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator = function(oGameTree,
     oDrawing.Create_MixedFullTemplate(sDivId);
 };
 
-/*
- Создаем демонстрационный вариант
+/**
+ * Создаем демонстрационный вариант
  */
 CGoBoardApi.prototype.Create_Presentation = function(oGameTree, sDivId, aSlides)
 {
@@ -58,8 +58,8 @@ CGoBoardApi.prototype.Create_Presentation = function(oGameTree, sDivId, aSlides)
     oPresentation.Init(sDivId, aSlides);
 };
 
-/*
- Создаем вариант для задачек
+/**
+ * Создаем вариант для задачек
  */
 CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
 {
@@ -91,33 +91,33 @@ CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
     oGameTree.Set_TutorCallbacks(pRightCallback, pWrongCallback, pResetCallback);
 };
 
-/*
- Ищем правильный вариант решения задачи. Если такого варианта нет возвращается false, если есть, тогда
- возвращаем true и делаем вариант с правильной нодой текущим.
+/**
+ * Ищем правильный вариант решения задачи. Если такого варианта нет возвращается false, если есть, тогда
+ * возвращаем true и делаем вариант с правильной нодой текущим.
  */
 CGoBoardApi.prototype.Find_ProblemRightVariant = function(oGameTree)
 {
     return oGameTree.Find_ProblemRightVariant();
 };
 
-/*
- Стартуем автопроигрывание
+/**
+ * Стартуем автопроигрывание
  */
 CGoBoardApi.prototype.Start_AutoPlay = function(oGameTree)
 {
     oGameTree.Start_AutoPlay(true);
 };
 
-/*
- Останавливаем автопроигрывание
+/**
+ * Останавливаем автопроигрывание
  */
 CGoBoardApi.prototype.Stop_AutoPlay = function(oGameTree)
 {
     oGameTree.Stop_AutoPlay();
 };
 
-/*
- Накладываем ограничения на редактирование.
+/**
+ * Накладываем ограничения на редактирование.
  */
 CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
 {
@@ -132,8 +132,8 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
     oGameTree.Set_EditingFlags(_Flags);
 };
 
-/*
- Загружаем Sgf в GameTree.
+/**
+ * Загружаем Sgf в GameTree.
  */
 CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMoveReference, sExt)
 {
@@ -163,32 +163,32 @@ CGoBoardApi.prototype.Load_Sgf = function(oGameTree, sSgfFile, _oViewPort, sMove
     oGameTree.m_nEditingFlags = nOldFlags;
 };
 
-/*
- Сохраняем Sgf в виде строки
+/**
+ * Сохраняем Sgf в виде строки
  */
 CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
 {
     return oGameTree.Save_Sgf();
 };
 
-/*
- Получаем ссылку на ход, чтобы потом можно было переоткрыть файл с данной ссылкой
+/**
+ * Получаем ссылку на ход, чтобы потом можно было переоткрыть файл с данной ссылкой
  */
 CGoBoardApi.prototype.Get_MoveReference = function(oGameTree)
 {
     return oGameTree.Get_MoveReference();
 };
 
-/*
- Функция обновления размеров всех графических объектов.
+/**
+ * Функция обновления размеров всех графических объектов.
  */
 CGoBoardApi.prototype.Update_Size = function(oGameTree)
 {
     oGameTree.Update_Size();
 };
 
-/*
- Получаем название матча.
+/**
+ * Получаем название матча.
  */
 CGoBoardApi.prototype.Get_MatchName = function(oGameTree)
 {
@@ -199,8 +199,8 @@ CGoBoardApi.prototype.Get_MatchName = function(oGameTree)
 };
 
 
-/*
- Функция для выставления звука.
+/**
+ * Функция для выставления звука.
  */
 CGoBoardApi.prototype.Set_Sound = function(oGameTree, sPath)
 {
@@ -213,8 +213,8 @@ CGoBoardApi.prototype.Focus = function(oGameTree)
         oGameTree.Focus();
 };
 
-/*
- Получить текущую версию библиотеки.
+/**
+ * Получить текущую версию библиотеки.
  */
 CGoBoardApi.prototype.Get_Version = function()
 {
@@ -228,7 +228,7 @@ CGoBoardApi.prototype.Toggle_Rulers = function (oGameTree)
 {
     if (oGameTree)
         oGameTree.Toggle_Rulers();
-}
+};
 
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;

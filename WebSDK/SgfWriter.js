@@ -31,15 +31,32 @@ CSgfWriter.prototype.private_WriteCommandName = function(sName)
 {
     this.private_WriteString(sName);
 };
+CSgfWriter.prototype.private_WriteMovePos = function(PosValue)
+{
+    if (0 != PosValue)
+        this.private_WritePos(PosValue);
+    else
+    {
+        // Пасс пишем как []
+        this.private_WriteString(String.fromCharCode(91, 93));
+    }
+};
+CSgfWriter.prototype.private_NumberToCharCode = function(Value)
+{
+    if (Value <= 26)
+        return g_nSgfReaderCharCodeOffsetLo + Value;
+    else
+        return g_nSgfReaderCharCodeOffsetHi + Value - 26;
+};
 CSgfWriter.prototype.private_WritePos = function(PosValue)
 {
     var oPos = Common_ValuetoXY(PosValue);
-    this.private_WriteString(String.fromCharCode(91, oPos.X + g_nSgfReaderCharCodeOffset, oPos.Y + g_nSgfReaderCharCodeOffset, 93));
+    this.private_WriteString(String.fromCharCode(91, this.private_NumberToCharCode(oPos.X), this.private_NumberToCharCode(oPos.Y), 93));
 };
 CSgfWriter.prototype.private_WritePos2 = function(PosValue)
 {
     var oPos = Common_ValuetoXY(PosValue);
-    this.private_WriteString(String.fromCharCode(oPos.X + g_nSgfReaderCharCodeOffset, oPos.Y + g_nSgfReaderCharCodeOffset));
+    this.private_WriteString(String.fromCharCode(this.private_NumberToCharCode(oPos.X), this.private_NumberToCharCode(oPos.Y)));
 };
 CSgfWriter.prototype.private_WritePosArray = function(arrPos)
 {
@@ -73,7 +90,7 @@ CSgfWriter.prototype.private_WriteGameInfo = function()
     this.private_WriteCommand("GM", 1);
     this.private_WriteCommand("FF", 4);
     this.private_WriteCommand("CA", "UTF-8");
-    this.private_WriteCommand("AP", "goban.org");
+    this.private_WriteCommand("AP", "WebGoBoard:" + GoBoardApi.Get_Version());
     this.private_WriteCommand("ST", oGameTree.Get_ShowVariants());
 
     this.private_WriteNonEmptyCommand("RU", oGameTree.Get_Rules());
@@ -132,7 +149,11 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
     if (oNode === this.m_oGameTree.Get_FirstNode())
         this.private_WriteGameInfo();
 
+    // AB, AW, AE
     this.private_WriteAddOrRemoveStones(oNode);
+
+    // LB, CR, MA, SQ, TR, RM
+    this.private_WriteMarks(oNode);
 
     for (var nIndex = 0, nCount = oNode.Get_CommandsCount(); nIndex < nCount; nIndex++)
     {
@@ -142,19 +163,19 @@ CSgfWriter.prototype.private_WriteNode = function(oNode)
 
         switch (nCommandType)
         {
-            case ECommand.AB: break; //this.private_WriteCommandName("AB"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.AW: break; //this.private_WriteCommandName("AW"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.AE: break; //this.private_WriteCommandName("AE"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.B:  this.private_WriteCommandName("B");  this.private_WritePos(oCommandValue); break;
-            case ECommand.W:  this.private_WriteCommandName("W");  this.private_WritePos(oCommandValue); break;
+            case ECommand.AB: break;
+            case ECommand.AW: break;
+            case ECommand.AE: break;
+            case ECommand.B:  this.private_WriteCommandName("B");  this.private_WriteMovePos(oCommandValue); break;
+            case ECommand.W:  this.private_WriteCommandName("W");  this.private_WriteMovePos(oCommandValue); break;
             case ECommand.BL: this.private_WriteCommandName("BL"); this.private_WriteReal(oCommandValue); break;
             case ECommand.WL: this.private_WriteCommandName("WL"); this.private_WriteReal(oCommandValue); break;
-            case ECommand.RM: this.private_WriteCommandName("RM"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.CR: this.private_WriteCommandName("CR"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.MA: this.private_WriteCommandName("MA"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.SQ: this.private_WriteCommandName("SQ"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.TR: this.private_WriteCommandName("TR"); this.private_WritePosArray(oCommandValue); break;
-            case ECommand.LB: this.private_WriteCommandName("LB"); this.private_WriteString("["); this.private_WritePos2(oCommandValue.Pos); this.private_WriteString(":" + oCommandValue.Text + "]"); break;
+            case ECommand.RM: break;
+            case ECommand.CR: break;
+            case ECommand.MA: break;
+            case ECommand.SQ: break;
+            case ECommand.TR: break;
+            case ECommand.LB: break;
             case ECommand.PL: this.private_WriteCommandName("PL"); this.private_WriteSimpleText(oCommandValue === BOARD_WHITE ? "W" : "B"); break;
         }
     }
@@ -330,5 +351,90 @@ CSgfWriter.prototype.private_WriteAddOrRemoveStones = function(oNode)
     {
         this.private_WriteCommandName("AE");
         this.private_WritePosArray(AE);
+    }
+};
+CSgfWriter.prototype.private_WriteMarks = function(oNode)
+{
+    var Marks = [[], [], [], [], [], []]; // LB, CR, MA, SQ, TR, RM
+    var LBvalues = [];
+    for (var nIndex = 0, nCount = oNode.Get_CommandsCount(); nIndex < nCount; nIndex++)
+    {
+        var oCommand = oNode.Get_Command(nIndex);
+        var nCommandType  = oCommand.Get_Type();
+        var oCommandValue = oCommand.Get_Value();
+
+        var nCurrentMarkPos = -1;
+        switch (nCommandType)
+        {
+            case ECommand.LB: nCurrentMarkPos = 0; oCommandValue = [oCommandValue.Pos]; break;
+            case ECommand.CR: nCurrentMarkPos = 1; break;
+            case ECommand.MA: nCurrentMarkPos = 2; break;
+            case ECommand.SQ: nCurrentMarkPos = 3; break;
+            case ECommand.TR: nCurrentMarkPos = 4; break;
+            case ECommand.RM: nCurrentMarkPos = 5; break;
+        }
+
+
+        for (var nPos = 0, nPointsCount = oCommandValue.length; nPos < nPointsCount; nPos++)
+        {
+            var nPosValue = oCommandValue[nPos];
+            for (var nMarksIndex = 0, nMarksCount = Marks.length; nMarksIndex < nMarksCount; nMarksIndex++)
+            {
+                if (nMarksIndex === nCurrentMarkPos)
+                {
+                    Marks[nMarksIndex].push(nPosValue);
+                    if (0 == nMarksIndex)
+                        LBvalues.push(oCommand.Get_Value().Text);
+                }
+                else
+                {
+                    for (var nTempPos = 0, nTempCount = Marks[nMarksIndex].length; nTempPos < nTempCount; nTempPos++)
+                    {
+                        if (nPosValue === Marks[nMarksIndex][nTempPos])
+                        {
+                            Marks[nMarksIndex].splice(nTempPos, 1);
+                            if (0 === nMarksIndex)
+                                LBvalues.splice(nTempPos, 1);
+
+                            nTempCount--;
+                            nTempPos--;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (Marks[0].length > 0)
+    {
+        this.private_WriteCommandName("LB");
+        for (var nPos = 0, nCount = Marks[0].length; nPos < nCount; nPos++)
+        {
+            this.private_WriteString("["); this.private_WritePos2(Marks[0][nPos]); this.private_WriteString(":" + LBvalues[nPos] + "]");
+        }
+    }
+
+    if (Marks[1].length > 0)
+    {
+        this.private_WriteCommandName("CR");
+        this.private_WritePosArray(Marks[1]);
+    }
+
+    if (Marks[2].length > 0)
+    {
+        this.private_WriteCommandName("MA");
+        this.private_WritePosArray(Marks[2]);
+    }
+
+    if (Marks[3].length > 0)
+    {
+        this.private_WriteCommandName("SQ");
+        this.private_WritePosArray(Marks[3]);
+    }
+
+    if (Marks[4].length > 0)
+    {
+        this.private_WriteCommandName("TR");
+        this.private_WritePosArray(Marks[4]);
     }
 };

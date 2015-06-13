@@ -7,7 +7,12 @@
  * Time     18:59
  */
 
-var g_nSgfReaderCharCodeOffset = 'a'.charCodeAt(0) - 1;
+var g_nSgfReaderCharCodeOffsetLo = 'a'.charCodeAt(0) - 1;
+var g_nSgfReaderCharCodeOffsetHi = 'A'.charCodeAt(0) - 1;
+var g_nSgfReaderCharCode_a = 'a'.charCodeAt(0);
+var g_nSgfReaderCharCode_z = 'z'.charCodeAt(0);
+var g_nSgfReaderCharCode_A = 'A'.charCodeAt(0);
+var g_nSgfReaderCharCode_Z = 'Z'.charCodeAt(0);
 
 var ESgfEncoding =
 {
@@ -37,8 +42,12 @@ CSgfReader.prototype.Load = function(SGF)
         this.private_Init();
         this.private_Normalize(SGF);
 
-        if (!this.private_Parse())
-            alert("Error occurs, while read SGF");
+        if (!this.private_Parse() && this.m_oGameTree && this.m_oGameTree.Get_Drawing())
+        {
+            var oGameTree = this.m_oGameTree;
+            var oDrawing  = oGameTree.Get_Drawing();
+            CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : oGameTree, Drawing : oDrawing, ErrorText : "File cannot be read. Invalid SGF file.", W : 275, H : 80});
+        }
     }
 };
 CSgfReader.prototype.private_Init = function()
@@ -394,6 +403,18 @@ CSgfReader.prototype.private_ReadUnknown = function()
             break;
     }
 };
+CSgfReader.prototype.private_LetterToNumber = function(sChar)
+{
+    var nCharCode = sChar.charCodeAt(0);
+
+    if (nCharCode >= g_nSgfReaderCharCode_a && nCharCode <= g_nSgfReaderCharCode_z)
+        return nCharCode - g_nSgfReaderCharCodeOffsetLo;
+    else if (nCharCode >= g_nSgfReaderCharCode_A && nCharCode <= g_nSgfReaderCharCode_Z)
+        return nCharCode - g_nSgfReaderCharCodeOffsetHi + 26;
+
+    this.m_bValidNode = false;
+    return 0;
+};
 CSgfReader.prototype.private_ReadAddOrRemoveStone = function(Value)
 {
     this.m_nPos += 3;
@@ -408,8 +429,8 @@ CSgfReader.prototype.private_ReadAddOrRemoveStone = function(Value)
         var sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
         var sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
 
-        var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-        var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+        var X = this.private_LetterToNumber(sX);
+        var Y = this.private_LetterToNumber(sY);
 
         // Возможны 2 варианта [aa] и [aa:bb]
         if (':' === this.m_sSGF[this.m_nPos])
@@ -419,8 +440,8 @@ CSgfReader.prototype.private_ReadAddOrRemoveStone = function(Value)
             sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
             sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
 
-            var X1 = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-            var Y1 = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var X1 = this.private_LetterToNumber(sX);
+            var Y1 = this.private_LetterToNumber(sY);
 
             for (var _Y = Y; _Y <= Y1; _Y++)
             {
@@ -481,8 +502,8 @@ CSgfReader.prototype.private_ReadMove = function(Value)
             this.m_oGameTree.Add_Move(0, 0, Value);
         else
         {
-            var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-            var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var X = this.private_LetterToNumber(sX);
+            var Y = this.private_LetterToNumber(sY);
 
             this.private_RegisterPoint(X, Y);
             this.m_oGameTree.Add_Move(X, Y, Value);
@@ -578,8 +599,8 @@ CSgfReader.prototype.private_ReadMark = function(Type)
         var sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
         var sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
 
-        var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-        var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+        var X = this.private_LetterToNumber(sX);
+        var Y = this.private_LetterToNumber(sY);
 
         // Возможны 2 варианта [aa] и [aa:bb]
         if (':' === this.m_sSGF[this.m_nPos])
@@ -589,8 +610,8 @@ CSgfReader.prototype.private_ReadMark = function(Type)
             sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
             sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
 
-            var X1 = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-            var Y1 = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var X1 = this.private_LetterToNumber(sX);
+            var Y1 = this.private_LetterToNumber(sY);
 
             for (var _Y = Y; _Y <= Y1; _Y++)
             {
@@ -674,8 +695,8 @@ CSgfReader.prototype.private_ReadLB = function()
     {
         var sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
         var sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
-        var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-        var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+        var X = this.private_LetterToNumber(sX);
+        var Y = this.private_LetterToNumber(sY);
 
         this.m_nPos++;
 
@@ -796,8 +817,8 @@ CSgfReader.prototype.private_ReadTerritory = function(Value)
         var sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
         var sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
 
-        var X = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-        var Y = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+        var X = this.private_LetterToNumber(sX);
+        var Y = this.private_LetterToNumber(sY);
 
         // Возможны 2 варианта [aa] и [aa:bb]
         if (':' === this.m_sSGF[this.m_nPos])
@@ -807,8 +828,8 @@ CSgfReader.prototype.private_ReadTerritory = function(Value)
             sX = this.m_sSGF[this.m_nPos]; this.m_nPos++;
             sY = this.m_sSGF[this.m_nPos]; this.m_nPos++;
 
-            var X1 = sX.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
-            var Y1 = sY.charCodeAt(0) - g_nSgfReaderCharCodeOffset;
+            var X1 = this.private_LetterToNumber(sX);
+            var Y1 = this.private_LetterToNumber(sY);
 
             for (var _Y = Y; _Y <= Y1; _Y++)
             {
