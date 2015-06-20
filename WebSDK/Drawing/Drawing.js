@@ -91,7 +91,7 @@ CSettings.prototype.Load_FromLocalStorage = function()
     this.Set_ColorScheme(eColorScheme);
 
     // Loading Settings
-    this.m_bLoadUnfinishedFilesOnLastNode = ("0" === Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode") ? false : true);
+    this.m_bLoadUnfinishedFilesOnLastNode = ("1" === Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode") ? true : false);
 
     var sLoadShowVariants = Common.Get_LocalStorageItem("ShowVariants");
     this.m_eLoadShowVariants = (!sLoadShowVariants || "" === sLoadShowVariants ? ESettingsLoadShowVariants.FromFile : parseInt(sLoadShowVariants));
