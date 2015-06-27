@@ -920,6 +920,12 @@ CDrawing.prototype.private_UpdateSize = function(bForce)
                 this.private_CreateHorFullTemplate();
             else
                 this.private_CreateVerFullTemplate();
+
+            if (this.m_oGameTree)
+            {
+                this.m_oGameTree.GoTo_Node(this.m_oGameTree.Get_CurNode(), true);
+                this.m_oGameTree.Update_InterfaceState(true);
+            }
         }
     }
 

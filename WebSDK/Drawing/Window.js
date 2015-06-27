@@ -1397,29 +1397,14 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
         }
     }
 
-    if (bRed)
-    {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
-        TopOffset += RowHeight + LineSpacing;
-    }
-
-    if (bGreen)
-    {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
-        TopOffset += RowHeight + LineSpacing;
-    }
-
-    if (bBlue)
-    {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
-        TopOffset += RowHeight + LineSpacing;
-    }
-
-    if (bGray)
-    {
-        this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
-        TopOffset += RowHeight + LineSpacing;
-    }
+    this.Red = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
+    TopOffset += RowHeight + LineSpacing;
+    this.Green = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
+    TopOffset += RowHeight + LineSpacing;
+    this.Blue = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
+    TopOffset += RowHeight + LineSpacing;
+    this.Gray = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
+    TopOffset += RowHeight + LineSpacing;
 
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
     var BottomControl = CreateControlContainer(sDivId + "Bottom");
@@ -1481,6 +1466,66 @@ CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDi
     oValueElement.value = sValue;
 
     return oValueElement;
+};
+CDrawingCountColorsWindow.prototype.Show = function(oPr)
+{
+    CDrawingCountColorsWindow.superclass.Show.call(this, oPr);
+
+
+    var oColorsMap = oPr.DrawingBoard.m_oColorMarks;
+
+    var Red = [0, 0, 0, 0], Green = [0, 0, 0, 0], Blue = [0, 0, 0, 0], Gray = [0, 0, 0, 0];
+    var bRed = false, bGreen = false, bBlue = false, bGray = false;
+
+    for (var oPos in oColorsMap)
+    {
+        var oColor = oColorsMap[oPos];
+        var nNum = -1;
+
+        if (0 !== oColor.r && 0 !== oColor.g && 0 !== oColor.b)
+        {
+            bGray = true;
+            nNum = 3;
+        }
+        else if (0 !== oColor.r)
+        {
+            bRed = true;
+            nNum = 0;
+        }
+        else if (0 !== oColor.g)
+        {
+            bGreen = true;
+            nNum = 1;
+        }
+        else if (0 !== oColor.b)
+        {
+            bBlue = true;
+            nNum = 2;
+        }
+
+        var Index = 0;
+        if (oColor.a <= 50)
+            Index = 0;
+        else if (oColor.a <= 100)
+            Index = 1;
+        else if (oColor.a <= 150)
+            Index = 2;
+        else
+            Index = 3;
+
+        switch (nNum)
+        {
+        case 0: Red[Index]++; break;
+        case 1: Green[Index]++; break;
+        case 2: Blue[Index]++; break;
+        case 3: Gray[Index]++; break;
+        }
+    }
+
+    this.Red.value   = "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]);
+    this.Green.value = "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]);
+    this.Blue.value  = "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]);
+    this.Gray.value  = "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]);
 };
 
 function CDrawingGifWriterWindow()

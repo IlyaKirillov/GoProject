@@ -1571,7 +1571,7 @@ CGameTree.prototype.private_SetNextMove = function(Value)
 {
     this.m_nNextMove = Value;
 };
-CGameTree.prototype.Update_InterfaceState = function()
+CGameTree.prototype.Update_InterfaceState = function(bUpdateInfo)
 {
     if (this.m_oDrawing)
     {
@@ -1614,6 +1614,14 @@ CGameTree.prototype.Update_InterfaceState = function()
             this.m_oDrawing.Update_Scores(this.Get_BlackScores(), this.Get_WhiteScores());
         else
             this.m_oDrawing.Update_Captured(this.Get_BlackCapt(), this.Get_WhiteCapt());
+
+        if (bUpdateInfo)
+        {
+            this.m_oDrawing.Update_BlackRank(this.m_sBlackRating);
+            this.m_oDrawing.Update_WhiteRank(this.m_sWhiteRating);
+            this.m_oDrawing.Update_BlackName(this.m_sBlack);
+            this.m_oDrawing.Update_WhiteName(this.m_sWhite);
+        }
     }
 
 };
