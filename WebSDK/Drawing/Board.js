@@ -337,13 +337,15 @@ CDrawingBoard.prototype.Set_Rulers = function(bRulers)
         g_oGlobalSettings.Set_Rulers(bRulers);
         this.m_bRulers = bRulers;
 
-        for (var Index = 0, Count = this.HtmlElement.LinkedControls.length; Index < Count; Index++)
-        {
-            var Control = this.HtmlElement.LinkedControls[Index];
-            Control.Resize(Control.width, Control.height);
-        }
+        this.m_oDrawing.Update_Size(true);
 
-        this.On_Resize(true);
+        //for (var Index = 0, Count = this.HtmlElement.LinkedControls.length; Index < Count; Index++)
+        //{
+        //    var Control = this.HtmlElement.LinkedControls[Index];
+        //    Control.Resize(Control.width, Control.height);
+        //}
+        //
+        //this.On_Resize(true);
     }
 };
 CDrawingBoard.prototype.Get_Rulers = function()
@@ -421,38 +423,34 @@ CDrawingBoard.prototype.On_EndLoadSgf = function()
 CDrawingBoard.prototype.Set_ViewPort = function(X0, Y0, X1, Y1)
 {
     var oSize = this.m_oLogicBoard.Get_Size();
-    var nW = oSize.X, nH = oSize.Y;
+    var nSizeX = oSize.X, nSizeY = oSize.Y;
 
-    var nSize = Math.min(nW, nH);
-
-    this.m_oViewPort.X0 = Math.max(0, Math.min(nSize - 1, X0));
-    this.m_oViewPort.Y0 = Math.max(0, Math.min(nSize - 1, Y0));
-    this.m_oViewPort.X1 = Math.max(0, Math.min(nSize - 1, X1));
-    this.m_oViewPort.Y1 = Math.max(0, Math.min(nSize - 1, Y1));
+    this.m_oViewPort.X0 = Math.max(0, Math.min(nSizeX - 1, X0));
+    this.m_oViewPort.Y0 = Math.max(0, Math.min(nSizeY - 1, Y0));
+    this.m_oViewPort.X1 = Math.max(0, Math.min(nSizeX - 1, X1));
+    this.m_oViewPort.Y1 = Math.max(0, Math.min(nSizeY - 1, Y1));
 
     if (this.m_oViewPort.X1 <= this.m_oViewPort.X0)
     {
         this.m_oViewPort.X0 = 0;
-        this.m_oViewPort.X1 = nSize - 1;
+        this.m_oViewPort.X1 = nSizeX - 1;
     }
 
     if (this.m_oViewPort.Y1 <= this.m_oViewPort.Y0)
     {
         this.m_oViewPort.Y0 = 0;
-        this.m_oViewPort.Y1 = nSize - 1;
+        this.m_oViewPort.Y1 = nSizeY - 1;
     }
 };
 CDrawingBoard.prototype.Reset_ViewPort = function()
 {
     var oSize = this.m_oLogicBoard.Get_Size();
-    var nW = oSize.X, nH = oSize.Y;
-
-    var nSize = Math.min(nW, nH);
+    var nSizeX = oSize.X, nSizeY = oSize.Y;
 
     this.m_oViewPort.X0 = 0;
     this.m_oViewPort.Y0 = 0;
-    this.m_oViewPort.X1 = nW - 1;
-    this.m_oViewPort.Y1 = nH - 1;
+    this.m_oViewPort.X1 = nSizeX - 1;
+    this.m_oViewPort.Y1 = nSizeY - 1;
 };
 CDrawingBoard.prototype.Get_ViewPort = function()
 {
@@ -714,10 +712,8 @@ CDrawingBoard.prototype.Clear_Variants = function()
 CDrawingBoard.prototype.Get_AspectRatio = function()
 {
     var oSize = this.m_oLogicBoard.Get_Size();
-    var nW = oSize.X, nH = oSize.Y;
-
-    // Работаем только с квадратными досками
-    var nSize = Math.min(nW, nH);
+    var nSizeX = oSize.X;
+    var nSizeY = oSize.Y;
 
     // Высчитаем суммарный абсолютный размер доски и абсолютные сдвиги до начала сетки
     var dAbsBoardW = (this.m_oViewPort.X1 - this.m_oViewPort.X0) * g_dBoardCellW + 2 * g_dBoardHorOffset;
@@ -735,13 +731,13 @@ CDrawingBoard.prototype.Get_AspectRatio = function()
     if (this.m_oViewPort.X0 > 0)
         dAbsBoardW += g_dBoardCellW_2 / 2;
 
-    if (this.m_oViewPort.X1 < nSize - 1)
+    if (this.m_oViewPort.X1 < nSizeX - 1)
         dAbsBoardW += g_dBoardCellW_2 / 2;
 
     if (this.m_oViewPort.Y0 > 0)
         dAbsBoardH += g_dBoardCellW_2 / 2;
 
-    if (this.m_oViewPort.Y1 < nSize - 1)
+    if (this.m_oViewPort.Y1 < nSizeY - 1)
         dAbsBoardH += g_dBoardCellW_2 / 2;
 
     return (dAbsBoardW / dAbsBoardH);
@@ -780,27 +776,24 @@ CDrawingBoard.prototype.private_UpdateMousePos = function(X, Y)
 CDrawingBoard.prototype.private_UpdateKoeffs = function()
 {
     var oSize = this.m_oLogicBoard.Get_Size();
-    var nW = oSize.X, nH = oSize.Y;
-
-    // Работаем только с квадратными досками
-    var nSize = Math.min(nW, nH);
+    var nSizeX = oSize.X, nSizeY = oSize.Y;
 
     // Сначала скоректируем ViewPort
-    this.m_oViewPort.X0 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.X0));
-    this.m_oViewPort.Y0 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.Y0));
-    this.m_oViewPort.X1 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.X1));
-    this.m_oViewPort.Y1 = Math.max(0, Math.min(nSize - 1, this.m_oViewPort.Y1));
+    this.m_oViewPort.X0 = Math.max(0, Math.min(nSizeX - 1, this.m_oViewPort.X0));
+    this.m_oViewPort.Y0 = Math.max(0, Math.min(nSizeY - 1, this.m_oViewPort.Y0));
+    this.m_oViewPort.X1 = Math.max(0, Math.min(nSizeX - 1, this.m_oViewPort.X1));
+    this.m_oViewPort.Y1 = Math.max(0, Math.min(nSizeY - 1, this.m_oViewPort.Y1));
 
     if (this.m_oViewPort.X1 <= this.m_oViewPort.X0)
     {
         this.m_oViewPort.X0 = 0;
-        this.m_oViewPort.X1 = nSize - 1;
+        this.m_oViewPort.X1 = nSizeX - 1;
     }
 
     if (this.m_oViewPort.Y1 <= this.m_oViewPort.Y0)
     {
         this.m_oViewPort.Y0 = 0;
-        this.m_oViewPort.Y1 = nSize - 1;
+        this.m_oViewPort.Y1 = nSizeY - 1;
     }
 
     // Высчитаем суммарный абсолютный размер доски и абсолютные сдвиги до начала сетки
@@ -826,7 +819,7 @@ CDrawingBoard.prototype.private_UpdateKoeffs = function()
         dAbsHorOff += g_dBoardCellW_2 / 2;
     }
 
-    if (this.m_oViewPort.X1 < nSize - 1)
+    if (this.m_oViewPort.X1 < nSizeX - 1)
         dAbsBoardW += g_dBoardCellW_2 / 2;
 
     if (this.m_oViewPort.Y0 > 0)
@@ -835,7 +828,7 @@ CDrawingBoard.prototype.private_UpdateKoeffs = function()
         dAbsVerOff += g_dBoardCellW_2 / 2;
     }
 
-    if (this.m_oViewPort.Y1 < nSize - 1)
+    if (this.m_oViewPort.Y1 < nSizeY - 1)
         dAbsBoardH += g_dBoardCellW_2 / 2;
 
     this.m_dKoeffCellH   = g_dBoardCellW / dAbsBoardH;
@@ -919,30 +912,21 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
     }
 
     // Форовые точки
-    if (oSize.X === oSize.Y && (9 === oSize.X || 13 === oSize.X || 19 === oSize.X))
+    LinesCanvas.fillStyle = this.private_GetSettings_LinesColor().ToString();
+
+    // Радиус делаем минимум 2 пикселя, чтобы форовая отметка всегда выделялась на
+    // фоне сетки доски.
+    var dRad = Math.max(2, this.m_dKoeffDiam * W / 2);
+    var aPoints = this.m_oLogicBoard.Get_HandiPoints();
+
+    for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
     {
-        LinesCanvas.fillStyle = this.private_GetSettings_LinesColor().ToString();
+        var dX = dOffX + aPoints[nPointIndex][0] * dCellW;
+        var dY = dOffY + aPoints[nPointIndex][1] * dCellW;
 
-        // Радиус делаем минимум 2 пикселя, чтобы форовая отметка всегда выделялась на
-        // фоне сетки доски.
-        var dRad = Math.max(2, this.m_dKoeffDiam * W / 2);
-        var aPoints = [];
-        switch (oSize.X)
-        {
-            case 9:  aPoints = [[2, 2], [2, 6], [4, 4], [6, 2], [6, 6]]; break;
-            case 13: aPoints = [[3, 3], [3, 6], [3, 9], [6, 3], [6, 6], [6, 9], [9, 3], [9, 6], [9, 9]]; break;
-            case 19: aPoints = [[3, 3], [3, 9], [3, 15], [9, 3], [9, 9], [9, 15], [15, 3], [15, 9], [15, 15]]; break;
-        }
-
-        for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
-        {
-            var dX = dOffX + aPoints[nPointIndex][0] * dCellW;
-            var dY = dOffY + aPoints[nPointIndex][1] * dCellW;
-
-            LinesCanvas.beginPath();
-            LinesCanvas.arc(dX, dY, dRad, 0, 2 * Math.PI, false);
-            LinesCanvas.fill();
-        }
+        LinesCanvas.beginPath();
+        LinesCanvas.arc(dX, dY, dRad, 0, 2 * Math.PI, false);
+        LinesCanvas.fill();
     }
 
     // Рисуем все камни
@@ -1002,17 +986,38 @@ CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
     var Green = oBoardColor.g;
     var Blue  = oBoardColor.b;
 
+
+    //---------------------------------------------------------------
+    var X = 100 / W;
+    var k1 = 16 / 10, k2 = 136 / 50, k3 = 2432 / 150;
     var dCoffWf = new Array(W);
-    for (var j = 0; j < W; j++)
+    for (var j = 0, J = 0; j < W; j++, J += X)
     {
-        dCoffWf[j] = (Math.tan(300 * j / W) + 1) / 2 + (Math.tan(100 * j / W) + 1) / 10;
+        dCoffWf[j] = 0.6 + k1 * J + k2 * J * J * J + k3 * J * J * J * J * J;
     }
 
+
     var dCoffHf = new Array(H);
-    for (var i = 0; i < H; i++)
+    var dK3 = 1 / H;
+    k1 = 0.02, k2 = 0.02 / 5, k3 = 0.04 / 15;
+    for (var i = 0, J = 0; i < H; i++, J += dK3)
     {
-        dCoffHf[i] = 0.02 * Math.tan(i / H);
+        dCoffHf[i] = k1 * J + k2 * J * J * J + k3 * J * J * J * J * J;
     }
+
+    //---------------------------------------------------------------
+    //var dCoffWf = new Array(W);
+    //for (var j = 0; j < W; j++)
+    //{
+    //    dCoffWf[j] = (Math.tan(300 * j / W) + 1) / 2 + (Math.tan(100 * j / W) + 1) / 10;
+    //}
+    //
+    //var dCoffHf = new Array(H);
+    //for (var i = 0; i < H; i++)
+    //{
+    //    dCoffHf[i] = 0.02 * Math.tan(i / H);
+    //}
+    //---------------------------------------------------------------
 
     var r, g, b;
 
@@ -1118,9 +1123,8 @@ CDrawingBoard.prototype.private_CreateLines = function()
     var dCellH  = this.m_dKoeffCellH   * H;
     var dCellW  = this.m_dKoeffCellW   * W;
 
-    // TODO: Пока мы реализуем для случая oSize.X == oSize.Y
     var oSize = this.m_oLogicBoard.Get_Size();
-    var nSize = Math.min(oSize.X, oSize.Y);
+    var nSize = Math.max(oSize.X, oSize.Y);
 
     var Lines = new Array(oSize.X);
 
@@ -1185,21 +1189,18 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
     LinesCanvas.clearRect(0, 0, W, H);
 
     // Рисуем форовые метки
-    if (oSize.X === oSize.Y)
+    var Handi = this.m_oImageData.Handi;
+    var nRad  = this.m_oImageData.HandiRad;
+
+    var aPoints = this.m_oLogicBoard.Get_HandiPoints();
+    for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
     {
-        var Handi = this.m_oImageData.Handi;
-        var nRad  = this.m_oImageData.HandiRad;
-
-        var aPoints = this.m_oLogicBoard.Get_HandiPoints();
-        for (var nPointIndex = 0, Count = aPoints.length; nPointIndex < Count; nPointIndex++)
+        if (true === this.private_IsPointInViewPort(aPoints[nPointIndex][0], aPoints[nPointIndex][1]))
         {
-            if (true === this.private_IsPointInViewPort(aPoints[nPointIndex][0], aPoints[nPointIndex][1]))
-            {
-                var dX = Lines[aPoints[nPointIndex][0]].X - nRad;
-                var dY = Lines[aPoints[nPointIndex][1]].Y - nRad;
+            var dX = Lines[aPoints[nPointIndex][0]].X - nRad;
+            var dY = Lines[aPoints[nPointIndex][1]].Y - nRad;
 
-                LinesCanvas.putImageData(Handi, dX, dY);
-            }
+            LinesCanvas.putImageData(Handi, dX, dY);
         }
     }
 
@@ -1208,7 +1209,7 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
     var X_1 = oSize.X - 1 === this.m_oViewPort.X1 ? Lines[this.m_oViewPort.X1].X : Lines[this.m_oViewPort.X1].X_G;
 
     var Y_0 =           0 === this.m_oViewPort.Y0 ? Lines[this.m_oViewPort.Y0].Y : Lines[this.m_oViewPort.Y0].Y_L;
-    var Y_1 = oSize.X - 1 === this.m_oViewPort.Y1 ? Lines[this.m_oViewPort.Y1].Y : Lines[this.m_oViewPort.Y1].Y_G;
+    var Y_1 = oSize.Y - 1 === this.m_oViewPort.Y1 ? Lines[this.m_oViewPort.Y1].Y : Lines[this.m_oViewPort.Y1].Y_G;
 
     var VerLine = LinesCanvas.createImageData(1, H);
     var HorLine = LinesCanvas.createImageData(W, 1);
@@ -1240,13 +1241,16 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
         }
     }
 
-    for (var i = 0; i < oSize.X; i++)
+    for (var nX = 0; nX < oSize.X; nX++)
     {
-        if (true === this.private_IsVerLineInViewPort(i))
-            LinesCanvas.putImageData(VerLine, Lines[i].X, 0);
+        if (true === this.private_IsVerLineInViewPort(nX))
+            LinesCanvas.putImageData(VerLine, Lines[nX].X, 0);
+    }
 
-        if (true === this.private_IsHorLineInViewPort(i))
-            LinesCanvas.putImageData(HorLine, 0, Lines[i].Y);
+    for (var nY = 0; nY < oSize.Y; nY++)
+    {
+        if (true === this.private_IsHorLineInViewPort(nY))
+            LinesCanvas.putImageData(HorLine, 0, Lines[nY].Y);
     }
 
     // Пересечения на доске, которые мы не отрисовываем из-за текстовых отметок
@@ -2653,8 +2657,8 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
     else if (true === event.CtrlKey)
     {
         // Добавляем комментарий с позицией хода.
-        var nSize = this.m_oLogicBoard.Get_Size().Y;
-        var sComment = Common_XYtoString(X, Y, nSize);
+        var oSize = this.m_oLogicBoard.Get_Size();
+        var sComment = Common_XYtoString(X, Y, oSize.X, oSize.Y);
         this.m_oGameTree.Add_Comment(sComment);
     }
     else if (event.ShiftKey)
@@ -3094,8 +3098,8 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         if (EBoardMode.AddMarkColor === this.m_eMode)
         {
-            this.m_oGameTree.Remove_AllColorMarks();
             this.private_ClearAllColorMarks();
+            this.m_oGameTree.Remove_AllColorMarks();
         }
         else
         {
@@ -3357,4 +3361,3 @@ CDrawingBoard.prototype.Clear_Board = function()
     this.HtmlElement.Target   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Select   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
 };
-

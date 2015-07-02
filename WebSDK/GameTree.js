@@ -339,22 +339,23 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
     if (this.m_bTutorModeAuto)
         this.m_nTutorMode = this.Get_NextMove() === BOARD_BLACK ? BOARD_WHITE : BOARD_BLACK;
 
-    var nSize = this.m_oBoard.Get_Size().X;
+    var nSizeX = this.m_oBoard.Get_Size().X;
+    var nSizeY = this.m_oBoard.Get_Size().Y;
     if (this.m_oDrawingBoard && oViewPort)
     {
         if (true === oViewPort.Auto)
         {
             var X0 = (oReader.m_oViewPort.X0 <= 4 ? 0 : oReader.m_oViewPort.X0 - 2);
-            var X1 = (nSize - oReader.m_oViewPort.X1 <= 3 ? nSize - 1 : oReader.m_oViewPort.X1);
+            var X1 = (nSizeX - oReader.m_oViewPort.X1 <= 3 ? nSizeX - 1 : oReader.m_oViewPort.X1);
             var Y0 = (oReader.m_oViewPort.Y0 <= 4 ? 0 : oReader.m_oViewPort.Y0 - 2);
-            var Y1 = (nSize - oReader.m_oViewPort.Y1 <= 3 ? nSize - 1 : oReader.m_oViewPort.Y1);
+            var Y1 = (nSizeY - oReader.m_oViewPort.Y1 <= 3 ? nSizeY - 1 : oReader.m_oViewPort.Y1);
             this.m_oDrawingBoard.Set_ViewPort(X0, Y0, X1, Y1);
         }
         else if (undefined !== oViewPort.X0 && undefined !== oViewPort.X1 && undefined !== oViewPort.Y0 && undefined !== oViewPort.Y1)
             this.m_oDrawingBoard.Set_ViewPort(oViewPort.X0, oViewPort.Y0, oViewPort.X1, oViewPort.Y1);
     }
     else if (this.m_oDrawingBoard)
-        this.m_oDrawingBoard.Set_ViewPort(0, 0, nSize - 1, nSize - 1);
+        this.m_oDrawingBoard.Set_ViewPort(0, 0, nSizeX - 1, nSizeY - 1);
 
     if (this.m_oDrawingNavigator)
     {
@@ -1528,12 +1529,10 @@ CGameTree.prototype.Get_WhiteTeam = function()
 };
 CGameTree.prototype.Set_BoardSize = function(_W, _H)
 {
-    // TODO: Пока мы работаем только с квадратными досками размера >= 2 (доска размером 1х1 бессмысленна)
-    var W = Math.min(52, Math.max(_W, _H, 2));
-    var H = W;
+    var W = Math.min(52, Math.max(_W, 2));
+    var H = Math.min(52, Math.max(_H, 2));
 
     var OldSize = this.m_oBoard.Get_Size();
-
     if (W !== OldSize.X || H !== OldSize.Y)
     {
         this.m_oBoard.Reset_Size(W, H);
@@ -1984,14 +1983,22 @@ CGameTree.prototype.Is_Unfinished = function()
 CGameTree.prototype.Add_ColorMark = function(X, Y, Color)
 {
     this.m_oCurNode.Add_ColorMark(X, Y, Color);
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_ColorsCounter();
 };
 CGameTree.prototype.Remove_ColorMark = function(X, Y)
 {
     this.m_oCurNode.Remove_ColorMark(X, Y);
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_ColorsCounter();
 };
 CGameTree.prototype.Remove_AllColorMarks = function()
 {
     this.m_oCurNode.Remove_AllColorMarks();
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_ColorsCounter();
 };
 CGameTree.prototype.Copy_ColorMapFromPrevNode = function()
 {
@@ -1999,6 +2006,10 @@ CGameTree.prototype.Copy_ColorMapFromPrevNode = function()
 
     if (this.m_oDrawingBoard)
         this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_ColorsCounter();
+
 };
 CGameTree.prototype.Get_MoveReference = function()
 {

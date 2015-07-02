@@ -94,16 +94,16 @@ function Common_FindPosition( oElement )
     }
 }
 
-function Common_PosValueToString(Value, nSize)
+function Common_PosValueToString(Value, nSizeX, nSizeY)
 {
     var oPos = Common_ValuetoXY(Value);
-    return Common_XYtoString(oPos.X, oPos.Y, nSize);
+    return Common_XYtoString(oPos.X, oPos.Y, nSizeX, nSizeY);
 }
 
-function Common_XYtoString(X, Y, nSize)
+function Common_XYtoString(X, Y, nSizeX, nSizeY)
 {
-    var Res = Common_X_to_String(X, nSize);
-    Res += (nSize + 1 - Y);
+    var Res = Common_X_to_String(X, nSizeX);
+    Res += (nSizeY + 1 - Y);
     return Res;
 }
 

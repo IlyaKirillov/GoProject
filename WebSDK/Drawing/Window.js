@@ -39,6 +39,8 @@ function CDrawingWindow()
     this.m_nW = -1;
     this.m_nH = -1;
 
+    this.m_bVisible = false;
+
     var oThis = this;
 
     this.private_OnDragLeftHandler = function()
@@ -251,6 +253,8 @@ function CDrawingWindow()
 CDrawingWindow.prototype.Init = function(sDivId, bResizable)
 {
     var oThis = this;
+
+    this.m_bVisible = true;
 
     this.HtmlElement.Control = CreateControlContainer(sDivId);
     var oMainDiv = this.HtmlElement.Control.HtmlElement;
@@ -465,6 +469,8 @@ CDrawingWindow.prototype.Update_Size = function(bForce)
 };
 CDrawingWindow.prototype.Close = function()
 {
+    this.m_bVisible = false;
+
     var oMainDiv = this.HtmlElement.Control.HtmlElement;
 
     oMainDiv.style.display = "none";
@@ -474,6 +480,8 @@ CDrawingWindow.prototype.Close = function()
 };
 CDrawingWindow.prototype.Show = function(oPr)
 {
+    this.m_bVisible = true;
+
     var oDiv = this.HtmlElement.Control.HtmlElement;
 
     oDiv.style.display = "block";
@@ -543,6 +551,13 @@ CDrawingWindow.prototype.protected_UpdateSizeAndPosition = function(oDrawing)
 CDrawingWindow.prototype.Get_DefaultWindowSize = function()
 {
     return null;
+};
+CDrawingWindow.prototype.Is_Visible = function()
+{
+    return this.m_bVisible;
+};
+CDrawingWindow.prototype.Update = function()
+{
 };
 
 function CDrawingConfirmWindow()
@@ -1271,7 +1286,8 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
     var sMainId      = this.HtmlElement.InnerDiv.id;
 
     oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
-    oMainControl.Set_Type(2);
+    var oDrawingBoard = new CDrawingBoard();
+    oMainControl.Set_Type(2, oDrawingBoard);
 
     var sBoard = sMainId + "B";
     var oBoardElement = this.protected_CreateDivElement(oMainDiv, sBoard);
@@ -1283,7 +1299,6 @@ CDrawingScoreEstimateWindow.prototype.Init = function(_sDivId, oPr)
     this.m_oBoardDiv = oBoardElement;
     this.m_oBoardControl = oBoardControl;
 
-    var oDrawingBoard = new CDrawingBoard();
     oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
     oDrawingBoard.Set_EstimateMode(this);
 
@@ -1318,7 +1333,7 @@ CDrawingScoreEstimateWindow.prototype.Show = function(oPr)
     CDrawingScoreEstimateWindow.superclass.Show.apply(this, arguments);
     // Для перерисовки позиции
     this.Update_Size(true);
-}
+};
 
 function CDrawingCountColorsWindow()
 {
@@ -1329,7 +1344,10 @@ CommonExtend(CDrawingCountColorsWindow, CDrawingWindow);
 
 CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 {
-    CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, true);
+    CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, false);
+
+    this.m_oGameTree     = oPr.GameTree;
+    this.m_oDrawingBoard = oPr.DrawingBoard;
 
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
@@ -1471,8 +1489,20 @@ CDrawingCountColorsWindow.prototype.Show = function(oPr)
 {
     CDrawingCountColorsWindow.superclass.Show.call(this, oPr);
 
+    this.m_oGameTree     = oPr.GameTree;
+    this.m_oDrawingBoard = oPr.DrawingBoard;
 
-    var oColorsMap = oPr.DrawingBoard.m_oColorMarks;
+    this.Update();
+};
+CDrawingCountColorsWindow.prototype.Update = function(oPr)
+{
+    if (!this.Is_Visible())
+        return;
+
+    if (!this.m_oDrawingBoard)
+        return;
+
+    var oColorsMap = this.m_oDrawingBoard.m_oColorMarks;
 
     var Red = [0, 0, 0, 0], Green = [0, 0, 0, 0], Blue = [0, 0, 0, 0], Gray = [0, 0, 0, 0];
     var bRed = false, bGreen = false, bBlue = false, bGray = false;
@@ -1526,6 +1556,10 @@ CDrawingCountColorsWindow.prototype.Show = function(oPr)
     this.Green.value = "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]);
     this.Blue.value  = "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]);
     this.Gray.value  = "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]);
+};
+CDrawingCountColorsWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 410, H : 160};
 };
 
 function CDrawingGifWriterWindow()
@@ -1653,7 +1687,7 @@ CDrawingAboutWindow.prototype.Init = function(_sDivId, oPr)
     this.m_oGameTree = oPr.GameTree;
 
     var oTabs = new CDrawingVerticalTabs();
-    oTabs.Init(this.HtmlElement.InnerDiv.id, ["About Web Go Board", "Keyboard Shortcuts"], 1);
+    oTabs.Init(this.HtmlElement.InnerDiv.id, ["About Web Go Board", "Keyboard Shortcuts"], 0);
 
     this.private_InitAboutPage(oTabs.Get_TabContent(0));
     this.private_InitKeyBoardShortcutsPage(oTabs.Get_TabContent(1), oPr);
@@ -1711,9 +1745,52 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "Visit our Github project for feedback and issue reports:");
     oString = document.createElement("a");
+    oString.target = "_blank";
     oString.href = "https://github.com/IlyaKirillov/GoProject";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "https://github.com/IlyaKirillov/GoProject");
+
+    oString = document.createElement("div");
+    oString.style.paddingTop = "20px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "Our site:");
+    oString = document.createElement("a");
+    oString.target = "_blank";
+    oString.href = "http://goban.org/";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "http://goban.org/");
+
+    oString = document.createElement("div");
+    oString.style.paddingTop = "20px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "Discussions:");
+    oString = document.createElement("a");
+    oString.target = "_blank";
+    oString.href = "http://www.lifein19x19.com/forum/viewtopic.php?f=18&t=11239";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "http://www.lifein19x19.com/");
+    oDivMainPart.appendChild(document.createElement("br"));
+    oString = document.createElement("a");
+    oString.target = "_blank";
+    oString.href = "http://kido.com.ru/253-web-go-doska";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "http://kido.com.ru/");
+
+    oString = document.createElement("div");
+    oString.style.paddingTop = "20px";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "Browsers extension:");
+    oString = document.createElement("a");
+    oString.target = "_blank";
+    oString.href = "https://chrome.google.com/webstore/detail/web-go-board/cdmhoehokaoghadonjfdbhieajggfbmd";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "Chrome and OperaNext");
+    oDivMainPart.appendChild(document.createElement("br"));
+    oString = document.createElement("a");
+    oString.target = "_blank";
+    oString.href = "https://addons.mozilla.org/ru/firefox/addon/web-gobaduk-board/";
+    oDivMainPart.appendChild(oString);
+    Common.Set_InnerTextToElement(oString, "FireFox");
 
     oString = document.createElement("div");
     oString.style.paddingTop = "30px";
@@ -2197,7 +2274,8 @@ CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
     var sMainId      = this.HtmlElement.ConfirmInnerDiv.id;
 
     oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
-    oMainControl.Set_Type(2);
+    var oDrawingBoard = new CDrawingBoard();
+    oMainControl.Set_Type(2, oDrawingBoard);
 
     var sBoard = sMainId + "B";
     var oBoardElement = this.protected_CreateDivElement(oMainDiv, sBoard);
@@ -2209,7 +2287,6 @@ CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
     this.m_oBoardDiv = oBoardElement;
     this.m_oBoardControl = oBoardControl;
 
-    var oDrawingBoard = new CDrawingBoard();
     oDrawingBoard.Init(sBoard, this.m_oGameTree.Copy_ForScoreEstimate());
     oDrawingBoard.Set_ViewPortMode(this);
 
@@ -2367,10 +2444,25 @@ CDrawingCreateNewWindow.prototype.Get_DefaultWindowSize = function()
 };
 CDrawingCreateNewWindow.prototype.Handle_OK = function()
 {
-    var nSize = parseInt(this.BoardSize.value);
-    if (isNaN(nSize) || nSize < 2 || nSize > 52)
+    var sSize = this.BoardSize.value;
+    var nSizeX = 19;
+    var nSizeY = 19;
+    var nPos = -1;
+    if (-1 == (nPos = sSize.indexOf(":")))
     {
-        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Size value must be an integer number from 2 to 52.", W : 300, H : 95});
+        nSizeX = Math.min(52, Math.max(parseInt(sSize), 2));
+        nSizeY = nSizeX;
+    }
+    else
+    {
+        nSizeX = parseInt(sSize.substr(0, nPos));
+        nSizeY = parseInt(sSize.substr(nPos + 1, sSize.length - nPos - 1));
+    }
+
+    if (isNaN(nSizeX) || nSizeX < 2 || nSizeX > 52
+        || isNaN(nSizeY) || nSizeY < 2 || nSizeY > 52)
+    {
+        CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Size value must be an integer number from 2 to 52, or pair of such numbers separated by ':' character.", W : 300, H : 115});
         return;
     }
 
@@ -2380,13 +2472,14 @@ CDrawingCreateNewWindow.prototype.Handle_OK = function()
         CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Handicap value must be an integer number from 0 to 9.", W : 300, H : 95});
         return;
     }
-    if (nSize <= 6 && 0 != nHandi)
+
+    if (0 != nHandi && (nSizeY <= 6 || nSizeX <= 6 || nSizeX !== nSizeY))
     {
         CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Handicap value must be 0 for this board size.", W : 300, H : 95});
         return;
     }
 
-    if (nSize <= 10 && nHandi > 5)
+    if (nHandi > 5 && (nSizeX <= 10 || nSizeY <= 10))
     {
         CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing, ErrorText : "Handicap value must be an integer number from 0 to 5 for this board size.", W : 300, H : 95});
         return;
@@ -2402,7 +2495,7 @@ CDrawingCreateNewWindow.prototype.Handle_OK = function()
     if (this.m_oGameTree)
     {
         var sSGF = "(;FF[4]";
-        sSGF += "SZ[" + nSize + "]";
+        sSGF += "SZ[" + (nSizeX === nSizeY ? nSizeX : nSizeX + ":" + nSizeY) + "]";
         sSGF += "KM[" + fKomi + "]";
         sSGF += "PB[" + this.BlackPlayer.value + "]";
         sSGF += "PW[" + this.WhitePlayer.value + "]";
@@ -2410,12 +2503,15 @@ CDrawingCreateNewWindow.prototype.Handle_OK = function()
 
         var aHandiPoints = [];
 
-        var nVal0 = (nSize < 10 ? 2 : 3);
-        var nVal1 = ((nSize + 1) / 2 | 0) - 1;
-        var nVal2 = (nSize < 10 ? nSize - 3 : nSize - 4);
-
-        switch(nHandi)
+        if (nSizeX === nSizeY)
         {
+            var nSize = nSizeX;
+            var nVal0 = (nSize < 10 ? 2 : 3);
+            var nVal1 = ((nSize + 1) / 2 | 0) - 1;
+            var nVal2 = (nSize < 10 ? nSize - 3 : nSize - 4);
+
+            switch (nHandi)
+            {
             case 2:
             {
                 aHandiPoints.push([nVal2, nVal0]);
@@ -2491,6 +2587,7 @@ CDrawingCreateNewWindow.prototype.Handle_OK = function()
                 aHandiPoints.push([nVal1, nVal2]);
                 aHandiPoints.push([nVal1, nVal1]);
                 break;
+            }
             }
         }
 

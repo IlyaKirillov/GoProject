@@ -12,7 +12,10 @@
 
 function Get_EditorURL(sFileUrl)
 {
-    return chrome.extension.getURL('content/editor.html') + '?file=' + encodeURIComponent(sFileUrl);
+    if (sFileUrl)
+        return chrome.extension.getURL('content/editor.html') + '?file=' + encodeURIComponent(sFileUrl);
+    else
+        return chrome.extension.getURL('content/editor.html');
 }
 
 function Get_HeaderFromHeaders(aHeaders, sHeaderName)
@@ -111,3 +114,8 @@ chrome.webRequest.onBeforeRequest.addListener(
     },
     ['blocking']
 );
+
+chrome.browserAction.onClicked.addListener(function()
+{
+    chrome.tabs.create({url: Get_EditorURL()});
+});

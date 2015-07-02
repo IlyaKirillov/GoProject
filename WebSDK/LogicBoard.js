@@ -318,57 +318,45 @@ CLogicBoard.prototype.Get_HandiPoints = function()
 {
     var aPoints = [];
 
-    if (this.m_nW === this.m_nH)
-    {
-        var nSize = this.m_nW;
-        var nVal0 = (nSize < 10 ? 2 : 3);
-        var nVal1 = ((nSize + 1) / 2 | 0) - 1;
-        var nVal2 = (nSize < 10 ? nSize - 3 : nSize - 4);
+    var aPointsX = this.private_GetLineHandiPoints(this.m_nW);
+    var aPointsY = this.private_GetLineHandiPoints(this.m_nH);
 
-        if (6 >= nSize && 1 === nSize % 2)
+    for (var nX = 0; nX < aPointsX.length; nX++)
+    {
+        for (var nY = 0; nY < aPointsY.length; nY++)
         {
-            aPoints = [
-                [nVal1, nVal1]
-            ];
-        }
-        else if (6 >= nSize && 0 === nSize % 2)
-        {
-        }
-        else if (0 === nSize % 2)
-        {
-            aPoints = [
-                [nVal0, nVal0],
-                [nVal2, nVal0],
-                [nVal0, nVal2],
-                [nVal2, nVal2]
-            ];
-        }
-        else if (nSize <= 9)
-        {
-            aPoints = [
-                [nVal0, nVal0],
-                [nVal2, nVal0],
-                [nVal0, nVal2],
-                [nVal2, nVal2],
-                [nVal1, nVal1]
-            ];
-        }
-        else
-        {
-            aPoints = [
-                [nVal0, nVal0],
-                [nVal0, nVal1],
-                [nVal0, nVal2],
-                [nVal1, nVal0],
-                [nVal1, nVal1],
-                [nVal1, nVal2],
-                [nVal2, nVal0],
-                [nVal2, nVal1],
-                [nVal2, nVal2]
-            ];
+            aPoints.push([aPointsX[nX], aPointsY[nY]]);
         }
     }
 
+    if (((9 == this.m_nW || 11 == this.m_nW) && 1 == this.m_nH % 2)
+        || ((9 == this.m_nH || 11 == this.m_nH) && 1 == this.m_nW % 2))
+        aPoints.push([(this.m_nW - 1) / 2, (this.m_nH - 1) / 2]);
+
+    return aPoints;
+};
+CLogicBoard.prototype.private_GetLineHandiPoints = function(nSize)
+{
+    var aPoints = [];
+    if (5 == nSize)
+        aPoints = [2];
+    else if (7 == nSize)
+        aPoints = [3];
+    else if (8 == nSize)
+        aPoints = [2, 5];
+    else if (9 == nSize)
+        aPoints = [2, 6];
+    else if (10 == nSize)
+        aPoints = [3, 6];
+    else if (11 == nSize)
+        aPoints = [3, 7];
+    else if (nSize >= 12)
+    {
+        if (1 == nSize % 2)
+            aPoints = [3, (nSize - 1) / 2, nSize - 4];
+        else
+            aPoints = [3, nSize - 4];
+    }
     return aPoints;
 };
 CLogicBoard.prototype.Is_HandiPoint = function(nX, nY)

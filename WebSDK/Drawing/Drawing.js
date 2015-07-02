@@ -1168,11 +1168,19 @@ CDrawing.prototype.Update_InterfaceState = function(oIState)
     // TimeLine
     if (this.m_oTimeLine)
         this.m_oTimeLine.Update_Pos(oIState.TimelinePos);
+
+    this.Update_ColorsCounter();
 };
 CDrawing.prototype.Update_Comments = function(sComment)
 {
     for (var Index = 0, Count = this.m_aComments.length; Index < Count; Index++)
         this.m_aComments[Index].Update_Comments(sComment);
+};
+CDrawing.prototype.Update_ColorsCounter = function()
+{
+    var oCountColorsWindow = g_aWindows[EWindowType.CountColors];
+    if (oCountColorsWindow && oCountColorsWindow.Is_Visible())
+        oCountColorsWindow.Update();
 };
 
 function CDrawingFullInfo()

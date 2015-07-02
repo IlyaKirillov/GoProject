@@ -86,6 +86,7 @@ CSgfWriter.prototype.private_WriteNonEmptyCommand = function(sName, sParam)
 CSgfWriter.prototype.private_WriteGameInfo = function()
 {
     var oGameTree = this.m_oGameTree;
+    var oBoardSize = oGameTree.Get_Board().Get_Size();
 
     this.private_WriteCommand("GM", 1);
     this.private_WriteCommand("FF", 4);
@@ -94,7 +95,8 @@ CSgfWriter.prototype.private_WriteGameInfo = function()
     this.private_WriteCommand("ST", oGameTree.Get_ShowVariants());
 
     this.private_WriteNonEmptyCommand("RU", oGameTree.Get_Rules());
-    this.private_WriteCommand("SZ", oGameTree.Get_Board().Get_Size().X);
+
+    this.private_WriteCommand("SZ", oBoardSize.X == oBoardSize.Y ? oBoardSize.X : oBoardSize.X + ":" + oBoardSize.Y);
     this.private_WriteCommand("KM", oGameTree.Get_Komi());
     this.private_WriteCommand("HA", oGameTree.Get_Handicap());
     this.private_WriteNonEmptyCommand("TM", oGameTree.Get_TimeLimit());

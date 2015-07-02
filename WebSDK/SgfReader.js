@@ -567,8 +567,9 @@ CSgfReader.prototype.private_ReadComments = function()
     {
         case ESgfEncoding.UTF8: sComment = Common_UTF8_Decode(sComment); break;
     }
-
-    this.m_oGameTree.Add_Comment(sComment);
+    var oCurNode = this.m_oGameTree.Get_CurNode();
+    if (oCurNode)
+        oCurNode.Add_Comment(sComment);
 };
 CSgfReader.prototype.private_ReadCA = function()
 {
@@ -787,11 +788,23 @@ CSgfReader.prototype.private_ReadST = function()
 CSgfReader.prototype.private_ReadSZ = function()
 {
     this.m_nPos += 3;
-    var nSize = this.private_ReadNumber();
-    if (nSize <= 0)
-        nSize = 19;
 
-    this.m_oGameTree.Set_BoardSize(nSize, nSize);
+    var sSize = this.private_ReadSimpleText();
+    var nSizeX = 19;
+    var nSizeY = 19;
+    var nPos = -1;
+    if (-1 == (nPos = sSize.indexOf(":")))
+    {
+        nSizeX = Math.min(52, Math.max(parseInt(sSize), 2));
+        nSizeY = nSizeX;
+    }
+    else
+    {
+        nSizeX = parseInt(sSize.substr(0, nPos));
+        nSizeY = parseInt(sSize.substr(nPos + 1, sSize.length - nPos - 1));
+    }
+
+    this.m_oGameTree.Set_BoardSize(nSizeX, nSizeY);
 };
 CSgfReader.prototype.private_ReadSO = function()
 {

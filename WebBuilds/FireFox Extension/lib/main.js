@@ -2,6 +2,7 @@ const {Cc,Ci,Cm,Cr,Cu} = require("chrome");
 var self    = require("sdk/self");
 var tabs    = require("sdk/tabs");
 var base64  = require("sdk/base64");
+var {ActionButton} = require("sdk/ui/button/action");
 
 Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 Cu.import('resource://gre/modules/Services.jsm');
@@ -254,3 +255,21 @@ function ClearMimeTypes(sExt)
     {
     }
 }
+
+var button = ActionButton(
+{
+    id    : "MainButtonId",
+    label : "Web Go Board",
+    icon  :
+    {
+        "16": self.data.url('icon16.png'),
+        "18": self.data.url('icon18.png'),
+        "32": self.data.url('icon32.png'),
+        "64": self.data.url('icon64.png')
+    },
+
+    onClick: function(state)
+    {
+        tabs.open(self.data.url('editor.html'));
+    }
+});
