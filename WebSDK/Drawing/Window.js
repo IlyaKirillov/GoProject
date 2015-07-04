@@ -1011,7 +1011,8 @@ function CDrawingSettingsWindow()
         LoadUnfinishedSgf    : null,
         NavigatorLabel       : null,
         CycleThroughVariants : null,
-        LoadShowVariants     : null
+        LoadShowVariants     : null,
+        ShowTarget           : null
     };
 }
 
@@ -1035,7 +1036,7 @@ CDrawingSettingsWindow.prototype.Init = function(_sDivId, oPr)
 };
 CDrawingSettingsWindow.prototype.Get_DefaultWindowSize = function()
 {
-    return {W : 400, H : 180};
+    return {W : 400, H : 210};
 };
 CDrawingSettingsWindow.prototype.Show = function(oPr)
 {
@@ -1072,6 +1073,7 @@ CDrawingSettingsWindow.prototype.private_CreateAppearancePage = function(oDiv, o
     var oDivMainPart = this.private_CreatePage(oDiv);
     var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "A";
 
+    this.HtmlElement2.ShowTarget           = this.private_CreateCheckBox(oDivMainPart, sDivId + "T", this.m_oGameTree.Is_ShowTarget(), "Show Target");
     this.HtmlElement2.CycleThroughVariants = this.private_CreateCheckBox(oDivMainPart, sDivId + "C", this.m_oGameTree.Is_CycleThroughVariants(), "Cycle through variants");
     this.HtmlElement2.Sound                = this.private_CreateCheckBox(oDivMainPart, sDivId + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
     this.HtmlElement2.NavigatorLabel       = this.private_CreateSelect(oDivMainPart, sDivId + "N", this.m_oGameTree.Get_NavigatorLabel(), ["No labels", "Move numbers", "Move numbers current variant only", "Move coordinates"], "Labels in navigator");
@@ -1117,6 +1119,7 @@ CDrawingSettingsWindow.prototype.Handle_OK = function()
     else
         this.m_oGameTree.TurnOff_Sound();
 
+    this.m_oGameTree.Set_ShowTarget(this.HtmlElement2.ShowTarget.checked ? true : false);
     this.m_oGameTree.Set_LoadUnfinishedFilesOnLastNode(this.HtmlElement2.LoadUnfinishedSgf.checked ? true : false);
     this.m_oGameTree.Set_NavigatorLabel(this.HtmlElement2.NavigatorLabel.selectedIndex);
     this.m_oGameTree.Set_CycleThroughVariants(this.HtmlElement2.CycleThroughVariants.checked ? true : false);

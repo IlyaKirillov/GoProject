@@ -68,10 +68,12 @@ function CSettings()
     this.m_bCycleThroughVariants          = false;
     this.m_eNavigatorLabels               = ESettingsNavigatorLabels.MoveNumbers;
     this.m_eLoadShowVariants              = ESettingsLoadShowVariants.FromFile;
+    this.m_bShowTarget                    = true;
 }
 CSettings.prototype.Load_FromLocalStorage = function()
 {
     // Appearance
+    this.m_bShowTarget           = ("0" === Common.Get_LocalStorageItem("ShowTarget") ? false : true);
     this.m_bCycleThroughVariants = ("1" === Common.Get_LocalStorageItem("CycleThroughVariants") ? true : false);
     this.m_bSound                = ("0" === Common.Get_LocalStorageItem("Sound") ? false : true);
 
@@ -135,6 +137,15 @@ CSettings.prototype.Set_CycleThroughVariants = function(Value)
 CSettings.prototype.Is_CycleThroughVariants = function()
 {
     return this.m_bCycleThroughVariants;
+};
+CSettings.prototype.Set_ShowTarget = function(Value)
+{
+    this.m_bShowTarget = Value;
+    Common.Set_LocalStorageItem("ShowTarget", Value === true ? "1" : "0");
+};
+CSettings.prototype.Is_ShowTarget = function()
+{
+    return this.m_bShowTarget;
 };
 CSettings.prototype.Set_ColorScheme = function(eScheme)
 {
