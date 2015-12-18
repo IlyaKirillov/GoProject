@@ -1953,6 +1953,16 @@ CGameTree.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
 {
     return g_oGlobalSettings.Is_LoadUnfinishedFilesOnLastNode();
 };
+CGameTree.prototype.Is_ShowTarget = function()
+{
+    return g_oGlobalSettings.Is_ShowTarget();
+};
+CGameTree.prototype.Set_ShowTarget = function(Value)
+{
+    g_oGlobalSettings.Set_ShowTarget(Value);
+    if (this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Update_Target();
+};
 CGameTree.prototype.Is_CycleThroughVariants = function()
 {
     return g_oGlobalSettings.Is_CycleThroughVariants();
