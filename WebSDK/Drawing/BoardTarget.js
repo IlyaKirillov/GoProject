@@ -38,6 +38,10 @@ CBoardTarget.prototype.Init = function(sCanvasId)
     this.m_oHtmlElement.style.position = "absolute";
     this.Hide();
 };
+CBoardTarget.prototype.Get_LogicPos = function()
+{
+    return {X : this.m_nLogicX, Y : this.m_nLogicY};
+};
 CBoardTarget.prototype.Update_Size = function(nSize)
 {
     this.m_oHtmlElement.width  = nSize;
@@ -55,7 +59,8 @@ CBoardTarget.prototype.Hide = function()
 };
 CBoardTarget.prototype.Show = function()
 {
-    this.m_oHtmlElement.style.display = "block";
+    if (true === g_oGlobalSettings.Is_ShowTarget())
+        this.m_oHtmlElement.style.display = "block";
 };
 CBoardTarget.prototype.Check_LogicPos = function(X, Y, bForce)
 {

@@ -172,7 +172,7 @@ function CDrawingBoard(oDrawing)
         if (16 === global_keyboardEvent.KeyCode && EBoardMode.AddRemove === oThis.Get_Mode())
         {
             global_mouseEvent.ShiftKey = true;
-            oThis.private_UpdateTarget();
+            oThis.private_UpdateTargetType();
             bPreventDefault = true;
         }
         else if ((16 === global_keyboardEvent.KeyCode || 17 === global_keyboardEvent.KeyCode) && EBoardMode.AddMarkColor === oThis.Get_Mode())
@@ -182,14 +182,14 @@ function CDrawingBoard(oDrawing)
             else if (17 === global_keyboardEvent.KeyCode)
                 global_mouseEvent.CtrlKey = true;
 
-            oThis.private_UpdateTarget();
+            oThis.private_UpdateTargetType();
             bPreventDefault = true;
         }
         else
         {
             bPreventDefault = oThis.private_HandleKeyDown(global_keyboardEvent);
             if (true === bPreventDefault)
-                oThis.private_HideTarget();
+                oThis.private_UpdateTargetType();
         }
 
         if (true === bPreventDefault)
@@ -205,7 +205,7 @@ function CDrawingBoard(oDrawing)
         if (16 === global_keyboardEvent.KeyCode && EBoardMode.AddRemove === oThis.Get_Mode())
         {
             global_mouseEvent.ShiftKey = false;
-            oThis.private_UpdateTarget();
+            oThis.private_UpdateTargetType();
         }
         else if ((16 === global_keyboardEvent.KeyCode || 17 === global_keyboardEvent.KeyCode) && EBoardMode.AddMarkColor === oThis.Get_Mode())
         {
@@ -214,7 +214,7 @@ function CDrawingBoard(oDrawing)
             else if (17 === global_keyboardEvent.KeyCode)
                 global_mouseEvent.CtrlKey = false;
 
-            oThis.private_UpdateTarget();
+            oThis.private_UpdateTargetType();
         }
     };
     this.private_OnKeyPress = function(e)
@@ -522,12 +522,7 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
     this.m_oBoardPosition[Common_XYtoValue(X, Y)] = Value;
 
     if (true === this.m_oTarget.Check_XY(X, Y))
-    {
-        if (BOARD_BLACK === Value || BOARD_WHITE === Value)
-            this.private_HideTarget();
-        else
-            this.private_UpdateTarget();
-    }
+        this.private_UpdateTargetType();
 };
 CDrawingBoard.prototype.Get_BoardState = function()
 {
@@ -585,7 +580,7 @@ CDrawingBoard.prototype.Get_BoardAreaByPosition = function(X, Y, bShadow, bStone
 };
 CDrawingBoard.prototype.Show_Target = function()
 {
-    this.private_UpdateTarget();
+    this.private_UpdateTargetType();
 };
 CDrawingBoard.prototype.Remove_Mark = function(X, Y)
 {
@@ -662,7 +657,7 @@ CDrawingBoard.prototype.Set_Mode = function(eMode)
             this.m_oGameTree.Clear_TerritoryPoints();
 
         this.m_eMode = eMode;
-        this.private_UpdateTarget();
+        this.private_UpdateTargetType();
 
         if (EBoardMode.CountScores === eMode)
         {
@@ -1860,9 +1855,101 @@ CDrawingBoard.prototype.private_CreateShadows = function()
         }
     }
 };
-CDrawingBoard.prototype.private_UpdateTarget = function()
+CDrawingBoard.prototype.Update_Target = function()
 {
-    this.private_MoveTarget(this.m_oTarget.m_nLogicX, this.m_oTarget.m_nLogicY, global_mouseEvent, true);
+    this.private_UpdateTargetType();
+};
+CDrawingBoard.prototype.private_UpdateTargetType = function()
+{
+    var oPos = this.m_oTarget.Get_LogicPos();
+    var Y = oPos.Y;
+    var X = oPos.X;
+
+    if (false === this.private_IsPointInViewPort(X - 1, Y - 1))
+    {
+        this.m_oTarget.Hide();
+        return;
+    }
+
+    var eTargetType = EBoardTargetType.Unknown;
+    var Value = this.m_oLogicBoard.Get(X, Y);
+    switch (this.m_eMode)
+    {
+    case EBoardMode.Move:
+    {
+        if (BOARD_EMPTY === Value)
+        {
+            if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
+                eTargetType = EBoardTargetType.BlackStone;
+            else
+                eTargetType = EBoardTargetType.WhiteStone;
+        }
+
+        break;
+    }
+    case EBoardMode.CountScores:
+    {
+        if (BOARD_BLACK === Value)
+            eTargetType = EBoardTargetType.WhiteX;
+        else if (BOARD_WHITE === Value)
+            eTargetType = EBoardTargetType.BlackX;
+
+        break;
+    }
+    case EBoardMode.AddRemove:
+    {
+        if (BOARD_BLACK === Value)
+            eTargetType = EBoardTargetType.WhiteX;
+        else if (BOARD_WHITE === Value)
+            eTargetType = EBoardTargetType.BlackX;
+        else
+        {
+            if (global_mouseEvent.ShiftKey)
+                eTargetType = EBoardTargetType.WhiteStone;
+            else
+                eTargetType = EBoardTargetType.BlackStone;
+        }
+
+        break;
+    }
+    case EBoardMode.ScoreEstimate:
+    {
+        var ValueSE = this.m_oLogicBoard.Get_SE(X, Y);
+        if (BOARD_BLACK === ValueSE)
+            eTargetType = EBoardTargetType.WhiteX;
+        else if (BOARD_WHITE === ValueSE)
+            eTargetType = EBoardTargetType.BlackX;
+
+        break;
+    }
+    case EBoardMode.AddMarkColor:
+    {
+        if (global_mouseEvent.CtrlKey && !global_mouseEvent.ShiftKey)
+            eTargetType = EBoardTargetType.ColorR;
+        else if (!global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
+            eTargetType = EBoardTargetType.ColorG;
+        else if (global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
+            eTargetType = EBoardTargetType.ColorA;
+        else
+            eTargetType = EBoardTargetType.ColorB;
+
+        break;
+    }
+    default:
+    {
+        if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.private_GetSettings_DarkBoard()))
+            eTargetType = EBoardTargetType.WhiteX;
+        else
+            eTargetType = EBoardTargetType.BlackX;
+
+        break;
+    }
+    }
+
+    if (EBoardTargetType.Unknown == eTargetType)
+        this.m_oTarget.Hide();
+    else
+        this.m_oTarget.Set_Type(eTargetType);
 };
 CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
 {
@@ -1895,87 +1982,8 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
         this.m_oTarget.Show();
         this.m_oTarget.Set_Pos(_X, _Y);
 
-        var eTargetType = EBoardTargetType.Unknown;
-        var Value = this.m_oLogicBoard.Get(X, Y);
-        switch (this.m_eMode)
-        {
-        case EBoardMode.Move:
-        {
-            if (BOARD_EMPTY === Value)
-            {
-                if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
-                    eTargetType = EBoardTargetType.BlackStone;
-                else
-                    eTargetType = EBoardTargetType.WhiteStone;
-            }
-
-            break;
-        }
-        case EBoardMode.CountScores:
-        {
-            if (BOARD_BLACK === Value)
-                eTargetType = EBoardTargetType.WhiteX;
-            else if (BOARD_WHITE === Value)
-                eTargetType = EBoardTargetType.BlackX;
-
-            break;
-        }
-        case EBoardMode.AddRemove:
-        {
-            if (BOARD_BLACK === Value)
-                eTargetType = EBoardTargetType.WhiteX;
-            else if (BOARD_WHITE === Value)
-                eTargetType = EBoardTargetType.BlackX;
-            else
-            {
-                if (e.ShiftKey)
-                    eTargetType = EBoardTargetType.WhiteStone;
-                else
-                    eTargetType = EBoardTargetType.BlackStone;
-            }
-
-            break;
-        }
-        case EBoardMode.ScoreEstimate:
-        {
-            var ValueSE = this.m_oLogicBoard.Get_SE(X, Y);
-            if (BOARD_BLACK === ValueSE)
-                eTargetType = EBoardTargetType.WhiteX;
-            else if (BOARD_WHITE === ValueSE)
-                eTargetType = EBoardTargetType.BlackX;
-
-            break;
-        }
-        case EBoardMode.AddMarkColor:
-        {
-            if (global_mouseEvent.CtrlKey && !global_mouseEvent.ShiftKey)
-                eTargetType = EBoardTargetType.ColorR;
-            else if (!global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
-                eTargetType = EBoardTargetType.ColorG;
-            else if (global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
-                eTargetType = EBoardTargetType.ColorA;
-            else
-                eTargetType = EBoardTargetType.ColorB;
-
-            break;
-        }
-        default:
-        {
-            if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.private_GetSettings_DarkBoard()))
-                eTargetType = EBoardTargetType.WhiteX;
-            else
-                eTargetType = EBoardTargetType.BlackX;
-
-            break;
-        }
-        }
-
-        if (EBoardTargetType.Unknown == eTargetType)
-            this.m_oTarget.Hide();
-        else
-            this.m_oTarget.Set_Type(eTargetType);
+        this.private_UpdateTargetType();
     }
-
 
     // TODO: Обновление статус бара, когда он будет
 };
@@ -2647,7 +2655,7 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
         // Меняем текущий ход.
         var NextMove = BOARD_BLACK === this.m_oGameTree.Get_NextMove() ? BOARD_WHITE : BOARD_BLACK;
         this.m_oGameTree.Set_NextMove( NextMove );
-        this.private_UpdateTarget();
+        this.private_UpdateTargetType();
     }
     else if (true === event.CtrlKey)
     {
@@ -2930,7 +2938,7 @@ CDrawingBoard.prototype.private_ScoreEstimate = function(X, Y, event)
     if (this.m_oEventsCatcher)
         this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
     this.Draw_Marks();
-    this.private_UpdateTarget();
+    this.private_UpdateTargetType();
 };
 CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
 {
