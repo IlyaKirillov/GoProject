@@ -370,7 +370,6 @@ function CommonExtend(Child, Parent)
 var Common_RequestAnimationFrame = (window['requestAnimationFrame'] ? window['requestAnimationFrame'] : (function()
 {
     return window['webkitRequestAnimationFrame'] ||
-           window['mozRequestAnimationFrame']    ||
            window['oRequestAnimationFrame']      ||
            window['msRequestAnimationFrame']     ||
            function(callback)

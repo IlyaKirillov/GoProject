@@ -22,9 +22,14 @@ function CDrawingToolbar(oDrawing)
     this.m_oBColor = new CColor(217, 217, 217, 255);
 
     this.m_aControls = [];
+    this.m_aDrawingControls = [];
 }
 
-CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
+CDrawingToolbar.prototype.Add_Control = function(oControl, nW, nSpace, eAlign)
+{
+    this.m_aDrawingControls.push(new CDrawingToolbarItem(oControl, nW, nSpace, eAlign));
+};
+CDrawingToolbar.prototype.Init = function(sDivId, oGameTree)
 {
     this.m_oGameTree = oGameTree;
 
@@ -34,48 +39,30 @@ CDrawingToolbar.prototype.Init = function(sDivId, oGameTree, oSettings)
 
     oMainElement.style.backgroundColor = this.m_oBColor.ToString();
 
-    for (var Index = 0, Count = oSettings.Controls.length; Index < Count; Index++)
+    var nLeft  = 0;
+    var nRight = 0;
+    for (var nIndex = 0, nCount = this.m_aDrawingControls.length; nIndex < nCount; ++nIndex)
     {
-        var ControlType = oSettings.Controls[Index];
-        var oControl     = null;
-
-        switch (ControlType)
-        {
-            case EDrawingButtonType.BackwardToStart:
-            case EDrawingButtonType.Backward_5     :
-            case EDrawingButtonType.Backward       :
-            case EDrawingButtonType.Forward        :
-            case EDrawingButtonType.Forward_5      :
-            case EDrawingButtonType.ForwardToEnd   :
-            case EDrawingButtonType.NextVariant    :
-            case EDrawingButtonType.PrevVariant    :
-            case EDrawingButtonType.EditModeMove   :
-            case EDrawingButtonType.EditModeScores :
-            case EDrawingButtonType.EditModeAddRem :
-            case EDrawingButtonType.EditModeTr     :
-            case EDrawingButtonType.EditModeSq     :
-            case EDrawingButtonType.EditModeCr     :
-            case EDrawingButtonType.EditModeX      :
-            case EDrawingButtonType.EditModeText   :
-            case EDrawingButtonType.EditModeNum    :
-            case EDrawingButtonType.AutoPlay       :
-            case EDrawingButtonType.GameInfo       :
-            case EDrawingButtonType.Settings       :
-            case EDrawingButtonType.Pass           :
-            case EDrawingButtonType.About          :
-            case EDrawingButtonType.TabComments    :
-            case EDrawingButtonType.TabNavigator   :
-                oControl = new CDrawingButton(this.m_oDrawing);
-                break;
-        }
+        var oDrawingControl = this.m_aDrawingControls[nIndex];
+        var oControl        = oDrawingControl.Get_Control();
 
         if (null !== oControl)
         {
-            var sElementName = sDivId + Index;
+            var sElementName = sDivId + nIndex;
             this.private_CreateDivElement(oMainElement, sElementName);
-            this.private_FillHtmlElement(oMainControl, sElementName, Index / Count, (Index + 1) / Count);
 
-            oControl.Init(sElementName, oGameTree, ControlType);
+            if (EToolbarFloat.Left === oDrawingControl.Get_Align())
+            {
+                this.private_FillHtmlElement(oMainControl, sElementName, nLeft, oDrawingControl.Get_W(), true);
+                nLeft += oDrawingControl.Get_W() + oDrawingControl.Get_Space();
+            }
+            else
+            {
+                this.private_FillHtmlElement(oMainControl, sElementName, nRight, oDrawingControl.Get_W(), false);
+                nRight += oDrawingControl.Get_W() + oDrawingControl.Get_Space();
+            }
+
+            oControl.Init(sElementName, oGameTree);
 
             this.m_aControls.push(oControl);
         }
@@ -103,11 +90,21 @@ CDrawingToolbar.prototype.private_CreateDivElement = function(oParentElement, sN
     oParentElement.appendChild(oElement);
     return oElement;
 };
-CDrawingToolbar.prototype.private_FillHtmlElement = function(oParentControl, sName, nStart, nEnd)
+CDrawingToolbar.prototype.private_FillHtmlElement = function(oParentControl, sName, nDistance, nWidth, bLeftAlign)
 {
     var oControl = CreateControlContainer(sName);
-    oControl.Bounds.SetParams(nStart * 1000, 0, nEnd * 1000, 1000, false, false, false, false, -1,-1);
-    oControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+
+    if (bLeftAlign)
+    {
+        oControl.Bounds.SetParams(nDistance, 0, 0, 1000, true, false, false, false, nWidth, -1);
+        oControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    }
+    else
+    {
+        oControl.Bounds.SetParams(0, 0, nDistance, 1000, false, false, true, false, nWidth, -1);
+        oControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+    }
+
     oParentControl.AddControl(oControl);
 };
 
@@ -216,3 +213,21 @@ CDrawingNavigatorCommentsTabs.prototype.Select = function(oClass)
         this.m_oCommentsDiv.style.visibility  = "hidden";
     }
 };
+
+var EToolbarFloat =
+{
+    Left   : 1,
+    Right  : 2
+};
+
+function CDrawingToolbarItem(oControl, nW, nSpace, eAlign)
+{
+    this.m_oControl = oControl;
+    this.m_nW       = nW;
+    this.m_nSpace   = nSpace;
+    this.m_eAlign   = eAlign;
+}
+CDrawingToolbarItem.prototype.Get_Control = function(){return this.m_oControl;};
+CDrawingToolbarItem.prototype.Get_W = function(){return this.m_nW;};
+CDrawingToolbarItem.prototype.Get_Space = function(){return this.m_nSpace;};
+CDrawingToolbarItem.prototype.Get_Align = function(){return this.m_eAlign;};

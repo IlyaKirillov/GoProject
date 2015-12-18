@@ -66,3 +66,15 @@ CCommand.prototype.Get_Count = function() { return this.m_nCount; };
 CCommand.prototype.Set_Type  = function(Value) { this.m_nType  = Value; };
 CCommand.prototype.Set_Value = function(Value) { this.m_oValue = Value; };
 CCommand.prototype.Set_Count = function(Value) { this.m_nCount = Value; };
+CCommand.prototype.To_String = function()
+{
+    return JSON.stringify({Type : this.m_nType, Value : this.m_oValue, Count : this.m_nCount});
+};
+CCommand.prototype.From_String = function(sString)
+{
+    var oCommand = JSON.parse(sString);
+
+    this.m_nType  = oCommand.Type;
+    this.m_oValue = oCommand.Value;
+    this.m_nCount = oCommand.m_nCount;
+};

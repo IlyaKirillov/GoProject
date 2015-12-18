@@ -230,6 +230,26 @@ CGoBoardApi.prototype.Toggle_Rulers = function (oGameTree)
         oGameTree.Toggle_Rulers();
 };
 
+/**
+ * Выставляем Handler для обработки изменений GameTree.
+ * Функции:
+ * Handler.GoTo_Node(NodeId)
+ */
+CGoBoardApi.prototype.Set_GameTreeHandler = function(oGameTree, oHandler)
+{
+    if (oGameTree && oHandler)
+        oGameTree.Set_Handler(oHandler);
+};
+
+/**
+ * Переход к ноде по заданному Id ноды
+ */
+CGoBoardApi.prototype.GoTo_Node = function(oGameTree, sNodeId)
+{
+    if (oGameTree)
+        oGameTree.GoTo_NodeById(sNodeId);
+};
+
 window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
@@ -250,3 +270,5 @@ CGoBoardApi.prototype['Focus']                                = CGoBoardApi.prot
 CGoBoardApi.prototype['Get_MatchName']                        = CGoBoardApi.prototype.Get_MatchName;
 CGoBoardApi.prototype['Get_Version']                          = CGoBoardApi.prototype.Get_Version;
 CGoBoardApi.prototype['Toggle_Rulers']                        = CGoBoardApi.prototype.Toggle_Rulers;
+CGoBoardApi.prototype['Set_GameTreeHandler']                  = CGoBoardApi.prototype.Set_GameTreeHandler;
+CGoBoardApi.prototype['GoTo_Node']                            = CGoBoardApi.prototype.GoTo_Node;

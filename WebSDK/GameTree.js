@@ -97,6 +97,8 @@ function CGameTree(Drawing)
     this.m_pTutorResetCallback = null;
 
     this.m_nGifId              = null;
+
+    this.m_oHandler            = null;
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -466,13 +468,16 @@ CGameTree.prototype.Step_Backward = function(Count)
     }
 
     this.GoTo_Node(ParentNode);
-}
+};
 CGameTree.prototype.Step_Forward = function(Count, bForce)
 {
     if (1 === Count)
     {
         if (!this.GoTo_Next(bForce))
             return;
+
+        if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
+            this.m_oHandler["GoTo_Node"](this.Get_CurNode().Get_Id());
 
         this.Execute_CurNodeCommands();
     }
@@ -618,7 +623,10 @@ CGameTree.prototype.Get_CurNode = function()
 };
 CGameTree.prototype.Set_CurNode = function(oNode)
 {
-    return this.m_oCurNode = oNode;
+    if (this.m_oHandler && this.m_oHandler.Set_CurNode)
+        this.m_oHandler.Set_CurNode(oNode.Get_Id());
+
+    this.m_oCurNode = oNode;
 };
 CGameTree.prototype.Add_Move = function(X, Y, Value)
 {
@@ -630,9 +638,12 @@ CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
         return false;
 
     var oNewNode = new CNode(this);
+    if (this.m_oHandler && this.m_oHandler.Add_NewNode)
+        this.m_oHandler.Add_NewNode(oNode.Get_Id());
+
     oNewNode.Set_Prev(this.m_oCurNode);
     this.m_oCurNode.Add_Next(oNewNode, bSetCur);
-    this.m_oCurNode = oNewNode;
+    this.Set_CurNode(oNewNode);
     this.m_nCurNodeDepth++;
 
     if (true === bUpdateNavigator && this.m_oDrawingNavigator)
@@ -658,7 +669,7 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
             var OldNextCur = this.m_oCurNode.Get_NextCur();
 
             this.m_oCurNode.Set_NextCur(Index);
-            this.m_oCurNode = oNode;
+            this.Set_CurNode(oNode);
             this.m_nCurNodeDepth++;
 
             if (this.m_oDrawingNavigator && OldNextCur !== Index)
@@ -789,7 +800,7 @@ CGameTree.prototype.Remove_CurNode = function()
         if (this.m_oCurNode === PrevNode.Get_Next(Index))
         {
             PrevNode.Remove_Next(Index);
-            this.m_oCurNode = PrevNode;
+            this.Set_CurNode(PrevNode);
 
             // Перестраиваем визуальное дерево вариантов
             if (this.m_oDrawingNavigator)
@@ -1140,7 +1151,7 @@ CGameTree.prototype.GoTo_Next = function(bForce)
     if (0 === this.m_oCurNode.Get_NextsCount() || -1 === this.m_oCurNode.Get_NextCur())
         return false;
 
-    this.m_oCurNode = this.m_oCurNode.Get_Next(this.m_oCurNode.Get_NextCur());
+    this.Set_CurNode(this.m_oCurNode.Get_Next(this.m_oCurNode.Get_NextCur()));
     this.m_nCurNodeDepth++;
 
     return true;
@@ -1173,6 +1184,9 @@ CGameTree.prototype.GoTo_Node = function(Node, bForce)
     if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE) && true !== bForce)
         return;
 
+    if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
+        this.m_oHandler["GoTo_Node"](Node.Get_Id());
+
     this.Stop_AutoPlay();
 
     this.Init_Match();
@@ -1185,7 +1199,7 @@ CGameTree.prototype.GoTo_Node = function(Node, bForce)
     // Делаем вариант с данной нодой текущим
     var bUpdateNavigator = Node.Make_ThisNodeCurrent();
 
-    this.m_oCurNode = this.m_oFirstNode;
+    this.Set_CurNode(this.m_oFirstNode);
     while (this.m_oCurNode != Node && this.m_oCurNode.Get_NextsCount() > 0)
     {
         // Выполняем на данной ноде только следующие команды:
@@ -1543,7 +1557,7 @@ CGameTree.prototype.Set_BoardSize = function(_W, _H)
 };
 CGameTree.prototype.Init_Match = function()
 {
-    this.m_oCurNode      = this.m_oFirstNode;
+    this.Set_CurNode(this.m_oFirstNode);
     this.m_nBlackCapt    = 0;
     this.m_nWhiteCapt    = 0;
     this.m_nMovesCount   = 0;
@@ -2139,7 +2153,7 @@ CGameTree.prototype.GoTo_MoveReference = function(sReference)
     {
         var bUserVariant = oReader.Get_Byte();
 
-        this.m_oCurNode = oNode;
+        this.Set_CurNode(oNode);
 
         if (0x01 === bUserVariant)
         {
@@ -2236,4 +2250,20 @@ CGameTree.prototype.Toggle_Rulers = function()
     {
         this.m_oDrawingBoard.Set_Rulers(!this.m_oDrawingBoard.Get_Rulers());
     }
-}
+};
+CGameTree.prototype.Set_Handler = function(oHandler)
+{
+    this.m_oHandler = oHandler;
+};
+CGameTree.prototype.Get_Handler = function()
+{
+    return this.m_oHandler;
+};
+CGameTree.prototype.GoTo_NodeById = function(sNodeId)
+{
+    var oFirstNode = this.Get_FirstNode();
+    var oNode = oFirstNode.Get_NodeById(sNodeId);
+
+    if (null !== oNode)
+        this.GoTo_Node(oNode);
+};

@@ -106,7 +106,7 @@ function CDrawingBoard(oDrawing)
         LinkedControls : []          // Контролы, которые нужно ресайзить из-за внутренних изменений доски
     };
 
-    this.m_oLastTargetPos = { X : -1, Y : -1 };
+    this.m_oTarget = new CBoardTarget(this.m_oImageData);
     this.m_oColorMarks = {};
 
     this.m_oMarks = {};
@@ -279,6 +279,7 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     var sMarksName    = sName + "_MarksCanvas";
     var sTargetName   = sName + "_TargetCanvas";
     var sSelectName   = sName + "_SelectCanvas";
+    var sCursorName   = sName + "_CursorCanvas";
     var sEventName    = sName + "_EventDiv";
 
     // Сначала заполняем Div нужными нам элементами
@@ -291,8 +292,10 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     this.private_CreateCanvasElement(oElement, sMarksName);
     this.private_CreateCanvasElement(oElement, sSelectName);
     this.private_CreateCanvasElement(oElement, sTargetName);
+    this.private_CreateDivElement(oElement, sCursorName);
     var oEventDiv = this.private_CreateDivElement(oElement, sEventName);
 
+    this.m_oTarget.Init(sCursorName);
     // Теперь выставляем настройки для созданных элементов. Для CDrawingBoard все внутренние элементы будут
     // растягиваться по ширине Div, в которой они лежат.
     var oControl = this.HtmlElement.Control;
@@ -518,7 +521,7 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
 
     this.m_oBoardPosition[Common_XYtoValue(X, Y)] = Value;
 
-    if (X === this.m_oLastTargetPos.X && Y === this.m_oLastTargetPos.Y)
+    if (true === this.m_oTarget.Check_XY(X, Y))
     {
         if (BOARD_BLACK === Value || BOARD_WHITE === Value)
             this.private_HideTarget();
@@ -1420,6 +1423,7 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
 
     var d = Math.floor(DWidth / 2) * 2 + 1;
     this.m_oImageData.StoneDiam = d;
+    this.m_oTarget.Update_Size(d);
 
     this.m_oImageData.BlackStone  = StonesCanvas.createImageData(d, d);
     this.m_oImageData.WhiteStone  = StonesCanvas.createImageData(d, d);
@@ -1858,13 +1862,13 @@ CDrawingBoard.prototype.private_CreateShadows = function()
 };
 CDrawingBoard.prototype.private_UpdateTarget = function()
 {
-    this.private_MoveTarget(this.m_oLastTargetPos.X, this.m_oLastTargetPos.Y, global_mouseEvent, true);
+    this.private_MoveTarget(this.m_oTarget.m_nLogicX, this.m_oTarget.m_nLogicY, global_mouseEvent, true);
 };
 CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
 {
-    if (-1 === X || -1 === Y || 0 === X || 0 === Y)
+    if (false === this.private_IsPointInViewPort(X - 1, Y - 1))
     {
-        this.private_HideTarget();
+        this.m_oTarget.Hide();
         return;
     }
 
@@ -1874,119 +1878,110 @@ CDrawingBoard.prototype.private_MoveTarget = function(X, Y, e, bForce)
     if (undefined === bForce)
         bForce = false;
 
-    if (X !== this.m_oLastTargetPos.X || Y !== this.m_oLastTargetPos.Y || true === bForce)
+    if (false === this.m_oTarget.Check_LogicPos(X, Y, bForce))
     {
-        this.m_oLastTargetPos.X = X;
-        this.m_oLastTargetPos.Y = Y;
-
         if (EBoardMode.AddMarkColor === this.m_eMode && this.m_bMouseDown && !bForce)
         {
             this.private_AddColorMark(X, Y, e);
         }
 
-        var W = this.m_oImageData.W;
-        var H = this.m_oImageData.H;
+        var d = this.m_oImageData.StoneDiam;
+        var Rad = (d - 1) / 2;
+        var Lines = this.m_oImageData.Lines;
 
-        var TargetCanvas = this.HtmlElement.Target.Control.HtmlElement.getContext("2d");
-        TargetCanvas.clearRect(0, 0, W, H);
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
 
-        if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
+        this.m_oTarget.Show();
+        this.m_oTarget.Set_Pos(_X, _Y);
+
+        var eTargetType = EBoardTargetType.Unknown;
+        var Value = this.m_oLogicBoard.Get(X, Y);
+        switch (this.m_eMode)
         {
-            var d = this.m_oImageData.StoneDiam;
-            var Rad = (d - 1) / 2;
-            var Lines = this.m_oImageData.Lines;
-
-            var _X = Lines[X - 1].X - Rad;
-            var _Y = Lines[Y - 1].Y - Rad;
-
-            var Value = this.m_oLogicBoard.Get(X, Y);
-            switch (this.m_eMode)
+        case EBoardMode.Move:
+        {
+            if (BOARD_EMPTY === Value)
             {
-                case EBoardMode.Move:
-                {
-                    if (BOARD_EMPTY === Value)
-                    {
-                        if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
-                            TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
-                        else
-                            TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
-                    }
-
-                    break;
-                }
-                case EBoardMode.CountScores:
-                {
-                    if (BOARD_BLACK === Value)
-                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                    else if (BOARD_WHITE === Value)
-                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
-
-                    break;
-                }
-                case EBoardMode.AddRemove:
-                {
-                    if (BOARD_BLACK === Value)
-                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                    else if (BOARD_WHITE === Value)
-                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
-                    else
-                    {
-                        if (e.ShiftKey)
-                            TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, _X, _Y);
-                        else
-                            TargetCanvas.putImageData(this.m_oImageData.BlackTarget, _X, _Y);
-                    }
-
-                    break;
-                }
-                case EBoardMode.ScoreEstimate:
-                {
-                    var ValueSE = this.m_oLogicBoard.Get_SE(X, Y);
-                    if (BOARD_BLACK === ValueSE)
-                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                    else if (BOARD_WHITE === ValueSE)
-                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
-
-                    break;
-                }
-                case EBoardMode.AddMarkColor:
-                {
-                    if (global_mouseEvent.CtrlKey && !global_mouseEvent.ShiftKey)
-                        TargetCanvas.putImageData(this.m_oImageData.RcolorTarget, _X, _Y);
-                    else if (!global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
-                        TargetCanvas.putImageData(this.m_oImageData.GcolorTarget, _X, _Y);
-                    else if (global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
-                        TargetCanvas.putImageData(this.m_oImageData.AcolorTarget, _X, _Y);
-                    else
-                        TargetCanvas.putImageData(this.m_oImageData.BcolorTarget, _X, _Y);
-
-                    break;
-                }
-                default:
-                {
-                    if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.private_GetSettings_DarkBoard()))
-                        TargetCanvas.putImageData(this.m_oImageData.X_White, _X, _Y);
-                    else
-                        TargetCanvas.putImageData(this.m_oImageData.X_Black, _X, _Y);
-
-                    break;
-                }
+                if (BOARD_BLACK === this.m_oGameTree.Get_NextMove())
+                    eTargetType = EBoardTargetType.BlackStone;
+                else
+                    eTargetType = EBoardTargetType.WhiteStone;
             }
+
+            break;
         }
+        case EBoardMode.CountScores:
+        {
+            if (BOARD_BLACK === Value)
+                eTargetType = EBoardTargetType.WhiteX;
+            else if (BOARD_WHITE === Value)
+                eTargetType = EBoardTargetType.BlackX;
+
+            break;
+        }
+        case EBoardMode.AddRemove:
+        {
+            if (BOARD_BLACK === Value)
+                eTargetType = EBoardTargetType.WhiteX;
+            else if (BOARD_WHITE === Value)
+                eTargetType = EBoardTargetType.BlackX;
+            else
+            {
+                if (e.ShiftKey)
+                    eTargetType = EBoardTargetType.WhiteStone;
+                else
+                    eTargetType = EBoardTargetType.BlackStone;
+            }
+
+            break;
+        }
+        case EBoardMode.ScoreEstimate:
+        {
+            var ValueSE = this.m_oLogicBoard.Get_SE(X, Y);
+            if (BOARD_BLACK === ValueSE)
+                eTargetType = EBoardTargetType.WhiteX;
+            else if (BOARD_WHITE === ValueSE)
+                eTargetType = EBoardTargetType.BlackX;
+
+            break;
+        }
+        case EBoardMode.AddMarkColor:
+        {
+            if (global_mouseEvent.CtrlKey && !global_mouseEvent.ShiftKey)
+                eTargetType = EBoardTargetType.ColorR;
+            else if (!global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
+                eTargetType = EBoardTargetType.ColorG;
+            else if (global_mouseEvent.CtrlKey && global_mouseEvent.ShiftKey)
+                eTargetType = EBoardTargetType.ColorA;
+            else
+                eTargetType = EBoardTargetType.ColorB;
+
+            break;
+        }
+        default:
+        {
+            if (BOARD_BLACK === Value || (BOARD_EMPTY === Value && true === this.private_GetSettings_DarkBoard()))
+                eTargetType = EBoardTargetType.WhiteX;
+            else
+                eTargetType = EBoardTargetType.BlackX;
+
+            break;
+        }
+        }
+
+        if (EBoardTargetType.Unknown == eTargetType)
+            this.m_oTarget.Hide();
+        else
+            this.m_oTarget.Set_Type(eTargetType);
     }
+
 
     // TODO: Обновление статус бара, когда он будет
 };
 CDrawingBoard.prototype.private_HideTarget = function()
 {
-    var W = this.m_oImageData.W;
-    var H = this.m_oImageData.H;
-
-    var TargetCanvas = this.HtmlElement.Target.Control.HtmlElement.getContext("2d");
-    TargetCanvas.clearRect(0, 0, W, H);
-
-    this.m_oLastTargetPos.X = -1;
-    this.m_oLastTargetPos.Y = -1;
+    this.m_oTarget.Hide();
 };
 CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
 {

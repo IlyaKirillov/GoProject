@@ -554,7 +554,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     this.private_CreateDiv(oTools2Element, sAutoPlayButton);
     this.private_CreateDiv(oTools2Element, sAutoPlaySlider);
 
-    var ToolbarH = 25;
+    var ToolbarH = 36;
     var InfoH    = 50;
 
     // INFO
@@ -591,7 +591,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     oCaTControl.AddControl(oCommentsControl);
 
     var oToolsControl = CreateControlContainer(sToolsDivId);
-    oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 3, false, false, false, true, -1, ToolbarH);
+    oToolsControl.Bounds.SetParams(6, 0, 6, ToolbarH * 3, true, false, true, true, -1, ToolbarH);
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oToolsControl);
 
@@ -620,14 +620,28 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oToolsControl);
 
-    var oDrawingComents = new CDrawingComments(this);
-    oDrawingComents.Init(sCommentsDivId, oGameTree);
+    var oDrawingComments = new CDrawingComments(this);
+    oDrawingComments.Init(sCommentsDivId, oGameTree);
 
     var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant]});
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForwardToEnd(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonPass(this), 73, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonNextVariant(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonPrevVariant(this), 36, 1, EToolbarFloat.Left);
 
-    var oDrawingToolbar2 = new CDrawingToolbar(this);
-    oDrawingToolbar2.Init(sToolsDivId2, oGameTree, {Controls : [EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings, EDrawingButtonType.About]});
+    // TODO: Поменять кнопку
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeMove(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonGameInfo(this), 36, 1, EToolbarFloat.Left);
+
+    oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Right);
+    oDrawingToolbar.Add_Control(new CDrawingButtonSettings(this), 36, 1, EToolbarFloat.Right);
+
+    oDrawingToolbar.Init(sToolsDivId, oGameTree);
 
 
     var oDrawingTimeLineSlider = new CDrawingSlider(this);
@@ -641,9 +655,8 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
 
     this.m_aElements.push(oDrawingBoard);
     this.m_aElements.push(oDrawingNavigator);
-    this.m_aElements.push(oDrawingComents);
+    this.m_aElements.push(oDrawingComments);
     this.m_aElements.push(oDrawingToolbar);
-    this.m_aElements.push(oDrawingToolbar2);
     this.m_aElements.push(oDrawingTimeLineSlider);
     this.m_aElements.push(oDrawingAutoPlayButton);
     this.m_aElements.push(oDrawingAutoPlaySlider);
@@ -718,7 +731,7 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     //------------------------------------------------------------------------------------------------------------------
     // Контрол под доской тоже делим на 2 части: сверху 25px под кнопки, а снизу все остальное под навигатор.
     //------------------------------------------------------------------------------------------------------------------
-    var ToolbarH = 25;
+    var ToolbarH = 36;
     var sToolbarDivId = sNotBoardDivId + "T";
     this.private_CreateDiv(oNotBoardControl.HtmlElement, sToolbarDivId);
     var oToolsControl = CreateControlContainer(sToolbarDivId);

@@ -30,17 +30,18 @@ function CDrawingSlider(oDrawing)
         Slider  : null
     };
 
-    this.m_oBackColor   = new CColor(217, 217, 217, 255);
-    this.m_oLeftColor   = new CColor( 54, 101, 179, 255);
-    this.m_oRightColor  = new CColor(140, 140, 140, 255);
-    this.m_oSliderColor = new CColor(  0,   0,   0, 255);
+    this.m_oBackColor        = new CColor(217, 217, 217, 255);
+    this.m_oLeftColor        = new CColor( 80,  80,  80, 255);
+    this.m_oRightColor       = new CColor(190, 190, 190, 255);
+    this.m_oSliderColor      = new CColor( 80,  80,  80, 255);
+    this.m_oSliderFocusColor = new CColor(130, 130, 130, 255);
 
     this.m_nW    = 0;
     this.m_dPos  = 0;
     this.m_nSize = 0;
 
-    this.m_nOffsetY = 7;
-    this.m_nOffsetX = 10;
+    this.m_nOffsetY = 17;
+    this.m_nOffsetX = 17;
 
     this.m_bPosLock = false;
 
@@ -95,21 +96,31 @@ CDrawingSlider.prototype.Init = function(sDivId, oGameTree, nSliderType, dPos)
     var sRightId  = sDivId + "_Right";
     var sSliderId = sDivId + "_Slider";
 
-    this.HtmlElement.Left   = this.private_CreateDivElement(oDivElement, sLeftId);
     this.HtmlElement.Right  = this.private_CreateDivElement(oDivElement, sRightId);
+    this.HtmlElement.Left   = this.private_CreateDivElement(oDivElement, sLeftId);
     this.HtmlElement.Slider = this.private_CreateDivElement(oDivElement, sSliderId);
+
+    var oThis = this;
+    this.HtmlElement.Slider.onmouseover = function()
+    {
+        this.style.backgroundColor = oThis.m_oSliderFocusColor.ToString();
+    };
+    this.HtmlElement.Slider.onmouseout = function()
+    {
+        this.style.backgroundColor = oThis.m_oSliderColor.ToString();
+    };
+
+    var oRightControl = CreateControlContainer(sRightId);
+    oRightControl.Bounds.SetParams(this.m_nOffsetX, this.m_nOffsetY - 1, this.m_nOffsetX, this.m_nOffsetY - 1, true, true, true, true, -1,-1);
+    oRightControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    this.HtmlElement.Control.AddControl(oRightControl);
+    oRightControl.HtmlElement.style.background = this.m_oRightColor.ToString();
 
     var oLeftControl = CreateControlContainer(sLeftId);
     oLeftControl.Bounds.SetParams(this.m_nOffsetX, this.m_nOffsetY, 500, this.m_nOffsetY, true, true, false, true, -1, -1);
     oLeftControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     this.HtmlElement.Control.AddControl(oLeftControl);
     oLeftControl.HtmlElement.style.background = this.m_oLeftColor.ToString();
-
-    var oRightControl = CreateControlContainer(sRightId);
-    oRightControl.Bounds.SetParams(500, this.m_nOffsetY, this.m_nOffsetX, this.m_nOffsetY, false, true, true, true, -1,-1);
-    oRightControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
-    this.HtmlElement.Control.AddControl(oRightControl);
-    oRightControl.HtmlElement.style.background = this.m_oRightColor.ToString();
 
     this.Update_Size();
     this.private_UpdatePos(dPos);
@@ -135,30 +146,51 @@ CDrawingSlider.prototype.Update_Pos = function(dPos)
 };
 CDrawingSlider.prototype.private_OnResize = function(W, H)
 {
-    var Size = H - 2 * this.m_nOffsetY;
-    this.m_nSize = Size;
+    var nSizeH = 12;
+    var nSizeW = 32;
+
+    switch(this.m_nType)
+    {
+    case EDrawingSliderType.AutoPlaySpeed:
+    {
+        nSizeW = 45;
+        break;
+    }
+    case EDrawingSliderType.Timeline     :
+    {
+        nSizeW = 32;
+        break;
+    }
+    }
+
+    this.m_nSize = nSizeW;
 
     var oSlider = this.HtmlElement.Slider;
 
-    oSlider.style.width           = Size + "px";
-    oSlider.style.height          = Size + "px";
+    oSlider.style.width           = nSizeW + "px";
+    oSlider.style.height          = nSizeH + "px";
     oSlider.style.display         = "block";
     oSlider.style.position        = "absolute";
     oSlider.style.backgroundColor = this.m_oSliderColor.ToString();
-    oSlider.style.top             = this.m_nOffsetY + "px";
+    oSlider.style.top             = (this.m_nOffsetY - 5) + "px";
     oSlider.style.left            = this.m_nOffsetX + "px";
+    oSlider.style.borderRadius    = "5px";
 
-    Common_DragHandler.Init(oSlider, null, this.m_nOffsetX, W - this.m_nOffsetX - Size, this.m_nOffsetY, this.m_nOffsetY);
+    Common_DragHandler.Init(oSlider, null, this.m_nOffsetX, W - this.m_nOffsetX - nSizeW, this.m_nOffsetY - 5, this.m_nOffsetY - 5);
 
     oSlider.onDrag      = this.private_OnDrag;
     oSlider.onDragStart = this.private_OnDragStart;
     oSlider.onDragEnd   = this.private_OnDragEnd;
 
-    var oLeft = this.HtmlElement.Left;
-    oLeft.style.fontSize = Size + "px";
-    oLeft.style.color = "rgb(255,255,255)";
-    oLeft.style.textOverflow = "clip";
-    oLeft.style.overflow = "hidden";
+    var oSlider = this.HtmlElement.Slider;
+    oSlider.style.fontSize = nSizeH + "px";
+    oSlider.style.color = "rgb(255,255,255)";
+    oSlider.style.textOverflow = "clip";
+    oSlider.style.overflow = "hidden";
+    oSlider.style.textAlign = "center";
+    oSlider.style.cursor = "default";
+    oSlider.style.transitionProperty = "background";
+    oSlider.style.transitionDuration = "0.25s";
 };
 CDrawingSlider.prototype.private_CreateDivElement = function(oParentElement, sName)
 {
@@ -175,8 +207,6 @@ CDrawingSlider.prototype.private_UpdatePos = function(dPos, bUpdateSliderPos)
 
     var X = this.m_dPos * this.m_nW;
     this.HtmlElement.Left.style.width  = X + "px";
-    this.HtmlElement.Right.style.left  = X + this.m_nOffsetX + "px";
-    this.HtmlElement.Right.style.width = (this.m_nW - X) + "px";
 
     if (false !== bUpdateSliderPos)
     {
@@ -198,11 +228,11 @@ CDrawingSlider.prototype.private_HandleOnChange = function(bEnd)
             if (!bEnd)
             {
                 var dSeconds = (((this.m_oGameTree.Get_AutoPlayInterval() / 1000) * 1000) | 0) / 1000;
-                Common.Set_InnerTextToElement(this.HtmlElement.Left, dSeconds + " seconds for move");
+                Common.Set_InnerTextToElement(this.HtmlElement.Slider, dSeconds + " s");
             }
             else
             {
-                Common.Set_InnerTextToElement(this.HtmlElement.Left, "");
+                Common.Set_InnerTextToElement(this.HtmlElement.Slider, "");
             }
 
             break;

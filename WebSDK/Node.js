@@ -23,9 +23,11 @@ CNodeIdCounter.prototype.Reset = function()
 
 var g_oIdCounter = new CNodeIdCounter();
 
-function CNode()
+function CNode(oGameTree)
 {
     this.m_sId        = g_oIdCounter.Get_NextId();
+    this.m_oGameTree  = oGameTree;
+    this.m_oHandler   = oGameTree ? oGameTree.Get_Handler() : null;
     this.m_aNext      = [];                        // Массив следующих нод
     this.m_nNextCur   = -1;                        // Номер текущей следующей ноды
     this.m_oPrev      = null;                      // Родительская нода
@@ -134,6 +136,7 @@ CNode.prototype.Set_Prev = function(Node)
 CNode.prototype.Add_Command = function(Command)
 {
     this.m_aCommands.push(Command);
+    this.ToHandler_AddCommand(Command);
 };
 CNode.prototype.Get_Command = function(Index)
 {
@@ -479,4 +482,36 @@ CNode.prototype.Make_CurrentVariantMainly = function()
         nCurNext  = oCurNode.Get_NextCur();
         oNextNode = oCurNode.Get_Next(nCurNext);
     }
+};
+//----------------------------------------------------------------------------------------------------------------------
+// Функции, которые приходят из вне
+//----------------------------------------------------------------------------------------------------------------------
+CNode.prototype.ToHandler_AddCommand = function()
+{
+    if (this.m_oHandler && this.m_oHandler.Add_NodeCommand)
+        this.m_oHandler.Add_NodeCommand(this.Get_Id(), Command.To_String());
+};
+CNode.prototype.FromHandler_AddCommand = function(sCommand)
+{
+    var oCommand = new CCommand();
+    oCommand.From_String(sCommand);
+
+    this.m_aCommands.push(oCommand);
+};
+CNode.prototype.ToHandler_UpdateNexts = function()
+{
+    if (!(this.m_oHandler && this.m_oHandler.Update_NodeNexts))
+        return;
+
+    var aNext = [];
+    for (var nPos = 0, nCount = this.m_aNext.length; nPos < nCount; ++nPos)
+    {
+        aNext.push(this.m_aNext[nPos].Get_Id());
+    }
+
+    this.m_oHandler.Update_NodeNexts(this.Get_Id(), aNext);
+};
+CNode.prototype.FromHandler_UpdateNexts = function(aNext)
+{
+
 };
