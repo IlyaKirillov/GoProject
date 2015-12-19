@@ -328,6 +328,8 @@ function CDrawing(oGameTree)
     this.m_oAutoPlayButton = null;
     this.m_oAutoPlaySlider = null;
 
+    this.m_oSelectBoardModeButton = null;
+
     this.m_oBlackInfo      = null;
     this.m_oWhiteInfo      = null;
 
@@ -342,7 +344,11 @@ function CDrawing(oGameTree)
     this.m_nMixedRightSide     = 400;
     this.m_nMixedBotSize       = 200;
 
-
+    this.private_OnMainDivClick = function()
+    {
+        if (oThis.m_oSelectBoardModeButton)
+            oThis.m_oSelectBoardModeButton.Hide_Toolbar();
+    };
     this.private_OnTimerDraw = function()
     {
         Common_RequestAnimationFrame(oThis.private_OnTimerDraw);
@@ -953,6 +959,7 @@ CDrawing.prototype.private_SetMainDiv = function(sDivId, oMainControl)
     this.m_oMainControl = oMainControl;
 
     this.m_oMainDiv.style.background = "url(\'" + g_sBackground + "\')";
+    this.m_oMainDiv.onclick = this.private_OnMainDivClick;
 };
 CDrawing.prototype.private_ClearMainDiv = function()
 {
@@ -1121,6 +1128,10 @@ CDrawing.prototype.Register_AutoPlayButton = function(oAutoPlayButton)
 {
     this.m_oAutoPlayButton = oAutoPlayButton;
 };
+CDrawing.prototype.Register_SelectBoardModeButton = function(oButton)
+{
+    this.m_oSelectBoardModeButton = oButton;
+};
 CDrawing.prototype.On_StartAutoPlay = function()
 {
     if (this.m_oAutoPlayButton)
@@ -1242,6 +1253,9 @@ CDrawing.prototype.Update_InterfaceState = function(oIState)
     // TimeLine
     if (this.m_oTimeLine)
         this.m_oTimeLine.Update_Pos(oIState.TimelinePos);
+
+    if (this.m_oSelectBoardModeButton)
+        this.m_oSelectBoardModeButton.On_UpdateBoardMode(oIState.BoardMode);
 
     this.Update_ColorsCounter();
 };

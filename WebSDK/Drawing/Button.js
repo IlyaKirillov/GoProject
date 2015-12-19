@@ -237,20 +237,6 @@ CDrawingButtonBase.prototype.private_OnResize = function()
     this.m_oImageData.Disabled = this.private_Draw(this.m_oDisabledBColor, this.m_oDisabledFColor, W, H, true);
     this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H, false, true);
 
-    var oDivElement = this.HtmlElement.Control.HtmlElement;
-
-    var oHead  = document.getElementsByTagName('head')[0];
-    var oStyle = document.createElement('style');
-    var oRules = document.createTextNode('a#my_link:hover{color:#ff0000 !important;}');
-
-    oStyle.type = 'text/css';
-    if (oStyle.styleSheet)
-        oStyle.styleSheet.cssText = oRules.nodeValue;
-    else
-        oStyle.appendChild(oRules);
-
-    oHead.appendChild(oStyle);
-
     this.private_UpdateState();
 };
 CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H, bDisabled, bSelected)
@@ -272,7 +258,7 @@ CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H,
 
     this.private_DrawOnCanvas(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor);
 
-    if (true === bSelected)
+    if (true === bSelected && !(this instanceof CDrawingButtonClose || this instanceof CDrawingButtonOK || this instanceof CDrawingButtonCancel))
     {
         Canvas.beginPath();
         Canvas.lineWidth = 1;
@@ -1538,8 +1524,9 @@ function CDrawingButtonBoardMode(oDrawing)
 
     var oMainDiv = oDrawing.Get_MainDiv();
 
-    this.m_nWidth = 2 + 36 * 9 + (9 - 1);
-    this.m_nHeight = 40;
+    var nButtonsCount = 10;
+    this.m_nWidth = 2 + 36 * nButtonsCount + (nButtonsCount - 1);
+    this.m_nHeight = 38;
 
     var oToolbarElementWrapper = document.createElement("div");
     oToolbarElementWrapper.id               = oMainDiv.id + "ButtonBoardModeToolbarWrapper";
@@ -1550,8 +1537,10 @@ function CDrawingButtonBoardMode(oDrawing)
     oToolbarElementWrapper.style.height     = this.m_nHeight + "px";
     oToolbarElementWrapper.style.background = "rgb(217, 217, 217)";
     oToolbarElementWrapper.style.display    = "block";
-    oToolbarElementWrapper.style.border     = "1px solid #505050";
+    oToolbarElementWrapper.style.border     = "1px solid rgb(166, 166, 166)";
     oToolbarElementWrapper.style.boxShadow  = "0px 1px 15px rgba(0,0,0,0.8)";
+    oToolbarElementWrapper.style.opacity    = 0;
+    oToolbarElementWrapper.style.overflowY  = "hidden";
     oToolbarElementWrapper.onclick          = function()
     {
         oToolbarElementWrapper.style.display = "none";
@@ -1567,22 +1556,70 @@ function CDrawingButtonBoardMode(oDrawing)
     oToolbarElement.style.bottom     = "1px";
     oToolbarElementWrapper.appendChild(oToolbarElement);
 
+    this.m_oButtonMove   = new CDrawingButtonEditModeMove(oDrawing);
+    this.m_oButtonScores = new CDrawingButtonEditModeScores(oDrawing);
+    this.m_oButtonAddRem = new CDrawingButtonEditModeAddRem(oDrawing);
+    this.m_oButtonTr     = new CDrawingButtonEditModeTr(oDrawing);
+    this.m_oButtonSq     = new CDrawingButtonEditModeSq(oDrawing);
+    this.m_oButtonCr     = new CDrawingButtonEditModeCr(oDrawing);
+    this.m_oButtonX      = new CDrawingButtonEditModeX(oDrawing);
+    this.m_oButtonText   = new CDrawingButtonEditModeText(oDrawing);
+    this.m_oButtonNum    = new CDrawingButtonEditModeNum(oDrawing);
+    this.m_oButtonColor  = new CDrawingButtonEditModeNum(oDrawing);
+
     var oDrawingToolbar = new CDrawingToolbar(oDrawing);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeMove(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeScores(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeAddRem(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeTr(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeSq(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeCr(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeX(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeText(oDrawing), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeNum(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonMove, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonScores, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonAddRem, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonTr, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonSq, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonCr, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonX, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonText, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonNum, 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(this.m_oButtonColor, 36, 1, EToolbarFloat.Left);
     oDrawingToolbar.Init(oToolbarElement.id, oDrawing.Get_GameTree());
     oDrawingToolbar.Update_Size();
 
     oToolbarElementWrapper.style.display    = "none";
     this.m_oToolbarElement = oToolbarElementWrapper;
+    this.m_nTransitionId   = null;
+    this.m_nTop            = 0;
+
+    oToolbarElementWrapper.style.transitionProperty       = "opacity,top,height";
+    oToolbarElementWrapper.style.transitionDuration       = "1s";
+    oToolbarElementWrapper.style.transitionTimingFunction = "cubic-bezier(0,0,0,1)";
+    oToolbarElementWrapper.style.transitionDelay          = "0s";
+
+    this.m_eMode = null;
+
+    var oThis = this;
+    this.m_nShowToolbarId = null;
+    this.private_ShowToolbar = function()
+    {
+        if (null !== oThis.m_nTransitionId)
+        {
+            clearTimeout(oThis.m_nTransitionId);
+            oThis.m_nTransitionId = null;
+        }
+
+        oThis.m_oToolbarElement.style.display = "block";
+        oThis.m_oToolbarElement.style.opacity = 0;
+        oThis.m_oToolbarElement.style.top     = (oThis.m_nTop + 50) + "px";
+        oThis.m_oToolbarElement.style.height  = "0px";
+
+        oThis.m_nTransitionId = setTimeout(function()
+        {
+            oThis.m_oToolbarElement.style.opacity = 1;
+            oThis.m_oToolbarElement.style.top     = oThis.m_nTop + "px";
+            oThis.m_oToolbarElement.style.height  = oThis.m_nHeight + "px";
+            oThis.m_nTransitionId = null;
+        }, 0);
+
+        oThis.m_nShowToolbarId = null;
+    };
 }
+
 CommonExtend(CDrawingButtonBoardMode, CDrawingButtonBase);
 
 CDrawingButtonBoardMode.prototype.Update_Size = function()
@@ -1590,7 +1627,7 @@ CDrawingButtonBoardMode.prototype.Update_Size = function()
     CDrawingButtonBoardMode.superclass.Update_Size.apply(this, arguments);
     var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
 
-    var nLeft = oOffset.X - 100;
+    var nLeft = oOffset.X - this.m_nWidth / 2 + 36 / 2;
     var nTop  = oOffset.Y - 50;
 
     var nOverallW = this.m_oDrawing.Get_Width();
@@ -1610,6 +1647,8 @@ CDrawingButtonBoardMode.prototype.Update_Size = function()
     if (nTop < nMinOffset)
         nTop = nMinOffset;
 
+    this.m_nTop = nTop;
+
     this.m_oToolbarElement.style.left = nLeft + "px";
     this.m_oToolbarElement.style.top  = nTop + "px";
 };
@@ -1619,15 +1658,94 @@ CDrawingButtonBoardMode.prototype.private_DrawOnCanvas = function(Canvas, Size, 
 CDrawingButtonBoardMode.prototype.private_HandleMouseDown = function()
 {
     if ("none" === this.m_oToolbarElement.style.display)
-        this.m_oToolbarElement.style.display = "block";
+    {
+        if (null === this.m_nShowToolbarId)
+        {
+            var oThis = this;
+            this.m_nShowToolbarId = setTimeout(function ()
+            {
+                if (null !== oThis.m_nTransitionId)
+                {
+                    clearTimeout(oThis.m_nTransitionId);
+                    oThis.m_nTransitionId = null;
+                }
+
+                oThis.m_oToolbarElement.style.display = "block";
+                oThis.m_oToolbarElement.style.opacity = 0;
+                oThis.m_oToolbarElement.style.top = (oThis.m_nTop + 50) + "px";
+                oThis.m_oToolbarElement.style.height = "0px";
+
+                var oThis2 = oThis;
+
+                oThis.m_nTransitionId = setTimeout(function ()
+                {
+                    oThis2.m_oToolbarElement.style.opacity = 1;
+                    oThis2.m_oToolbarElement.style.top = oThis2.m_nTop + "px";
+                    oThis2.m_oToolbarElement.style.height = oThis2.m_nHeight + "px";
+                    oThis2.m_nTransitionId = null;
+                    oThis2.m_nShowToolbarId = null;
+                }, 20);
+            }, 20);
+        }
+    }
     else
-        this.m_oToolbarElement.style.display = "none";
+    {
+        this.Hide_Toolbar();
+    }
 };
 CDrawingButtonBoardMode.prototype.private_GetHint = function()
 {
-    return "Select Edit mode";
+    return "Select Edit mode (F1-F10)";
 };
 CDrawingButtonBoardMode.prototype.private_RegisterButton = function()
 {
+    this.m_oDrawing.Register_SelectBoardModeButton(this);
+};
+CDrawingButtonBoardMode.prototype.On_UpdateBoardMode = function(eBoardMode)
+{
+    if (this.m_eMode === eBoardMode)
+        return;
 
+    this.m_eMode = eBoardMode;
+
+    switch (eBoardMode)
+    {
+    case EBoardMode.Move         : this.m_oImageData = this.m_oButtonMove.m_oImageData; break;
+    case EBoardMode.CountScores  : this.m_oImageData = this.m_oButtonScores.m_oImageData; break;
+    case EBoardMode.AddRemove    : this.m_oImageData = this.m_oButtonAddRem.m_oImageData; break;
+    case EBoardMode.AddMarkTr    : this.m_oImageData = this.m_oButtonTr.m_oImageData; break;
+    case EBoardMode.AddMarkSq    : this.m_oImageData = this.m_oButtonSq.m_oImageData; break;
+    case EBoardMode.AddMarkCr    : this.m_oImageData = this.m_oButtonCr.m_oImageData; break;
+    case EBoardMode.AddMarkX     : this.m_oImageData = this.m_oButtonX.m_oImageData; break;
+    case EBoardMode.AddMarkTx    : this.m_oImageData = this.m_oButtonText.m_oImageData; break;
+    case EBoardMode.AddMarkNum   : this.m_oImageData = this.m_oButtonNum.m_oImageData; break;
+    case EBoardMode.AddMarkColor : this.m_oImageData = this.m_oButtonColor.m_oImageData; break;
+    }
+
+    this.private_UpdateState();
+};
+CDrawingButtonBoardMode.prototype.private_OnResize = function()
+{
+    this.private_UpdateState();
+};
+CDrawingButtonBoardMode.prototype.Hide_Toolbar = function()
+{
+    if ("none" !== this.m_oToolbarElement.style.display)
+    {
+        if (null !== this.m_nTransitionId)
+        {
+            clearTimeout(this.m_nTransitionId);
+            this.m_nTransitionId = null;
+        }
+
+        this.m_oToolbarElement.style.opacity = 0;
+        this.m_oToolbarElement.style.top     = (this.m_nTop + 50) + "px";
+        this.m_oToolbarElement.style.height  = "0px";
+        var oThis = this;
+        this.m_nTransitionId = setTimeout(function()
+        {
+            oThis.m_oToolbarElement.style.display = "none";
+            oThis.m_nTransitionId = null;
+        }, 500);
+    }
 };
