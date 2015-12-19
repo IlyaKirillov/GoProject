@@ -411,6 +411,25 @@ CDrawing.prototype.Get_MainDiv = function()
 {
     return this.m_oMainDiv;
 };
+CDrawing.prototype.Get_GameTree = function()
+{
+    return this.m_oGameTree;
+};
+CDrawing.prototype.Get_ElementOffset = function(oElement)
+{
+    var X = 0;
+    var Y = 0;
+
+    var _oElement = oElement;
+    while (_oElement != this.m_oMainDiv && _oElement)
+    {
+        X += (_oElement.offsetLeft - _oElement.scrollLeft + _oElement.clientLeft);
+        Y += (_oElement.offsetTop  - _oElement.scrollTop  + _oElement.clientTop);
+        _oElement = _oElement.offsetParent;
+    }
+
+    return {X : X, Y : Y};
+};
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {
     this.private_SetMainDiv(sDivId);
@@ -674,9 +693,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     oDrawingToolbar.Add_Control(new CDrawingButtonPass(this), 73, 1, EToolbarFloat.Left);
     oDrawingToolbar.Add_Control(new CDrawingButtonNextVariant(this), 36, 1, EToolbarFloat.Left);
     oDrawingToolbar.Add_Control(new CDrawingButtonPrevVariant(this), 36, 1, EToolbarFloat.Left);
-
-    // TODO: Поменять кнопку
-    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeMove(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBoardMode(this, oGameTree), 36, 1, EToolbarFloat.Left);
     oDrawingToolbar.Add_Control(new CDrawingButtonGameInfo(this), 36, 1, EToolbarFloat.Left);
 
     oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Right);

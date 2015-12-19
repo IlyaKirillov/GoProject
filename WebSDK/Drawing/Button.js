@@ -27,7 +27,7 @@ var EDrawingButtonState2 =
 function CDrawingButtonBase(oDrawing)
 {
     this.m_oDrawing  = oDrawing;
-    this.m_oGameTree = null;
+    this.m_oGameTree = oDrawing ? oDrawing.Get_GameTree() : null;
     this.m_nState    = EDrawingButtonState.Normal;
     this.m_nState2   = EDrawingButtonState2.AutoPlayStopped;
 
@@ -1528,4 +1528,106 @@ CDrawingButtonTabNavigator.prototype.private_HandleMouseDown = function()
 CDrawingButtonTabNavigator.prototype.private_GetHint = function()
 {
     return "Navigator";
+};
+//----------------------------------------------------------------------------------------------------------------------
+// Кнопка выбора режима редактирования
+//----------------------------------------------------------------------------------------------------------------------
+function CDrawingButtonBoardMode(oDrawing)
+{
+    CDrawingButtonBoardMode.superclass.constructor.call(this, oDrawing);
+
+    var oMainDiv = oDrawing.Get_MainDiv();
+
+    this.m_nWidth = 2 + 36 * 9 + (9 - 1);
+    this.m_nHeight = 40;
+
+    var oToolbarElementWrapper = document.createElement("div");
+    oToolbarElementWrapper.id               = oMainDiv.id + "ButtonBoardModeToolbarWrapper";
+    oToolbarElementWrapper.style.position   = "absolute";
+    oToolbarElementWrapper.style.top        = "100px";
+    oToolbarElementWrapper.style.left       = "100px";
+    oToolbarElementWrapper.style.width      = this.m_nWidth  + "px";
+    oToolbarElementWrapper.style.height     = this.m_nHeight + "px";
+    oToolbarElementWrapper.style.background = "rgb(217, 217, 217)";
+    oToolbarElementWrapper.style.display    = "block";
+    oToolbarElementWrapper.style.border     = "1px solid #505050";
+    oToolbarElementWrapper.style.boxShadow  = "0px 1px 15px rgba(0,0,0,0.8)";
+    oToolbarElementWrapper.onclick          = function()
+    {
+        oToolbarElementWrapper.style.display = "none";
+    };
+    oMainDiv.appendChild(oToolbarElementWrapper);
+
+    var oToolbarElement = document.createElement("div");
+    oToolbarElement.id               = oMainDiv.id + "ButtonBoardModeToolbar";
+    oToolbarElement.style.position   = "absolute";
+    oToolbarElement.style.top        = "1px";
+    oToolbarElement.style.left       = "1px";
+    oToolbarElement.style.right      = "1px";
+    oToolbarElement.style.bottom     = "1px";
+    oToolbarElementWrapper.appendChild(oToolbarElement);
+
+    var oDrawingToolbar = new CDrawingToolbar(oDrawing);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeMove(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeScores(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeAddRem(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeTr(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeSq(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeCr(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeX(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeText(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeNum(oDrawing), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Init(oToolbarElement.id, oDrawing.Get_GameTree());
+    oDrawingToolbar.Update_Size();
+
+    oToolbarElementWrapper.style.display    = "none";
+    this.m_oToolbarElement = oToolbarElementWrapper;
+}
+CommonExtend(CDrawingButtonBoardMode, CDrawingButtonBase);
+
+CDrawingButtonBoardMode.prototype.Update_Size = function()
+{
+    CDrawingButtonBoardMode.superclass.Update_Size.apply(this, arguments);
+    var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
+
+    var nLeft = oOffset.X - 100;
+    var nTop  = oOffset.Y - 50;
+
+    var nOverallW = this.m_oDrawing.Get_Width();
+    var nOverallH = this.m_oDrawing.Get_Height();
+
+    var nMinOffset = 5;
+
+    if (nLeft + this.m_nWidth  > nOverallW - nMinOffset)
+        nLeft = nOverallW - nMinOffset - this.m_nWidth;
+
+    if (nLeft < nMinOffset)
+        nLeft = nMinOffset;
+
+    if (nTop + this.m_nHeight > nOverallH - nMinOffset)
+        nTop = nOverallH - nMinOffset - this.m_nHeight;
+
+    if (nTop < nMinOffset)
+        nTop = nMinOffset;
+
+    this.m_oToolbarElement.style.left = nLeft + "px";
+    this.m_oToolbarElement.style.top  = nTop + "px";
+};
+CDrawingButtonBoardMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+};
+CDrawingButtonBoardMode.prototype.private_HandleMouseDown = function()
+{
+    if ("none" === this.m_oToolbarElement.style.display)
+        this.m_oToolbarElement.style.display = "block";
+    else
+        this.m_oToolbarElement.style.display = "none";
+};
+CDrawingButtonBoardMode.prototype.private_GetHint = function()
+{
+    return "Select Edit mode";
+};
+CDrawingButtonBoardMode.prototype.private_RegisterButton = function()
+{
+
 };
