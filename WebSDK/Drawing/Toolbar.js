@@ -138,18 +138,18 @@ CDrawingNavigatorCommentsTabs.prototype.Init = function(sDivId, oGameTree, _sNav
 
     oMainElement.style.backgroundColor = this.m_oBColor.ToString();
 
-    var oCommentsControl = new CDrawingButton(this.m_oDrawing);
+    var oCommentsControl = new CDrawingButtonTabComments(this.m_oDrawing);
     var sCommentsDivId = sDivId + "C";
     this.private_CreateDivElement(oMainElement, sCommentsDivId);
     this.private_FillHtmlElement(oMainControl, sCommentsDivId, 0, 0.5);
-    oCommentsControl.Init(sCommentsDivId, oGameTree, EDrawingButtonType.TabComments);
+    oCommentsControl.Init(sCommentsDivId, oGameTree);
     this.m_oCommentsButton = oCommentsControl;
 
-    var oNavigatorControl = new CDrawingButton(this.m_oDrawing);
+    var oNavigatorControl = new CDrawingButtonTabNavigator(this.m_oDrawing);
     var sNavigatorDivId = sDivId + "N";
     this.private_CreateDivElement(oMainElement, sNavigatorDivId);
     this.private_FillHtmlElement(oMainControl, sNavigatorDivId, 1, 1);
-    oNavigatorControl.Init(sNavigatorDivId, oGameTree, EDrawingButtonType.TabNavigator);
+    oNavigatorControl.Init(sNavigatorDivId, oGameTree);
     this.m_oNavigatorButton = oNavigatorControl;
 
     // TODO: Переделать здесь, когда классы с кнопками переделаются по нормальному

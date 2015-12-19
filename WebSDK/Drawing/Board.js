@@ -188,8 +188,12 @@ function CDrawingBoard(oDrawing)
         else
         {
             bPreventDefault = oThis.private_HandleKeyDown(global_keyboardEvent);
-            if (true === bPreventDefault)
+
+            // TODO: Надо, чтобы функция private_HandleKeyDown возвращала флагом, нужно ли убирать курсор
+            if (true === bPreventDefault && 112 <= global_keyboardEvent.KeyCode && global_keyboardEvent.KeyCode <= 121)
                 oThis.private_UpdateTargetType();
+            else if (true === bPreventDefault)
+                oThis.private_HideTarget();
         }
 
         if (true === bPreventDefault)

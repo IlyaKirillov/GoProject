@@ -658,8 +658,8 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var oDrawingTimeLineSlider = new CDrawingSlider(this);
     oDrawingTimeLineSlider.Init(sTools3DivId, oGameTree, EDrawingSliderType.Timeline, 0);
 
-    var oDrawingAutoPlayButton = new CDrawingButton(this);
-    oDrawingAutoPlayButton.Init(sAutoPlayButton, oGameTree, EDrawingButtonType.AutoPlay);
+    var oDrawingAutoPlayButton = new CDrawingButtonAutoPlay(this);
+    oDrawingAutoPlayButton.Init(sAutoPlayButton, oGameTree);
 
     var oDrawingAutoPlaySlider = new CDrawingSlider(this);
     oDrawingAutoPlaySlider.Init(sAutoPlaySlider, oGameTree, EDrawingSliderType.AutoPlaySpeed, 0);

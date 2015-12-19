@@ -445,8 +445,8 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oMainControl.AddControl(oCloseButtonControl);
     oCloseButtonElement.style.backgroundColor = (new CColor(255, 0, 0, 255)).ToString();
 
-    var oCloseButton = new CDrawingButton(this.m_oDrawing);
-    oCloseButton.Init(sCloseButtonId, this, EDrawingButtonType.WindowClose);
+    var oCloseButton = new CDrawingButtonClose(this.m_oDrawing);
+    oCloseButton.Init(sCloseButtonId, this);
     oCloseButton.m_oNormaFColor = new CColor(199, 80, 80, 255);
     oCloseButton.m_oHoverFColor = new CColor(224, 67, 67, 255);
     oCloseButton.m_oActiveFColor = new CColor(153, 61, 61, 255);
@@ -612,8 +612,8 @@ CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
     oButtonOkControl.Bounds.SetParams(0, 9, 85, 1000, false, true, true, false, 66, 21);
     oButtonOkControl.Anchor = (g_anchor_top | g_anchor_right);
     oMainControl.AddControl(oButtonOkControl);
-    var oDrawingButttonOK = new CDrawingButton(this.m_oDrawing);
-    oDrawingButttonOK.Init(sButtonOk, this, EDrawingButtonType.WindowOK);
+    var oDrawingButttonOK = new CDrawingButtonOK(this.m_oDrawing);
+    oDrawingButttonOK.Init(sButtonOk, this);
     this.HtmlElement.OKButton = oDrawingButttonOK;
 
     oDrawingButttonOK.m_oNormaBColor    = new CColor(234, 234, 234, 255); // 229,229,229 -> 240,240,240
@@ -631,8 +631,8 @@ CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
     oButtonCancelControl.Bounds.SetParams(0, 9, 11, 1000, false, true, true, false, 66, 21);
     oButtonCancelControl.Anchor = (g_anchor_top | g_anchor_right);
     oMainControl.AddControl(oButtonCancelControl);
-    var oDrawingButttonCancel = new CDrawingButton(this.m_oDrawing);
-    oDrawingButttonCancel.Init(sButtonCancel, this, EDrawingButtonType.WindowCancel);
+    var oDrawingButttonCancel = new CDrawingButtonCancel(this.m_oDrawing);
+    oDrawingButttonCancel.Init(sButtonCancel, this);
     this.HtmlElement.CancelButton = oDrawingButttonCancel;
 
     oDrawingButttonCancel.m_oNormaBColor    = new CColor(234, 234, 234, 255); // 229,229,229 -> 240,240,240
