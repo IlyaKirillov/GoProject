@@ -433,20 +433,23 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     var oMainControl = CreateControlContainer(sDivId);
     this.private_CreateDiv(oMainControl.HtmlElement, sDivId + "div");
 
-    var H = 25;
+    var H = 36;
     var oControl = CControlContainerBoardAndBottomButtons.Create(sDivId + "div");
-    oControl.Set(H);
+    oControl.Set(H + 2);
     var oMainElement = oControl.HtmlElement;
     oMainControl.AddControl(oControl);
 
-    var sBoardDivId    = sDivId + "_Board";
-    var sToolbaDivId   = sDivId + "_Toolbar";
+    var sBoardDivId        = sDivId + "_Board";
+    var sToolbarPanelDivId = sDivId + "_ToolbarPanel";
+    var sToolbarDivId      = sDivId + "_Toolbar";
 
     this.private_CreateDiv(oMainElement, sBoardDivId);
-    this.private_CreateDiv(oMainElement, sToolbaDivId);
+    var oToolbarPanelElement = this.private_CreateDiv(oMainElement, sToolbarPanelDivId);
+    oToolbarPanelElement.style.background = "rgb(217, 217, 217)";
+    this.private_CreateDiv(oToolbarPanelElement, sToolbarDivId);
 
     var oBoardControl = CreateControlContainer(sBoardDivId);
-    oBoardControl.Bounds.SetParams(0, 0, 1000, H, false, false, false, true, -1, -1);
+    oBoardControl.Bounds.SetParams(0, 0, 1000, H + 2, false, false, false, true, -1, -1);
     oBoardControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oControl.AddControl(oBoardControl);
 
@@ -454,14 +457,41 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
     oDrawingBoard.Init(sBoardDivId, oGameTree);
     oDrawingBoard.Focus();
 
-    var oToolbarControl = CreateControlContainer(sToolbaDivId);
-    oToolbarControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, H);
+    var oToolbarPanelControl = CreateControlContainer(sToolbarPanelDivId);
+    oToolbarPanelControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, H + 2);
+    oToolbarPanelControl.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oControl.AddControl(oToolbarPanelControl);
+
+    var oToolbarControl = CreateControlContainer(sToolbarDivId);
+    oToolbarControl.Bounds.SetParams(0, 1, 1000, 1, false, true, false, true, -1, -1);
     oToolbarControl.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
-    oControl.AddControl(oToolbarControl);
+    oToolbarPanelControl.AddControl(oToolbarControl);
 
     var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Init(sToolbaDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward_5, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.Forward_5, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.NextVariant,
-        EDrawingButtonType.PrevVariant, EDrawingButtonType.EditModeMove, EDrawingButtonType.EditModeScores, EDrawingButtonType.EditModeAddRem, EDrawingButtonType.EditModeTr, EDrawingButtonType.EditModeSq, EDrawingButtonType.EditModeCr, EDrawingButtonType.EditModeX, EDrawingButtonType.EditModeText, EDrawingButtonType.EditModeNum, EDrawingButtonType.GameInfo, EDrawingButtonType.About]});
+
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForwardToEnd(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonNextVariant(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonPrevVariant(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeMove(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeScores(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeAddRem(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeTr(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeSq(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeCr(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeX(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeText(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonEditModeNum(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonGameInfo(this), 36, 1, EToolbarFloat.Left);
+
+    oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Right);
+    oDrawingToolbar.Add_Control(new CDrawingButtonSettings(this), 36, 1, EToolbarFloat.Right);
+
+    oDrawingToolbar.Init(sToolbarDivId, oGameTree);
 
     this.m_oControl = oMainControl;
     this.m_aElements.push(oDrawingBoard);

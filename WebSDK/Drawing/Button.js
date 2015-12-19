@@ -232,10 +232,10 @@ CDrawingButtonBase.prototype.private_OnResize = function()
         return;
 
     this.m_oImageData.Active   = this.private_Draw(this.m_oActiveBColor,   this.m_oActiveFColor,   W, H);
-    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H);
+    this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H, false, true);
     this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor,    this.m_oNormaFColor,    W, H);
     this.m_oImageData.Disabled = this.private_Draw(this.m_oDisabledBColor, this.m_oDisabledFColor, W, H, true);
-    this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H);
+    this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H, false, true);
 
     var oDivElement = this.HtmlElement.Control.HtmlElement;
 
@@ -253,7 +253,7 @@ CDrawingButtonBase.prototype.private_OnResize = function()
 
     this.private_UpdateState();
 };
-CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H, bDisabled)
+CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H, bDisabled, bSelected)
 {
     var Canvas = this.HtmlElement.Canvas.Control.HtmlElement.getContext("2d");
 
@@ -271,6 +271,20 @@ CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H,
     var Y_off = (H - Size) / 2;
 
     this.private_DrawOnCanvas(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor);
+
+    if (true === bSelected)
+    {
+        Canvas.beginPath();
+        Canvas.lineWidth = 1;
+        Canvas.strokeStyle = (new CColor(0, 0, 0, 255)).ToString();
+        Canvas.moveTo(0, 0);
+        Canvas.lineTo(W, 0);
+        Canvas.lineTo(W, H);
+        Canvas.lineTo(0, H);
+        Canvas.lineTo(0, 0);
+        Canvas.stroke();
+        Canvas.beginPath();
+    }
 
     return Canvas.getImageData(0, 0, W, H);
 };
