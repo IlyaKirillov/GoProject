@@ -851,6 +851,7 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     var oPanelControl = CreateControlContainer(sPanelDivId);
     oMainControl.AddControl(oBoardControl);
     oMainControl.AddControl(oPanelControl);
+    oPanelControl.HtmlElement.style.background = "rgb(217, 217, 217)";
 
     oDrawingBoard.Init(sBoardDivId, oGameTree);
     oDrawingBoard.Focus();
@@ -860,15 +861,15 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     this.private_CreateDiv(oPanelControl.HtmlElement, sCommentsDivId);
     this.private_CreateDiv(oPanelControl.HtmlElement, sToolsDivId);
 
-    var ToolbarH = 25;
+    var ToolbarH = 36;
 
     var oCommentsControl = CreateControlContainer(sCommentsDivId);
-    oCommentsControl.Bounds.SetParams(0, ToolbarH, 1000, 1000, false, true, false, false, -1, -1);
+    oCommentsControl.Bounds.SetParams(0, ToolbarH + 2, 1000, 1000, false, true, false, false, -1, -1);
     oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oPanelControl.AddControl(oCommentsControl);
 
     var oToolsControl = CreateControlContainer(sToolsDivId);
-    oToolsControl.Bounds.SetParams(0, 0, 1000, 1000, true, true, false, true, -1, ToolbarH);
+    oToolsControl.Bounds.SetParams(6, 1, 1000, 1000, true, true, false, true, -1, ToolbarH);
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top);
     oPanelControl.AddControl(oToolsControl);
 
@@ -876,7 +877,9 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     oDrawingComments.Init(sCommentsDivId, oGameTree);
 
     var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Init(sToolsDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart]});
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Init(sToolsDivId, oGameTree);
 
     this.m_aElements.push(oDrawingBoard);
     this.m_aElements.push(oDrawingComments);
