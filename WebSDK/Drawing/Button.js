@@ -1174,6 +1174,8 @@ function CDrawingButtonBase(oDrawing)
     this.m_nW = 0;
     this.m_nH = 0;
 
+    this.m_nLoadReady = 0;
+
     var oThis = this;
 
     this.private_OnMouseDown = function(e)
@@ -1245,7 +1247,7 @@ CDrawingButtonBase.prototype.Init = function(sDivId, oGameTree)
 
     this.private_RegisterButton();
     this.HtmlElement.Control = CreateControlContainer(sDivId);
-    var oDivElement = this.HtmlElement.Control.HtmlElement;
+    var oDivElement          = this.HtmlElement.Control.HtmlElement;
 
     var sHint = this.private_GetHint();
     oDivElement.setAttribute("title", sHint);
@@ -1262,29 +1264,32 @@ CDrawingButtonBase.prototype.Init = function(sDivId, oGameTree)
     oDivElement.appendChild(oCanvasElement);
 
     this.HtmlElement.Canvas.Control = CreateControlContainer(sDivId + "_canvas");
-    var oCanvasControl = this.HtmlElement.Canvas.Control;
-    oCanvasControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1,-1);
+    var oCanvasControl              = this.HtmlElement.Canvas.Control;
+    oCanvasControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
     oCanvasControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     this.HtmlElement.Control.AddControl(oCanvasControl);
 
-    oDivElement.onmousedown = this.private_OnMouseDown;
-    oDivElement.onmouseup   = this.private_OnMouseUp;
-    oDivElement.onmouseover = this.private_OnMouseOver;
-    oDivElement.onmouseout  = this.private_OnMouseOut;
-    oDivElement.onfocus     = this.private_OnFocus;
-    oDivElement.tabIndex    = -1;
+    oDivElement.onmousedown   = this.private_OnMouseDown;
+    oDivElement.onmouseup     = this.private_OnMouseUp;
+    oDivElement.onmouseover   = this.private_OnMouseOver;
+    oDivElement.onmouseout    = this.private_OnMouseOut;
+    oDivElement.onfocus       = this.private_OnFocus;
+    oDivElement.tabIndex      = -1;
     oDivElement.style.outline = "none";
-    oDivElement.draggable   = "true";
-    oDivElement.ondragstart = this.private_OnDragStart;
+    oDivElement.draggable     = "true";
+    oDivElement.ondragstart   = this.private_OnDragStart;
 
     this.Update_Size();
 };
-CDrawingButtonBase.prototype.Update_Size = function()
+CDrawingButtonBase.prototype.Update_Size = function(bForce)
 {
+    if (true !== this.private_IsReady())
+        return;
+
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
 
-    if (W !== this.m_nW || H !== this.m_nH)
+    if (W !== this.m_nW || H !== this.m_nH || true === bForce)
     {
         this.m_nW = W;
         this.m_nH = H;
@@ -1443,19 +1448,47 @@ CDrawingButtonBase.prototype.private_GetHint = function()
 CDrawingButtonBase.prototype.private_RegisterButton = function()
 {
 };
+CDrawingButtonBase.prototype.private_AddImageToLoad = function(sBase64)
+{
+    this.m_nLoadReady--;
+    var oImage = new Image();
+    var oThis = this;
+    oImage.onload = function()
+    {
+        oThis.private_OnImageReady();
+    };
+    oImage.src = sBase64;
+    return oImage;
+};
+CDrawingButtonBase.prototype.private_IsReady = function()
+{
+    return this.m_nLoadReady < 0 ? false : true;
+};
+CDrawingButtonBase.prototype.private_OnImageReady = function()
+{
+    this.m_nLoadReady++;
+
+    if (this.m_nLoadReady >= 0)
+        this.Update_Size(true);
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка возврата в начало партии
 //----------------------------------------------------------------------------------------------------------------------
 function CDrawingButtonBackwardToStart(oDrawing)
 {
     CDrawingButtonBackwardToStart.superclass.constructor.call(this, oDrawing);
+
+    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCTIWyQE/egAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA8klEQVRYw+3XQaqDMBQF0JuSkYggkolLECHiRLfgArrKgutQ6MBMXIKTIIKIo0A6+vDprE1KWnh3AeEQXu4jrO97fFMu+LIQiEAEItBPgYQQ967rbF3X9iduiHOOpmlsWZY2OIhzjrZtbZ7nSNMUcRyHA/1hhBBY1xVKKXYcRxjQM2aaJrbve5gZ8o1xAn0C4wSSUlohBM7zxDzPNx8YJ5BSimmtEUURiqK4JkkSFmSMwTAMTGuNLMtQVZX1gXIa6k+gnJ+9b5SXYnxGSSlt0Kb+j1qWBdu24d2m5j6XqzEG4zgylzMYfRQJRCACEYhAr+UBzPGCWleBZVAAAAAASUVORK5CYII=");
+    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCgYTAAeGWwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA1ElEQVRYw+3XMQqEMBAF0J8otnoBQRsLnfv3uUMQtDHY2dmL7laKbLGFM6DC/C7FwMsPDMR0XffBg2LxsChIQQpS0L8sywLnHMZxfE9Dfd9jmqZngLz3B2jbtntB3nuEEJDnOZqmgbX2PtAZQ0SIoui+J5PEsEHSGBYohIBhGJBlGeq6FsGwQEVRoCxLzPOMtm2xrqsIKOYME9HR1n7mNhVzbySNiiVqlkSJgH5RxhgQ0aXlKAbaUUmSIE3Ty5taFAQAVVWx5o3+yxSkIAUpSEEvB30BgCRWQjlMhyUAAAAASUVORK5CYII=");
 }
 CommonExtend(CDrawingButtonBackwardToStart, CDrawingButtonBase);
 
 CDrawingButtonBackwardToStart.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled)
 {
-    var Img = document.getElementById(bDisabled ? "imgBackSDisabled" : "imgBackS");
-    Canvas.drawImage(Img, 0, 0);
+    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+
+    if (oImage)
+        Canvas.drawImage(oImage, 0, 0);
 };
 CDrawingButtonBackwardToStart.prototype.private_HandleMouseDown = function()
 {
@@ -1469,19 +1502,25 @@ CDrawingButtonBackwardToStart.prototype.private_RegisterButton = function()
 {
     this.m_oDrawing.Register_BackwardToStartButton(this);
 };
+
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка перехода на 5 ходов назад
 //----------------------------------------------------------------------------------------------------------------------
 function CDrawingButtonBackward5(oDrawing)
 {
     CDrawingButtonBackward5.superclass.constructor.call(this, oDrawing);
+
+    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCTUb+PHVAAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAcUlEQVRYw+3VwQnAIAyFYVu6UJbqDB0vh9xFcA7xHALpCAptpbXvO77TDwENAQAAJicihZn33v1RMUZXVa+1es8+JEZVPaXkrX1YTM7ZWztipo5ZP/3mvOpkiJoq6s6vY7sSRESLiBQzO3p2AACAPzgBHJpQat/4zFsAAAAASUVORK5CYII=");
+    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCgsbu3JwJAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABCklEQVRYw+3XsYqEMBAG4H9UZBtBfAbBWrSw0c6n1spKIYWFjY2PYJNGgmS2Wm+56nS57C7k79J9ZIZMhuZ5ZrwxSZLQ89nBh8WCLMiCLOirQUop7Pv+GSApJbquwziOYP6ZPm3bQghhFiSlxDAMYGbEcQwiOjDMjDRNzYEeGK01sixDGIYHRmuNsizhuu5lkHcW0/c9mBl5niOKIgBA0zRgZlRVhdvtZqaHTGD+DDKF+d53KAgCFEUBIoIQAuu6AgDqugYRoes6bNtm9oZMoU6VzATqdA/9N+pSUz+jlmU5RscDNU3TZRC9sgYppeA4DjzPuwz4vQZ5r9Tb9337H7IgC7IgC7Kgd+cOKWukY/lIDsgAAAAASUVORK5CYII=");
 }
 CommonExtend(CDrawingButtonBackward5, CDrawingButtonBase);
 
 CDrawingButtonBackward5.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled)
 {
-    var Img = document.getElementById(bDisabled ? "imgBack5Disabled" : "imgBack5");
-    Canvas.drawImage(Img, 0, 0);
+    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+
+    if (oImage)
+        Canvas.drawImage(oImage, 0, 0);
 };
 CDrawingButtonBackward5.prototype.private_HandleMouseDown = function()
 {
@@ -1501,13 +1540,18 @@ CDrawingButtonBackward5.prototype.private_RegisterButton = function()
 function CDrawingButtonBackward(oDrawing)
 {
     CDrawingButtonBackward.superclass.constructor.call(this, oDrawing);
+
+    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCQ8pFY9a+QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAxUlEQVRYw+3VIQ7DMAwF0J+ppHABQSEhISVBPdLOsKvsEr1NSKQoKi0oq0IqdbQabN0lquwTPNnfthiGATXVA5UVgxjEIAbdDqSUmqWUrypAxpit7/unc+7Ttm1ZkDFm67oOADCOI3LO5UB7TAgBMUZRbGS/mBCCKBZqaswp0BWYe92hlJLw3gMArLWw1m7FO3QF6vTIqFEkGaJEkYV6j9Ja4+jraCg3JKUklmWZ13V9H30dDfXaTtMk+Q4xiEEMYhCD/lhfy3RcBznfWwkAAAAASUVORK5CYII=");
+    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCgcfEKr7MQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAw0lEQVRYw+3XMQrEIBAF0D8i6YTgGXKDpPD8VgmkSJsmR0hjJ8HZamHrqGsI8w8gDx2/SPu+Mx4UhYdFQAISkIBeBYox4rquZ4BCCPDeY9s2MHNbUAgBy7KAmTEMA4ioHeiLSSlhHEf0fZ+1ns7FzPMMZsY0TbDWthvqGpjboFqY9/SQMQbOORAR1nXFeZ7td6gWKuvIaqCyZ6g0qshQ/6KO48h6OqjkNyjGCKUUtL7ft7rkle26TnpIQAISkIAE9O98AMOJZd+FkCSYAAAAAElFTkSuQmCC");
 }
 CommonExtend(CDrawingButtonBackward, CDrawingButtonBase);
 
 CDrawingButtonBackward.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled)
 {
-    var Img = document.getElementById(bDisabled ? "imgBackDisabled" : "imgBack");
-    Canvas.drawImage(Img, 0, 0);
+    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+
+    if (oImage)
+        Canvas.drawImage(oImage, 0, 0);
 };
 CDrawingButtonBackward.prototype.private_HandleMouseDown = function()
 {
@@ -1527,13 +1571,18 @@ CDrawingButtonBackward.prototype.private_RegisterButton = function()
 function CDrawingButtonForward(oDrawing)
 {
     CDrawingButtonForward.superclass.constructor.call(this, oDrawing);
+
+    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCTMzmx7afAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAxUlEQVRYw+3WIQ7DIBQG4L8NBiQCVVODqeFU21V6he0QPUsNhqQh2AossrsDvKVseb8n+QL8D4Zt29BTRnQWBjGIQQz6WZDW+mGMydQgUbNISgnn3EspBe/9FWMcbt2hUgpSSgCAZVkwz/N1+5EdxzGEEMhRTZc6hECOam4ZNYqk9pSo/xyM1trLWgsA8N6jZQyMPWGaQdSYJtA3MNUgKSWmaSLHVL9lpRTs+/4UQqzneeouWpZzflNj+IPGIAYxiEEMqsgHyjhf9O2e3l4AAAAASUVORK5CYII=");
+    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCggDgzO7sQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAwklEQVRYw+3XMQqEMBAF0D+L2AmSM3gDU3h+K4UUaW08go1dCDNb7QlmwOzu/D7wYOYnhI7jEDSUFxqLgxzkIAd9NajWilJKGyARQc4Z67rivu/nQUSEaZogItj33QylGtk4jpjnGcxshlIvdQgBMUYwM7ZtU6NMWvZBiYgaZVZ7K9TvXozXdSGlBCLCsiwYhuE5kBXGBGSJUYOsMeqn4zxPUwwAkOYbVGsFM6Pve7OWdarDXddu7R3kIAc5yEH/AnoDv0Bo1K+5YRYAAAAASUVORK5CYII=");
 }
 CommonExtend(CDrawingButtonForward, CDrawingButtonBase);
 
 CDrawingButtonForward.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled)
 {
-    var Img = document.getElementById(bDisabled ? "imgForwDisabled" : "imgForw");
-    Canvas.drawImage(Img, 0, 0);
+    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+
+    if (oImage)
+        Canvas.drawImage(oImage, 0, 0);
 };
 CDrawingButtonForward.prototype.private_HandleMouseDown = function()
 {
@@ -1553,13 +1602,18 @@ CDrawingButtonForward.prototype.private_RegisterButton = function()
 function CDrawingButtonForward5(oDrawing)
 {
     CDrawingButtonForward5.superclass.constructor.call(this, oDrawing);
+
+    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCTUMeyJQxwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAZUlEQVRYw+3VMQrAIAyFYelhe84M7kHwHMU5S3qAVnCxpOH/xrfkQdCUAgBIRkTOWuu1mm83xnAzc1X1lXy71pqb2WP4LP9E7/11+CynVOpSR6o/KdTKKPOblxXudIQ7rgAABHMDFJxNsmE+xLoAAAAASUVORK5CYII=");
+    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCgsPoaikWQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABCUlEQVRYw+3XLY6FMBQF4NOBEAwJYQ1sgIDAgGPVoKogqUBgMCwBgyGkuXfUkMw89WjfT970uLpPnNO0An8yzzPjhfnCm8WBHMiBHOijQFprHMfxGpBSCl3XnWdmxjiOkFJi27bng7IsAzOfKCEE0jQFM2MYhsuoyyDP81BVFYjoRMVxjDzPQUSXUUYdCsMQdV2DiNC2LQAgSRIURQEiQt/3d6OMS/2DYuYbFDPfjbKyMpuoz7yH9n2HlBJCCDRNAwBY1xVKKQghUJYloih6DsgmxhhkG2MEegTGCDRN0y8MM2NZFiMMAAib3yCtNYgIQRBcroFvc7K+77/H7N0DzYEcyIEc6D+BvgEeP6ZpL3594wAAAABJRU5ErkJggg==");
 }
 CommonExtend(CDrawingButtonForward5, CDrawingButtonBase);
 
 CDrawingButtonForward5.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled)
 {
-    var Img = document.getElementById(bDisabled ? "imgForw5Disabled" : "imgForw5");
-    Canvas.drawImage(Img, 0, 0);
+    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+
+    if (oImage)
+        Canvas.drawImage(oImage, 0, 0);
 };
 CDrawingButtonForward5.prototype.private_HandleMouseDown = function()
 {
@@ -1579,13 +1633,18 @@ CDrawingButtonForward5.prototype.private_RegisterButton = function()
 function CDrawingButtonForwardToEnd(oDrawing)
 {
     CDrawingButtonForwardToEnd.superclass.constructor.call(this, oDrawing);
+
+    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCTMW0BoOOwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA/ElEQVRYw+3WUYqGIBQF4ONPvYQIUW4iAqOX2kILmFUOtI4epkiINiERiPQQgbOHsikGzwLk0+u9Stq2xZvywcviQR7kQR70b0FlWdqmaSzn/OdPQHme26qqbBAETjdyajVKKeI4RpqmCMPQdl1HjuN4rmTGGEgpybIs4JyjrmtnJ3W6ZFprjOPoHHXpUt+ButxlrlFO2l5rjXmev7dtA+ccQgj7KIgxhizLvqIoglIKUkryGIgxhqIobJIkUErh6gj4vAlzCXQH5jSIUgohhHPM6afDGIN1XbHvO/q+d4Y5DQKAaZoIbkiAmzIMA3lsDvkfowd5kAd50I35BcSwhNDY1fy/AAAAAElFTkSuQmCC");
+    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wsbCgYtwWab8AAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA4klEQVRYw+3XoQ6EMAwG4J9tAoGvHQYBvL/nHYAEDGSoORIcZOPcPQAbB5e0/k++ZkubJsMwnHhRCbysGMQgBjEoVhlj0DQNjuP4Dchai3EcozeiroS897DWwhiDfd9R1/WzICEEqqrCeZ6Y5xkAoqHU1aCU8ouIiVIh4TtQKrSj2CgV492llCjLEtu2YZomZFkGIcRzc8g5h77vsa4r8jyH1vq5weicQ9u2WJYFWuvgPyTehAkC3YG5DPLeo+u66JigSU1ESNMURVE8v8sAgIhARNGXa8J3GYMYxCAGMejPQR8ExWauMaLfvwAAAABJRU5ErkJggg==");
 }
 CommonExtend(CDrawingButtonForwardToEnd, CDrawingButtonBase);
 
 CDrawingButtonForwardToEnd.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled)
 {
-    var Img = document.getElementById(bDisabled ? "imgForwEDisabled" : "imgForwE");
-    Canvas.drawImage(Img, 0, 0);
+    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+
+    if (oImage)
+        Canvas.drawImage(oImage, 0, 0);
 };
 CDrawingButtonForwardToEnd.prototype.private_HandleMouseDown = function()
 {
