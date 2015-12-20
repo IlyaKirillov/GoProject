@@ -318,7 +318,8 @@ function CDrawing(oGameTree)
         BoardModeCr     : [],
         BoardModeX      : [],
         BoardModeText   : [],
-        BoardModeNum    : []
+        BoardModeNum    : [],
+        BoardModeColor  : []
     };
 
     this.m_oBoard     = null;
@@ -1104,6 +1105,10 @@ CDrawing.prototype.Register_EditModeNumButton = function(oButton)
 {
     this.m_oButtons.BoardModeNum.push(oButton);
 };
+CDrawing.prototype.Register_EditModeColorButton = function(oButton)
+{
+    this.m_oButtons.BoardModeColor.push(oButton);
+};
 CDrawing.prototype.Register_Comments = function(oComments)
 {
     this.m_aComments.push(oComments);
@@ -1249,6 +1254,9 @@ CDrawing.prototype.Update_InterfaceState = function(oIState)
 
     for (var Index = 0, Count = this.m_oButtons.BoardModeNum.length; Index < Count; Index++)
         this.m_oButtons.BoardModeNum[Index].Set_Selected(oIState.BoardMode === EBoardMode.AddMarkNum);
+
+    for (var Index = 0, Count = this.m_oButtons.BoardModeColor.length; Index < Count; Index++)
+        this.m_oButtons.BoardModeColor[Index].Set_Selected(oIState.BoardMode === EBoardMode.AddMarkColor);
 
     // TimeLine
     if (this.m_oTimeLine)

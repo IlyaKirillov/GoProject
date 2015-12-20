@@ -1523,6 +1523,7 @@ function CDrawingButtonBoardMode(oDrawing)
     CDrawingButtonBoardMode.superclass.constructor.call(this, oDrawing);
 
     var oMainDiv = oDrawing.Get_MainDiv();
+    var oThis = this;
 
     var nButtonsCount = 10;
     this.m_nWidth = 2 + 36 * nButtonsCount + (nButtonsCount - 1);
@@ -1543,7 +1544,7 @@ function CDrawingButtonBoardMode(oDrawing)
     oToolbarElementWrapper.style.overflowY  = "hidden";
     oToolbarElementWrapper.onclick          = function()
     {
-        oToolbarElementWrapper.style.display = "none";
+        oThis.Hide_Toolbar();
     };
     oMainDiv.appendChild(oToolbarElementWrapper);
 
@@ -1565,7 +1566,7 @@ function CDrawingButtonBoardMode(oDrawing)
     this.m_oButtonX      = new CDrawingButtonEditModeX(oDrawing);
     this.m_oButtonText   = new CDrawingButtonEditModeText(oDrawing);
     this.m_oButtonNum    = new CDrawingButtonEditModeNum(oDrawing);
-    this.m_oButtonColor  = new CDrawingButtonEditModeNum(oDrawing);
+    this.m_oButtonColor  = new CDrawingButtonEditModeColor(oDrawing);
 
     var oDrawingToolbar = new CDrawingToolbar(oDrawing);
     oDrawingToolbar.Add_Control(this.m_oButtonMove, 36, 1, EToolbarFloat.Left);
@@ -1593,33 +1594,9 @@ function CDrawingButtonBoardMode(oDrawing)
 
     this.m_eMode = null;
 
-    var oThis = this;
+
     this.m_nShowToolbarId = null;
-    this.private_ShowToolbar = function()
-    {
-        if (null !== oThis.m_nTransitionId)
-        {
-            clearTimeout(oThis.m_nTransitionId);
-            oThis.m_nTransitionId = null;
-        }
-
-        oThis.m_oToolbarElement.style.display = "block";
-        oThis.m_oToolbarElement.style.opacity = 0;
-        oThis.m_oToolbarElement.style.top     = (oThis.m_nTop + 50) + "px";
-        oThis.m_oToolbarElement.style.height  = "0px";
-
-        oThis.m_nTransitionId = setTimeout(function()
-        {
-            oThis.m_oToolbarElement.style.opacity = 1;
-            oThis.m_oToolbarElement.style.top     = oThis.m_nTop + "px";
-            oThis.m_oToolbarElement.style.height  = oThis.m_nHeight + "px";
-            oThis.m_nTransitionId = null;
-        }, 0);
-
-        oThis.m_nShowToolbarId = null;
-    };
 }
-
 CommonExtend(CDrawingButtonBoardMode, CDrawingButtonBase);
 
 CDrawingButtonBoardMode.prototype.Update_Size = function()
@@ -1748,4 +1725,65 @@ CDrawingButtonBoardMode.prototype.Hide_Toolbar = function()
             oThis.m_nTransitionId = null;
         }, 500);
     }
+};
+//----------------------------------------------------------------------------------------------------------------------
+// Кнопка выбора режима редактирования
+//----------------------------------------------------------------------------------------------------------------------
+function CDrawingButtonEditModeColor(oDrawing)
+{
+    CDrawingButtonEditModeText.superclass.constructor.call(this, oDrawing);
+}
+CommonExtend(CDrawingButtonEditModeColor, CDrawingButtonBase);
+
+CDrawingButtonEditModeColor.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+    var shift = 6, size = 12;
+    var x1 = 6, x12 = x1 + size;
+    var y1 = 6, y12 = y1 + size;
+
+    var x2 = x1 + shift, x22 = x2 + size;
+    var y2 = y1 + shift, y22 = y2 + size;
+
+    var x3 = x2 + shift, x32 = x3 + size;
+    var y3 = y2 + shift, y32 = y3 + size;
+
+    Canvas.lineWidth = 2;
+    Canvas.strokeStyle = "rgb(0, 0, 200)";
+    Canvas.beginPath();
+    Canvas.moveTo(x12, y2);
+    Canvas.lineTo(x12, y1);
+    Canvas.lineTo(x1, y1);
+    Canvas.lineTo(x1, y12);
+    Canvas.lineTo(x2, y12);
+    Canvas.stroke();
+
+    Canvas.strokeStyle = "rgb(0, 100, 0)";
+    Canvas.beginPath();
+    Canvas.moveTo(x22, y3);
+    Canvas.lineTo(x22, y2);
+    Canvas.lineTo(x2, y2);
+    Canvas.lineTo(x2, y22);
+    Canvas.lineTo(x3, y22);
+    Canvas.stroke();
+
+    Canvas.strokeStyle = "rgb(200, 0, 0)";
+    Canvas.beginPath();
+    Canvas.moveTo(x32, y32);
+    Canvas.lineTo(x32, y3);
+    Canvas.lineTo(x3, y3);
+    Canvas.lineTo(x3, y32);
+    Canvas.closePath();
+    Canvas.stroke();
+};
+CDrawingButtonEditModeColor.prototype.private_HandleMouseDown = function()
+{
+    this.m_oGameTree.Get_DrawingBoard().Set_Mode(EBoardMode.AddMarkColor);
+};
+CDrawingButtonEditModeColor.prototype.private_GetHint = function()
+{
+    return "Color marks (F10)";
+};
+CDrawingButtonEditModeColor.prototype.private_RegisterButton = function()
+{
+    this.m_oDrawing.Register_EditModeColorButton(this);
 };
