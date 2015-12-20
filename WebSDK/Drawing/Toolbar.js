@@ -231,3 +231,103 @@ CDrawingToolbarItem.prototype.Get_Control = function(){return this.m_oControl;};
 CDrawingToolbarItem.prototype.Get_W = function(){return this.m_nW;};
 CDrawingToolbarItem.prototype.Get_Space = function(){return this.m_nSpace;};
 CDrawingToolbarItem.prototype.Get_Align = function(){return this.m_eAlign;};
+
+function CDrawingMultiLevelToolbar(oDrawing)
+{
+    this.m_oDrawing = oDrawing;
+
+    this.HtmlElement =
+    {
+        Control : null
+    };
+
+    this.m_bGeneralToolbar  = true;
+    this.m_bAutoPlayToolbar = false;
+    this.m_bTimelimeToolbar = false;
+
+    this.m_nLineHeight    = 36;
+    this.m_nLineSpace     = 1;
+    this.m_nSettingsWidth = 36 * 3 + 2;
+
+    this.m_oSettingsToolbar = new CDrawingToolbar(oDrawing);
+    this.m_oGeneralToolbar  = new CDrawingToolbar(oDrawing);
+    this.m_oAutoPlayToolbar = new CDrawingToolbar(oDrawing);
+    this.m_oTimelineToolbar = new CDrawingToolbar(oDrawing);
+
+    this.m_aLevels = [];
+
+    this.private_UpdateLevels();
+}
+CDrawingMultiLevelToolbar.prototype.private_GetControlByLevel = function(nLevelIndex)
+{
+    if (m_aLevels[nLevelIndex])
+        return m_aLevels[nLevelIndex];
+
+    return null;
+};
+CDrawingMultiLevelToolbar.prototype.Init = function(sDivId)
+{
+    this.HtmlElement.Control = CreateControlContainer(sDivId);
+    var oMainElement         = this.HtmlElement.Control.HtmlElement;
+    var oMainControl         = this.HtmlElement.Control;
+
+    var sSettingsDivId = sDivId + "S";
+    var sGeneralDivId  = sDivId + "G";
+    var sAutoPlayDivId = sDivId + "A";
+    var sTimelineDivId = sDivId + "T";
+
+    Common.Create_DivElement(oMainElement, sSettingsDivId);
+    Common.Create_DivElement(oMainElement, sGeneralDivId);
+    Common.Create_DivElement(oMainElement, sAutoPlayDivId);
+    Common.Create_DivElement(oMainElement, sTimelineDivId);
+
+    var nY = 0;
+    var oSettingsControl = CreateControlContainer(sSettingsDivId);
+    oSettingsControl.Bounds.SetParams(0, 0, 0, 1000, false, true, true, false, this.m_nSettingsWidth, this.m_nLineHeight);
+    oSettingsControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oMainControl.AddControl(oSettingsControl);
+
+    var nControlIndex = 0;
+    var oControl = this.private_GetControlByLevel(nControlIndex);
+    while (oControl)
+    {
+        var sControlDivIdName = "";
+        if (oControl === this.m_oGeneralToolbar)
+            sControlDivIdName = sGeneralDivId;
+        else if (oControl === this.m_oAutoPlayToolbar)
+            sControlDivIdName = sAutoPlayDivId;
+        else if (oControl === this.m_oTimelineToolbar)
+            sControlDivIdName = sTimelineDivId;
+        else
+            break;
+
+        var oElementControl = CreateControlContainer(sControlDivIdName);
+
+        if (0 === nControlIndex)
+            oElementControl.Bounds.SetParams(0, nY, this.m_nSettingsWidth, 1000, false, true, true, false, -1, this.m_nLineHeight);
+        else
+            oElementControl.Bounds.SetParams(0, nY, 1000, 1000, false, true, false, false, -1, this.m_nLineHeight);
+
+        oElementControl.Anchor = (g_anchor_left | g_anchor_right);
+        oMainControl.AddControl(oElementControl);
+
+        nY += this.m_nLineHeight + this.m_nLineSpace;
+        oControl = this.private_GetControlByLevel(++nControlIndex);
+    }
+};
+CDrawingMultiLevelToolbar.prototype.Get_Height = function()
+{
+    var nLevelsCount = Math.max(this.m_aLevels.length, 1);
+    return nLevelsCount * this.m_nLineHeight + (nLevelsCount - 1) * this.m_nLineSpace;
+};
+CDrawingMultiLevelToolbar.prototype.private_UpdateLevels = function()
+{
+    this.m_aLevels = [];
+
+    if (true === this.m_bGeneralToolbar)
+        m_aLevels.push(this.m_oGeneralToolbar);
+    else if (true === this.m_bAutoPlayToolbar)
+        m_aLevels.push(this.m_oAutoPlayToolbar);
+    else if (true === this.m_bTimelimeToolbar)
+        m_aLevels.push(this.m_oTimelineToolbar);
+};

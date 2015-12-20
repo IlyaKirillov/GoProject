@@ -546,7 +546,16 @@ CCommon.prototype.Is_NodeDescendant = function(oParent, oChild, _nDepth)
         oNode = oNode.parentNode;
     }
     return false;
-}
+};
+CCommon.prototype.Create_DivElement = function(oParentElement, sName)
+{
+    var oElement = document.createElement("div");
+    oElement.setAttribute("id", sName);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oParentElement.appendChild(oElement);
+    return oElement;
+};
 
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
