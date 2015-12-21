@@ -1787,3 +1787,272 @@ CDrawingButtonEditModeColor.prototype.private_RegisterButton = function()
 {
     this.m_oDrawing.Register_EditModeColorButton(this);
 };
+//----------------------------------------------------------------------------------------------------------------------
+// Кнопка для настройки тулбара
+//----------------------------------------------------------------------------------------------------------------------
+function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
+{
+    CDrawingButtonEditModeText.superclass.constructor.call(this, oDrawing);
+    this.m_oMultiLevelToolbar = oMutliLevelToolbar;
+
+    var oMainDiv = oDrawing.Get_MainDiv();
+    var oThis    = this;
+
+    this.m_nWidth  = 160;
+    this.m_nHeight = 74;
+
+    var oContextMenuElementWrapper              = document.createElement("div");
+    oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
+    oContextMenuElementWrapper.style.position   = "absolute";
+    oContextMenuElementWrapper.style.top        = "100px";
+    oContextMenuElementWrapper.style.left       = "100px";
+    oContextMenuElementWrapper.style.width      = this.m_nWidth + "px";
+    oContextMenuElementWrapper.style.height     = this.m_nHeight + "px";
+    oContextMenuElementWrapper.style.background = "rgb(255, 255, 255)";
+    oContextMenuElementWrapper.style.display    = "block";
+    oContextMenuElementWrapper.style.border     = "1px solid rgb(166, 166, 166)";
+    oContextMenuElementWrapper.style.boxShadow  = "0px 1px 15px rgba(0,0,0,0.8)";
+    oContextMenuElementWrapper.style.overflowY  = "hidden";
+    oMainDiv.appendChild(oContextMenuElementWrapper);
+
+    oContextMenuElementWrapper.style.transitionProperty = "height";
+    oContextMenuElementWrapper.style.transitionDuration = "0.2s";
+    oContextMenuElementWrapper.style.transitionDelay    = "0s";
+    oContextMenuElementWrapper.style.display            = "none";
+
+    this.m_oContextMenuElement = oContextMenuElementWrapper;
+    this.m_nTransitionId       = null;
+    this.m_nShowId             = null;
+
+    var oList = document.createElement("ul");
+
+    oList.style.padding        = "5px 0";
+    oList.style.margin         = "2px 0 0";
+    oList.style.listStyle      = "none";
+    oList.style.fontSize       = "16px";
+    oList.style.backgroundClip = "padding-box";
+    oList.style.lineHeight     = "20px";
+
+    this.m_oGeneralCheckElement  = this.private_CreateListItem(oList, "General toolbar", function(){oDrawing.Toggle_MultiLevelToolbarGeneral()}, g_oGlobalSettings.Is_MultiLevelToolbarGeneral());
+    this.m_oAutoPlayCheckElement = this.private_CreateListItem(oList, "Autoplay toolbar", function(){oDrawing.Toggle_MultiLevelToolbarAutoPlay()}, g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay());
+    this.m_oTimelineCheckElement = this.private_CreateListItem(oList, "Timeline toolbar", function(){oDrawing.Toggle_MultiLevelToolbarTimeline()}, g_oGlobalSettings.Is_MultiLevelToolbarTimeline());
+
+    oContextMenuElementWrapper.appendChild(oList);
+}
+CommonExtend(CDrawingButtonToolbarCustomize, CDrawingButtonBase);
+
+CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
+{
+    CDrawingButtonToolbarCustomize.superclass.Update_Size.apply(this, arguments);
+    var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
+
+    var nLeft = oOffset.X + 36 - this.m_nWidth;
+    var nTop  = oOffset.Y + 36 + 5;
+
+    var nOverallW = this.m_oDrawing.Get_Width();
+    var nOverallH = this.m_oDrawing.Get_Height();
+
+    var nMinOffset = 5;
+
+    if (nLeft + this.m_nWidth  > nOverallW - nMinOffset)
+        nLeft = nOverallW - nMinOffset - this.m_nWidth;
+
+    if (nLeft < nMinOffset)
+        nLeft = nMinOffset;
+
+    if (nTop + this.m_nHeight > nOverallH - nMinOffset)
+        nTop = nOverallH - nMinOffset - this.m_nHeight;
+
+    if (nTop < nMinOffset)
+        nTop = nMinOffset;
+
+    this.m_nTop = nTop;
+
+    this.m_oContextMenuElement.style.left = nLeft + "px";
+    this.m_oContextMenuElement.style.top  = nTop + "px";
+};
+CDrawingButtonToolbarCustomize.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+    var shift = 6, size = 12;
+    var x1 = 6, x12 = x1 + size;
+    var y1 = 6, y12 = y1 + size;
+
+    var x2 = x1 + shift, x22 = x2 + size;
+    var y2 = y1 + shift, y22 = y2 + size;
+
+    var x3 = x2 + shift, x32 = x3 + size;
+    var y3 = y2 + shift, y32 = y3 + size;
+
+    Canvas.lineWidth = 2;
+    Canvas.strokeStyle = "rgb(0, 0, 200)";
+    Canvas.beginPath();
+    Canvas.moveTo(x12, y2);
+    Canvas.lineTo(x12, y1);
+    Canvas.lineTo(x1, y1);
+    Canvas.lineTo(x1, y12);
+    Canvas.lineTo(x2, y12);
+    Canvas.stroke();
+};
+CDrawingButtonToolbarCustomize.prototype.private_HandleMouseDown = function()
+{
+    if ("none" === this.m_oContextMenuElement.style.display)
+    {
+        if (null === this.m_nShowId)
+        {
+            var oThis = this;
+            this.m_nShowId = setTimeout(function ()
+            {
+                if (null !== oThis.m_nTransitionId)
+                {
+                    clearTimeout(oThis.m_nTransitionId);
+                    oThis.m_nTransitionId = null;
+                }
+
+                oThis.m_oContextMenuElement.style.display = "block";
+                oThis.m_oContextMenuElement.style.height  = "0px";
+
+                oThis.m_nTransitionId = setTimeout(function ()
+                {
+                    oThis.m_oContextMenuElement.style.height = oThis.m_nHeight + "px";
+                    oThis.m_nTransitionId = null;
+                    oThis.m_nShowId       = null;
+                }, 20);
+            }, 20);
+        }
+    }
+    else
+    {
+        this.Hide_ContextMenu();
+    }
+
+    //if (this.m_oMultiLevelToolbar)
+    //    this.m_oMultiLevelToolbar.Set(false, true, false);
+};
+CDrawingButtonToolbarCustomize.prototype.private_GetHint = function()
+{
+    return "";
+};
+CDrawingButtonToolbarCustomize.prototype.private_RegisterButton = function()
+{
+    this.m_oDrawing.Register_ToolbarCustomizeButton(this);
+};
+CDrawingButtonToolbarCustomize.prototype.Hide_ContextMenu = function(bFast)
+{
+    if ("none" !== this.m_oContextMenuElement.style.display)
+    {
+        if (true === bFast)
+        {
+            this.m_oContextMenuElement.style.height  = "0px";
+            this.m_oContextMenuElement.style.display = "none";
+        }
+        else
+        {
+
+            if (null !== this.m_nTransitionId)
+            {
+                clearTimeout(this.m_nTransitionId);
+                this.m_nTransitionId = null;
+            }
+
+            this.m_oContextMenuElement.style.height = "0px";
+            var oThis                               = this;
+            this.m_nTransitionId                    = setTimeout(function()
+            {
+                oThis.m_oContextMenuElement.style.display = "none";
+                oThis.m_nTransitionId                     = null;
+            }, 200);
+        }
+    }
+};
+CDrawingButtonToolbarCustomize.prototype.private_CreateListItem = function(oList, sText, pOnClickHandler, bChecked)
+{
+    var oItem = document.createElement("li");
+
+    oItem.style.fontFamily = '"Times New Roman", Times, serif';
+    oItem.style.width      = (this.m_nWidth - 10) + "px";
+    oItem.style.height     = "20px";
+    oItem.style.color      = "#444444";
+    oItem.style.margin     = "0px 5px 0px 5px";
+    oItem.style.cursor     = "pointer";
+
+    var oCheckItem               = document.createElement("div");
+    oCheckItem.style.paddingLeft = "3px";
+    oCheckItem.style.width       = "20px";
+    oCheckItem.style.height      = "20px";
+    oCheckItem.style.float       = "left";
+    Common.Set_InnerTextToElement(oCheckItem, bChecked ? "✔" : "");
+    oItem.appendChild(oCheckItem);
+
+    var oTextItem               = document.createElement("div");
+    oTextItem.style.paddingLeft = "5px";
+    oTextItem.style.height      = "20px";
+    oTextItem.style.width       = (this.m_nWidth - 10 - 20 - 10) + "px";
+    oTextItem.style.float       = "left";
+    oTextItem.style.overflow    = "hidden";
+    Common.Set_InnerTextToElement(oTextItem, sText);
+    oItem.appendChild(oTextItem);
+
+    oItem.onmouseover = function()
+    {
+        oItem.style.background = "#d8dadc";
+        oItem.style.color      = "#373737";
+    };
+
+    oItem.onmouseout = function()
+    {
+        oItem.style.background = "transparent";
+        oItem.style.color      = "#444444";
+    };
+
+    var oThis = this;
+    oItem.onclick = function()
+    {
+        if (pOnClickHandler)
+            pOnClickHandler();
+
+        oThis.Hide_ContextMenu(true);
+    };
+
+    oList.appendChild(oItem);
+
+    return oCheckItem;
+};
+CDrawingButtonToolbarCustomize.prototype.Set_General = function(bChecked)
+{
+    if (this.m_oMultiLevelToolbar)
+        this.m_oMultiLevelToolbar.Set_General(bChecked);
+
+    this.private_UpdateCheckElement(this.m_oGeneralCheckElement, bChecked);
+};
+CDrawingButtonToolbarCustomize.prototype.Set_AutoPlay = function(bChecked)
+{
+    if (this.m_oMultiLevelToolbar)
+        this.m_oMultiLevelToolbar.Set_AutoPlay(bChecked);
+
+    this.private_UpdateCheckElement(this.m_oAutoPlayCheckElement, bChecked);
+};
+CDrawingButtonToolbarCustomize.prototype.Set_Timeline = function(bChecked)
+{
+    if (this.m_oMultiLevelToolbar)
+        this.m_oMultiLevelToolbar.Set_Timeline(bChecked);
+
+    this.private_UpdateCheckElement(this.m_oTimelineCheckElement, bChecked);
+};
+CDrawingButtonToolbarCustomize.prototype.Set_General = function(bGeneral)
+{
+    if (this.m_oMultiLevelToolbar)
+        this.m_oMultiLevelToolbar.Set_General(bGeneral);
+
+    this.private_UpdateCheckElement(this.m_oGeneralCheckElement, bGeneral);
+};
+CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(oCheckElement, bChecked)
+{
+    if (oCheckElement)
+    {
+        if (true === bChecked)
+            Common.Set_InnerTextToElement(oCheckElement, "✔");
+        else
+            Common.Set_InnerTextToElement(oCheckElement, "");
+    }
+};
+

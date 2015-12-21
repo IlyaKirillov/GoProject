@@ -11,7 +11,7 @@ function CPos()
 {
     X = 0;
     Y = 0;
-};
+}
 
 function CColor(r, g, b, a)
 {

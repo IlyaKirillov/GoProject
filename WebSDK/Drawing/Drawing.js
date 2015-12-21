@@ -69,6 +69,10 @@ function CSettings()
     this.m_eNavigatorLabels               = ESettingsNavigatorLabels.MoveNumbers;
     this.m_eLoadShowVariants              = ESettingsLoadShowVariants.FromFile;
     this.m_bShowTarget                    = true;
+
+    this.m_bMultiLevelToolbarGeneral      = true;
+    this.m_bMultiLevelToolbarAutoPlay     = true;
+    this.m_bMultiLevelToolbarTimeline     = true;
 }
 CSettings.prototype.Load_FromLocalStorage = function()
 {
@@ -101,6 +105,11 @@ CSettings.prototype.Load_FromLocalStorage = function()
     // Rulers
     var sRulers = Common.Get_LocalStorageItem("Rulers");
     this.m_bRulers = (sRulers === "1" ? true : false);
+
+    // MultilevelToolbar
+    this.m_bMultiLevelToolbarGeneral  = Common.Get_LocalStorageItem("MultiLevelToolbarGeneral") == "0" ? false : true;
+    this.m_bMultiLevelToolbarAutoPlay = Common.Get_LocalStorageItem("MultiLevelToolbarAutoPlay") == "1" ? true : false;
+    this.m_bMultiLevelToolbarTimeline = Common.Get_LocalStorageItem("MultiLevelToolbarTimeline") == "1" ? true : false;
 };
 CSettings.prototype.Set_Sound = function(Value)
 {
@@ -281,6 +290,36 @@ CSettings.prototype.Set_LoadShowVariants = function(eValue)
     this.m_eLoadShowVariants = eValue;
     Common.Set_LocalStorageItem("ShowVariants", eValue);
 };
+CSettings.prototype.Toggle_MultiLevelToolbarGeneral = function()
+{
+    this.m_bMultiLevelToolbarGeneral = !this.m_bMultiLevelToolbarGeneral;
+    Common.Set_LocalStorageItem("MultiLevelToolbarGeneral", true === this.m_bMultiLevelToolbarGeneral ? "1" : "0");
+    return this.m_bMultiLevelToolbarGeneral;
+};
+CSettings.prototype.Toggle_MultiLevelToolbarAutoPlay = function()
+{
+    this.m_bMultiLevelToolbarAutoPlay = !this.m_bMultiLevelToolbarAutoPlay;
+    Common.Set_LocalStorageItem("MultiLevelToolbarAutoPlay", true === this.m_bMultiLevelToolbarAutoPlay ? "1" : "0");
+    return this.m_bMultiLevelToolbarAutoPlay;
+};
+CSettings.prototype.Toggle_MultiLevelToolbarTimeline = function()
+{
+    this.m_bMultiLevelToolbarTimeline = !this.m_bMultiLevelToolbarTimeline;
+    Common.Set_LocalStorageItem("MultiLevelToolbarTimeline", true === this.m_bMultiLevelToolbarTimeline ? "1" : "0");
+    return this.m_bMultiLevelToolbarTimeline;
+};
+CSettings.prototype.Is_MultiLevelToolbarGeneral = function()
+{
+    return this.m_bMultiLevelToolbarGeneral;
+};
+CSettings.prototype.Is_MultiLevelToolbarAutoPlay = function()
+{
+    return this.m_bMultiLevelToolbarAutoPlay;
+};
+CSettings.prototype.Is_MultiLevelToolbarTimeline = function()
+{
+    return this.m_bMultiLevelToolbarTimeline;
+};
 var g_oGlobalSettings = new CSettings();
 
 function CDrawing(oGameTree)
@@ -319,7 +358,9 @@ function CDrawing(oGameTree)
         BoardModeX      : [],
         BoardModeText   : [],
         BoardModeNum    : [],
-        BoardModeColor  : []
+        BoardModeColor  : [],
+
+        ToolbarCustomize: null
     };
 
     this.m_oBoard     = null;
@@ -349,6 +390,9 @@ function CDrawing(oGameTree)
     {
         if (oThis.m_oSelectBoardModeButton)
             oThis.m_oSelectBoardModeButton.Hide_Toolbar();
+
+        if (oThis.m_oButtons.ToolbarCustomize)
+            oThis.m_oButtons.ToolbarCustomize.Hide_ContextMenu(false);
     };
     this.private_OnTimerDraw = function()
     {
@@ -594,6 +638,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     oCaTControl.Bounds.SetParams(0, 0, 1000, 500, false, false, false, false, -1, -1);
     oCaTControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oPanelControl.AddControl(oCaTControl);
+    oCaTControl.HtmlElement.style.background = "rgb(217, 217, 217)";
 
     var oNavigatorControl = CreateControlContainer(sNavigatorDivId);
     oNavigatorControl.Bounds.SetParams(0, 500, 1000, 1000, false, false, false, false, -1, -1);
@@ -652,79 +697,37 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
 
     // END INFO
 
+    var oDrawingMultilevelToolbar = new CDrawingMultiLevelToolbar(this);
+    oDrawingMultilevelToolbar.Init(sToolsDivId);
+
+    var nToolbarHeight = oDrawingMultilevelToolbar.Get_Height();
+
+    var oToolsControl = CreateControlContainer(sToolsDivId);
+    oToolsControl.Bounds.SetParams(6, 0, 6, 0, true, false, true, true, -1, nToolbarHeight);
+    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaTControl.AddControl(oToolsControl);
+
     var oCommentsControl = CreateControlContainer(sCommentsDivId);
-    oCommentsControl.Bounds.SetParams(0, InfoH, 1000, ToolbarH * 4, false, true, false, true, -1, ToolbarH);
+    oCommentsControl.Bounds.SetParams(0, InfoH, 1000, nToolbarHeight + 1, false, true, false, true, -1, -1);
     oCommentsControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaTControl.AddControl(oCommentsControl);
 
-    var oToolsControl = CreateControlContainer(sToolsDivId);
-    oToolsControl.Bounds.SetParams(6, 0, 6, ToolbarH * 3, true, false, true, true, -1, ToolbarH);
-    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-    oCaTControl.AddControl(oToolsControl);
-
-    oToolsControl = CreateControlContainer(sToolsDivId2);
-    oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH * 2, false, false, false, true, -1, ToolbarH);
-    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-    oCaTControl.AddControl(oToolsControl);
-
-    oToolsControl = CreateControlContainer(sTools2DivId);
-    oToolsControl.Bounds.SetParams(0, 0, 1000, ToolbarH, false, false, false, true, -1, ToolbarH);
-    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-    oCaTControl.AddControl(oToolsControl);
-
-    var oAutoControl = CreateControlContainer(sAutoPlayButton);
-    oAutoControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, ToolbarH, -1);
-    oAutoControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_bottom);
-    oToolsControl.AddControl(oAutoControl);
-
-    oAutoControl = CreateControlContainer(sAutoPlaySlider);
-    oAutoControl.Bounds.SetParams(ToolbarH, 0, 1000, 1000, true, false, false, false, -1, ToolbarH);
-    oAutoControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
-    oToolsControl.AddControl(oAutoControl);
-
-    oToolsControl = CreateControlContainer(sTools3DivId);
-    oToolsControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, ToolbarH);
-    oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
-    oCaTControl.AddControl(oToolsControl);
+    var oThis = this;
+    oDrawingMultilevelToolbar.Set_OnChangeCallback(function()
+    {
+        nToolbarHeight = oDrawingMultilevelToolbar.Get_Height();
+        oToolsControl.Bounds.SetParams(6, 0, 6, 0, true, false, true, true, -1, nToolbarHeight);
+        oCommentsControl.Bounds.SetParams(0, InfoH, 1000, nToolbarHeight + 1, false, true, false, true, -1, -1);
+        oThis.Update_Size(false);
+    });
 
     var oDrawingComments = new CDrawingComments(this);
     oDrawingComments.Init(sCommentsDivId, oGameTree);
 
-    var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonBackward5(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonBackward(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonForward(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonForward5(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonForwardToEnd(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonPass(this), 73, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonNextVariant(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonPrevVariant(this), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonBoardMode(this, oGameTree), 36, 1, EToolbarFloat.Left);
-    oDrawingToolbar.Add_Control(new CDrawingButtonGameInfo(this), 36, 1, EToolbarFloat.Left);
-
-    oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Right);
-    oDrawingToolbar.Add_Control(new CDrawingButtonSettings(this), 36, 1, EToolbarFloat.Right);
-
-    oDrawingToolbar.Init(sToolsDivId, oGameTree);
-
-
-    var oDrawingTimeLineSlider = new CDrawingSlider(this);
-    oDrawingTimeLineSlider.Init(sTools3DivId, oGameTree, EDrawingSliderType.Timeline, 0);
-
-    var oDrawingAutoPlayButton = new CDrawingButtonAutoPlay(this);
-    oDrawingAutoPlayButton.Init(sAutoPlayButton, oGameTree);
-
-    var oDrawingAutoPlaySlider = new CDrawingSlider(this);
-    oDrawingAutoPlaySlider.Init(sAutoPlaySlider, oGameTree, EDrawingSliderType.AutoPlaySpeed, 0);
-
     this.m_aElements.push(oDrawingBoard);
     this.m_aElements.push(oDrawingNavigator);
     this.m_aElements.push(oDrawingComments);
-    this.m_aElements.push(oDrawingToolbar);
-    this.m_aElements.push(oDrawingTimeLineSlider);
-    this.m_aElements.push(oDrawingAutoPlayButton);
-    this.m_aElements.push(oDrawingAutoPlaySlider);
+    this.m_aElements.push(oDrawingMultilevelToolbar);
     this.m_aElements.push(oDrawingBlackInfo);
     this.m_aElements.push(oDrawingWhiteInfo);
 
@@ -790,32 +793,49 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     oDrawingBoard.Focus();
 
     var sNotBoardDivId = sNotInfoDivId + "N";
-    this.private_CreateDiv(oNotInfoControl.HtmlElement, sNotBoardDivId);
+    var oNotBoardElement = this.private_CreateDiv(oNotInfoControl.HtmlElement, sNotBoardDivId);
     var oNotBoardControl = CreateControlContainer(sNotBoardDivId);
     oNotInfoControl.AddControl(oNotBoardControl);
+    oNotBoardElement.style.background = "rgb(217, 217, 217)";
+    //------------------------------------------------------------------------------------------------------------------
+    // Создаем контрол с кнопками.
+    //------------------------------------------------------------------------------------------------------------------
+    var sToolbarDivId = sNotBoardDivId + "T";
+    this.private_CreateDiv(oNotBoardControl.HtmlElement, sToolbarDivId);
+
+    var oDrawingToolbar = new CDrawingMultiLevelToolbar(this);
+    oDrawingToolbar.Init(sToolbarDivId);
+    var ToolbarH = oDrawingToolbar.Get_Height();
+    this.m_aElements.push(oDrawingToolbar);
+    this.m_nMixedBotSize = ToolbarH + 160;
+    oNotInfoControl.Set_Type(3, oDrawingBoard, {RMin : this.m_nMixedBotSize - 50});
     //------------------------------------------------------------------------------------------------------------------
     // Контрол под доской тоже делим на 2 части: сверху 25px под кнопки, а снизу все остальное под навигатор.
     //------------------------------------------------------------------------------------------------------------------
-    var ToolbarH = 36;
-    var sToolbarDivId = sNotBoardDivId + "T";
-    this.private_CreateDiv(oNotBoardControl.HtmlElement, sToolbarDivId);
     var oToolsControl = CreateControlContainer(sToolbarDivId);
-    oToolsControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, ToolbarH);
+    oToolsControl.Bounds.SetParams(0, 1, 1000, 0, true, false, false, false, -1, ToolbarH);
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top);
     oNotBoardControl.AddControl(oToolsControl);
 
     var sUnderToolbarDivId = sNotBoardDivId + "U";
     this.private_CreateDiv(oNotBoardControl.HtmlElement, sUnderToolbarDivId);
     var oUnderToolBarControl = CreateControlContainer(sUnderToolbarDivId);
-    oUnderToolBarControl.Bounds.SetParams(0, ToolbarH, 1000, 1000, false, true, false, false, -1, -1);
+    oUnderToolBarControl.Bounds.SetParams(0, ToolbarH + 2, 1000, 1000, false, true, false, false, -1, -1);
     oUnderToolBarControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
     oNotBoardControl.AddControl(oUnderToolBarControl);
     //------------------------------------------------------------------------------------------------------------------
-    // Заполняем контрол с кнопками.
+    // Обработчик изменения многоуровнего тулбара.
     //------------------------------------------------------------------------------------------------------------------
-    var oDrawingToolbar = new CDrawingToolbar(this);
-    oDrawingToolbar.Init(sToolbarDivId, oGameTree, {Controls : [EDrawingButtonType.BackwardToStart, EDrawingButtonType.Backward, EDrawingButtonType.Forward, EDrawingButtonType.ForwardToEnd, EDrawingButtonType.Pass, EDrawingButtonType.NextVariant, EDrawingButtonType.PrevVariant, EDrawingButtonType.GameInfo, EDrawingButtonType.Settings, EDrawingButtonType.About]});
-    this.m_aElements.push(oDrawingToolbar);
+    var oThis = this;
+    oDrawingToolbar.Set_OnChangeCallback(function()
+    {
+        ToolbarH = oDrawingToolbar.Get_Height();
+        oThis.m_nMixedBotSize = ToolbarH + 160;
+        oNotInfoControl.Set_Type(3, oDrawingBoard, {RMin : oThis.m_nMixedBotSize - 50});
+        oToolsControl.Bounds.SetParams(0, 1, 1000, 0, false, true, false, false, -1, ToolbarH);
+        oUnderToolBarControl.Bounds.SetParams(0, ToolbarH + 2, 1000, 1000, false, true, false, false, -1, -1);
+        oThis.Update_Size(false);
+    });
     //------------------------------------------------------------------------------------------------------------------
     // Контрол под панелью управления делим на 2 части, справа панель 30px с кнопками для переключения, слева все
     // остальное.
@@ -1137,6 +1157,10 @@ CDrawing.prototype.Register_SelectBoardModeButton = function(oButton)
 {
     this.m_oSelectBoardModeButton = oButton;
 };
+CDrawing.prototype.Register_ToolbarCustomizeButton = function(oButton)
+{
+    this.m_oButtons.ToolbarCustomize = oButton;
+};
 CDrawing.prototype.On_StartAutoPlay = function()
 {
     if (this.m_oAutoPlayButton)
@@ -1147,7 +1171,6 @@ CDrawing.prototype.On_StopAutoPlay = function()
     if (this.m_oAutoPlayButton)
         this.m_oAutoPlayButton.Set_State2(EDrawingButtonState2.AutoPlayStopped);
 };
-
 CDrawing.prototype.Update_AutoPlaySpeed = function(dPos)
 {
     if (this.m_oAutoPlaySlider)
@@ -1277,6 +1300,33 @@ CDrawing.prototype.Update_ColorsCounter = function()
     var oCountColorsWindow = g_aWindows[EWindowType.CountColors];
     if (oCountColorsWindow && oCountColorsWindow.Is_Visible())
         oCountColorsWindow.Update();
+};
+CDrawing.prototype.Toggle_MultiLevelToolbarGeneral = function()
+{
+    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarGeneral();
+
+    if (this.m_oButtons.ToolbarCustomize)
+        this.m_oButtons.ToolbarCustomize.Set_General(bShow);
+
+    return bShow;
+};
+CDrawing.prototype.Toggle_MultiLevelToolbarAutoPlay = function()
+{
+    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarAutoPlay();
+
+    if (this.m_oButtons.ToolbarCustomize)
+        this.m_oButtons.ToolbarCustomize.Set_AutoPlay(bShow);
+
+    return bShow;
+};
+CDrawing.prototype.Toggle_MultiLevelToolbarTimeline = function()
+{
+    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarTimeline();
+
+    if (this.m_oButtons.ToolbarCustomize)
+        this.m_oButtons.ToolbarCustomize.Set_Timeline(bShow);
+
+    return bShow;
 };
 
 function CDrawingFullInfo()

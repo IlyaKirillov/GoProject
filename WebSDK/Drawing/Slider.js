@@ -16,11 +16,11 @@ var EDrawingSliderType =
     Timeline      : 1
 };
 
-function CDrawingSlider(oDrawing)
+function CDrawingSlider(oDrawing, nSliderType)
 {
     this.m_oDrawing  = oDrawing;
     this.m_oGameTree = null;
-    this.m_nType     = EDrawingSliderType.Unknown;
+    this.m_nType     = nSliderType ? nSliderType : EDrawingSliderType.Unknown;
 
     this.HtmlElement =
     {
@@ -76,12 +76,11 @@ function CDrawingSlider(oDrawing)
     };
 }
 
-CDrawingSlider.prototype.Init = function(sDivId, oGameTree, nSliderType, dPos)
+CDrawingSlider.prototype.Init = function(sDivId)
 {
-    this.m_oGameTree = oGameTree;
-    this.m_nType     = nSliderType;
+    this.m_oGameTree = (this.m_oDrawing ? this.m_oDrawing.Get_GameTree() : null);
 
-    switch(nSliderType)
+    switch(this.m_nSliderType)
     {
         case EDrawingSliderType.AutoPlaySpeed: this.m_oDrawing.Register_AutoPlaySpeed(this); break;
         case EDrawingSliderType.Timeline     : this.m_oDrawing.Register_TimeLine(this); break;
@@ -123,7 +122,7 @@ CDrawingSlider.prototype.Init = function(sDivId, oGameTree, nSliderType, dPos)
     oLeftControl.HtmlElement.style.background = this.m_oLeftColor.ToString();
 
     this.Update_Size();
-    this.private_UpdatePos(dPos);
+    this.private_UpdatePos(0);
 };
 CDrawingSlider.prototype.Update_Size = function()
 {

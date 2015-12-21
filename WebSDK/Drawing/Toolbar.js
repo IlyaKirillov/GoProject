@@ -96,7 +96,7 @@ CDrawingToolbar.prototype.private_FillHtmlElement = function(oParentControl, sNa
 
     if (bLeftAlign)
     {
-        oControl.Bounds.SetParams(nDistance, 0, 0, 1000, true, false, false, false, nWidth, -1);
+        oControl.Bounds.SetParams(nDistance, 0, 1000, 1000, true, false, false, false, nWidth, -1);
         oControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
     }
     else
@@ -234,34 +234,65 @@ CDrawingToolbarItem.prototype.Get_Align = function(){return this.m_eAlign;};
 
 function CDrawingMultiLevelToolbar(oDrawing)
 {
-    this.m_oDrawing = oDrawing;
+    this.m_oDrawing  = oDrawing;
 
     this.HtmlElement =
     {
-        Control : null
+        Control         : null,
+        SettingsControl : null,
+        SettingsElement : null,
+
+        GeneralControl  : null,
+        GeneralElement  : null,
+
+        AutoPlayControl : null,
+        AutoPlayElement : null,
+
+        TimelineControl : null,
+        TimelineElement : null
     };
 
-    this.m_bGeneralToolbar  = true;
-    this.m_bAutoPlayToolbar = false;
-    this.m_bTimelimeToolbar = false;
+    this.m_bGeneralToolbar  = g_oGlobalSettings.Is_MultiLevelToolbarGeneral();
+    this.m_bAutoPlayToolbar = g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay();
+    this.m_bTimelimeToolbar = g_oGlobalSettings.Is_MultiLevelToolbarTimeline();
 
     this.m_nLineHeight    = 36;
     this.m_nLineSpace     = 1;
     this.m_nSettingsWidth = 36 * 3 + 2;
 
     this.m_oSettingsToolbar = new CDrawingToolbar(oDrawing);
-    this.m_oGeneralToolbar  = new CDrawingToolbar(oDrawing);
+    this.m_oSettingsToolbar.Add_Control(new CDrawingButtonAbout(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oSettingsToolbar.Add_Control(new CDrawingButtonSettings(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oSettingsToolbar.Add_Control(new CDrawingButtonToolbarCustomize(oDrawing, this), 36, 1, EToolbarFloat.Left);
+
+    this.m_oGeneralToolbar = new CDrawingToolbar(oDrawing);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonBackwardToStart(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonBackward5(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonBackward(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonForward(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonForward5(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonForwardToEnd(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonPass(oDrawing), 73, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonNextVariant(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonPrevVariant(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonBoardMode(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralToolbar.Add_Control(new CDrawingButtonGameInfo(oDrawing), 36, 1, EToolbarFloat.Left);
+
     this.m_oAutoPlayToolbar = new CDrawingToolbar(oDrawing);
+    this.m_oAutoPlayToolbar.Add_Control(new CDrawingButtonAutoPlay(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oAutoPlayToolbar.Add_Control(new CDrawingSlider(oDrawing, EDrawingSliderType.AutoPlaySpeed), -1, 1, EToolbarFloat.Left);
+
     this.m_oTimelineToolbar = new CDrawingToolbar(oDrawing);
+    this.m_oTimelineToolbar.Add_Control(new CDrawingSlider(oDrawing, EDrawingSliderType.Timeline), -1, 1, EToolbarFloat.Left);
 
     this.m_aLevels = [];
 
-    this.private_UpdateLevels();
+    this.m_pOnChangeCallback = null;
 }
 CDrawingMultiLevelToolbar.prototype.private_GetControlByLevel = function(nLevelIndex)
 {
-    if (m_aLevels[nLevelIndex])
-        return m_aLevels[nLevelIndex];
+    if (this.m_aLevels[nLevelIndex])
+        return this.m_aLevels[nLevelIndex];
 
     return null;
 };
@@ -276,44 +307,29 @@ CDrawingMultiLevelToolbar.prototype.Init = function(sDivId)
     var sAutoPlayDivId = sDivId + "A";
     var sTimelineDivId = sDivId + "T";
 
-    Common.Create_DivElement(oMainElement, sSettingsDivId);
-    Common.Create_DivElement(oMainElement, sGeneralDivId);
-    Common.Create_DivElement(oMainElement, sAutoPlayDivId);
-    Common.Create_DivElement(oMainElement, sTimelineDivId);
+    this.HtmlElement.SettingsElement = Common.Create_DivElement(oMainElement, sSettingsDivId);
+    this.HtmlElement.GeneralElement  = Common.Create_DivElement(oMainElement, sGeneralDivId);
+    this.HtmlElement.AutoPlayElement = Common.Create_DivElement(oMainElement, sAutoPlayDivId);
+    this.HtmlElement.TimelineElement = Common.Create_DivElement(oMainElement, sTimelineDivId);
 
-    var nY = 0;
-    var oSettingsControl = CreateControlContainer(sSettingsDivId);
-    oSettingsControl.Bounds.SetParams(0, 0, 0, 1000, false, true, true, false, this.m_nSettingsWidth, this.m_nLineHeight);
-    oSettingsControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
-    oMainControl.AddControl(oSettingsControl);
+    this.HtmlElement.SettingsControl = CreateControlContainer(sSettingsDivId);
+    oMainControl.AddControl(this.HtmlElement.SettingsControl);
+    this.m_oSettingsToolbar.Init(sSettingsDivId, this.m_oDrawing.Get_GameTree());
 
-    var nControlIndex = 0;
-    var oControl = this.private_GetControlByLevel(nControlIndex);
-    while (oControl)
-    {
-        var sControlDivIdName = "";
-        if (oControl === this.m_oGeneralToolbar)
-            sControlDivIdName = sGeneralDivId;
-        else if (oControl === this.m_oAutoPlayToolbar)
-            sControlDivIdName = sAutoPlayDivId;
-        else if (oControl === this.m_oTimelineToolbar)
-            sControlDivIdName = sTimelineDivId;
-        else
-            break;
+    this.HtmlElement.GeneralControl = CreateControlContainer(sGeneralDivId);
+    oMainControl.AddControl(this.HtmlElement.GeneralControl);
+    this.m_oGeneralToolbar.Init(sGeneralDivId, this.m_oDrawing.Get_GameTree());
 
-        var oElementControl = CreateControlContainer(sControlDivIdName);
+    this.HtmlElement.AutoPlayControl = CreateControlContainer(sAutoPlayDivId);
+    oMainControl.AddControl(this.HtmlElement.AutoPlayControl);
+    this.m_oAutoPlayToolbar.Init(sAutoPlayDivId, this.m_oDrawing.Get_GameTree());
 
-        if (0 === nControlIndex)
-            oElementControl.Bounds.SetParams(0, nY, this.m_nSettingsWidth, 1000, false, true, true, false, -1, this.m_nLineHeight);
-        else
-            oElementControl.Bounds.SetParams(0, nY, 1000, 1000, false, true, false, false, -1, this.m_nLineHeight);
+    this.HtmlElement.TimelineControl = CreateControlContainer(sTimelineDivId);
+    oMainControl.AddControl(this.HtmlElement.TimelineControl);
+    this.m_oTimelineToolbar.Init(sTimelineDivId, this.m_oDrawing.Get_GameTree());
 
-        oElementControl.Anchor = (g_anchor_left | g_anchor_right);
-        oMainControl.AddControl(oElementControl);
-
-        nY += this.m_nLineHeight + this.m_nLineSpace;
-        oControl = this.private_GetControlByLevel(++nControlIndex);
-    }
+    this.private_UpdateLevels();
+    this.private_UpdateControls();
 };
 CDrawingMultiLevelToolbar.prototype.Get_Height = function()
 {
@@ -325,9 +341,127 @@ CDrawingMultiLevelToolbar.prototype.private_UpdateLevels = function()
     this.m_aLevels = [];
 
     if (true === this.m_bGeneralToolbar)
-        m_aLevels.push(this.m_oGeneralToolbar);
-    else if (true === this.m_bAutoPlayToolbar)
-        m_aLevels.push(this.m_oAutoPlayToolbar);
-    else if (true === this.m_bTimelimeToolbar)
-        m_aLevels.push(this.m_oTimelineToolbar);
+    {
+        this.m_aLevels.push(this.m_oGeneralToolbar);
+        this.HtmlElement.GeneralElement.style.display = "block";
+    }
+    else
+    {
+        this.HtmlElement.GeneralElement.style.display = "none";
+    }
+
+    if (true === this.m_bAutoPlayToolbar)
+    {
+        this.m_aLevels.push(this.m_oAutoPlayToolbar);
+        this.HtmlElement.AutoPlayElement.style.display = "block";
+    }
+    else
+    {
+        this.HtmlElement.AutoPlayElement.style.display = "none";
+    }
+
+    if (true === this.m_bTimelimeToolbar)
+    {
+        this.m_aLevels.push(this.m_oTimelineToolbar);
+        this.HtmlElement.TimelineElement.style.display = "block";
+    }
+    else
+    {
+        this.HtmlElement.TimelineElement.style.display = "none";
+    }
+};
+CDrawingMultiLevelToolbar.prototype.private_CheckAddControlToLevel = function(oControl, bAdd)
+{
+    if (true === bAdd)
+    {
+        this.m_aLevels.push(oControl);
+        oControl.HtmlElement.Control.HtmlElement.style.display = "block";
+    }
+    else
+    {
+        oControl.HtmlElement.Control.HtmlElement.style.display = "none";
+    }
+};
+CDrawingMultiLevelToolbar.prototype.private_UpdateControls = function()
+{
+    var nY = 0;
+    var oSettingsControl = this.HtmlElement.SettingsControl;
+    oSettingsControl.Bounds.SetParams(0, 0, 0, 1000, false, true, true, false, this.m_nSettingsWidth, this.m_nLineHeight);
+    oSettingsControl.Anchor = (g_anchor_top | g_anchor_right);
+
+    var nControlIndex = 0;
+    var oControl = this.private_GetControlByLevel(nControlIndex);
+    while (oControl)
+    {
+        var oElementControl = null;
+
+        if (oControl === this.m_oGeneralToolbar)
+            oElementControl = this.HtmlElement.GeneralControl;
+        else if (oControl === this.m_oAutoPlayToolbar)
+            oElementControl = this.HtmlElement.AutoPlayControl;
+        else if (oControl === this.m_oTimelineToolbar)
+            oElementControl = this.HtmlElement.TimelineControl;
+        else
+            break;
+
+        if (0 === nControlIndex)
+            oElementControl.Bounds.SetParams(0, nY, this.m_nSettingsWidth, 1000, false, true, true, false, -1, this.m_nLineHeight);
+        else
+            oElementControl.Bounds.SetParams(0, nY, 1000, 1000, false, true, false, false, -1, this.m_nLineHeight);
+
+        oElementControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+
+        nY += this.m_nLineHeight + this.m_nLineSpace;
+        oControl = this.private_GetControlByLevel(++nControlIndex);
+    }
+};
+CDrawingMultiLevelToolbar.prototype.Update_Size = function()
+{
+    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
+    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
+
+    this.HtmlElement.Control.Resize(W, H);
+    this.m_oSettingsToolbar.Update_Size();
+
+    var nControlIndex = 0;
+    var oControl = this.private_GetControlByLevel(nControlIndex);
+    while (oControl)
+    {
+        oControl.Update_Size();
+        oControl = this.private_GetControlByLevel(++nControlIndex);
+    }
+};
+CDrawingMultiLevelToolbar.prototype.Set_OnChangeCallback = function(pCallback)
+{
+    this.m_pOnChangeCallback = pCallback;
+};
+CDrawingMultiLevelToolbar.prototype.Set_General = function(bGeneral)
+{
+    this.m_bGeneralToolbar  = bGeneral;
+
+    this.private_UpdateLevels();
+    this.private_UpdateControls();
+
+    if (this.m_pOnChangeCallback)
+        this.m_pOnChangeCallback();
+};
+CDrawingMultiLevelToolbar.prototype.Set_AutoPlay = function(bAutoPlay)
+{
+    this.m_bAutoPlayToolbar = bAutoPlay;
+
+    this.private_UpdateLevels();
+    this.private_UpdateControls();
+
+    if (this.m_pOnChangeCallback)
+        this.m_pOnChangeCallback();
+};
+CDrawingMultiLevelToolbar.prototype.Set_Timeline = function(bTimeline)
+{
+    this.m_bTimelimeToolbar = bTimeline;
+
+    this.private_UpdateLevels();
+    this.private_UpdateControls();
+
+    if (this.m_pOnChangeCallback)
+        this.m_pOnChangeCallback();
 };
