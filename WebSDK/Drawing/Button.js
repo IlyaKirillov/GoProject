@@ -1464,28 +1464,30 @@ CommonExtend(CDrawingButtonTabNavigator, CDrawingButtonBase);
 CDrawingButtonTabNavigator.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
     var X_0 = X_off + 0;
-    var X_1 = X_off +  6 * Size / 20;
-    var X_2 = X_off + 14 * Size / 20;
+    var X_1 = X_off +  5 * Size / 20;
+    var X_2 = X_off + 15 * Size / 20;
     var X_3 = X_off + Size;
 
     var Y_1 = Y_off +  6 * Size / 20;
-    var Y_2 = Y_off + 14 * Size / 20;
+    var Y_2 = Y_off + 16 * Size / 20;
 
-    var R = Size / 7;
+    var R = (Size / 6 + 1) | 0;
 
-    Canvas.lineWidth = 1;
-    Canvas.lineJoin = "miter";
+    var BoundShift = 2;
+
+    Canvas.lineWidth   = 2;
+    Canvas.lineJoin    = "miter";
     Canvas.strokeStyle = 'rgba(0,0,0, 1)';//FillColor.ToString();
 
     Canvas.beginPath();
-    Canvas.moveTo(X_0 | 0, Y_1 | 0);
-    Canvas.lineTo(X_3 | 0, Y_1 | 0);
+    Canvas.moveTo((X_0 - BoundShift) | 0, Y_1 | 0);
+    Canvas.lineTo((X_3 + BoundShift) | 0, Y_1 | 0);
     Canvas.stroke();
 
     Canvas.beginPath();
     Canvas.moveTo(X_1 | 0, Y_1 | 0);
     Canvas.lineTo(X_1 | 0, Y_2 | 0);
-    Canvas.lineTo(X_3 | 0, Y_2 | 0);
+    Canvas.lineTo((X_3 + BoundShift) | 0, Y_2 | 0);
     Canvas.stroke();
 
     Canvas.lineWidth = 1;
@@ -1793,10 +1795,14 @@ CDrawingButtonEditModeColor.prototype.private_RegisterButton = function()
 function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
 {
     CDrawingButtonEditModeText.superclass.constructor.call(this, oDrawing);
+
+    // Картинка рамзмером 14х8
+    this.m_oImage = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAICAYAAADJEc7MAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwVDQAZ4Th1ZQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAkUlEQVQY033PsRHDIAwF0A+nitILUHCnhoapklW8QrZhBBo1NDRULEEak3OwsSpO0pOEijG+QgifWityzgoP4Zzr1lqklN5ERLsxBswMAH2FmbkfPSCiXbfWNhEZRTBzf0IigtbapgGglKJWeEalFAUANBqORPfe/84eg2b0Bxf4FgGAnv9zPnuFLhvnzaf3Jb5oPFaLEyr1tgAAAABJRU5ErkJggg==");
+    this.m_oTransformCanvas = null;
+
     this.m_oMultiLevelToolbar = oMutliLevelToolbar;
 
     var oMainDiv = oDrawing.Get_MainDiv();
-    var oThis    = this;
 
     this.m_nWidth  = 160;
     this.m_nHeight = 74;
@@ -1841,6 +1847,22 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
 }
 CommonExtend(CDrawingButtonToolbarCustomize, CDrawingButtonBase);
 
+CDrawingButtonToolbarCustomize.prototype.Init = function(sDivId, oGameTree)
+{
+    CDrawingButtonToolbarCustomize.superclass.Init.apply(this, arguments);
+
+    var oDivElement = this.HtmlElement.Control.HtmlElement;
+    var oCanvasElement = document.createElement("canvas");
+    oCanvasElement.setAttribute("id", sDivId + "_transform");
+    oCanvasElement.setAttribute("style", "position:absolute;padding:0;margin:0;top:14px;left:11px;width:14px;height:8px;");
+    oCanvasElement.width  = 14;
+    oCanvasElement.height = 8;
+    oCanvasElement.setAttribute("oncontextmenu", "return false;");
+    oCanvasElement.draggable = "false";
+    oCanvasElement['ondragstart'] = function(event) { event.preventDefault(); return false; };
+    oDivElement.appendChild(oCanvasElement);
+    this.m_oTransformCanvas = oCanvasElement;
+};
 CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
 {
     CDrawingButtonToolbarCustomize.superclass.Update_Size.apply(this, arguments);
@@ -1873,25 +1895,11 @@ CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
 };
 CDrawingButtonToolbarCustomize.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var shift = 6, size = 12;
-    var x1 = 6, x12 = x1 + size;
-    var y1 = 6, y12 = y1 + size;
-
-    var x2 = x1 + shift, x22 = x2 + size;
-    var y2 = y1 + shift, y22 = y2 + size;
-
-    var x3 = x2 + shift, x32 = x3 + size;
-    var y3 = y2 + shift, y32 = y3 + size;
-
-    Canvas.lineWidth = 2;
-    Canvas.strokeStyle = "rgb(0, 0, 200)";
-    Canvas.beginPath();
-    Canvas.moveTo(x12, y2);
-    Canvas.lineTo(x12, y1);
-    Canvas.lineTo(x1, y1);
-    Canvas.lineTo(x1, y12);
-    Canvas.lineTo(x2, y12);
-    Canvas.stroke();
+    if (this.m_oTransformCanvas)
+    {
+        var oCanvas = this.m_oTransformCanvas.getContext("2d");
+        oCanvas.drawImage(this.m_oImage, 0, 0);
+    }
 };
 CDrawingButtonToolbarCustomize.prototype.private_HandleMouseDown = function()
 {
@@ -1916,6 +1924,8 @@ CDrawingButtonToolbarCustomize.prototype.private_HandleMouseDown = function()
                     oThis.m_oContextMenuElement.style.height = oThis.m_nHeight + "px";
                     oThis.m_nTransitionId = null;
                     oThis.m_nShowId       = null;
+                    oThis.m_oTransformCanvas.style.transition = "transform 0.2s ease";
+                    oThis.m_oTransformCanvas.style.transform  = "rotate(180deg)";
                 }, 20);
             }, 20);
         }
@@ -1924,9 +1934,6 @@ CDrawingButtonToolbarCustomize.prototype.private_HandleMouseDown = function()
     {
         this.Hide_ContextMenu();
     }
-
-    //if (this.m_oMultiLevelToolbar)
-    //    this.m_oMultiLevelToolbar.Set(false, true, false);
 };
 CDrawingButtonToolbarCustomize.prototype.private_GetHint = function()
 {
@@ -1944,6 +1951,9 @@ CDrawingButtonToolbarCustomize.prototype.Hide_ContextMenu = function(bFast)
         {
             this.m_oContextMenuElement.style.height  = "0px";
             this.m_oContextMenuElement.style.display = "none";
+
+            this.m_oTransformCanvas.style.transition = "transform 0.2s ease";
+            this.m_oTransformCanvas.style.transform  = "rotate(0deg)";
         }
         else
         {
@@ -1960,6 +1970,8 @@ CDrawingButtonToolbarCustomize.prototype.Hide_ContextMenu = function(bFast)
             {
                 oThis.m_oContextMenuElement.style.display = "none";
                 oThis.m_nTransitionId                     = null;
+                oThis.m_oTransformCanvas.style.transition = "transform 0.2s ease";
+                oThis.m_oTransformCanvas.style.transform  = "rotate(0deg)";
             }, 200);
         }
     }
@@ -2055,4 +2067,3 @@ CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(o
             Common.Set_InnerTextToElement(oCheckElement, "");
     }
 };
-

@@ -141,14 +141,15 @@ CDrawingNavigatorCommentsTabs.prototype.Init = function(sDivId, oGameTree, _sNav
     var oCommentsControl = new CDrawingButtonTabComments(this.m_oDrawing);
     var sCommentsDivId = sDivId + "C";
     this.private_CreateDivElement(oMainElement, sCommentsDivId);
-    this.private_FillHtmlElement(oMainControl, sCommentsDivId, 0, 0.5);
+    this.private_FillHtmlElement(oMainControl, sCommentsDivId, 0);
     oCommentsControl.Init(sCommentsDivId, oGameTree);
     this.m_oCommentsButton = oCommentsControl;
 
     var oNavigatorControl = new CDrawingButtonTabNavigator(this.m_oDrawing);
     var sNavigatorDivId = sDivId + "N";
+    var nTop = 0;
     this.private_CreateDivElement(oMainElement, sNavigatorDivId);
-    this.private_FillHtmlElement(oMainControl, sNavigatorDivId, 1, 1);
+    this.private_FillHtmlElement(oMainControl, sNavigatorDivId, 1);
     oNavigatorControl.Init(sNavigatorDivId, oGameTree);
     this.m_oNavigatorButton = oNavigatorControl;
 
@@ -179,10 +180,10 @@ CDrawingNavigatorCommentsTabs.prototype.private_CreateDivElement = function(oPar
     oParentElement.appendChild(oElement);
     return oElement;
 };
-CDrawingNavigatorCommentsTabs.prototype.private_FillHtmlElement = function(oParentControl, sName, nStart, nEnd)
+CDrawingNavigatorCommentsTabs.prototype.private_FillHtmlElement = function(oParentControl, sName, nIndex)
 {
     var oControl = CreateControlContainer(sName);
-    oControl.Bounds.SetParams(0, nStart * 40, 1000, 0, false, true, false, false, -1, 40);
+    oControl.Bounds.SetParams(0, nIndex * 36 + nIndex, 1000, 0, false, true, false, false, -1, 36);
     oControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oParentControl.AddControl(oControl);
 };

@@ -813,7 +813,7 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     // Контрол под доской тоже делим на 2 части: сверху 25px под кнопки, а снизу все остальное под навигатор.
     //------------------------------------------------------------------------------------------------------------------
     var oToolsControl = CreateControlContainer(sToolbarDivId);
-    oToolsControl.Bounds.SetParams(0, 1, 1000, 0, true, false, false, false, -1, ToolbarH);
+    oToolsControl.Bounds.SetParams(0, 1, 1000, 0, false, true, false, false, -1, ToolbarH);
     oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top);
     oNotBoardControl.AddControl(oToolsControl);
 
@@ -840,7 +840,7 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     // Контрол под панелью управления делим на 2 части, справа панель 30px с кнопками для переключения, слева все
     // остальное.
     //------------------------------------------------------------------------------------------------------------------
-    var ToolbarW = 30;
+    var ToolbarW = 36;
     var sVerticalToolbarDivId = sUnderToolbarDivId + "L";
     this.private_CreateDiv(oUnderToolBarControl.HtmlElement, sVerticalToolbarDivId);
     var oRightToolbarControl = CreateControlContainer(sVerticalToolbarDivId);
