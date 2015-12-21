@@ -754,6 +754,7 @@ CDrawingNavigator.prototype.private_OnResize = function(W, H, bForce)
 {
     this.private_DrawBackground(W, H, bForce);
     this.Update();
+    this.Update_Current(true);
 };
 CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
 {
