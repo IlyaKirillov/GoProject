@@ -2034,6 +2034,19 @@ CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
 
     return {X : X + 1, Y : Y + 1};
 };
+CDrawingBoard.prototype.private_GetXYByBoardPos = function(X, Y)
+{
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    var dCellH  = this.m_dKoeffCellH * H;
+    var dCellW  = this.m_dKoeffCellW * W;
+
+    return {
+        X : this.m_dKoeffOffsetX * W + (X - 1) * dCellW,
+        Y : this.m_dKoeffOffsetY * H + (Y - 1) * dCellH
+    };
+};
 CDrawingBoard.prototype.private_CreateMarks = function()
 {
     if (!this.m_oImageData.Lines)
@@ -2766,7 +2779,61 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
     {
         var sText = "";
         if (event.ShiftKey)
-            sText = prompt("Enter the label that you want to add to board here. For best results, keep your label to one or two letters.", "");
+        {
+            if (!this.m_oDrawing || !this.HtmlElement.Control || !this.HtmlElement.Control.HtmlElement)
+                return;
+
+            var oMainDiv = this.m_oDrawing.Get_MainDiv();
+
+            if (!oMainDiv)
+                return;
+
+            var oPos = this.private_GetXYByBoardPos(X, Y);
+            var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
+
+            var oAddLabelInput              = document.createElement("input");
+            oAddLabelInput.style.position   = "absolute";
+            oAddLabelInput.style.top        = oOffset.Y + oPos.Y - 10 + "px";
+            oAddLabelInput.style.left       = oOffset.X + oPos.X - 25 + "px";
+            oAddLabelInput.style.width      = "50px";
+            oAddLabelInput.style.height     = "20px";
+            oAddLabelInput.style.fontFamily = '"Times New Roman", Times, serif';
+            oAddLabelInput.style.fontSize   = "16px";
+            oAddLabelInput.type             = "text";
+            oAddLabelInput.placeholder      = "Label...";
+            oAddLabelInput.style.outline    = 0;
+            oAddLabelInput.style.border     = "1px solid rgb(166, 166, 166)";
+            oAddLabelInput.style.boxShadow  = "rgba(0, 0, 0, 0.8) 0px 1px 15px";
+            oAddLabelInput.style.padding    = "3px";
+
+            oMainDiv.appendChild(oAddLabelInput);
+            oAddLabelInput.focus();
+
+            var oThis = this;
+            oAddLabelInput.onblur    = function()
+            {
+                oThis.m_oDrawing.Remove_LabelElement();
+            };
+            oAddLabelInput.onkeydown = function(e)
+            {
+                if (27 === e.keyCode)
+                {
+                    oThis.m_oDrawing.Remove_LabelElement();
+                }
+                else if (13 === e.keyCode)
+                {
+                    sText       = this.value;
+                    var NewMark = new CDrawingMark(X, Y, EDrawingMark.Tx, sText);
+                    oThis.m_oGameTree.Add_TextMark(sText, Common_XYtoValue(X, Y));
+                    oThis.private_SetMark(X, Y, NewMark);
+                    oThis.private_DrawMarks();
+                    oThis.m_oDrawing.Remove_LabelElement();
+                }
+            };
+
+            oThis.m_oDrawing.Register_AddLabelElement(oAddLabelInput);
+            return;
+        }
 
         if (undefined == sText || "" === sText || null === sText)
         {

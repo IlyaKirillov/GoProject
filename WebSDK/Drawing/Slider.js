@@ -80,7 +80,7 @@ CDrawingSlider.prototype.Init = function(sDivId)
 {
     this.m_oGameTree = (this.m_oDrawing ? this.m_oDrawing.Get_GameTree() : null);
 
-    switch(this.m_nSliderType)
+    switch(this.m_nType)
     {
         case EDrawingSliderType.AutoPlaySpeed: this.m_oDrawing.Register_AutoPlaySpeed(this); break;
         case EDrawingSliderType.Timeline     : this.m_oDrawing.Register_TimeLine(this); break;

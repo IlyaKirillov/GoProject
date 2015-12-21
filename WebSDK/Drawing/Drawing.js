@@ -363,6 +363,8 @@ function CDrawing(oGameTree)
         ToolbarCustomize: null
     };
 
+    this.m_oAddLabelElement = null;
+
     this.m_oBoard     = null;
     this.m_oNavigator = null;
     this.m_oTimeLine  = null;
@@ -651,22 +653,11 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var sInfoDivId     = sCaTDivId + "_Info";
     var sCommentsDivId = sCaTDivId + "_Comments";
     var sToolsDivId    = sCaTDivId + "_Toolbar";
-    var sToolsDivId2   = sCaTDivId + "_ToolbarSecond";
-    var sTools2DivId   = sCaTDivId + "_ToolbarAutoPlay";
-    var sTools3DivId   = sCaTDivId + "_ToolbarTimeLine";
+
     this.private_CreateDiv(oCaTControl.HtmlElement, sInfoDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sCommentsDivId);
     this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId);
-    this.private_CreateDiv(oCaTControl.HtmlElement, sToolsDivId2);
-    var oTools2Element = this.private_CreateDiv(oCaTControl.HtmlElement, sTools2DivId);
-    this.private_CreateDiv(oCaTControl.HtmlElement, sTools3DivId);
 
-    var sAutoPlaySlider = sTools2DivId + "_Slider";
-    var sAutoPlayButton = sTools2DivId + "_Button";
-    this.private_CreateDiv(oTools2Element, sAutoPlayButton);
-    this.private_CreateDiv(oTools2Element, sAutoPlaySlider);
-
-    var ToolbarH = 36;
     var InfoH    = 50;
 
     // INFO
@@ -984,6 +975,8 @@ CDrawing.prototype.private_SetMainDiv = function(sDivId, oMainControl)
 };
 CDrawing.prototype.private_ClearMainDiv = function()
 {
+    this.Remove_LabelElement();
+
     while (this.m_oMainDiv.firstChild)
         this.m_oMainDiv.removeChild(this.m_oMainDiv.firstChild);
 
@@ -1160,6 +1153,20 @@ CDrawing.prototype.Register_SelectBoardModeButton = function(oButton)
 CDrawing.prototype.Register_ToolbarCustomizeButton = function(oButton)
 {
     this.m_oButtons.ToolbarCustomize = oButton;
+};
+CDrawing.prototype.Register_AddLabelElement = function(oElement)
+{
+    this.Remove_LabelElement();
+    this.m_oAddLabelElement = oElement;
+};
+CDrawing.prototype.Remove_LabelElement = function()
+{
+    if (this.m_oAddLabelElement)
+    {
+        var oElement = this.m_oAddLabelElement;
+        this.m_oAddLabelElement = null;
+        this.m_oMainDiv.removeChild(oElement);
+    }
 };
 CDrawing.prototype.On_StartAutoPlay = function()
 {

@@ -770,6 +770,83 @@ CGameTree.prototype.Clear_TerritoryPoints = function()
     if (this.m_oDrawingBoard)
     {
         this.m_oDrawingBoard.Remove_AllMarks();
+
+        for (var CommandIndex = 0, CommandsCount = this.m_oCurNode.Get_CommandsCount(); CommandIndex < CommandsCount; CommandIndex++)
+        {
+            var Command = this.m_oCurNode.Get_Command( CommandIndex );
+            var Command_Type  = Command.Get_Type();
+            var Command_Value = Command.Get_Value();
+            var Command_Count = Command.Get_Count();
+
+            switch(Command_Type)
+            {
+                case ECommand.CR:
+                {
+                    for (var Index = 0; Index < Command_Count; Index++)
+                    {
+                        var Pos = Common_ValuetoXY(Command_Value[Index]);
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Cr, ""));
+                    }
+                    break;
+                }
+                case ECommand.MA:
+                {
+                    for (var Index = 0; Index < Command_Count; Index++)
+                    {
+                        var Pos = Common_ValuetoXY(Command_Value[Index]);
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.X, ""));
+                    }
+                    break;
+                }
+                case ECommand.SQ:
+                {
+                    for (var Index = 0; Index < Command_Count; Index++)
+                    {
+                        var Pos = Common_ValuetoXY(Command_Value[Index]);
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Sq, ""));
+                    }
+                    break;
+                }
+                case ECommand.TR:
+                {
+                    for (var Index = 0; Index < Command_Count; Index++)
+                    {
+                        var Pos = Common_ValuetoXY(Command_Value[Index]);
+                        this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Tr, ""));
+                    }
+                    break;
+                }
+                case ECommand.LB:
+                {
+                    var Pos = Common_ValuetoXY(Command_Value.Pos);
+                    this.m_oDrawingBoard.Add_Mark(new CDrawingMark(Pos.X, Pos.Y, EDrawingMark.Tx, Command_Value.Text));
+                    break;
+                }
+                case ECommand.RM:
+                {
+                    for (var Index = 0; Index < Command_Count; Index++)
+                    {
+                        var Pos = Common_ValuetoXY(Command_Value[Index]);
+                        this.m_oDrawingBoard.Remove_Mark(Pos.X, Pos.Y);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (this.m_oCurNode.Have_Move())
+        {
+            var oMove = this.m_oCurNode.Get_Move();
+            var X = oMove.Get_X();
+            var Y = oMove.Get_Y();
+
+            this.m_oDrawingBoard.Set_LastMoveMark(X, Y);
+        }
+        else
+        {
+            this.m_oDrawingBoard.Set_LastMoveMark(-1, -1);
+        }
+
         this.m_oDrawingBoard.Draw_Marks();
     }
 };

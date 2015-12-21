@@ -56,7 +56,7 @@ function CDrawingButtonBase(oDrawing)
     this.m_oActiveFColor   = new CColor(255, 255, 255, 255);
     this.m_oDisabledBColor = new CColor(0, 0, 0, 0);
     this.m_oDisabledFColor = new CColor(140, 140, 140, 255);
-    this.m_oSelectedBColor = new CColor(  0, 175, 240, 255);
+    this.m_oSelectedBColor = new CColor(0, 0, 0, 77);
 
     this.m_nW = 0;
     this.m_nH = 0;
@@ -235,7 +235,7 @@ CDrawingButtonBase.prototype.private_OnResize = function()
     this.m_oImageData.Hover    = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H, false, true);
     this.m_oImageData.Normal   = this.private_Draw(this.m_oNormaBColor,    this.m_oNormaFColor,    W, H);
     this.m_oImageData.Disabled = this.private_Draw(this.m_oDisabledBColor, this.m_oDisabledFColor, W, H, true);
-    this.m_oImageData.Selected = this.private_Draw(this.m_oHoverBColor,    this.m_oHoverFColor,    W, H, false, true);
+    this.m_oImageData.Selected = this.private_Draw(this.m_oSelectedBColor, this.m_oHoverFColor,    W, H, false, true);
 
     this.private_UpdateState();
 };
@@ -1926,6 +1926,7 @@ CDrawingButtonToolbarCustomize.prototype.private_HandleMouseDown = function()
                     oThis.m_nShowId       = null;
                     oThis.m_oTransformCanvas.style.transition = "transform 0.2s ease";
                     oThis.m_oTransformCanvas.style.transform  = "rotate(180deg)";
+                    oThis.Set_Selected(true);
                 }, 20);
             }, 20);
         }
@@ -1954,6 +1955,7 @@ CDrawingButtonToolbarCustomize.prototype.Hide_ContextMenu = function(bFast)
 
             this.m_oTransformCanvas.style.transition = "transform 0.2s ease";
             this.m_oTransformCanvas.style.transform  = "rotate(0deg)";
+            this.Set_Selected(false);
         }
         else
         {
@@ -1972,6 +1974,7 @@ CDrawingButtonToolbarCustomize.prototype.Hide_ContextMenu = function(bFast)
                 oThis.m_nTransitionId                     = null;
                 oThis.m_oTransformCanvas.style.transition = "transform 0.2s ease";
                 oThis.m_oTransformCanvas.style.transform  = "rotate(0deg)";
+                oThis.Set_Selected(false);
             }, 200);
         }
     }
