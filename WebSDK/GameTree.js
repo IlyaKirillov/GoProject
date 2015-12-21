@@ -2331,6 +2331,17 @@ CGameTree.prototype.Make_CurrentVariantMainly = function()
         this.m_oDrawingNavigator.Update_Current(true);
     }
 };
+CGameTree.prototype.Move_Variant = function(nCount)
+{
+    this.m_oCurNode.Move_Variant(nCount);
+
+    if (this.m_oDrawingNavigator)
+    {
+        this.m_oDrawingNavigator.Create_FromGameTree();
+        this.m_oDrawingNavigator.Update();
+        this.m_oDrawingNavigator.Update_Current(true);
+    }
+};
 CGameTree.prototype.Toggle_Rulers = function()
 {
     if (this.m_oDrawingBoard)

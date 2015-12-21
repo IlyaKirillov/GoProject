@@ -3084,7 +3084,10 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     }
     else if (68 === KeyCode && true === Event.CtrlKey) // Ctrl + D
     {
-        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.DiagramSL, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+        if (true === Event.ShiftKey)
+            this.m_oGameTree.Move_Variant(-1);
+        else
+            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.DiagramSL, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
         bRetValue = true;
     }
     else if (69 === KeyCode && true === Event.CtrlKey) // Ctrl + E
@@ -3108,7 +3111,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.Download_GifForCurVariant();
         bRetValue = true;
     }
-    else if (77 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey)
+    else if (77 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey) // Ctrl + M
     {
         this.m_oGameTree.Make_CurrentVariantMainly();
         bRetValue = true;
@@ -3198,6 +3201,14 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
         }
         bRetValue = true;
+    }
+    else if (85 === KeyCode && true === Event.CtrlKey) // Ctrl + U
+    {
+        if (true === Event.ShiftKey)
+        {
+            this.m_oGameTree.Move_Variant(1);
+            bRetValue = true;
+        }
     }
     else if (86 === KeyCode && true === Event.CtrlKey) // Ctrl + V
     {

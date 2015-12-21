@@ -1305,11 +1305,40 @@ CDrawingButtonCancel.prototype.private_ClickTransformOut = function()
 function CDrawingButtonSettings(oDrawing)
 {
     CDrawingButtonSettings.superclass.constructor.call(this, oDrawing);
+
+    this.m_oTransformCanvas = null;
 }
 CommonExtend(CDrawingButtonSettings, CDrawingButtonBase);
 
-CDrawingButtonSettings.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonSettings.prototype.Init = function(sDivId, oGameTree)
 {
+    CDrawingButtonToolbarCustomize.superclass.Init.apply(this, arguments);
+
+    var oDivElement = this.HtmlElement.Control.HtmlElement;
+    var oCanvasElement = document.createElement("canvas");
+    oCanvasElement.setAttribute("id", sDivId + "_transform");
+    oCanvasElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oCanvasElement.setAttribute("oncontextmenu", "return false;");
+    oCanvasElement.width  = 36;
+    oCanvasElement.height = 36;
+    oCanvasElement.draggable = "false";
+    oCanvasElement['ondragstart'] = function(event) { event.preventDefault(); return false; };
+    oDivElement.appendChild(oCanvasElement);
+
+    var oCanvasControl = CreateControlContainer(sDivId + "_canvas");
+    oCanvasControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oCanvasControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    this.HtmlElement.Control.AddControl(oCanvasControl);
+
+    this.m_oTransformCanvas = oCanvasElement;
+};
+CDrawingButtonSettings.prototype.private_DrawOnCanvas = function(_Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+    var Canvas = this.m_oTransformCanvas.getContext("2d");
+
+    Canvas.fillStyle   = _Canvas.fillStyle;
+    Canvas.strokeStyle = _Canvas.strokeStyle;
+
     var PenWidth = 0.02 * Size;
     var r2    = Size / 2 - Size / 30;
     var shift = PenWidth * 4;
@@ -1335,6 +1364,16 @@ CDrawingButtonSettings.prototype.private_DrawOnCanvas = function(Canvas, Size, X
 CDrawingButtonSettings.prototype.private_HandleMouseDown = function()
 {
     CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.Settings, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+    if ("rotate(90deg)" !== this.m_oTransformCanvas.style.transform)
+    {
+        this.m_oTransformCanvas.style.transition = "transform 0.5s linear";
+        this.m_oTransformCanvas.style.transform  = "rotate(90deg)";
+    }
+    else
+    {
+        this.m_oTransformCanvas.style.transition = "transform 0.5s linear";
+        this.m_oTransformCanvas.style.transform  = "rotate(0deg)";
+    }
 };
 CDrawingButtonSettings.prototype.private_GetHint = function()
 {

@@ -483,6 +483,49 @@ CNode.prototype.Make_CurrentVariantMainly = function()
         oNextNode = oCurNode.Get_Next(nCurNext);
     }
 };
+CNode.prototype.Move_Variant = function(nCount)
+{
+    var oCurNode  = this;
+    var oPrevNode = this.Get_Prev();
+
+    while (null !== oPrevNode && undefined !== oPrevNode)
+    {
+        var nNextsCount = oPrevNode.Get_NextsCount();
+        if (oPrevNode.Get_NextsCount() > 1)
+        {
+            for (var nIndex = 0; nIndex < nNextsCount; ++nIndex)
+            {
+                if (oCurNode === oPrevNode.Get_Next(nIndex))
+                {
+                    if (nCount > 0)
+                    {
+                        if (nIndex > 0)
+                        {
+                            oPrevNode.m_aNext.splice(nIndex, 1);
+                            oPrevNode.m_aNext.splice(nIndex - 1, 0, oCurNode);
+                            oPrevNode.Set_NextCur(nIndex - 1);
+                        }
+                    }
+                    else
+                    {
+                        if (nIndex < nNextsCount - 1)
+                        {
+                            oPrevNode.m_aNext.splice(nIndex, 1);
+                            oPrevNode.m_aNext.splice(nIndex + 1, 0, oCurNode);
+                            oPrevNode.Set_NextCur(nIndex + 1);
+                        }
+                    }
+
+                    break;
+                }
+            }
+            return;
+        }
+
+        oCurNode  = oPrevNode;
+        oPrevNode = oPrevNode.Get_Prev();
+    }
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Функции, которые приходят из вне
 //----------------------------------------------------------------------------------------------------------------------

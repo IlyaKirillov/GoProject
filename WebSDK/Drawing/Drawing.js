@@ -387,6 +387,7 @@ function CDrawing(oGameTree)
     this.m_nMixedTemplateIndex = -1;
     this.m_nMixedRightSide     = 400;
     this.m_nMixedBotSize       = 200;
+    this.m_nMinWidth           = -1;
 
     this.private_OnMainDivClick = function()
     {
@@ -614,6 +615,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var sMainDivId   = this.m_oMainDiv.id;
     var sDivId       = sMainDivId;
 
+    this.m_nMixedRightSide = 566;
     var oDrawingBoard = new CDrawingBoard(this);
     oMainControl.Set_Type(1, oDrawingBoard, {RMin : this.m_nMixedRightSide});
 
@@ -727,6 +729,8 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
 };
 CDrawing.prototype.private_CreateVerFullTemplate = function()
 {
+    this.m_nMinWidth = 555;
+
     var oGameTree    = this.m_oGameTree;
     var oMainControl = this.m_oMainControl;
     var sMainDivId   = this.m_oMainDiv.id;
@@ -993,6 +997,9 @@ CDrawing.prototype.private_UpdateSize = function(bForce)
         var W = this.m_oControl.HtmlElement.clientWidth;
         var H = this.m_oControl.HtmlElement.clientHeight;
 
+        if (this.m_nMinWidth > 0 && W < this.m_nMinWidth)
+            W = this.m_nMinWidth;
+
         var nNewTemplateIndex = -1;
         if (H - (W - this.m_nMixedRightSide) > this.m_nMixedBotSize + 100)
         {
@@ -1030,6 +1037,9 @@ CDrawing.prototype.private_UpdateSize = function(bForce)
     {
         var W = this.m_oControl.HtmlElement.clientWidth;
         var H = this.m_oControl.HtmlElement.clientHeight;
+
+        if (this.m_nMinWidth > 0 && W < this.m_nMinWidth)
+            W = this.m_nMinWidth;
 
         this.m_oControl.Resize(W, H);
     }
