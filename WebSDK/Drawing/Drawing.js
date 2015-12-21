@@ -500,6 +500,8 @@ CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 {
     g_oGlobalSettings.Load_FromLocalStorage();
 
+    this.m_nMinWidth = 739;
+
     this.private_SetMainDiv(sDivId);
     var oGameTree = this.m_oGameTree;
 

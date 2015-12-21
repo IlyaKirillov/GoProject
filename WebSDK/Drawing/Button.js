@@ -2033,7 +2033,7 @@ CDrawingButtonToolbarCustomize.prototype.private_CreateListItem = function(oList
     oCheckItem.style.paddingLeft = "3px";
     oCheckItem.style.width       = "20px";
     oCheckItem.style.height      = "20px";
-    oCheckItem.style.float       = "left";
+    oCheckItem.style['float']    = "left";
     Common.Set_InnerTextToElement(oCheckItem, bChecked ? "✔" : "");
     oItem.appendChild(oCheckItem);
 
@@ -2041,7 +2041,7 @@ CDrawingButtonToolbarCustomize.prototype.private_CreateListItem = function(oList
     oTextItem.style.paddingLeft = "5px";
     oTextItem.style.height      = "20px";
     oTextItem.style.width       = (this.m_nWidth - 10 - 20 - 10) + "px";
-    oTextItem.style.float       = "left";
+    oTextItem.style['float']    = "left";
     oTextItem.style.overflow    = "hidden";
     Common.Set_InnerTextToElement(oTextItem, sText);
     oItem.appendChild(oTextItem);
