@@ -34,6 +34,16 @@ var ESettingsLoadShowVariants =
     FromFile : 3
 };
 
+var EDrawingTemplate =
+{
+    None        : 0,
+    SimpleBoard : 1,
+    Viewer      : 2,
+    VerEditor   : 3,
+    HorEditor   : 4,
+    Problems    : 5
+};
+
 function CSettings()
 {
     this.m_bSound = true;
@@ -376,6 +386,8 @@ function CDrawing(oGameTree)
 
     this.m_oBlackInfo      = null;
     this.m_oWhiteInfo      = null;
+    this.m_oViewerScores   = null;
+    this.m_oViewerTitle    = null;
 
     // Массив ссылок на окна с комментариями
     this.m_aComments = [];
@@ -383,11 +395,19 @@ function CDrawing(oGameTree)
     var oThis = this;
     this.m_bNeedUpdateSize = true;
 
+    this.m_eTemplateType       = EDrawingTemplate.None;
     this.m_bMixedTemplate      = false;
     this.m_nMixedTemplateIndex = -1;
     this.m_nMixedRightSide     = 400;
     this.m_nMixedBotSize       = 200;
     this.m_nMinWidth           = -1;
+
+    this.m_nViewerTitleH   = 0;
+    this.m_nViewerToolbarH = 0;
+
+    this.m_nVerEditorTitleH   = 0;
+    this.m_nVerEditorToolbarH = 0;
+    this.m_nVerEditorComNavH  = 0;
 
     this.private_OnMainDivClick = function()
     {
@@ -484,8 +504,13 @@ CDrawing.prototype.Get_ElementOffset = function(oElement)
 
     return {X : X, Y : Y};
 };
+CDrawing.prototype.Set_TemplateType = function(eType)
+{
+    this.m_eTemplateType = eType;
+};
 CDrawing.prototype.Create_SimpleBoard = function(sDivId)
 {
+    this.Set_TemplateType(EDrawingTemplate.SimpleBoard);
     this.private_SetMainDiv(sDivId);
 
     var DrawingBoard = new CDrawingBoard(this);
@@ -495,6 +520,111 @@ CDrawing.prototype.Create_SimpleBoard = function(sDivId)
     this.m_aElements.push(DrawingBoard);
 
     this.Update_Size();
+};
+CDrawing.prototype.Create_Viewer = function(sDivId)
+{
+    this.Set_TemplateType(EDrawingTemplate.Viewer);
+    this.private_CreateWrappingMainDiv(sDivId);
+
+    this.m_nMinWidth = 295;
+
+    var oGameTree    = this.m_oGameTree;
+    var oMainControl = this.m_oMainControl;
+    var sMainDivId   = this.m_oMainDiv.id;
+
+    var InfoH    = 25;
+    var ToolbarH = 36;
+
+    this.m_nViewerTitleH   = InfoH;
+    this.m_nViewerToolbarH = ToolbarH;
+    //------------------------------------------------------------------------------------------------------------------
+    // Делим главную дивку на 3 части сверху 20px под информацию об игрока, снизу 36px под тулбар, а остальное для доски.
+    //------------------------------------------------------------------------------------------------------------------
+    var sInfoDivId = sMainDivId + "I";
+    this.private_CreateDiv(oMainControl.HtmlElement, sInfoDivId);
+
+    var oInfoControl = CreateControlContainer(sInfoDivId);
+    oInfoControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, InfoH);
+    oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oInfoControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Информация
+    //------------------------------------------------------------------------------------------------------------------
+    var sScoresInfo = sInfoDivId + "S";
+    this.private_CreateDiv(oInfoControl.HtmlElement, sScoresInfo);
+    var oScoresInfoControl = CreateControlContainer(sScoresInfo);
+    oScoresInfoControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, 122, -1);
+    oScoresInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    oInfoControl.AddControl(oScoresInfoControl);
+
+    this.m_oViewerScores = new CDrawingViewerScores(this);
+    this.m_oViewerScores.Init(sScoresInfo, oGameTree);
+    this.m_aElements.push(this.m_oViewerScores);
+
+    var sTitleInfo = sInfoDivId + "T";
+    this.private_CreateDiv(oInfoControl.HtmlElement, sTitleInfo);
+    var oTitleInfoControl = CreateControlContainer(sTitleInfo);
+    oTitleInfoControl.Bounds.SetParams(122, 0, 1000, 1000, true, false, false, false, -1, -1);
+    oTitleInfoControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oInfoControl.AddControl(oTitleInfoControl);
+
+    this.m_oViewerTitle = new CDrawingViewerTitle(this);
+    this.m_oViewerTitle.Init(sTitleInfo, oGameTree);
+    this.m_aElements.push(this.m_oViewerTitle);
+    //------------------------------------------------------------------------------------------------------------------
+    // Тулбар
+    //------------------------------------------------------------------------------------------------------------------
+    var sToolbarDivId = sMainDivId + "T";
+    this.private_CreateDiv(oMainControl.HtmlElement, sToolbarDivId);
+
+    var oToolbarControl = CreateControlContainer(sToolbarDivId);
+    oToolbarControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, true, -1, ToolbarH);
+    oToolbarControl.Anchor = (g_anchor_bottom | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oToolbarControl);
+
+    var oDrawingToolbar = new CDrawingToolbar(this);
+
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForwardToEnd(this), 36, 1, EToolbarFloat.Left);
+
+    oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Right);
+    oDrawingToolbar.Add_Control(new CDrawingButtonGameInfo(this), 36, 1, EToolbarFloat.Right);
+
+    oDrawingToolbar.Init(sToolbarDivId, oGameTree);
+    this.m_aElements.push(oDrawingToolbar);
+    //------------------------------------------------------------------------------------------------------------------
+    // Доска
+    //------------------------------------------------------------------------------------------------------------------
+    var sBoardDivId = sMainDivId + "B";
+    var oBoardElement = this.private_CreateDiv(oMainControl.HtmlElement, sBoardDivId);
+
+    var oBoardControl = CreateControlContainer(sBoardDivId);
+    oBoardControl.Bounds.SetParams(0, InfoH, 1000, ToolbarH, false, true, false, true, -1, -1);
+    oBoardControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top | g_anchor_bottom);
+    oMainControl.AddControl(oBoardControl);
+
+    var sBoardDivId2 = sBoardDivId + "B";
+    this.private_CreateDiv(oBoardElement, sBoardDivId2);
+    var oBoardControl2 = CreateControlContainer(sBoardDivId2);
+    oBoardControl.AddControl(oBoardControl2);
+
+    var sBoardDivId3 = sBoardDivId + "N";
+    this.private_CreateDiv(oBoardElement, sBoardDivId3);
+    var oBoardControl3 = CreateControlContainer(sBoardDivId3);
+    oBoardControl.AddControl(oBoardControl3);
+
+    var oDrawingBoard = new CDrawingBoard(this);
+    oDrawingBoard.Init(sBoardDivId2, this.m_oGameTree);
+    oDrawingBoard.Focus();
+    this.m_aElements.push(oDrawingBoard);
+    oBoardControl.Set_Type(3, oDrawingBoard, {RMin : 0});
+    //------------------------------------------------------------------------------------------------------------------
+    this.Update_Size();
+    oGameTree.On_EndLoadDrawing();
 };
 CDrawing.prototype.Create_BoardWithNavigateButtons = function(sDivId)
 {
@@ -587,12 +717,14 @@ CDrawing.prototype.Create_HorizontalFullTemplate = function(sDivId)
     this.m_bMixedTemplate = false;
     this.private_CreateWrappingMainDiv(sDivId);
     this.private_CreateHorFullTemplate();
+    this.Set_TemplateType(EDrawingTemplate.HorEditor);
 };
 CDrawing.prototype.Create_VerticalFullTemplate = function(sDivId)
 {
     this.m_bMixedTemplate = false;
     this.private_CreateWrappingMainDiv(sDivId);
     this.private_CreateVerFullTemplate();
+    this.Set_TemplateType(EDrawingTemplate.VerEditor);
 };
 CDrawing.prototype.private_CreateWrappingMainDiv = function(sDivId)
 {
@@ -736,6 +868,7 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     var oGameTree    = this.m_oGameTree;
     var oMainControl = this.m_oMainControl;
     var sMainDivId   = this.m_oMainDiv.id;
+
     //------------------------------------------------------------------------------------------------------------------
     // Делим главную дивку на 2 части сверху 50px под информацию об игрока, а снизу все остальное.
     //------------------------------------------------------------------------------------------------------------------
@@ -890,6 +1023,10 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     //------------------------------------------------------------------------------------------------------------------
     this.Update_Size();
     oGameTree.On_EndLoadDrawing();
+
+    this.m_nVerEditorTitleH   = InfoH;
+    this.m_nVerEditorToolbarH = 36;
+    this.m_nVerEditorComNavH  = 160;
 };
 CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 {
@@ -897,6 +1034,7 @@ CDrawing.prototype.Create_BoardCommentsButtonsNavigator = function(sDivId)
 };
 CDrawing.prototype.Create_Problems = function(sDivId)
 {
+    this.Set_TemplateType(EDrawingTemplate.Problems);
     var oGameTree = this.m_oGameTree;
 
     var oDrawingBoard = new CDrawingBoard(this);
@@ -910,7 +1048,8 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     oMainControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oParentControl.AddControl(oMainControl);
 
-    oMainControl.Set_Type(1, oDrawingBoard, {RMin : 100});
+    this.m_nMixedRightSide = 200;
+    oMainControl.Set_Type(1, oDrawingBoard, {RMin : this.m_nMixedRightSide});
 
     var sBoardDivId = sDivId + "_Board";
     var sPanelDivId = sDivId + "_Panel";
@@ -1207,6 +1346,8 @@ CDrawing.prototype.Update_BlackName = function(sName)
 {
     if (this.m_oBlackInfo)
         this.m_oBlackInfo.Update_Name(sName);
+
+    this.private_UpdateViewerTitle();
 };
 CDrawing.prototype.Update_BlackRank = function(sRank)
 {
@@ -1217,11 +1358,18 @@ CDrawing.prototype.Update_WhiteName = function(sName)
 {
     if (this.m_oWhiteInfo)
         this.m_oWhiteInfo.Update_Name(sName);
+
+    this.private_UpdateViewerTitle();
 };
 CDrawing.prototype.Update_WhiteRank = function(sRank)
 {
     if (this.m_oWhiteInfo)
         this.m_oWhiteInfo.Update_Rank(sRank);
+};
+CDrawing.prototype.private_UpdateViewerTitle = function()
+{
+    if (this.m_oViewerTitle)
+        this.m_oViewerTitle.Set_Title(this.m_oGameTree.Get_MatchName());
 };
 CDrawing.prototype.Update_Captured = function(dBlack, dWhite)
 {
@@ -1230,6 +1378,9 @@ CDrawing.prototype.Update_Captured = function(dBlack, dWhite)
 
     if (this.m_oWhiteInfo)
         this.m_oWhiteInfo.Update_Captured(dWhite);
+
+    if (this.m_oViewerScores)
+        this.m_oViewerScores.Update_Scores(dWhite, dBlack);
 };
 CDrawing.prototype.Update_Scores = function(dBlack, dWhite)
 {
@@ -1238,6 +1389,9 @@ CDrawing.prototype.Update_Scores = function(dBlack, dWhite)
 
     if (this.m_oWhiteInfo)
         this.m_oWhiteInfo.Update_Scores(dWhite);
+
+    if (this.m_oViewerScores)
+        this.m_oViewerScores.Update_Scores(dWhite, dBlack);
 };
 CDrawing.prototype.Update_InterfaceState = function(oIState)
 {
@@ -1346,6 +1500,38 @@ CDrawing.prototype.Toggle_MultiLevelToolbarTimeline = function()
         this.m_oButtons.ToolbarCustomize.Set_Timeline(bShow);
 
     return bShow;
+};
+CDrawing.prototype.Get_DivHeightByWidth = function(nWidth)
+{
+    var oDrawingBoard = this.m_oGameTree? this.m_oGameTree.Get_DrawingBoard() : null;
+    if (!oDrawingBoard)
+        return 0;
+
+    var dAscpect = oDrawingBoard.Get_AspectRatio();
+
+    if (Math.abs(dAscpect) < 0.1)
+        return 0;
+
+    var dKoef = 1 / oDrawingBoard.Get_AspectRatio();
+
+    switch (this.m_eTemplateType)
+    {
+        case EDrawingTemplate.SimpleBoard:
+            return dKoef * nWidth;
+        case EDrawingTemplate.Viewer:
+            return this.m_nViewerTitleH + this.m_nViewerToolbarH + dKoef * nWidth;
+        case EDrawingTemplate.VerEditor:
+            return this.m_nVerEditorComNavH + this.m_nVerEditorTitleH + this.m_nVerEditorToolbarH + dKoef * nWidth;
+        case EDrawingTemplate.HorEditor:
+            return (nWidth - this.m_nMixedRightSide) * dKoef;
+        case EDrawingTemplate.Problems:
+            return (nWidth - this.m_nMixedRightSide) * dKoef;
+        case EDrawingTemplate.None:
+        default:
+            return 0;
+    }
+
+    return 0;
 };
 
 function CDrawingFullInfo()

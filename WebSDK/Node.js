@@ -61,6 +61,28 @@ CNode.prototype.Get_NodeById = function(sId)
 
     return null;
 };
+CNode.prototype.Get_NodeByMoveNumber = function(nMoveNumber)
+{
+    if (0 === nMoveNumber)
+        return this;
+
+    var nCurMoveNumber = 0;
+    var oCurNode = this;
+    while (nCurMoveNumber !== nMoveNumber)
+    {
+        if (oCurNode.Get_NextsCount() <= 0)
+            break;
+
+        oCurNode = oCurNode.Get_Next(oCurNode.Get_NextCur());
+        if (!oCurNode)
+            break;
+
+        if (oCurNode.Have_Move())
+            nCurMoveNumber++;
+    }
+
+    return oCurNode;
+};
 CNode.prototype.Copy_CurrentVariant = function(LastNode)
 {
     var oNode = new CNode();

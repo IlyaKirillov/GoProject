@@ -26,12 +26,39 @@ CGoBoardApi.prototype.Create_GameTree = function()
 };
 
 /**
- * Создаем графическую доску в заданной div и привязываем ее к GameTree.
+ * Тимплейт с простой доской без дополнительных элементов.
  */
 CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
 {
     var oDrawing = new CDrawing(oGameTree);
     oDrawing.Create_SimpleBoard(sDivId);
+};
+
+/**
+ * Тимплейт для просмотрщика.
+ */
+CGoBoardApi.prototype.Create_Viewer = function(oGameTree, sDivId)
+{
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_Viewer(sDivId);
+};
+
+/**
+ * Тимплейт для вертикального редактора.
+ */
+CGoBoardApi.prototype.Create_EditorVer = function(oGameTree, sDivId)
+{
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_VerticalFullTemplate(sDivId);
+};
+
+/**
+ * Тимплейт для горизонтального редактора.
+ */
+CGoBoardApi.prototype.Create_EditorHor = function(oGameTree, sDivId)
+{
+    var oDrawing = new CDrawing(oGameTree);
+    oDrawing.Create_HorizontalFullTemplate(sDivId);
 };
 
 /**
@@ -87,7 +114,7 @@ CGoBoardApi.prototype.Create_Problems = function(oGameTree, sDivId, oPr)
 
     var pRightCallback = (undefined !== oPr['RightCallback'] ? oPr['RightCallback'] : null);
     var pWrongCallback = (undefined !== oPr['WrongCallback'] ? oPr['WrongCallback'] : null);
-    var pResetCallback = (undefined !== oPr['ResetCallback'] ? oPr['ResetCallback'] : null)
+    var pResetCallback = (undefined !== oPr['ResetCallback'] ? oPr['ResetCallback'] : null);
     oGameTree.Set_TutorCallbacks(pRightCallback, pWrongCallback, pResetCallback);
 };
 
@@ -128,6 +155,7 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
     _Flags.ChangeBoardMode = oFlags['ChangeBoardMode'];
     _Flags.LoadFile        = oFlags['LoadFile'];
     _Flags.GameInfo        = oFlags['GameInfo'];
+    _Flags.ViewPort        = oFlags['ViewPort'];
 
     oGameTree.Set_EditingFlags(_Flags);
 };
@@ -250,13 +278,46 @@ CGoBoardApi.prototype.GoTo_Node = function(oGameTree, sNodeId)
         oGameTree.GoTo_NodeById(sNodeId);
 };
 
+/**
+ * Переход к ноде по заданному номеру хода в текущей ветке.
+ */
+CGoBoardApi.prototype.GoTo_NodeByMoveNumber = function(oGameTree, nMoveNumber)
+{
+    if (oGameTree)
+        oGameTree.GoTo_NodeByMoveNumber(nMoveNumber);
+};
+
+/**
+ * Прячем или показываем курсор.
+ */
+CGoBoardApi.prototype.Set_ShowTarget = function(oGameTree, bShow)
+{
+    if (oGameTree)
+        oGameTree.Set_ShowTarget(bShow, true);
+};
+
+/**
+ * Получем минимальную высоту необходимую для дивки, исходя из заданной ширины.
+ */
+CGoBoardApi.prototype.Get_DivHeightByWidth = function(oGameTree, nWidth)
+{
+    if (oGameTree)
+        return oGameTree.Get_DivHeightByWidth(nWidth);
+};
+
+
 window['GoBoardApi'] = new CGoBoardApi();
+
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
+
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
+CGoBoardApi.prototype['Create_EditorHor']                     = CGoBoardApi.prototype.Create_EditorHor;
+CGoBoardApi.prototype['Create_EditorVer']                     = CGoBoardApi.prototype.Create_EditorVer;
 CGoBoardApi.prototype['Create_BoardWithNavigateButtons']      = CGoBoardApi.prototype.Create_BoardWithNavigateButtons;
 CGoBoardApi.prototype['Create_BoardCommentsButtonsNavigator'] = CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator;
 CGoBoardApi.prototype['Create_Presentation']                  = CGoBoardApi.prototype.Create_Presentation;
 CGoBoardApi.prototype['Create_Problems']                      = CGoBoardApi.prototype.Create_Problems;
+
 CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prototype.Set_Permissions;
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
 CGoBoardApi.prototype['Save_Sgf']                             = CGoBoardApi.prototype.Save_Sgf;
@@ -272,3 +333,6 @@ CGoBoardApi.prototype['Get_Version']                          = CGoBoardApi.prot
 CGoBoardApi.prototype['Toggle_Rulers']                        = CGoBoardApi.prototype.Toggle_Rulers;
 CGoBoardApi.prototype['Set_GameTreeHandler']                  = CGoBoardApi.prototype.Set_GameTreeHandler;
 CGoBoardApi.prototype['GoTo_Node']                            = CGoBoardApi.prototype.GoTo_Node;
+CGoBoardApi.prototype['GoTo_NodeByMoveNumber']                = CGoBoardApi.prototype.GoTo_NodeByMoveNumber;
+CGoBoardApi.prototype['Set_ShowTarget']                       = CGoBoardApi.prototype.Set_ShowTarget;
+CGoBoardApi.prototype['Get_DivHeightByWidth']                 = CGoBoardApi.prototype.Get_DivHeightByWidth;

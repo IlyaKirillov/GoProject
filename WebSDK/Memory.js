@@ -17,7 +17,7 @@ function CStreamWriter()
     this.m_nPos       = 0;
 
     this.Init();
-};
+}
 
 CStreamWriter.prototype.Init = function()
 {
@@ -60,7 +60,7 @@ CStreamWriter.prototype.Get_CurPosition = function()
 CStreamWriter.prototype.Seek = function(nPos)
 {
     this.m_nPos = nPos;
-}
+};
 CStreamWriter.prototype.Skip = function(nBytes)
 {
     this.m_nPos += nBytes;

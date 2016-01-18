@@ -1134,8 +1134,6 @@ CDrawingSettingsWindow.prototype.Handle_OK = function()
     if (oNavigator && true === oSchemeChange.Navigator)
         oNavigator.Update_All();
 
-
-
     this.Close();
 };
 CDrawingSettingsWindow.prototype.private_CreateRadioButton = function(oParentElement, sName, sRadioIs, sRadioValue)
@@ -1759,9 +1757,9 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     Common.Set_InnerTextToElement(oString, "Our site:");
     oString = document.createElement("a");
     oString.target = "_blank";
-    oString.href = "http://goban.org/";
+    oString.href = "http://webgoboard.org/";
     oDivMainPart.appendChild(oString);
-    Common.Set_InnerTextToElement(oString, "http://goban.org/");
+    Common.Set_InnerTextToElement(oString, "http://webgoboard.org/");
 
     oString = document.createElement("div");
     oString.style.paddingTop = "20px";

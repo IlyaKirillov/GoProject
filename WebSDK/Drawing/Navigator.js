@@ -124,7 +124,7 @@ function CDrawingNavigator(oDrawing)
             oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
         else
             oThis.m_nHorScrollBlurTimerId = null;
-    };
+    }
 
     function VerScrollBlur()
     {

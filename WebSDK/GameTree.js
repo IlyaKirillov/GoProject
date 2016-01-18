@@ -13,12 +13,14 @@ var EDITINGFLAGS_MOVE      = 0x00000002; // Можно ли свободно п�
 var EDITINGFLAGS_BOARDMODE = 0x00000004; // Можно ли изменять тип редактирования на доске
 var EDITINGFLAGS_LOADFILE  = 0x00000008; // Можно ли загружать файлы
 var EDITINGFLAGS_GAMEINFO  = 0x00000010; // Можно ли редактировать информацию об игре
+var EDITINGFLAGS_VIEWPORT  = 0x00000020; // Можно ли менять границы доски
 
 var EDITINGFLAGS_NEWNODE_NON   = EDITINGFLAGS_MASK ^ EDITINGFLAGS_NEWNODE;
 var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
 var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
 var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
 var EDITINGFLAGS_GAMEINFO_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_GAMEINFO;
+var EDITINGFLAGS_VIEWPORT_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_VIEWPORT;
 
 function CGameTree(Drawing)
 {
@@ -1744,6 +1746,11 @@ CGameTree.prototype.Set_EditingFlags = function(oFlags)
         this.m_nEditingFlags |= EDITINGFLAGS_GAMEINFO;
     else if (false === oFlags.GameInfo)
         this.m_nEditingFlags &= EDITINGFLAGS_GAMEINFO_NON;
+
+    if (true === oFlags.ViewPort)
+        this.m_nEditingFlags |= EDITINGFLAGS_VIEWPORT;
+    else if (false === oFlags.ViewPort)
+        this.m_nEditingFlags &= EDITINGFLAGS_VIEWPORT_NON;
 };
 CGameTree.prototype.Reset_EditingFlags = function()
 {
@@ -2034,9 +2041,11 @@ CGameTree.prototype.Is_ShowTarget = function()
 {
     return g_oGlobalSettings.Is_ShowTarget();
 };
-CGameTree.prototype.Set_ShowTarget = function(Value)
+CGameTree.prototype.Set_ShowTarget = function(Value, bFromApi)
 {
-    g_oGlobalSettings.Set_ShowTarget(Value);
+    if (true !== bFromApi)
+        g_oGlobalSettings.Set_ShowTarget(Value);
+
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Update_Target();
 };
@@ -2364,4 +2373,19 @@ CGameTree.prototype.GoTo_NodeById = function(sNodeId)
 
     if (null !== oNode)
         this.GoTo_Node(oNode);
+};
+CGameTree.prototype.GoTo_NodeByMoveNumber = function(nMoveNumber)
+{
+    var oFirstNode = this.Get_FirstNode();
+    var oNode = oFirstNode.Get_NodeByMoveNumber(nMoveNumber);
+
+    if (null !== oNode)
+        this.GoTo_Node(oNode);
+};
+CGameTree.prototype.Get_DivHeightByWidth = function(nWidth)
+{
+    if (this.m_oDrawing)
+        return this.m_oDrawing.Get_DivHeightByWidth(nWidth);
+
+    return 0;
 };

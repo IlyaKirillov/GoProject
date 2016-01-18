@@ -3214,7 +3214,10 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     {
         if (true === Event.ShiftKey)
         {
-            CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ViewPort, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+            if (this.m_oGameTree && (this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_VIEWPORT))
+            {
+                CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ViewPort, {GameTree : this.m_oGameTree, Drawing  : this.m_oDrawing});
+            }
         }
         else
         {
