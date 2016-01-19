@@ -749,7 +749,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var sMainDivId   = this.m_oMainDiv.id;
     var sDivId       = sMainDivId;
 
-    this.m_nMixedRightSide = 566;
+    this.m_nMixedRightSide = 344;
     var oDrawingBoard = new CDrawingBoard(this);
     oMainControl.Set_Type(1, oDrawingBoard, {RMin : this.m_nMixedRightSide});
 
@@ -863,7 +863,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
 };
 CDrawing.prototype.private_CreateVerFullTemplate = function()
 {
-    this.m_nMinWidth = 555;
+    this.m_nMinWidth = 332;
 
     var oGameTree    = this.m_oGameTree;
     var oMainControl = this.m_oMainControl;
