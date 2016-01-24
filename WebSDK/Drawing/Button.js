@@ -1567,8 +1567,8 @@ function CDrawingButtonBoardMode(oDrawing)
     var oThis = this;
 
     var nButtonsCount = 10;
-    this.m_nWidth = 2 + 36 * nButtonsCount + (nButtonsCount - 1);
-    this.m_nHeight = 38;
+    this.m_nWidth = 4 + 36 * nButtonsCount + (nButtonsCount - 1);
+    this.m_nHeight = 40;
 
     var oToolbarElementWrapper = document.createElement("div");
     oToolbarElementWrapper.id               = oMainDiv.id + "ButtonBoardModeToolbarWrapper";
@@ -1583,6 +1583,7 @@ function CDrawingButtonBoardMode(oDrawing)
     oToolbarElementWrapper.style.boxShadow  = "0px 1px 15px rgba(0,0,0,0.8)";
     oToolbarElementWrapper.style.opacity    = 0;
     oToolbarElementWrapper.style.overflowY  = "hidden";
+    oToolbarElementWrapper.style.boxSizing  = "border-box";
     oToolbarElementWrapper.onclick          = function()
     {
         oThis.Hide_Toolbar();
@@ -2108,4 +2109,60 @@ CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(o
         else
             Common.Set_InnerTextToElement(oCheckElement, "");
     }
+};
+//----------------------------------------------------------------------------------------------------------------------
+// Кнопка меню
+//----------------------------------------------------------------------------------------------------------------------
+function CDrawingButtonFileMenu(oDrawing)
+{
+    CDrawingButtonFileMenu.superclass.constructor.call(this, oDrawing);
+}
+CommonExtend(CDrawingButtonFileMenu, CDrawingButtonBase);
+
+CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+    var shift = 6, size = 12;
+    var x1 = 6, x12 = x1 + size;
+    var y1 = 6, y12 = y1 + size;
+
+    var x2 = x1 + shift, x22 = x2 + size;
+    var y2 = y1 + shift, y22 = y2 + size;
+
+    var x3 = x2 + shift, x32 = x3 + size;
+    var y3 = y2 + shift, y32 = y3 + size;
+
+    Canvas.lineWidth = 2;
+    Canvas.strokeStyle = "rgb(0, 0, 200)";
+    Canvas.beginPath();
+    Canvas.moveTo(x12, y2);
+    Canvas.lineTo(x12, y1);
+    Canvas.lineTo(x1, y1);
+    Canvas.lineTo(x1, y12);
+    Canvas.lineTo(x2, y12);
+    Canvas.stroke();
+
+    Canvas.strokeStyle = "rgb(0, 100, 0)";
+    Canvas.beginPath();
+    Canvas.moveTo(x22, y3);
+    Canvas.lineTo(x22, y2);
+    Canvas.lineTo(x2, y2);
+    Canvas.lineTo(x2, y22);
+    Canvas.lineTo(x3, y22);
+    Canvas.stroke();
+
+    Canvas.strokeStyle = "rgb(200, 0, 0)";
+    Canvas.beginPath();
+    Canvas.moveTo(x32, y32);
+    Canvas.lineTo(x32, y3);
+    Canvas.lineTo(x3, y3);
+    Canvas.lineTo(x3, y32);
+    Canvas.closePath();
+    Canvas.stroke();
+};
+CDrawingButtonFileMenu.prototype.private_HandleMouseDown = function()
+{
+};
+CDrawingButtonFileMenu.prototype.private_GetHint = function()
+{
+    return "";
 };

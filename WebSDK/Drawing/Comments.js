@@ -101,11 +101,11 @@ function CDrawingPlayerInfo(oDrawing)
 }
 CDrawingPlayerInfo.prototype.Init = function(sDivId, oGameTree, nPlayer)
 {
-    this.m_nPlayer = nPlayer;
+    this.m_nPlayer   = nPlayer;
     this.m_oGameTree = oGameTree;
 
-    this.HtmlElement.Control = CreateControlContainer(sDivId);
-    var oDivElement = this.HtmlElement.Control.HtmlElement;
+    this.HtmlElement.Control          = CreateControlContainer(sDivId);
+    var oDivElement                   = this.HtmlElement.Control.HtmlElement;
     oDivElement.style.backgroundColor = new CColor(217, 217, 217, 255).ToString();
 
     this.HtmlElement.NameDiv   = document.createElement("div");
@@ -129,12 +129,12 @@ CDrawingPlayerInfo.prototype.Init = function(sDivId, oGameTree, nPlayer)
     oImage.setAttribute("id", sDivId + "_Image");
     oImage.setAttribute("style", "position:absolute;padding:0;margin:0;");
     oImage.setAttribute("oncontextmenu", "return false;");
-    oImage.style.left   = "0px";
-    oImage.style.top    = "0px";
-    oImage.style.width  = 25 + "px";
-    oImage.style.height = 25 + "px";
-    oImage.width = 25;
-    oImage.height = 25;
+    oImage.style.left            = "0px";
+    oImage.style.top             = "0px";
+    oImage.style.width           = 25 + "px";
+    oImage.style.height          = 25 + "px";
+    oImage.width                 = 25;
+    oImage.height                = 25;
 
     var Canvas = oImage.getContext("2d");
 
@@ -192,6 +192,15 @@ CDrawingPlayerInfo.prototype.Update_Size = function()
     this.HtmlElement.NameDiv.style.textOverflow        = "ellipsis";
     this.HtmlElement.NameDiv.style['-o-text-overflow'] = "ellipsis";
     this.HtmlElement.NameDiv.style.height              = 25 + "px";
+    this.HtmlElement.NameDiv.style.lineHeight          = 25 + "px";
+    this.HtmlElement.NameDiv.style.fontFamily          = '"Times New Roman", Times, serif';
+
+    this.HtmlElement.ScoresDiv.style.overflow            = "hidden";
+    this.HtmlElement.ScoresDiv.style.textOverflow        = "ellipsis";
+    this.HtmlElement.ScoresDiv.style['-o-text-overflow'] = "ellipsis";
+    this.HtmlElement.ScoresDiv.style.height              = 25 + "px";
+    this.HtmlElement.ScoresDiv.style.lineHeight          = 25 + "px";
+    this.HtmlElement.ScoresDiv.style.fontFamily          = '"Times New Roman", Times, serif';
 };
 CDrawingPlayerInfo.prototype.Update_Name = function(sName)
 {
@@ -272,10 +281,10 @@ CDrawingViewerScores.prototype.Init = function(sDivId, oGameTree)
 
     this.HtmlElement.ScoresWDiv.style.position     = "absolute";
     this.HtmlElement.ScoresWDiv.style.left         = "25px";
-    this.HtmlElement.ScoresWDiv.style.top          = "4px";
+    this.HtmlElement.ScoresWDiv.style.top          = "0px";
     this.HtmlElement.ScoresWDiv.style.overflow     = "hidden";
     this.HtmlElement.ScoresWDiv.style.textOverflow = "ellipsis";
-    this.HtmlElement.ScoresWDiv.style.height       = "16px";
+    this.HtmlElement.ScoresWDiv.style.height       = "25px";
     this.HtmlElement.ScoresWDiv.style.fontFamily   = '"Times New Roman", Times, serif';
     this.HtmlElement.ScoresWDiv.style.fontSize     = "16px";
 
@@ -285,10 +294,10 @@ CDrawingViewerScores.prototype.Init = function(sDivId, oGameTree)
 
     this.HtmlElement.ScoresBDiv.style.position     = "absolute";
     this.HtmlElement.ScoresBDiv.style.left         = "86px";
-    this.HtmlElement.ScoresBDiv.style.top          = "4px";
+    this.HtmlElement.ScoresWDiv.style.top          = "0px";
     this.HtmlElement.ScoresBDiv.style.overflow     = "hidden";
     this.HtmlElement.ScoresBDiv.style.textOverflow = "ellipsis";
-    this.HtmlElement.ScoresBDiv.style.height       = "16px";
+    this.HtmlElement.ScoresBDiv.style.height       = "25px";
     this.HtmlElement.ScoresBDiv.style.fontFamily   = '"Times New Roman", Times, serif';
     this.HtmlElement.ScoresBDiv.style.fontSize     = "16px";
 
@@ -372,11 +381,12 @@ CDrawingViewerTitle.prototype.Init = function(sDivId, oGameTree)
 
     this.HtmlElement.TitleDiv.style.position     = "absolute";
     this.HtmlElement.TitleDiv.style.left         = "0px";
-    this.HtmlElement.TitleDiv.style.top          = "4px";
+    this.HtmlElement.TitleDiv.style.top          = "0px";
     this.HtmlElement.TitleDiv.style.overflow     = "hidden";
     this.HtmlElement.TitleDiv.style.textOverflow = "ellipsis";
     this.HtmlElement.TitleDiv.style.fontFamily   = '"Times New Roman", Times, serif';
     this.HtmlElement.TitleDiv.style.fontSize     = "16px";
+    this.HtmlElement.TitleDiv.style.height       = "25px";
     this.HtmlElement.TitleDiv.style.width        = "100%";
     this.HtmlElement.TitleDiv.style.textAlign    = "center";
 

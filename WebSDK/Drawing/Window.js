@@ -1710,8 +1710,12 @@ CDrawingAboutWindow.prototype.Get_DefaultWindowSize = function()
 };
 CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
 {
-    var oDivMainPart = document.createElement("div");
+    var oDivMainPart           = document.createElement("div");
     oDiv.appendChild(oDivMainPart);
+
+    oDiv.style.overflowX  = "hidden";
+    oDiv.style.overflowY  = "scroll";
+
     oDivMainPart.style.margin  = "0";
     oDivMainPart.style.padding = "10px 20px";
 
@@ -1720,14 +1724,14 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     oDivMainPart.style.color      = "#666";
     oDivMainPart.style.background = "#fff";
 
-    var oLogo = document.createElement("img");
+    var oLogo            = document.createElement("img");
     oLogo.src            = g_sLogo100;
     oLogo.width          = 100;
     oLogo.height         = 100;
     oLogo.style['float'] = "left";
     oDivMainPart.appendChild(oLogo);
 
-    var oMargin = document.createElement("div");
+    var oMargin            = document.createElement("div");
     oMargin.style.width    = "10px";
     oMargin.style.height   = "100px";
     oMargin.style['float'] = "left";
@@ -1741,59 +1745,59 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     oDivMainPart.appendChild(oVersion);
     Common.Set_InnerTextToElement(oVersion, "Version " + GoBoardApi.Get_Version());
 
-    var oString = document.createElement("div");
+    var oString              = document.createElement("div");
     oString.style.paddingTop = "40px";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "Visit our Github project for feedback and issue reports:");
-    oString = document.createElement("a");
-    oString.target = "_blank";
-    oString.href = "https://github.com/IlyaKirillov/GoProject";
+    oString                  = document.createElement("a");
+    oString.target           = "_blank";
+    oString.href             = "https://github.com/IlyaKirillov/GoProject";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "https://github.com/IlyaKirillov/GoProject");
 
-    oString = document.createElement("div");
+    oString                  = document.createElement("div");
     oString.style.paddingTop = "20px";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "Our site:");
-    oString = document.createElement("a");
-    oString.target = "_blank";
-    oString.href = "http://webgoboard.org/";
+    oString                  = document.createElement("a");
+    oString.target           = "_blank";
+    oString.href             = "http://webgoboard.org/";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "http://webgoboard.org/");
 
-    oString = document.createElement("div");
+    oString                  = document.createElement("div");
     oString.style.paddingTop = "20px";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "Discussions:");
-    oString = document.createElement("a");
-    oString.target = "_blank";
-    oString.href = "http://www.lifein19x19.com/forum/viewtopic.php?f=18&t=11239";
+    oString                  = document.createElement("a");
+    oString.target           = "_blank";
+    oString.href             = "http://www.lifein19x19.com/forum/viewtopic.php?f=18&t=11239";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "http://www.lifein19x19.com/");
     oDivMainPart.appendChild(document.createElement("br"));
-    oString = document.createElement("a");
-    oString.target = "_blank";
-    oString.href = "http://kido.com.ru/253-web-go-doska";
+    oString                  = document.createElement("a");
+    oString.target           = "_blank";
+    oString.href             = "http://kido.com.ru/253-web-go-doska";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "http://kido.com.ru/");
 
-    oString = document.createElement("div");
+    oString                  = document.createElement("div");
     oString.style.paddingTop = "20px";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "Browsers extension:");
-    oString = document.createElement("a");
-    oString.target = "_blank";
-    oString.href = "https://chrome.google.com/webstore/detail/web-go-board/cdmhoehokaoghadonjfdbhieajggfbmd";
+    oString                  = document.createElement("a");
+    oString.target           = "_blank";
+    oString.href             = "https://chrome.google.com/webstore/detail/web-go-board/cdmhoehokaoghadonjfdbhieajggfbmd";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "Chrome and OperaNext");
     oDivMainPart.appendChild(document.createElement("br"));
-    oString = document.createElement("a");
-    oString.target = "_blank";
-    oString.href = "https://addons.mozilla.org/ru/firefox/addon/web-gobaduk-board/";
+    oString                  = document.createElement("a");
+    oString.target           = "_blank";
+    oString.href             = "https://addons.mozilla.org/ru/firefox/addon/web-gobaduk-board/";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "FireFox");
 
-    oString = document.createElement("div");
+    oString                  = document.createElement("div");
     oString.style.paddingTop = "30px";
     oDivMainPart.appendChild(oString);
     Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2015. All rights reserved.");

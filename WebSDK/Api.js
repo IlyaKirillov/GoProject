@@ -311,6 +311,7 @@ window['GoBoardApi'] = new CGoBoardApi();
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;
+CGoBoardApi.prototype['Create_Viewer']                        = CGoBoardApi.prototype.Create_Viewer;
 CGoBoardApi.prototype['Create_EditorHor']                     = CGoBoardApi.prototype.Create_EditorHor;
 CGoBoardApi.prototype['Create_EditorVer']                     = CGoBoardApi.prototype.Create_EditorVer;
 CGoBoardApi.prototype['Create_BoardWithNavigateButtons']      = CGoBoardApi.prototype.Create_BoardWithNavigateButtons;

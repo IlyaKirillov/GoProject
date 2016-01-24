@@ -57,7 +57,11 @@
 
         var oGameTree = GoBoardApi.Create_GameTree();
         GoBoardApi.Set_Sound(oGameTree, "../../Resources/Sound");
-        GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
+
+        GoBoardApi.Create_Viewer(oGameTree, "divId");
+        var nHeight = GoBoardApi.Get_DivHeightByWidth(oGameTree, 600);
+
+        //GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
         //GoBoardApi.Create_BoardWithNavigateButtons(oGameTree, "divId");
 
 

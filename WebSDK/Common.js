@@ -21,38 +21,31 @@ function CColor(r, g, b, a)
     this.a = ( typeof(a) === "undefined" ? 255 : a);
 }
 
-CColor.prototype =
+CColor.prototype.ToString = function()
 {
-    ToString : function()
-    {
-        return "rgba(" + this.r + "," + this.g + "," + this.b + "," + this.a / 255 +")";
-    },
+    return "rgba(" + this.r + "," + this.g + "," + this.b + "," + this.a / 255 + ")";
+};
+CColor.prototype.Compare = function(oColor)
+{
+    if (this.r !== oColor.r || this.g !== oColor.g || this.b !== oColor.b || this.a !== oColor.a)
+        return false;
 
-    Compare : function(oColor)
-    {
-        if (this.r !== oColor.r || this.g !== oColor.g || this.b !== oColor.b || this.a !== oColor.a)
-            return false;
-
-        return true;
-    },
-
-    Copy : function()
-    {
-        return new CColor(this.r, this.g, this.b, this.a);
-    },
-
-    ToLong : function()
-    {
-        return ((this.r << 24 & 0xFF000000 ) | (this.g << 16 & 0x00FF0000) | (this.b << 8 & 0x0000FF00) | (this.a & 0x000000FF));
-    },
-
-    FromLong : function(nLong)
-    {
-        this.r = (nLong >> 24) & 0xFF;
-        this.g = (nLong >> 16) & 0xFF;
-        this.b = (nLong >>  8) & 0xFF;
-        this.a = (nLong      ) & 0xFF;
-    }
+    return true;
+};
+CColor.prototype.Copy = function()
+{
+    return new CColor(this.r, this.g, this.b, this.a);
+};
+CColor.prototype.ToLong = function()
+{
+    return ((this.r << 24 & 0xFF000000 ) | (this.g << 16 & 0x00FF0000) | (this.b << 8 & 0x0000FF00) | (this.a & 0x000000FF));
+};
+CColor.prototype.FromLong = function(nLong)
+{
+    this.r = (nLong >> 24) & 0xFF;
+    this.g = (nLong >> 16) & 0xFF;
+    this.b = (nLong >> 8) & 0xFF;
+    this.a = (nLong      ) & 0xFF;
 };
 
 function Common_ValuetoXY(Value)

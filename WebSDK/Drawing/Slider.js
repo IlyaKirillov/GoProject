@@ -148,7 +148,7 @@ CDrawingSlider.prototype.private_OnResize = function(W, H)
     var nSizeH = 12;
     var nSizeW = 32;
 
-    switch(this.m_nType)
+    switch (this.m_nType)
     {
     case EDrawingSliderType.AutoPlaySpeed:
     {
@@ -181,15 +181,16 @@ CDrawingSlider.prototype.private_OnResize = function(W, H)
     oSlider.onDragStart = this.private_OnDragStart;
     oSlider.onDragEnd   = this.private_OnDragEnd;
 
-    var oSlider = this.HtmlElement.Slider;
-    oSlider.style.fontSize = nSizeH + "px";
-    oSlider.style.color = "rgb(255,255,255)";
-    oSlider.style.textOverflow = "clip";
-    oSlider.style.overflow = "hidden";
-    oSlider.style.textAlign = "center";
-    oSlider.style.cursor = "default";
+    oSlider.style.fontSize           = nSizeH + "px";
+    oSlider.style.lineHeight         = nSizeH + "px";
+    oSlider.style.color              = "rgb(255,255,255)";
+    oSlider.style.textOverflow       = "clip";
+    oSlider.style.overflow           = "hidden";
+    oSlider.style.textAlign          = "center";
+    oSlider.style.cursor             = "default";
     oSlider.style.transitionProperty = "background";
     oSlider.style.transitionDuration = "0.25s";
+    oSlider.style.fontFamily         = '"Times New Roman", Times, serif';
 };
 CDrawingSlider.prototype.private_CreateDivElement = function(oParentElement, sName)
 {
