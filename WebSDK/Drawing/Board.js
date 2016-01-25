@@ -586,6 +586,10 @@ CDrawingBoard.prototype.Show_Target = function()
 {
     this.private_UpdateTargetType();
 };
+CDrawingBoard.prototype.Force_HideTarget = function()
+{
+    this.m_oTarget.Force_Hide();
+};
 CDrawingBoard.prototype.Remove_Mark = function(X, Y)
 {
     var Place = Common_XYtoValue(X, Y);
@@ -3122,50 +3126,53 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.CountColors, {DrawingBoard : this, Drawing : this.m_oDrawing});
         else
         {
-            if (true === Event.ShiftKey)
+            if (this.m_oGameTree && this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_LOADFILE)
             {
-                var sSgfFile = prompt("Enter here code of ur sgf file", "");
-                this.m_oGameTree.Load_Sgf(sSgfFile);
-            }
-            else
-            {
-                var oThis = this;
-
-                var aBody = document.getElementsByTagName('body');
-
-                if (aBody.length > 0)
+                if (true === Event.ShiftKey)
                 {
-                    var oBody = aBody[0];
-                    var oInput = document.createElement("input");
-                    oBody.appendChild(oInput); // в IE без этого не будет работать
+                    var sSgfFile = prompt("Enter here code of ur sgf file", "");
+                    this.m_oGameTree.Load_Sgf(sSgfFile);
+                }
+                else
+                {
+                    var oThis = this;
 
-                    oInput.type          = "file";
-                    oInput.multiple      = false;
-                    oInput.accept        = ".sgf,.gib,.ngf";
-                    oInput.style.display = "none";
+                    var aBody = document.getElementsByTagName('body');
 
-                    oInput.addEventListener("change", function(oEvent)
+                    if (aBody.length > 0)
                     {
-                        var aFiles = oEvent.target.files;
+                        var oBody  = aBody[0];
+                        var oInput = document.createElement("input");
+                        oBody.appendChild(oInput); // в IE без этого не будет работать
 
-                        if (aFiles.length > 0)
+                        oInput.type          = "file";
+                        oInput.multiple      = false;
+                        oInput.accept        = ".sgf,.gib,.ngf";
+                        oInput.style.display = "none";
+
+                        oInput.addEventListener("change", function (oEvent)
                         {
-                            var oFile = aFiles[0];
-                            var sExt  = oFile.name.split('.').pop().toLowerCase();
-                            var oReader = new FileReader();
-                            oReader.onload = function(oEvent2)
+                            var aFiles = oEvent.target.files;
+
+                            if (aFiles.length > 0)
                             {
-                                oThis.m_oGameTree.Load_Sgf(oEvent2.target.result, null, null, sExt);
+                                var oFile      = aFiles[0];
+                                var sExt       = oFile.name.split('.').pop().toLowerCase();
+                                var oReader    = new FileReader();
+                                oReader.onload = function (oEvent2)
+                                {
+                                    oThis.m_oGameTree.Load_Sgf(oEvent2.target.result, null, null, sExt);
+                                    oThis.Focus();
+                                };
+
+                                oReader.readAsText(oFile);
                                 oThis.Focus();
-                            };
+                            }
+                        }, false);
 
-                            oReader.readAsText(oFile);
-                            oThis.Focus();
-                        }
-                    }, false);
-
-                    Common.Click(oInput);
-                    oBody.removeChild(oInput);
+                        Common.Click(oInput);
+                        oBody.removeChild(oInput);
+                    }
                 }
             }
         }

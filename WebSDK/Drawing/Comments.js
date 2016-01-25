@@ -35,6 +35,7 @@ CDrawingComments.prototype.Init = function(sDivId, oGameTree)
     var oDivElement = this.HtmlElement.Control.HtmlElement;
 
     oDivElement.style.background = new CColor(217, 217, 217, 255).ToString();
+    oDivElement.style.boxSizing = "content-box";
 
     var sAreaName = sDivId + "_TextArea";
 

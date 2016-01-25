@@ -1845,7 +1845,7 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     var oMainDiv = oDrawing.Get_MainDiv();
 
     this.m_nWidth  = 160;
-    this.m_nHeight = 74;
+    this.m_nHeight = 14 + 5 * 20;
 
     var oContextMenuElementWrapper              = document.createElement("div");
     oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
@@ -1879,6 +1879,8 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     oList.style.backgroundClip = "padding-box";
     oList.style.lineHeight     = "20px";
 
+    this.m_oMainNavigationCheckElement  = this.private_CreateListItem(oList, "Main navigation", function(){oDrawing.Toggle_MultiLevelToolbarMainNavigation()}, g_oGlobalSettings.Is_MultiLevelToolbarMainNavigation());
+    this.m_oTreeNavigationCheckElement  = this.private_CreateListItem(oList, "Tree navigation", function(){oDrawing.Toggle_MultiLevelToolbarTreeNavigation()}, g_oGlobalSettings.Is_MultiLevelToolbarTreeNavigation());
     this.m_oGeneralCheckElement  = this.private_CreateListItem(oList, "General toolbar", function(){oDrawing.Toggle_MultiLevelToolbarGeneral()}, g_oGlobalSettings.Is_MultiLevelToolbarGeneral());
     this.m_oAutoPlayCheckElement = this.private_CreateListItem(oList, "Autoplay toolbar", function(){oDrawing.Toggle_MultiLevelToolbarAutoPlay()}, g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay());
     this.m_oTimelineCheckElement = this.private_CreateListItem(oList, "Timeline toolbar", function(){oDrawing.Toggle_MultiLevelToolbarTimeline()}, g_oGlobalSettings.Is_MultiLevelToolbarTimeline());
@@ -2071,6 +2073,20 @@ CDrawingButtonToolbarCustomize.prototype.private_CreateListItem = function(oList
     oList.appendChild(oItem);
 
     return oCheckItem;
+};
+CDrawingButtonToolbarCustomize.prototype.Set_MainNavigation = function(bChecked)
+{
+    if (this.m_oMultiLevelToolbar)
+        this.m_oMultiLevelToolbar.Set_MainNavigation(bChecked);
+
+    this.private_UpdateCheckElement(this.m_oMainNavigationCheckElement, bChecked);
+};
+CDrawingButtonToolbarCustomize.prototype.Set_TreeNavigation = function(bChecked)
+{
+    if (this.m_oMultiLevelToolbar)
+        this.m_oMultiLevelToolbar.Set_TreeNavigation(bChecked);
+
+    this.private_UpdateCheckElement(this.m_oTreeNavigationCheckElement, bChecked);
 };
 CDrawingButtonToolbarCustomize.prototype.Set_General = function(bChecked)
 {

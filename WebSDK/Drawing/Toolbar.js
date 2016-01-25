@@ -276,8 +276,8 @@ function CDrawingMultiLevelToolbar(oDrawing)
         TreeNavigationElement    : null
     };
 
-    this.m_bGeneralNavigation = true;
-    this.m_bTreeNavigation    = true;
+    this.m_bGeneralNavigation = g_oGlobalSettings.Is_MultiLevelToolbarMainNavigation();
+    this.m_bTreeNavigation    = g_oGlobalSettings.Is_MultiLevelToolbarTreeNavigation();
     this.m_bGeneralToolbar    = g_oGlobalSettings.Is_MultiLevelToolbarGeneral();
     this.m_bAutoPlayToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay();
     this.m_bTimelimeToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarTimeline();
@@ -375,12 +375,12 @@ CDrawingMultiLevelToolbar.prototype.Get_Height = function()
     var nLevelsCount = Math.max(this.m_nLevelsCount, 1);
     return nLevelsCount * this.m_nLineHeight + (nLevelsCount - 1) * this.m_nLineSpace;
 };
-CDrawingMultiLevelToolbar.prototype.Update_Size = function()
+CDrawingMultiLevelToolbar.prototype.Update_Size = function(bForce)
 {
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
 
-    if (W !== this.m_nW || H !== this.m_nH)
+    if (W !== this.m_nW || H !== this.m_nH || true === bForce)
     {
         this.m_nW = W;
         this.m_nH = H;
@@ -400,30 +400,35 @@ CDrawingMultiLevelToolbar.prototype.Set_OnChangeCallback = function(pCallback)
 {
     this.m_pOnChangeCallback = pCallback;
 };
-CDrawingMultiLevelToolbar.prototype.Set_GeneralNavigation = function(bNavigation)
+CDrawingMultiLevelToolbar.prototype.Set_MainNavigation = function(bNavigation)
 {
     this.m_bGeneralNavigation = bNavigation;
     this.private_Update();
+    this.Update_Size(true);
 };
 CDrawingMultiLevelToolbar.prototype.Set_TreeNavigation = function(bNavigation)
 {
     this.m_bTreeNavigation = bNavigation;
     this.private_Update();
+    this.Update_Size(true);
 };
 CDrawingMultiLevelToolbar.prototype.Set_General = function(bGeneral)
 {
     this.m_bGeneralToolbar  = bGeneral;
     this.private_Update();
+    this.Update_Size(true);
 };
 CDrawingMultiLevelToolbar.prototype.Set_AutoPlay = function(bAutoPlay)
 {
     this.m_bAutoPlayToolbar = bAutoPlay;
     this.private_Update();
+    this.Update_Size(true);
 };
 CDrawingMultiLevelToolbar.prototype.Set_Timeline = function(bTimeline)
 {
     this.m_bTimelimeToolbar = bTimeline;
     this.private_Update();
+    this.Update_Size(true);
 };
 CDrawingMultiLevelToolbar.prototype.private_Update = function()
 {
@@ -482,7 +487,7 @@ CDrawingMultiLevelToolbar.prototype.private_UpdateControls = function()
 
         if (nX <= 0.1 || nX + nControlMinW < nLineWidth)
         {
-            oElementControl.Bounds.SetParams(nX, nY, 1000, 1000, true, true, true, false, nControlMinW, this.m_nLineHeight);
+            oElementControl.Bounds.SetParams(nX, nY, 1000, 1000, true, true, true, false, Math.min(nControlMinW, nLineWidth), this.m_nLineHeight);
             oElementControl.Anchor = (g_anchor_top | g_anchor_left);
             nX += nControlMinW;
         }
@@ -493,7 +498,7 @@ CDrawingMultiLevelToolbar.prototype.private_UpdateControls = function()
             nX = 0;
             nY += this.m_nLineHeight + this.m_nLineSpace;
 
-            oElementControl.Bounds.SetParams(nX, nY, 1000, 1000, true, true, true, false, Math.min(nControlMinW, nLineWidth), this.m_nLineHeight);
+            oElementControl.Bounds.SetParams(nX, nY, 1000, 1000, true, true, true, false, Math.min(nControlMinW, nLineWidth - nX), this.m_nLineHeight);
             oElementControl.Anchor = (g_anchor_top | g_anchor_left);
 
             nX += nControlMinW;

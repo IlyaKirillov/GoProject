@@ -23,7 +23,7 @@ function BodyFocus()
 function OnDocumentReady()
 {
     var oGameTree = GoBoardApi.Create_GameTree();
-    GoBoardApi.Set_Sound(oGameTree, "http://goban.org/Sound");
+    GoBoardApi.Set_Sound(oGameTree, "http://webgoboard.org/Sound");
     GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
 
     if (sFilePath && "" !== sFilePath)

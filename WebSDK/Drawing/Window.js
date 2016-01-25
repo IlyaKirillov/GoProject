@@ -257,39 +257,40 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     this.m_bVisible = true;
 
     this.HtmlElement.Control = CreateControlContainer(sDivId);
-    var oMainDiv = this.HtmlElement.Control.HtmlElement;
-    var oMainControl = this.HtmlElement.Control;
+    var oMainDiv             = this.HtmlElement.Control.HtmlElement;
+    var oMainControl         = this.HtmlElement.Control;
 
-    oMainDiv.style.border = "1px solid " + this.m_oOuterBorderColor.ToString();
+    oMainDiv.style.border          = "1px solid " + this.m_oOuterBorderColor.ToString();
     oMainDiv.style.backgroundColor = this.m_oBackColor.ToString();
+    oMainDiv.style.boxSizing       = "content-box";
 
     // InnerDiv
-    var sInnerDivId   = sDivId  + "_Inner";
-    var oInnerElement = this.protected_CreateDivElement(oMainDiv, sInnerDivId);
-    var oInnerControl = CreateControlContainer(sInnerDivId);
-    oInnerControl.Bounds.SetParams(6, 29, 8, 8, true, true, true, true, -1,-1);
-    oInnerControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    var sInnerDivId                     = sDivId + "_Inner";
+    var oInnerElement                   = this.protected_CreateDivElement(oMainDiv, sInnerDivId);
+    var oInnerControl                   = CreateControlContainer(sInnerDivId);
+    oInnerControl.Bounds.SetParams(6, 29, 8, 8, true, true, true, true, -1, -1);
+    oInnerControl.Anchor                = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oInnerControl);
-    oInnerElement.style.border = "1px solid " + this.m_oInnerBorderColor.ToString();
-    oInnerElement.style.backgroundColor = (new CColor(255,255,255,255)).ToString();
-    oInnerElement.style.overflow = "hidden";
-    this.HtmlElement.InnerDiv     = oInnerElement;
-    this.HtmlElement.InnerControl = oInnerControl;
+    oInnerElement.style.border          = "1px solid " + this.m_oInnerBorderColor.ToString();
+    oInnerElement.style.backgroundColor = (new CColor(255, 255, 255, 255)).ToString();
+    oInnerElement.style.overflow        = "hidden";
+    this.HtmlElement.InnerDiv           = oInnerElement;
+    this.HtmlElement.InnerControl       = oInnerControl;
 
     // Caption
-    var sCaptionId      = sDivId + "_Caption";
-    var oCaptionElement = this.protected_CreateDivElement(oMainDiv, sCaptionId);
-    var oCaptionControl = CreateControlContainer(sCaptionId);
+    var sCaptionId         = sDivId + "_Caption";
+    var oCaptionElement    = this.protected_CreateDivElement(oMainDiv, sCaptionId);
+    var oCaptionControl    = CreateControlContainer(sCaptionId);
     oCaptionControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, 30);
     oCaptionControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oMainControl.AddControl(oCaptionControl);
 
     // CaptionText
-    var sCaptionTextId = sCaptionId + "_Text";
-    var oCaptionTextElement = this.protected_CreateDivElement(oMainDiv, sCaptionTextId);
-    var oCaptionTextControl = CreateControlContainer(sCaptionTextId);
+    var sCaptionTextId                            = sCaptionId + "_Text";
+    var oCaptionTextElement                       = this.protected_CreateDivElement(oMainDiv, sCaptionTextId);
+    var oCaptionTextControl                       = CreateControlContainer(sCaptionTextId);
     oCaptionTextControl.Bounds.SetParams(15, 0, 55, 1000, true, false, true, false, -1, 30);
-    oCaptionTextControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+    oCaptionTextControl.Anchor                    = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oCaptionControl.AddControl(oCaptionTextControl);
     oCaptionTextElement.style.fontFamily          = "Tahoma, Sans serif";
     oCaptionTextElement.style.fontSize            = "13pt";
@@ -301,28 +302,28 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCaptionTextElement.style['-o-text-overflow'] = "ellipsis";
     oCaptionTextElement.style.cursor              = "default";
     Common.Set_InnerTextToElement(oCaptionTextElement, "Caption");
-    this.HtmlElement.CaptionText = oCaptionTextElement;
+    this.HtmlElement.CaptionText                  = oCaptionTextElement;
 
     // Caption
-    var sCaptionId2      = sDivId + "_Caption2";
-    var oCaptionElement2 = this.protected_CreateDivElement(oMainDiv, sCaptionId2);
-    var oCaptionControl2 = CreateControlContainer(sCaptionId2);
+    var sCaptionId2          = sDivId + "_Caption2";
+    var oCaptionElement2     = this.protected_CreateDivElement(oMainDiv, sCaptionId2);
+    var oCaptionControl2     = CreateControlContainer(sCaptionId2);
     oCaptionControl2.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, 30);
-    oCaptionControl2.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oCaptionControl2.Anchor  = (g_anchor_top | g_anchor_left | g_anchor_right);
     oMainControl.AddControl(oCaptionControl2);
     this.HtmlElement.Caption = oCaptionElement2;
 
     Common_DragHandler.Init(oCaptionElement2, null);
-    oCaptionElement2.onDrag = function(X, Y)
+    oCaptionElement2.onDrag  = function (X, Y)
     {
-        var CurLeft     = parseInt(oThis.HtmlElement.Control.HtmlElement.style.left);
-        var CurTop      = parseInt(oThis.HtmlElement.Control.HtmlElement.style.top);
+        var CurLeft = parseInt(oThis.HtmlElement.Control.HtmlElement.style.left);
+        var CurTop  = parseInt(oThis.HtmlElement.Control.HtmlElement.style.top);
 
         var LeftHandler = parseInt(oThis.HtmlElement.Caption.style.left);
         var TopHandler  = parseInt(oThis.HtmlElement.Caption.style.top);
 
         oThis.HtmlElement.Control.HtmlElement.style.left = CurLeft + LeftHandler + "px";
-        oThis.HtmlElement.Control.HtmlElement.style.top  = CurTop  + TopHandler + "px";
+        oThis.HtmlElement.Control.HtmlElement.style.top  = CurTop + TopHandler + "px";
 
         oThis.HtmlElement.Caption.style.left = "0px";
         oThis.HtmlElement.Caption.style.top  = "0px";
@@ -332,123 +333,123 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     if (false !== bResizable)
     {
         // Left Handler
-        var sLeftHandlerId = sDivId + "_LeftHandler";
-        var oLeftHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftHandlerId);
-        var oLeftHandlerControl = CreateControlContainer(sLeftHandlerId);
+        var sLeftHandlerId               = sDivId + "_LeftHandler";
+        var oLeftHandlerElement          = this.protected_CreateDivElement(oMainDiv, sLeftHandlerId);
+        var oLeftHandlerControl          = CreateControlContainer(sLeftHandlerId);
         oLeftHandlerControl.Bounds.SetParams(0, 6, 1000, 6, false, true, false, true, 6, -1);
-        oLeftHandlerControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+        oLeftHandlerControl.Anchor       = (g_anchor_top | g_anchor_left | g_anchor_bottom);
         oMainControl.AddControl(oLeftHandlerControl);
         oLeftHandlerElement.style.cursor = "w-resize";
-        this.HtmlElement.HandlerL = oLeftHandlerElement;
+        this.HtmlElement.HandlerL        = oLeftHandlerElement;
 
         // Right Handler
-        var sRightHandlerId = sDivId + "_RightHandler";
-        var oRightHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightHandlerId);
-        var oRightHandlerControl = CreateControlContainer(sRightHandlerId);
+        var sRightHandlerId               = sDivId + "_RightHandler";
+        var oRightHandlerElement          = this.protected_CreateDivElement(oMainDiv, sRightHandlerId);
+        var oRightHandlerControl          = CreateControlContainer(sRightHandlerId);
         oRightHandlerControl.Bounds.SetParams(0, 6, 0, 6, false, true, true, true, 6, -1);
-        oRightHandlerControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_bottom);
+        oRightHandlerControl.Anchor       = (g_anchor_top | g_anchor_right | g_anchor_bottom);
         oMainControl.AddControl(oRightHandlerControl);
         oRightHandlerElement.style.cursor = "w-resize";
-        this.HtmlElement.HandlerR = oRightHandlerElement;
+        this.HtmlElement.HandlerR         = oRightHandlerElement;
 
         // Bottom Handler
-        var sBottomHandlerId = sDivId + "_BottomHandler";
-        var oBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sBottomHandlerId);
-        var oBottomHandlerControl = CreateControlContainer(sBottomHandlerId);
+        var sBottomHandlerId               = sDivId + "_BottomHandler";
+        var oBottomHandlerElement          = this.protected_CreateDivElement(oMainDiv, sBottomHandlerId);
+        var oBottomHandlerControl          = CreateControlContainer(sBottomHandlerId);
         oBottomHandlerControl.Bounds.SetParams(6, 0, 6, 0, true, false, true, true, -1, 6);
-        oBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_right | g_anchor_left);
+        oBottomHandlerControl.Anchor       = (g_anchor_bottom | g_anchor_right | g_anchor_left);
         oMainControl.AddControl(oBottomHandlerControl);
         oBottomHandlerElement.style.cursor = "s-resize";
-        this.HtmlElement.HandlerB = oBottomHandlerElement;
+        this.HtmlElement.HandlerB          = oBottomHandlerElement;
 
         // Top Handler
-        var sTopHandlerId = sDivId + "_TopHandler";
-        var oTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sTopHandlerId);
-        var oTopHandlerControl = CreateControlContainer(sTopHandlerId);
+        var sTopHandlerId               = sDivId + "_TopHandler";
+        var oTopHandlerElement          = this.protected_CreateDivElement(oMainDiv, sTopHandlerId);
+        var oTopHandlerControl          = CreateControlContainer(sTopHandlerId);
         oTopHandlerControl.Bounds.SetParams(6, 0, 6, 1000, true, true, true, false, -1, 6);
-        oTopHandlerControl.Anchor = (g_anchor_top | g_anchor_right | g_anchor_left);
+        oTopHandlerControl.Anchor       = (g_anchor_top | g_anchor_right | g_anchor_left);
         oMainControl.AddControl(oTopHandlerControl);
         oTopHandlerElement.style.cursor = "s-resize";
-        this.HtmlElement.HandlerT = oTopHandlerElement;
+        this.HtmlElement.HandlerT       = oTopHandlerElement;
 
         // Left-Top Handler
-        var sLeftTopHandlerId = sDivId + "_LeftTopHandler";
-        var oLeftTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftTopHandlerId);
-        var oLeftTopHandlerControl = CreateControlContainer(sLeftTopHandlerId);
+        var sLeftTopHandlerId               = sDivId + "_LeftTopHandler";
+        var oLeftTopHandlerElement          = this.protected_CreateDivElement(oMainDiv, sLeftTopHandlerId);
+        var oLeftTopHandlerControl          = CreateControlContainer(sLeftTopHandlerId);
         oLeftTopHandlerControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, 6, 6);
-        oLeftTopHandlerControl.Anchor = (g_anchor_top | g_anchor_left);
+        oLeftTopHandlerControl.Anchor       = (g_anchor_top | g_anchor_left);
         oMainControl.AddControl(oLeftTopHandlerControl);
         oLeftTopHandlerElement.style.cursor = "se-resize";
-        this.HtmlElement.HandlerLT = oLeftTopHandlerElement;
+        this.HtmlElement.HandlerLT          = oLeftTopHandlerElement;
 
         // Right-Top Handler
-        var sRightTopHandlerId = sDivId + "_RightTopHandler";
-        var oRightTopHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightTopHandlerId);
-        var oRightTopHandlerControl = CreateControlContainer(sRightTopHandlerId);
+        var sRightTopHandlerId               = sDivId + "_RightTopHandler";
+        var oRightTopHandlerElement          = this.protected_CreateDivElement(oMainDiv, sRightTopHandlerId);
+        var oRightTopHandlerControl          = CreateControlContainer(sRightTopHandlerId);
         oRightTopHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, true, false, 6, 6);
-        oRightTopHandlerControl.Anchor = (g_anchor_top | g_anchor_right);
+        oRightTopHandlerControl.Anchor       = (g_anchor_top | g_anchor_right);
         oMainControl.AddControl(oRightTopHandlerControl);
         oRightTopHandlerElement.style.cursor = "ne-resize";
-        this.HtmlElement.HandlerRT = oRightTopHandlerElement;
+        this.HtmlElement.HandlerRT           = oRightTopHandlerElement;
 
         // Left-Bottom Handler
-        var sLeftBottomHandlerId = sDivId + "_LeftBottomHandler";
-        var oLeftBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sLeftBottomHandlerId);
-        var oLeftBottomHandlerControl = CreateControlContainer(sLeftBottomHandlerId);
+        var sLeftBottomHandlerId               = sDivId + "_LeftBottomHandler";
+        var oLeftBottomHandlerElement          = this.protected_CreateDivElement(oMainDiv, sLeftBottomHandlerId);
+        var oLeftBottomHandlerControl          = CreateControlContainer(sLeftBottomHandlerId);
         oLeftBottomHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, false, false, 6, 6);
-        oLeftBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_left);
+        oLeftBottomHandlerControl.Anchor       = (g_anchor_bottom | g_anchor_left);
         oMainControl.AddControl(oLeftBottomHandlerControl);
         oLeftBottomHandlerElement.style.cursor = "ne-resize";
-        this.HtmlElement.HandlerLB = oLeftBottomHandlerElement;
+        this.HtmlElement.HandlerLB             = oLeftBottomHandlerElement;
 
         // Right-Bottom Handler
-        var sRightBottomHandlerId = sDivId + "_RightBottomHandler";
-        var oRightBottomHandlerElement = this.protected_CreateDivElement(oMainDiv, sRightBottomHandlerId);
-        var oRightBottomHandlerControl = CreateControlContainer(sRightBottomHandlerId);
+        var sRightBottomHandlerId               = sDivId + "_RightBottomHandler";
+        var oRightBottomHandlerElement          = this.protected_CreateDivElement(oMainDiv, sRightBottomHandlerId);
+        var oRightBottomHandlerControl          = CreateControlContainer(sRightBottomHandlerId);
         oRightBottomHandlerControl.Bounds.SetParams(0, 0, 0, 1000, false, false, true, false, 6, 6);
-        oRightBottomHandlerControl.Anchor = (g_anchor_bottom | g_anchor_right);
+        oRightBottomHandlerControl.Anchor       = (g_anchor_bottom | g_anchor_right);
         oMainControl.AddControl(oRightBottomHandlerControl);
         oRightBottomHandlerElement.style.cursor = "se-resize";
-        this.HtmlElement.HandlerRB = oRightBottomHandlerElement;
+        this.HtmlElement.HandlerRB              = oRightBottomHandlerElement;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
-        this.HtmlElement.HandlerL.onDrag = this.private_OnDragLeftHandler;
+        this.HtmlElement.HandlerL.onDrag        = this.private_OnDragLeftHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
-        this.HtmlElement.HandlerR.onDrag = this.private_OnDragRightHandler;
+        this.HtmlElement.HandlerR.onDrag        = this.private_OnDragRightHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
-        this.HtmlElement.HandlerT.onDrag = this.private_OnDragTopHandler;
+        this.HtmlElement.HandlerT.onDrag        = this.private_OnDragTopHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
-        this.HtmlElement.HandlerB.onDrag = this.private_OnDragBottomHandler;
+        this.HtmlElement.HandlerB.onDrag        = this.private_OnDragBottomHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
-        this.HtmlElement.HandlerLT.onDrag = this.private_OnDragLeftTopHandler;
+        this.HtmlElement.HandlerLT.onDrag       = this.private_OnDragLeftTopHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerRT, null, null, null, null, null);
-        this.HtmlElement.HandlerRT.onDrag = this.private_OnDragRightTopHandler;
+        this.HtmlElement.HandlerRT.onDrag       = this.private_OnDragRightTopHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerLB, null, null, null, null, null);
-        this.HtmlElement.HandlerLB.onDrag = this.private_OnDragLeftBottomHandler;
+        this.HtmlElement.HandlerLB.onDrag       = this.private_OnDragLeftBottomHandler;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
-        this.HtmlElement.HandlerRB.onDrag = this.private_OnDragRightBottomHandler;
+        this.HtmlElement.HandlerRB.onDrag       = this.private_OnDragRightBottomHandler;
     }
 
     // CloseButton
-    var sCloseButtonId = sDivId + "_Close";
-    var oCloseButtonElement = this.protected_CreateDivElement(oMainDiv, sCloseButtonId);
-    var oCloseButtonControl = CreateControlContainer(sCloseButtonId);
+    var sCloseButtonId                        = sDivId + "_Close";
+    var oCloseButtonElement                   = this.protected_CreateDivElement(oMainDiv, sCloseButtonId);
+    var oCloseButtonControl                   = CreateControlContainer(sCloseButtonId);
     oCloseButtonControl.Bounds.SetParams(0, 0, 6, 1000, false, true, true, false, 45, 20);
-    oCloseButtonControl.Anchor = (g_anchor_top | g_anchor_right);
+    oCloseButtonControl.Anchor                = (g_anchor_top | g_anchor_right);
     oMainControl.AddControl(oCloseButtonControl);
     oCloseButtonElement.style.backgroundColor = (new CColor(255, 0, 0, 255)).ToString();
 
-    var oCloseButton = new CDrawingButtonClose(this.m_oDrawing);
+    var oCloseButton             = new CDrawingButtonClose(this.m_oDrawing);
     oCloseButton.Init(sCloseButtonId, this);
-    oCloseButton.m_oNormaFColor = new CColor(199, 80, 80, 255);
-    oCloseButton.m_oHoverFColor = new CColor(224, 67, 67, 255);
+    oCloseButton.m_oNormaFColor  = new CColor(199, 80, 80, 255);
+    oCloseButton.m_oHoverFColor  = new CColor(224, 67, 67, 255);
     oCloseButton.m_oActiveFColor = new CColor(153, 61, 61, 255);
 
     this.HtmlElement.CloseButton = oCloseButton;

@@ -24,6 +24,7 @@ var EBoardTargetType =
 
 function CBoardTarget(oImageData)
 {
+    this.m_bForceHide   = false;
     this.m_nLogicX      = -1;
     this.m_nLogicY      = -1;
     this.m_oHtmlElement = null;
@@ -59,7 +60,7 @@ CBoardTarget.prototype.Hide = function()
 };
 CBoardTarget.prototype.Show = function()
 {
-    if (true === g_oGlobalSettings.Is_ShowTarget())
+    if (true !== this.m_bForceHide && true === g_oGlobalSettings.Is_ShowTarget())
         this.m_oHtmlElement.style.display = "block";
 };
 CBoardTarget.prototype.Check_LogicPos = function(X, Y, bForce)
@@ -128,4 +129,9 @@ CBoardTarget.prototype.Check_XY = function(X, Y)
         return true;
 
     return false;
+};
+CBoardTarget.prototype.Force_Hide = function()
+{
+    this.m_bForceHide = true;
+    this.Hide();
 };

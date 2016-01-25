@@ -305,9 +305,188 @@ CGoBoardApi.prototype.Get_DivHeightByWidth = function(oGameTree, nWidth)
         return oGameTree.Get_DivHeightByWidth(nWidth);
 };
 
+/**
+ * Функция, которая встраивает доску с заданными параметрами.
+ */
+CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
+{
+    var nMoveNumber = -1;
+    var oViewPort   = null;
+    var sSgfData    = null;
+    var sBoardMode  = null;
+    var nBoardWidth = null;
+    var oThis       = this;
+
+    var oGameTree = this.Create_GameTree();
+
+    if (oConfig["viewPort"])
+    {
+        oViewPort = {};
+
+        if ("auto" === oConfig["viewPort"])
+        {
+            oViewPort["Auto"] = true;
+        }
+        else
+        {
+            oViewPort["Auto"] = false;
+            oViewPort["X0"]   = parseInt(oConfig["viewPort"]["X0"]);
+            oViewPort["X1"]   = parseInt(oConfig["viewPort"]["X1"]);
+            oViewPort["Y0"]   = parseInt(oConfig["viewPort"]["Y0"]);
+            oViewPort["Y1"]   = parseInt(oConfig["viewPort"]["Y1"]);
+        }
+    }
+
+    if (oConfig["moveNumber"])
+    {
+        nMoveNumber = parseInt(oConfig["moveNumber"]);
+    }
+
+    if (oConfig["boardMode"])
+    {
+        sBoardMode = oConfig["boardMode"];
+    }
+    else
+    {
+        sBoardMode = "viewer";
+    }
+
+    if (oConfig["width"])
+    {
+        nBoardWidth = oConfig["width"];
+    }
+
+    if (null != oConfig["sgfUrl"])
+    {
+        Load_SgfByUrl(oConfig["sgfUrl"]);
+    }
+    else if (null !== oConfig["sgfData"])
+    {
+        sSgfData = oConfig["sgfData"];
+        Load_Board();
+    }
+    else
+    {
+        sSgfData = "(;FF[4]GM[1]SZ[19])";
+        Load_Board();
+    }
+
+    function Load_SgfByUrl(sUrl)
+    {
+        sUrl        = decodeURIComponent(sUrl);
+        var rawFile = new XMLHttpRequest();
+        rawFile["open"]("GET", sUrl, false);
+
+        rawFile["onreadystatechange"] = function ()
+        {
+            if (rawFile["readyState"] === 4)
+            {
+                if (rawFile["status"] === 200 || rawFile["status"] == 0)
+                {
+                    sSgfData = rawFile.responseText;
+                    Load_Board();
+                }
+            }
+        };
+        rawFile["send"](null);
+    }
+
+    function Load_Board()
+    {
+        var oDiv = document.getElementById(sDivId);
+        if (!oDiv)
+            return;
+
+        var oPermissions                = {};
+        oPermissions["LoadFile"]        = false;
+        oPermissions["GameInfo"]        = false;
+        oPermissions["ChangeBoardMode"] = false;
+        oPermissions["NewNode"]         = false;
+        oPermissions["Move"]            = false;
+        oPermissions["ViewPort"]        = false;
+
+        var nWidth = 400;
+        if ("image" === sBoardMode)
+        {
+            oThis.Create_SimpleBoard(oGameTree, sDivId);
+            oThis.Set_ShowTarget(oGameTree, false);
+            nWidth = 600;
+        }
+        else if ("viewer" == sBoardMode)
+        {
+            oThis.Create_Viewer(oGameTree, sDivId);
+            oPermissions["Move"] = true;
+            nWidth               = 600;
+        }
+        else if ("vereditor" === sBoardMode)
+        {
+            oThis.Create_EditorVer(oGameTree, sDivId);
+            oPermissions["ChangeBoardMode"] = true;
+            oPermissions["NewNode"]         = true;
+            oPermissions["Move"]            = true;
+            nWidth                          = 600;
+        }
+        else if ("horeditor" === sBoardMode)
+        {
+            oThis.Create_EditorHor(oGameTree, sDivId);
+            oPermissions["ChangeBoardMode"] = true;
+            oPermissions["NewNode"]         = true;
+            oPermissions["Move"]            = true;
+            nWidth                          = 900;
+        }
+        else if ("problems" == sBoardMode)
+        {
+            var oPr = {};
+
+            if (oConfig["problemsTime"])
+                oPr["TutorTime"] = oConfig["problemsTime"];
+
+            if (oConfig["problemsColor"])
+                oPr["TutorColor"] = oConfig["problemsColor"];
+
+            if (oConfig["problemsNewNode"])
+                oPr["NewNode"] = oConfig["problemsNewNode"];
+
+            oThis.Create_Problems(oGameTree, sDivId, oPr);
+            oPermissions       = null;
+            nWidth             = 400;
+
+            if (null === oViewPort)
+            {
+                oViewPort = {};
+                oViewPort["Auto"] = true;
+            }
+        }
+
+        oThis.Load_Sgf(oGameTree, sSgfData, oViewPort);
+
+        if (null !== nBoardWidth)
+        {
+            nWidth = nBoardWidth;
+        }
+
+        var nHeight = oThis.Get_DivHeightByWidth(oGameTree, nWidth);
+
+        oDiv.style.width  = nWidth + "px";
+        oDiv.style.height = nHeight + "px";
+
+        if (-1 !== nMoveNumber)
+        {
+            oThis.GoTo_NodeByMoveNumber(oGameTree, nMoveNumber);
+        }
+
+        oThis.Update_Size(oGameTree);
+
+        if (oPermissions)
+        {
+            oThis.Set_Permissions(oGameTree, oPermissions);
+        }
+    }
+};
 
 window['GoBoardApi'] = new CGoBoardApi();
 
+CGoBoardApi.prototype['Embed']                                = CGoBoardApi.prototype.Embed;
 CGoBoardApi.prototype['Create_GameTree']                      = CGoBoardApi.prototype.Create_GameTree;
 
 CGoBoardApi.prototype['Create_SimpleBoard']                   = CGoBoardApi.prototype.Create_SimpleBoard;

@@ -2043,8 +2043,13 @@ CGameTree.prototype.Is_ShowTarget = function()
 };
 CGameTree.prototype.Set_ShowTarget = function(Value, bFromApi)
 {
-    if (true !== bFromApi)
-        g_oGlobalSettings.Set_ShowTarget(Value);
+    if (true === bFromApi && false === Value && this.m_oDrawingBoard)
+    {
+        this.m_oDrawingBoard.Force_HideTarget();
+        return;
+    }
+
+    g_oGlobalSettings.Set_ShowTarget(Value);
 
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Update_Target();
