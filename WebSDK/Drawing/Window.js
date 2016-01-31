@@ -2643,9 +2643,13 @@ var EWindowType =
 var g_aWindows = {};
 function CreateWindow(sDrawingId, nWindowType, oPr)
 {
-    if (g_aWindows[nWindowType])
+    if (!g_aWindows[sDrawingId])
+        g_aWindows[sDrawingId] = {};
+
+    var oWindows = g_aWindows[sDrawingId];
+    if (oWindows[nWindowType])
     {
-        var oWindow = g_aWindows[nWindowType];
+        var oWindow = oWindows[nWindowType];
         oWindow.Show(oPr);
         return oWindow;
     }
@@ -2693,7 +2697,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.CreateNew     : oWindow = new CDrawingCreateNewWindow(); break;
             }
 
-            g_aWindows[nWindowType] = oWindow;
+            oWindows[nWindowType] = oWindow;
 
             if (null !== oWindow)
             {
