@@ -201,10 +201,20 @@ CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
 
 /**
  * Получаем ссылку на ход, чтобы потом можно было переоткрыть файл с данной ссылкой
+ * bStrong - получаем сильную ссылку или нет. Сильная, значит в ссылку записывается весь вариант, не считая нод, которые
+ * были в файле изначально. В слабой ссылка просто указывает на место, но не сохраняет ее как самостоятельный вариант.
  */
-CGoBoardApi.prototype.Get_MoveReference = function(oGameTree)
+CGoBoardApi.prototype.Get_MoveReference = function(oGameTree, bStrong)
 {
-    return oGameTree.Get_MoveReference();
+    return oGameTree.Get_MoveReference(bStrong);
+};
+
+/**
+ * Проверяем, делались ли какие-либо изменения в файле с момента открытия.
+ */
+CGoBoardApi.prototype.Is_Modified = function(oGameTree)
+{
+    return oGameTree.Is_Modified();
 };
 
 /**
@@ -375,7 +385,7 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     {
         sUrl        = decodeURIComponent(sUrl);
         var rawFile = new XMLHttpRequest();
-        rawFile["open"]("GET", sUrl, false);
+        rawFile["open"]("GET", sUrl + '?_=' + new Date().getTime(), false);
 
         rawFile["onreadystatechange"] = function ()
         {
@@ -474,6 +484,10 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
         {
             oThis.GoTo_NodeByMoveNumber(oGameTree, nMoveNumber);
         }
+        else
+        {
+            oThis.GoTo_NodeByMoveNumber(oGameTree, 0);
+        }
 
         oThis.Update_Size(oGameTree);
 
@@ -502,6 +516,7 @@ CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prot
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
 CGoBoardApi.prototype['Save_Sgf']                             = CGoBoardApi.prototype.Save_Sgf;
 CGoBoardApi.prototype['Get_MoveReference']                    = CGoBoardApi.prototype.Get_MoveReference;
+CGoBoardApi.prototype['Is_Modified']                          = CGoBoardApi.prototype.Is_Modified;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;
 CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prototype.Set_Sound;
 CGoBoardApi.prototype['Find_ProblemRightVariant']             = CGoBoardApi.prototype.Find_ProblemRightVariant;

@@ -136,6 +136,9 @@ CNode.prototype.Add_Next = function(Node, bSetCur)
 
     if (true === bSetCur || -1 === this.m_nNextCur)
         this.m_nNextCur = this.m_aNext.length - 1;
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Remove_Next = function(Index)
 {
@@ -146,6 +149,9 @@ CNode.prototype.Remove_Next = function(Index)
 
     if (-1 === this.m_nNextCur && this.m_aNext.length > 0)
         this.m_nNextCur = 0;
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Get_Prev = function()
 {
@@ -159,6 +165,9 @@ CNode.prototype.Add_Command = function(Command)
 {
     this.m_aCommands.push(Command);
     this.ToHandler_AddCommand(Command);
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Get_Command = function(Index)
 {
@@ -171,6 +180,9 @@ CNode.prototype.Get_CommandsCount = function()
 CNode.prototype.Set_Move = function(Move)
 {
     this.m_oMove = Move;
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Get_Move = function()
 {
@@ -186,10 +198,16 @@ CNode.prototype.Have_Move = function()
 CNode.prototype.Add_Comment = function(sComment)
 {
     this.m_sComment += sComment;
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Set_Comment = function(sComment)
 {
     this.m_sComment = sComment;
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Get_Comment = function()
 {
@@ -441,14 +459,23 @@ CNode.prototype.Find_RightNodes = function(aNodes)
 CNode.prototype.Add_ColorMark = function(X, Y, Color)
 {
     this.m_oColorMap[Common_XYtoValue(X, Y)] = Color;
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Remove_ColorMark = function(X, Y)
 {
     delete this.m_oColorMap[Common_XYtoValue(X, Y)];
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Remove_AllColorMarks = function()
 {
     this.m_oColorMap = {};
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Draw_ColorMap = function(oDrawingBoard)
 {
@@ -472,6 +499,9 @@ CNode.prototype.Copy_ColorMapFromPrevNode = function()
             this.m_oColorMap[nPos] = oPrevMap[nPos].Copy();
         }
     }
+
+    if (this.m_oGameTree)
+        this.m_oGameTree.Set_Modified(true);
 };
 CNode.prototype.Get_ColorTable = function(oTable)
 {

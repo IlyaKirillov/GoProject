@@ -288,6 +288,7 @@ CDrawingViewerScores.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.ScoresWDiv.style.height       = "25px";
     this.HtmlElement.ScoresWDiv.style.fontFamily   = '"Times New Roman", Times, serif';
     this.HtmlElement.ScoresWDiv.style.fontSize     = "16px";
+    this.HtmlElement.ScoresWDiv.style.lineHeight   = "25px";
 
     this.HtmlElement.ImageB.style.position = "absolute";
     this.HtmlElement.ImageB.style.left     = "61px";
@@ -301,6 +302,7 @@ CDrawingViewerScores.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.ScoresBDiv.style.height       = "25px";
     this.HtmlElement.ScoresBDiv.style.fontFamily   = '"Times New Roman", Times, serif';
     this.HtmlElement.ScoresBDiv.style.fontSize     = "16px";
+    this.HtmlElement.ScoresBDiv.style.lineHeight   = "25px";
 
     this.private_DrawColor(this.HtmlElement.ImageW, false);
     this.private_DrawColor(this.HtmlElement.ImageB, true);
@@ -388,6 +390,7 @@ CDrawingViewerTitle.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.TitleDiv.style.fontFamily   = '"Times New Roman", Times, serif';
     this.HtmlElement.TitleDiv.style.fontSize     = "16px";
     this.HtmlElement.TitleDiv.style.height       = "25px";
+    this.HtmlElement.TitleDiv.style.lineHeight   = "25px";
     this.HtmlElement.TitleDiv.style.width        = "100%";
     this.HtmlElement.TitleDiv.style.textAlign    = "center";
 

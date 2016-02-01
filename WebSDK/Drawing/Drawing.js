@@ -1573,6 +1573,10 @@ CDrawing.prototype.Get_DivHeightByWidth = function(nWidth)
 
     return 0;
 };
+CDrawing.prototype.Get_TemplateType = function()
+{
+    return this.m_eTemplateType;
+};
 
 function CDrawingFullInfo()
 {
