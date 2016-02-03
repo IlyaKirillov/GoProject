@@ -307,6 +307,15 @@ CGoBoardApi.prototype.Set_ShowTarget = function(oGameTree, bShow)
 };
 
 /**
+ * Выставляем тему доски для текущей сессии, перекрывающую тему пользователя.
+ */
+CGoBoardApi.prototype.Set_BoardTheme = function(oGameTree, sTheme)
+{
+    if (oGameTree)
+        oGameTree.Set_BoardTheme(sTheme);
+};
+
+/**
  * Получем минимальную высоту необходимую для дивки, исходя из заданной ширины.
  */
 CGoBoardApi.prototype.Get_DivHeightByWidth = function(oGameTree, nWidth)
@@ -325,6 +334,7 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     var sSgfData    = null;
     var sBoardMode  = null;
     var nBoardWidth = null;
+    var sTheme      = "TrueColor";
     var oThis       = this;
 
     var oGameTree = this.Create_GameTree();
@@ -364,6 +374,11 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     if (oConfig["width"])
     {
         nBoardWidth = oConfig["width"];
+    }
+
+    if (oConfig["boardTheme"])
+    {
+        sTheme = oConfig["boardTheme"];
     }
 
     if (null != oConfig["sgfUrl"])
@@ -414,6 +429,8 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
         oPermissions["NewNode"]         = false;
         oPermissions["Move"]            = false;
         oPermissions["ViewPort"]        = false;
+
+        oThis.Set_BoardTheme(oGameTree, sTheme);
 
         var nWidth = 400;
         if ("image" === sBoardMode)
@@ -531,3 +548,4 @@ CGoBoardApi.prototype['GoTo_Node']                            = CGoBoardApi.prot
 CGoBoardApi.prototype['GoTo_NodeByMoveNumber']                = CGoBoardApi.prototype.GoTo_NodeByMoveNumber;
 CGoBoardApi.prototype['Set_ShowTarget']                       = CGoBoardApi.prototype.Set_ShowTarget;
 CGoBoardApi.prototype['Get_DivHeightByWidth']                 = CGoBoardApi.prototype.Get_DivHeightByWidth;
+CGoBoardApi.prototype['Set_BoardTheme']                       = CGoBoardApi.prototype.Set_BoardTheme;

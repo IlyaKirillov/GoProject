@@ -24,6 +24,7 @@ var EDITINGFLAGS_VIEWPORT_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_VIEWPORT;
 
 function CGameTree(Drawing)
 {
+    this.m_oSettings         = new CLocalSetting(this);
     this.m_oSound            = new CBoardSound();
     this.m_oDrawing          = Drawing;
 
@@ -2493,4 +2494,8 @@ CGameTree.prototype.Set_Modified = function(bModified)
 CGameTree.prototype.Is_Modified = function()
 {
     return this.m_bModified;
+};
+CGameTree.prototype.Get_LocalSettings = function()
+{
+    return this.m_oSettings;
 };

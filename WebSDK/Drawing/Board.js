@@ -3314,39 +3314,39 @@ CDrawingBoard.prototype.private_IsVerLineInViewPort = function(X)
 };
 CDrawingBoard.prototype.private_GetSettings_TrueColorBoard = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.bTrueColorBoard;
+    return this.m_oGameTree.Get_LocalSettings().Is_BoardTrueColorBoard();
 };
 CDrawingBoard.prototype.private_GetSettings_TrueColorStones = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.bTrueColorStones;
+    return this.m_oGameTree.Get_LocalSettings().Is_BoardTrueColorStones();
 };
 CDrawingBoard.prototype.private_GetSettings_ShellWhiteStones = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.bShellWhiteStones;
+    return this.m_oGameTree.Get_LocalSettings.Is_BoardShellWhiteStones();
 };
 CDrawingBoard.prototype.private_GetSettings_Shadows = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.bShadows;
+    return this.m_oGameTree.Get_LocalSettings.Is_BoardShadows();
 };
 CDrawingBoard.prototype.private_GetSettings_WhiteColor = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.oWhiteColor;
+    return this.m_oGameTree.Get_LocalSettings.Get_BoardWhiteColor();
 };
 CDrawingBoard.prototype.private_GetSettings_BlackColor = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.oBlackColor;
+    return this.m_oGameTree.Get_LocalSettings.Get_BoardBlackColor();
 };
 CDrawingBoard.prototype.private_GetSettings_BoardColor = function()
 {
-   return g_oGlobalSettings.m_oBoardPr.oBoardColor;
+    return this.m_oGameTree.Get_LocalSettings.Get_BoardBoardColor();
 };
 CDrawingBoard.prototype.private_GetSettings_LinesColor = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.oLinesColor;
+    return this.m_oGameTree.Get_LocalSettings.Get_BoardLinesColor();
 };
 CDrawingBoard.prototype.private_GetSettings_DarkBoard = function()
 {
-    return g_oGlobalSettings.m_oBoardPr.bDarkBoard;
+    return this.m_oGameTree.Get_LocalSettings.Is_BoardDarkBoard();
 };
 CDrawingBoard.prototype.private_DrawLogo = function()
 {
