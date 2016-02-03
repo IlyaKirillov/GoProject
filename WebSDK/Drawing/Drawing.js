@@ -371,16 +371,41 @@ function CLocalSetting(oGameTree)
 {
     CLocalSetting.superclass.constructor.call(this);
 
+    this.m_oBoardPr =
+    {
+        bTrueColorBoard   : null,
+        bTrueColorStones  : null,
+        oBoardColor       : null,
+        bShellWhiteStones : null,
+        bShadows          : null,
+        oWhiteColor       : null,
+        oBlackColor       : null,
+        oLinesColor       : null,
+        bDarkBoard        : null
+    };
+
+    this.m_oNavigatorPr =
+    {
+        bTrueColorBoard   : null,
+        bTrueColorStones  : null,
+        oBoardColor       : null,
+        bShadows          : null,
+        oWhiteColor       : null,
+        oBlackColor       : null,
+        oLinesColor       : null,
+        bDarkBoard        : null
+    };
+
     this.m_oGameTree = oGameTree;
 
     this.m_bShowTarget  = null;
-    this.m_eColorScheme = null;
+
+
+
 }
 CommonExtend(CLocalSetting, CSettingsBase);
 CLocalSetting.prototype.Set_ColorScheme = function(eScheme)
 {
-    this.m_eColorScheme = eScheme;
-
     if (null !== eScheme)
         return this.private_SetColorScheme(eScheme);
     else
@@ -388,63 +413,67 @@ CLocalSetting.prototype.Set_ColorScheme = function(eScheme)
 };
 CLocalSetting.prototype.Is_BoardTrueColorBoard = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.bTrueColorBoard)
         return g_oGlobalSettings.m_oBoardPr.bTrueColorBoard;
     else
         return this.m_oBoardPr.bTrueColorBoard;
 };
 CLocalSetting.prototype.Is_BoardTrueColorStones = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.bTrueColorStones)
         return g_oGlobalSettings.m_oBoardPr.bTrueColorStones;
     else
         return this.m_oBoardPr.bTrueColorStones;
 };
 CLocalSetting.prototype.Is_BoardShellWhiteStones = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.bShellWhiteStones)
         return g_oGlobalSettings.m_oBoardPr.bShellWhiteStones;
     else
         return this.m_oBoardPr.bShellWhiteStones;
 };
+CLocalSetting.prototype.Set_BoardShellWhiteStones = function(isShell)
+{
+    this.m_oBoardPr.bShellWhiteStones = isShell;
+};
 CLocalSetting.prototype.Is_BoardShadows = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.bShadows)
         return g_oGlobalSettings.m_oBoardPr.bShadows;
     else
         return this.m_oBoardPr.bShadows;
 };
 CLocalSetting.prototype.Get_BoardWhiteColor = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.oWhiteColor)
         return g_oGlobalSettings.m_oBoardPr.oWhiteColor;
     else
         return this.m_oBoardPr.oWhiteColor;
 };
 CLocalSetting.prototype.Get_BoardBlackColor = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.oBlackColor)
         return g_oGlobalSettings.m_oBoardPr.oBlackColor;
     else
         return this.m_oBoardPr.oBlackColor;
 };
 CLocalSetting.prototype.Get_BoardBoardColor = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.oBoardColor)
         return g_oGlobalSettings.m_oBoardPr.oBoardColor;
     else
         return this.m_oBoardPr.oBoardColor;
 };
 CLocalSetting.prototype.Get_BoardLinesColor = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.oLinesColor)
         return g_oGlobalSettings.m_oBoardPr.oLinesColor;
     else
         return this.m_oBoardPr.oLinesColor;
 };
 CLocalSetting.prototype.Is_BoardDarkBoard = function()
 {
-    if (!this.m_eColorScheme)
+    if (null === this.m_oBoardPr.bDarkBoard)
         return g_oGlobalSettings.m_oBoardPr.bDarkBoard;
     else
         return this.m_oBoardPr.bDarkBoard;
@@ -1157,8 +1186,6 @@ CDrawing.prototype.Create_Problems = function(sDivId)
     var oGameTree = this.m_oGameTree;
 
     var oDrawingBoard = new CDrawingBoard(this);
-    oDrawingBoard.Set_ShellWhiteStones(false);
-
     var oParentControl = CreateControlContainer(sDivId);
     var sMainDivId = sDivId + "GoBoard";
     this.private_CreateDiv(oParentControl.HtmlElement, sMainDivId);
@@ -1184,6 +1211,7 @@ CDrawing.prototype.Create_Problems = function(sDivId)
 
     oDrawingBoard.Init(sBoardDivId, oGameTree);
     oDrawingBoard.Focus();
+    oDrawingBoard.Set_ShellWhiteStones(false);
 
     var sToolsDivId    = sPanelDivId + "_Toolbar";
     var sCommentsDivId = sPanelDivId + "_Comments";

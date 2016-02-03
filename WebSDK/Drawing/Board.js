@@ -361,7 +361,8 @@ CDrawingBoard.prototype.Get_Rulers = function()
 };
 CDrawingBoard.prototype.Set_ShellWhiteStones = function(Value)
 {
-    g_oGlobalSettings.m_oBoardPr.bShellWhiteStones = Value;
+    if (this.m_oGameTree)
+        this.m_oGameTree.Get_LocalSettings().Set_BoardShellWhiteStones(Value);
 };
 CDrawingBoard.prototype.Set_BlackWhiteLastMark = function(Value)
 {
@@ -3322,31 +3323,31 @@ CDrawingBoard.prototype.private_GetSettings_TrueColorStones = function()
 };
 CDrawingBoard.prototype.private_GetSettings_ShellWhiteStones = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Is_BoardShellWhiteStones();
+    return this.m_oGameTree.Get_LocalSettings().Is_BoardShellWhiteStones();
 };
 CDrawingBoard.prototype.private_GetSettings_Shadows = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Is_BoardShadows();
+    return this.m_oGameTree.Get_LocalSettings().Is_BoardShadows();
 };
 CDrawingBoard.prototype.private_GetSettings_WhiteColor = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Get_BoardWhiteColor();
+    return this.m_oGameTree.Get_LocalSettings().Get_BoardWhiteColor();
 };
 CDrawingBoard.prototype.private_GetSettings_BlackColor = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Get_BoardBlackColor();
+    return this.m_oGameTree.Get_LocalSettings().Get_BoardBlackColor();
 };
 CDrawingBoard.prototype.private_GetSettings_BoardColor = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Get_BoardBoardColor();
+    return this.m_oGameTree.Get_LocalSettings().Get_BoardBoardColor();
 };
 CDrawingBoard.prototype.private_GetSettings_LinesColor = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Get_BoardLinesColor();
+    return this.m_oGameTree.Get_LocalSettings().Get_BoardLinesColor();
 };
 CDrawingBoard.prototype.private_GetSettings_DarkBoard = function()
 {
-    return this.m_oGameTree.Get_LocalSettings.Is_BoardDarkBoard();
+    return this.m_oGameTree.Get_LocalSettings().Is_BoardDarkBoard();
 };
 CDrawingBoard.prototype.private_DrawLogo = function()
 {

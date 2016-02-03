@@ -2499,3 +2499,13 @@ CGameTree.prototype.Get_LocalSettings = function()
 {
     return this.m_oSettings;
 };
+CGameTree.prototype.Set_LocalColorScheme = function(eScheme)
+{
+    var oResult = this.m_oSettings.Set_ColorScheme(eScheme);
+
+    if (true === oResult.Board && this.m_oDrawingBoard)
+        this.m_oDrawingBoard.Update_Size(true);
+
+    if (this.m_oDrawingNavigator && true === oResult.Navigator)
+        this.m_oDrawingNavigator.Update_All();
+};

@@ -312,7 +312,21 @@ CGoBoardApi.prototype.Set_ShowTarget = function(oGameTree, bShow)
 CGoBoardApi.prototype.Set_BoardTheme = function(oGameTree, sTheme)
 {
     if (oGameTree)
-        oGameTree.Set_BoardTheme(sTheme);
+    {
+        var eScheme = null;
+
+        if ("TrueColor" === sTheme)
+            eScheme = EColorScheme.TrueColor;
+        else if ("BookStyle" === sTheme)
+            eScheme = EColorScheme.BookStyle;
+        else if ("Simple" === sTheme)
+            eScheme = EColorScheme.SimpleColor;
+        else if ("Dark" === sTheme)
+            eScheme = EColorScheme.Dark;
+
+        if (eScheme)
+            oGameTree.Set_LocalColorScheme(eScheme);
+    }
 };
 
 /**
