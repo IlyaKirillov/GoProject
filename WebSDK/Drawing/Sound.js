@@ -19,7 +19,7 @@ function CBoardSound()
 
     this.m_bIE      = false;
     this.m_bOn      = true;
-};
+}
 
 CBoardSound.prototype.Init = function(sPath, bIE)
 {

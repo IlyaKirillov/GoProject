@@ -1115,11 +1115,7 @@ CDrawingSettingsWindow.prototype.Handle_OK = function()
 
     var oSchemeChange = g_oGlobalSettings.Set_ColorScheme(eColorScheme);
 
-    if (this.HtmlElement2.Sound.checked)
-        this.m_oGameTree.TurnOn_Sound();
-    else
-        this.m_oGameTree.TurnOff_Sound();
-
+    this.m_oGameTree.Toggle_Sound(this.HtmlElement2.Sound.checked ? true : false, false);
     this.m_oGameTree.Set_ShowTarget(this.HtmlElement2.ShowTarget.checked ? true : false);
     this.m_oGameTree.Set_LoadUnfinishedFilesOnLastNode(this.HtmlElement2.LoadUnfinishedSgf.checked ? true : false);
     this.m_oGameTree.Set_NavigatorLabel(this.HtmlElement2.NavigatorLabel.selectedIndex);

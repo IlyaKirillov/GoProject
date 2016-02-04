@@ -2052,13 +2052,9 @@ CGameTree.prototype.private_SendCallback = function(pCallback)
     if (pCallback)
         pCallback();
 };
-CGameTree.prototype.TurnOn_Sound = function()
+CGameTree.prototype.Toggle_Sound = function(bSound, bLocal)
 {
-    g_oGlobalSettings.Set_Sound(true);
-};
-CGameTree.prototype.TurnOff_Sound = function()
-{
-    g_oGlobalSettings.Set_Sound(false);
+    g_oGlobalSettings.Set_Sound(bSound);
 };
 CGameTree.prototype.Is_SoundOn = function()
 {
@@ -2081,13 +2077,15 @@ CGameTree.prototype.Is_ShowTarget = function()
 };
 CGameTree.prototype.Set_ShowTarget = function(Value, bFromApi)
 {
-    if (true === bFromApi && false === Value && this.m_oDrawingBoard)
+    if (true === bFromApi)
     {
-        this.m_oDrawingBoard.Force_HideTarget();
-        return;
+        this.m_oSettings.Set_ShowTarget(Value);
+    }
+    else
+    {
+        g_oGlobalSettings.Set_ShowTarget(Value);
     }
 
-    g_oGlobalSettings.Set_ShowTarget(Value);
 
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Update_Target();

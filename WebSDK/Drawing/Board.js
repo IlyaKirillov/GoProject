@@ -106,7 +106,7 @@ function CDrawingBoard(oDrawing)
         LinkedControls : []          // Контролы, которые нужно ресайзить из-за внутренних изменений доски
     };
 
-    this.m_oTarget = new CBoardTarget(this.m_oImageData);
+    this.m_oTarget = new CBoardTarget(this.m_oImageData, this);
     this.m_oColorMarks = {};
 
     this.m_oMarks = {};
@@ -586,10 +586,6 @@ CDrawingBoard.prototype.Get_BoardAreaByPosition = function(X, Y, bShadow, bStone
 CDrawingBoard.prototype.Show_Target = function()
 {
     this.private_UpdateTargetType();
-};
-CDrawingBoard.prototype.Force_HideTarget = function()
-{
-    this.m_oTarget.Force_Hide();
 };
 CDrawingBoard.prototype.Remove_Mark = function(X, Y)
 {
@@ -3456,4 +3452,8 @@ CDrawingBoard.prototype.Clear_Board = function()
     this.HtmlElement.Marks    .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Target   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
     this.HtmlElement.Select   .Control.HtmlElement.getContext("2d").clearRect(0, 0, W, H);
+};
+CDrawingBoard.prototype.Get_GameTree = function()
+{
+    return this.m_oGameTree;
 };

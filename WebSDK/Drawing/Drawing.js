@@ -386,22 +386,19 @@ function CLocalSetting(oGameTree)
 
     this.m_oNavigatorPr =
     {
-        bTrueColorBoard   : null,
-        bTrueColorStones  : null,
-        oBoardColor       : null,
-        bShadows          : null,
-        oWhiteColor       : null,
-        oBlackColor       : null,
-        oLinesColor       : null,
-        bDarkBoard        : null
+        bTrueColorBoard  : null,
+        bTrueColorStones : null,
+        oBoardColor      : null,
+        bShadows         : null,
+        oWhiteColor      : null,
+        oBlackColor      : null,
+        oLinesColor      : null,
+        bDarkBoard       : null
     };
 
     this.m_oGameTree = oGameTree;
 
-    this.m_bShowTarget  = null;
-
-
-
+    this.m_bShowTarget = null;
 }
 CommonExtend(CLocalSetting, CSettingsBase);
 CLocalSetting.prototype.Set_ColorScheme = function(eScheme)
@@ -534,7 +531,17 @@ CLocalSetting.prototype.Is_NavigatorDarkBoard = function()
     else
         return this.m_oNavigatorPr.bDarkBoard;
 };
-
+CLocalSetting.prototype.Is_ShowTarget = function()
+{
+    if (null === this.m_bShowTarget)
+        return g_oGlobalSettings.Is_ShowTarget();
+    else
+        return this.m_bShowTarget;
+};
+CLocalSetting.prototype.Set_ShowTarget = function(bShowTarget)
+{
+    this.m_bShowTarget = bShowTarget;
+};
 
 function CDrawing(oGameTree)
 {

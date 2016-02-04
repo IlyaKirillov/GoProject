@@ -22,16 +22,16 @@ var EBoardTargetType =
     ColorA     : 7
 };
 
-function CBoardTarget(oImageData)
+function CBoardTarget(oImageData, oDrawingBoard)
 {
-    this.m_bForceHide   = false;
-    this.m_nLogicX      = -1;
-    this.m_nLogicY      = -1;
-    this.m_oHtmlElement = null;
-    this.m_eType        = EBoardTargetType.Unknown;
-    this.m_nSize        = -1;
+    this.m_oDrawingBoard = oDrawingBoard;
+    this.m_nLogicX       = -1;
+    this.m_nLogicY       = -1;
+    this.m_oHtmlElement  = null;
+    this.m_eType         = EBoardTargetType.Unknown;
+    this.m_nSize         = -1;
 
-    this.m_oImageData   = oImageData; // Ссылка на CDrawingBoard.m_oImageData
+    this.m_oImageData = oImageData; // Ссылка на CDrawingBoard.m_oImageData
 }
 CBoardTarget.prototype.Init = function(sCanvasId)
 {
@@ -60,7 +60,8 @@ CBoardTarget.prototype.Hide = function()
 };
 CBoardTarget.prototype.Show = function()
 {
-    if (true !== this.m_bForceHide && true === g_oGlobalSettings.Is_ShowTarget())
+    var oGameTree = this.m_oDrawingBoard.Get_GameTree();
+    if (oGameTree && true === oGameTree.Get_LocalSettings().Is_ShowTarget())
         this.m_oHtmlElement.style.display = "block";
 };
 CBoardTarget.prototype.Check_LogicPos = function(X, Y, bForce)
@@ -129,9 +130,4 @@ CBoardTarget.prototype.Check_XY = function(X, Y)
         return true;
 
     return false;
-};
-CBoardTarget.prototype.Force_Hide = function()
-{
-    this.m_bForceHide = true;
-    this.Hide();
 };
