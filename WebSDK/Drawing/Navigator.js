@@ -1933,33 +1933,33 @@ CDrawingNavigator.prototype.private_DrawCurrentOnTimer = function()
 };
 CDrawingNavigator.prototype.private_GetSettings_TrueColorBoard = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.bTrueColorBoard;
+    return this.m_oGameTree.Get_LocalSettings().Is_NavigatorTrueColorBoard();
 };
 CDrawingNavigator.prototype.private_GetSettings_TrueColorStones = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.bTrueColorStones;
+    return this.m_oGameTree.Get_LocalSettings().Is_NavigatorTrueColorStones();
 };
 CDrawingNavigator.prototype.private_GetSettings_Shadows = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.bShadows;
+    return this.m_oGameTree.Get_LocalSettings().Is_NavigatorShadows();
 };
 CDrawingNavigator.prototype.private_GetSettings_WhiteColor = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.oWhiteColor;
+    return this.m_oGameTree.Get_LocalSettings().Get_NavigatorWhiteColor();
 };
 CDrawingNavigator.prototype.private_GetSettings_BlackColor = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.oBlackColor;
+    return this.m_oGameTree.Get_LocalSettings().Get_NavigatorBlackColor();
 };
 CDrawingNavigator.prototype.private_GetSettings_BoardColor = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.oBoardColor;
+    return this.m_oGameTree.Get_LocalSettings().Get_NavigatorBoardColor();
 };
 CDrawingNavigator.prototype.private_GetSettings_LinesColor = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.oLinesColor;
+    return this.m_oGameTree.Get_LocalSettings().Get_NavigatorLinesColor();
 };
 CDrawingNavigator.prototype.private_GetSettings_DarkBoard = function()
 {
-    return g_oGlobalSettings.m_oNavigatorPr.bDarkBoard;
+    return this.m_oGameTree.Get_LocalSettings().Is_NavigatorDarkBoard();
 };

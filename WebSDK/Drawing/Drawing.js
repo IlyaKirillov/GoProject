@@ -478,6 +478,62 @@ CLocalSetting.prototype.Is_BoardDarkBoard = function()
     else
         return this.m_oBoardPr.bDarkBoard;
 };
+CLocalSetting.prototype.Is_NavigatorTrueColorBoard = function()
+{
+    if (null === this.m_oNavigatorPr.bTrueColorBoard)
+        return g_oGlobalSettings.m_oNavigatorPr.bTrueColorBoard;
+    else
+        return this.m_oNavigatorPr.bTrueColorBoard;
+};
+CLocalSetting.prototype.Is_NavigatorTrueColorStones = function()
+{
+    if (null === this.m_oNavigatorPr.bTrueColorStones)
+        return g_oGlobalSettings.m_oNavigatorPr.bTrueColorStones;
+    else
+        return this.m_oNavigatorPr.bTrueColorStones;
+};
+CLocalSetting.prototype.Is_NavigatorShadows = function()
+{
+    if (null === this.m_oNavigatorPr.bShadows)
+        return g_oGlobalSettings.m_oNavigatorPr.bShadows;
+    else
+        return this.m_oNavigatorPr.bShadows;
+};
+CLocalSetting.prototype.Get_NavigatorWhiteColor = function()
+{
+    if (null === this.m_oNavigatorPr.oWhiteColor)
+        return g_oGlobalSettings.m_oNavigatorPr.oWhiteColor;
+    else
+        return this.m_oNavigatorPr.oWhiteColor;
+};
+CLocalSetting.prototype.Get_NavigatorBlackColor = function()
+{
+    if (null === this.m_oNavigatorPr.oBlackColor)
+        return g_oGlobalSettings.m_oNavigatorPr.oBlackColor;
+    else
+        return this.m_oNavigatorPr.oBlackColor;
+};
+CLocalSetting.prototype.Get_NavigatorBoardColor = function()
+{
+    if (null === this.m_oNavigatorPr.oBoardColor)
+        return g_oGlobalSettings.m_oNavigatorPr.oBoardColor;
+    else
+        return this.m_oNavigatorPr.oBoardColor;
+};
+CLocalSetting.prototype.Get_NavigatorLinesColor = function()
+{
+    if (null === this.m_oNavigatorPr.oLinesColor)
+        return g_oGlobalSettings.m_oNavigatorPr.oLinesColor;
+    else
+        return this.m_oNavigatorPr.oLinesColor;
+};
+CLocalSetting.prototype.Is_NavigatorDarkBoard = function()
+{
+    if (null === this.m_oNavigatorPr.bDarkBoard)
+        return g_oGlobalSettings.m_oNavigatorPr.bDarkBoard;
+    else
+        return this.m_oNavigatorPr.bDarkBoard;
+};
 
 
 function CDrawing(oGameTree)
