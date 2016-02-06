@@ -64,7 +64,8 @@ class WpWebGoBoardPlugin {
 					'width' => null,
 					'problemstime' => null,
 					'problemsnewnode' => null,
-					'problemscolor' => null
+					'problemscolor' => null,
+					'boardtheme' => null
 				), $atts 
 			) 
 		);
@@ -93,7 +94,8 @@ class WpWebGoBoardPlugin {
 			'width' => $width,
 			'problemsTime' => $problemstime,
 			'problemsNewNode' => $problemsnewnode,
-			'problemsColor' => $problemscolor
+			'problemsColor' => $problemscolor,
+			'boardTheme' => $boardtheme
 		);	
 		
 		$config = json_encode($config);
