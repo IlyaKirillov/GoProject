@@ -291,7 +291,17 @@ function CDrawingMultiLevelToolbar(oDrawing)
 
     this.m_oSettingsToolbar = new CDrawingToolbar(oDrawing);
     this.m_oSettingsToolbar.Add_Control(new CDrawingButtonAbout(oDrawing), 36, 1, EToolbarFloat.Left);
-    this.m_oSettingsToolbar.Add_Control(new CDrawingButtonSettings(oDrawing), 36, 1, EToolbarFloat.Left);
+
+    // Не даем править настройки в режиме Embed
+    if (this.m_oDrawing && this.m_oDrawing.Get_GameTree() && true !== this.m_oDrawing.Get_GameTree().Get_LocalSettings().Is_Embedding())
+    {
+        this.m_oSettingsToolbar.Add_Control(new CDrawingButtonSettings(oDrawing), 36, 1, EToolbarFloat.Left);
+    }
+    else
+    {
+        this.m_nSettingsWidth = 36 * 2 + 1;
+    }
+
     this.m_oSettingsToolbar.Add_Control(new CDrawingButtonToolbarCustomize(oDrawing, this), 36, 1, EToolbarFloat.Left);
 
     this.m_oGeneralNavigation = new CDrawingToolbar(oDrawing);

@@ -352,6 +352,7 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     var oThis       = this;
 
     var oGameTree = this.Create_GameTree();
+    oGameTree.Get_LocalSettings().Set_Embedding(true);
 
     if (oConfig["viewPort"])
     {

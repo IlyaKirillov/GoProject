@@ -399,8 +399,18 @@ function CLocalSetting(oGameTree)
     this.m_oGameTree = oGameTree;
 
     this.m_bShowTarget = null;
+
+    this.m_bEmbedding  = false;
 }
 CommonExtend(CLocalSetting, CSettingsBase);
+CLocalSetting.prototype.Is_Embedding = function()
+{
+    return this.m_bEmbedding;
+};
+CLocalSetting.prototype.Set_Embedding = function(bEmbedding)
+{
+    this.m_bEmbedding = bEmbedding;
+};
 CLocalSetting.prototype.Set_ColorScheme = function(eScheme)
 {
     if (null !== eScheme)
