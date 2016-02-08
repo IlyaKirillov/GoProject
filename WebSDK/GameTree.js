@@ -104,6 +104,11 @@ function CGameTree(Drawing)
     this.m_oHandler            = null;
 
     this.m_bModified           = false;
+
+    this.m_bGameMode     = false;
+    this.m_nGameColor    = BOARD_EMPTY;
+    this.m_sGameStartSgf = "";
+    this.m_aGameActions  = [];
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
