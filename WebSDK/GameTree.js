@@ -104,11 +104,6 @@ function CGameTree(Drawing)
     this.m_oHandler            = null;
 
     this.m_bModified           = false;
-
-    this.m_bGameMode     = false;
-    this.m_nGameColor    = BOARD_EMPTY;
-    this.m_sGameStartSgf = "";
-    this.m_aGameActions  = [];
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -2512,3 +2507,34 @@ CGameTree.prototype.Set_LocalColorScheme = function(eScheme)
     if (this.m_oDrawingNavigator && true === oResult.Navigator)
         this.m_oDrawingNavigator.Update_All();
 };
+
+
+function CMatchCommandMove()
+{
+    this.m_nColor = BOARD_EMPTY;
+    this.m_nPos   = 0;
+}
+
+function CMatchCommandComment()
+{
+    this.m_sAuthor  = "";
+    this.m_sComment = "";
+}
+
+function CMatchCommandPass()
+{
+    this.m_nColor = BOARD_EMPTY;
+}
+
+function CMatchCommnadResign()
+{
+    this.m_nColor = BOARD_EMPTY;
+}
+
+function CMatchMode()
+{
+    this.m_bMode     = false;
+    this.m_nColor    = BOARD_EMPTY;
+    this.m_sStartSgf = "";
+    this.m_aCommands = [];
+}
