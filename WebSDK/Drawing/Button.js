@@ -2132,6 +2132,30 @@ CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(o
 function CDrawingButtonFileMenu(oDrawing)
 {
     CDrawingButtonFileMenu.superclass.constructor.call(this, oDrawing);
+
+    var oMainDiv = oDrawing.Get_MainDiv();
+
+    var oMenuElementWrapper = document.createElement("div");
+    oMenuElementWrapper.style.position        = "absolute";
+    oMenuElementWrapper.style.top             = "40px";
+    oMenuElementWrapper.style.width           = "200px";
+    oMenuElementWrapper.style.backgroundColor = "white";
+    oMenuElementWrapper.style.borderWidth     = "1px";
+    oMenuElementWrapper.style.borderColor     = "#b3b3b3";
+    oMenuElementWrapper.style.borderStyle     = "solid";
+    oMenuElementWrapper.style.padding         = "0px";
+    oMenuElementWrapper.style.boxShadow       = "0px 0px 2px 0px rgba(0,0,0,0.3)";
+    oMenuElementWrapper.style.opacity         = "1";
+    oMenuElementWrapper.style.zIndex          = "10";
+    oMenuElementWrapper.style.overflowX       = "hidden";
+    oMenuElementWrapper.style.overflowY       = "auto";
+    oMenuElementWrapper.style.maxHeight       = "calc(100vh - 90px)";
+
+    oMainDiv.appendChild(oMenuElementWrapper);
+
+    this.private_CreateMenuItem(oMenuElementWrapper, "Create New", null);
+    this.private_CreateMenuItem(oMenuElementWrapper, "Open", null);
+    this.private_CreateMenuItem(oMenuElementWrapper, "Open from clipboard", null);
 }
 CommonExtend(CDrawingButtonFileMenu, CDrawingButtonBase);
 
@@ -2175,10 +2199,100 @@ CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X
     Canvas.closePath();
     Canvas.stroke();
 };
+CDrawingButtonFileMenu.prototype.private_CreateMenuItem = function(oMenuElement, sText, pOnClickHandler)
+{
+    var oItemWrapper           = document.createElement("div");
+    oItemWrapper.style.padding = "0px";
+    oItemWrapper.style.maring  = "0px";
+    oMenuElement.appendChild(oItemWrapper);
+
+    var oItemElement                   = document.createElement("div");
+    oItemElement.style.display         = "flex";
+    oItemElement.style.alignItems      = "center";
+    oItemElement.style.padding         = "0px";
+    oItemElement.style.position        = "relative";
+    oItemElement.style.cursor          = "pointer";
+    oItemElement.style.transition      = "background-color 0.25s ease";
+    oItemElement.style.backgroundColor = "#fff";
+    oItemElement.style.color           = "#424242";
+    oItemElement.style.border          = "1px solid transparent";
+    oItemElement.style.outline         = "none";
+    oItemWrapper.appendChild(oItemElement);
+
+
+    var oInnerDiv                = document.createElement("div");
+    oInnerDiv.style.padding      = "10px 20px";
+    oInnerDiv.style.position     = "relative";
+    oInnerDiv.style.cursor       = "pointer";
+    oInnerDiv.style.borderBottom = "1px solid #e6e7e8";
+    oInnerDiv.style.transition   = "background-color 0.25s ease";
+    oInnerDiv.style.outline      = "none";
+    oInnerDiv.style.width        = "100%";
+    oItemElement.appendChild(oInnerDiv);
+
+    var TextSpan = document.createElement("span");
+
+    TextSpan.style.color         = "#4d4d4d";
+    TextSpan.style.fontFamily    = '"Segoe UI Light","Segoe UI Semilight","Segoe UI",Helvetica,Tahoma,Geneva,Verdana,sans-serif';
+    TextSpan.style.fontWeight    = 'lighter';
+    TextSpan.style.fontSize      = "15px";
+    TextSpan.style.userSelect    = "none";
+    TextSpan.style.verticalAlign = "middle";
+    TextSpan.style.cursor        = "pointer";
+
+    Common.Set_InnerTextToElement(TextSpan, sText);
+    oInnerDiv.appendChild(TextSpan);
+
+    oItemElement.onmouseover = function()
+    {
+        oItemElement.style.backgroundColor = "#e6e6e6";
+        oItemElement.style.color           = "#424242";
+    };
+
+    oItemElement.onmouseout = function()
+    {
+        oItemElement.style.background = "transparent";
+        oItemElement.style.color      = "#424242";
+        oItemElement.style.border     = "1px solid transparent";
+    };
+
+    oItemElement.onmousedown = function()
+    {
+        oItemElement.style.backgroundColor = "#969696";
+        oItemElement.style.border          = "1px solid #737373";
+        oItemElement.style.color           = "#424242";
+    };
+
+    oItemElement.onmouseup = function()
+    {
+        oItemElement.style.backgroundColor = "#e6e6e6";
+        oItemElement.style.color           = "#424242";
+        oItemElement.style.border          = "1px solid transparent";
+    };
+
+    var oThis = this;
+    oItemElement.onclick = function()
+    {
+        if (pOnClickHandler)
+            pOnClickHandler();
+
+        oThis.Hide_Menu(true);
+    };
+
+    return oItemWrapper;
+};
 CDrawingButtonFileMenu.prototype.private_HandleMouseDown = function()
 {
 };
 CDrawingButtonFileMenu.prototype.private_GetHint = function()
 {
-    return "";
+    return "Menu";
+};
+CDrawingButtonFileMenu.prototype.Show_Menu = function()
+{
+
+};
+CDrawingButtonFileMenu.prototype.Hide_Menu = function()
+{
+
 };

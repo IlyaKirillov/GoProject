@@ -1043,6 +1043,16 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var oDrawingBlackInfo = new CDrawingPlayerInfo(this);
     oDrawingBlackInfo.Init(sBlackInfo, oGameTree, BOARD_BLACK);
 
+    var sMenuButton = sCaTDivId + "_M";
+    this.private_CreateDiv(oCaTControl.HtmlElement, sMenuButton);
+    var oMenuButtonControl = CreateControlContainer(sMenuButton);
+    oMenuButtonControl.Bounds.SetParams(10, 7, 1000, 7, true, true, false, true, 36, 36);
+    oMenuButtonControl.Anchor = (g_anchor_top | g_anchor_left);
+    oCaTControl.AddControl(oMenuButtonControl);
+
+    var oDrawingMenuButton = new CDrawingButtonFileMenu(this);
+    oDrawingMenuButton.Init(sMenuButton, oGameTree);
+
     // END INFO
 
     var oDrawingMultilevelToolbar = new CDrawingMultiLevelToolbar(this);
@@ -1078,6 +1088,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     this.m_aElements.push(oDrawingMultilevelToolbar);
     this.m_aElements.push(oDrawingBlackInfo);
     this.m_aElements.push(oDrawingWhiteInfo);
+    this.m_aElements.push(oDrawingMenuButton);
 
     this.Update_Size();
     oGameTree.On_EndLoadDrawing();
