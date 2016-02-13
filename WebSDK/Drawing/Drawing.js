@@ -591,7 +591,8 @@ function CDrawing(oGameTree)
         BoardModeNum    : [],
         BoardModeColor  : [],
 
-        ToolbarCustomize: null
+        ToolbarCustomize: null,
+        Menu            : null
     };
 
     this.m_oAddLabelElement = null;
@@ -637,6 +638,9 @@ function CDrawing(oGameTree)
 
         if (oThis.m_oButtons.ToolbarCustomize)
             oThis.m_oButtons.ToolbarCustomize.Hide_ContextMenu(false);
+
+        if (oThis.m_oButtons.Menu)
+            oThis.m_oButtons.Menu.Hide_Menu(false);
     };
     this.private_OnTimerDraw = function()
     {
@@ -1046,13 +1050,13 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var sMenuButton = sCaTDivId + "_M";
     this.private_CreateDiv(oCaTControl.HtmlElement, sMenuButton);
     var oMenuButtonControl = CreateControlContainer(sMenuButton);
-    oMenuButtonControl.Bounds.SetParams(10, 7, 1000, 7, true, true, false, true, 36, 36);
+    oMenuButtonControl.Bounds.SetParams(7, 7, 1000, 7, true, true, false, true, 36, 36);
     oMenuButtonControl.Anchor = (g_anchor_top | g_anchor_left);
     oCaTControl.AddControl(oMenuButtonControl);
 
     var oDrawingMenuButton = new CDrawingButtonFileMenu(this);
     oDrawingMenuButton.Init(sMenuButton, oGameTree);
-
+    this.Register_MenuButton(oDrawingMenuButton);
     // END INFO
 
     var oDrawingMultilevelToolbar = new CDrawingMultiLevelToolbar(this);
@@ -1540,6 +1544,10 @@ CDrawing.prototype.Register_AddLabelElement = function(oElement)
 {
     this.Remove_LabelElement();
     this.m_oAddLabelElement = oElement;
+};
+CDrawing.prototype.Register_MenuButton = function(oElement)
+{
+    this.m_oButtons.Menu = oElement;
 };
 CDrawing.prototype.Remove_LabelElement = function()
 {

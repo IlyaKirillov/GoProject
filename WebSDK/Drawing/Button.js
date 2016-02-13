@@ -2133,9 +2133,10 @@ function CDrawingButtonFileMenu(oDrawing)
 {
     CDrawingButtonFileMenu.superclass.constructor.call(this, oDrawing);
 
-    var oMainDiv = oDrawing.Get_MainDiv();
+    var oMainDiv  = oDrawing.Get_MainDiv();
+    var oGameTree = oDrawing.Get_GameTree();
 
-    var oMenuElementWrapper = document.createElement("div");
+    var oMenuElementWrapper                   = document.createElement("div");
     oMenuElementWrapper.style.position        = "absolute";
     oMenuElementWrapper.style.top             = "40px";
     oMenuElementWrapper.style.width           = "200px";
@@ -2148,14 +2149,27 @@ function CDrawingButtonFileMenu(oDrawing)
     oMenuElementWrapper.style.opacity         = "1";
     oMenuElementWrapper.style.zIndex          = "10";
     oMenuElementWrapper.style.overflowX       = "hidden";
-    oMenuElementWrapper.style.overflowY       = "auto";
+    oMenuElementWrapper.style.overflowY       = "hidden";
     oMenuElementWrapper.style.maxHeight       = "calc(100vh - 90px)";
+
+    oMenuElementWrapper.style.transitionProperty = "height";
+    oMenuElementWrapper.style.transitionDuration = "0.2s";
+    oMenuElementWrapper.style.transitionDelay    = "0s";
+
 
     oMainDiv.appendChild(oMenuElementWrapper);
 
     this.private_CreateMenuItem(oMenuElementWrapper, "Create New", null);
     this.private_CreateMenuItem(oMenuElementWrapper, "Open", null);
     this.private_CreateMenuItem(oMenuElementWrapper, "Open from clipboard", null);
+
+    this.m_oMenuElement  = oMenuElementWrapper;
+    this.m_nHeight       = oMenuElementWrapper.clientHeight;
+    this.m_nWidth        = oMenuElementWrapper.clientWidth;
+    this.m_nTransitionId = null;
+    this.m_nShowId       = null;
+
+    oMenuElementWrapper.style.display = "none";
 }
 CommonExtend(CDrawingButtonFileMenu, CDrawingButtonBase);
 
@@ -2276,13 +2290,14 @@ CDrawingButtonFileMenu.prototype.private_CreateMenuItem = function(oMenuElement,
         if (pOnClickHandler)
             pOnClickHandler();
 
-        oThis.Hide_Menu(true);
+        oThis.Hide_Menu(false);
     };
 
     return oItemWrapper;
 };
 CDrawingButtonFileMenu.prototype.private_HandleMouseDown = function()
 {
+    this.Show_Menu();
 };
 CDrawingButtonFileMenu.prototype.private_GetHint = function()
 {
@@ -2290,9 +2305,94 @@ CDrawingButtonFileMenu.prototype.private_GetHint = function()
 };
 CDrawingButtonFileMenu.prototype.Show_Menu = function()
 {
+    if ("none" === this.m_oMenuElement.style.display)
+    {
+        if (null === this.m_nShowId)
+        {
+            var oThis = this;
+            this.m_nShowId = setTimeout(function ()
+            {
+                if (null !== oThis.m_nTransitionId)
+                {
+                    clearTimeout(oThis.m_nTransitionId);
+                    oThis.m_nTransitionId = null;
+                }
 
+                oThis.m_oMenuElement.style.display = "block";
+                oThis.m_oMenuElement.style.height  = "0px";
+
+                oThis.m_nTransitionId = setTimeout(function ()
+                {
+                    oThis.m_oMenuElement.style.height = oThis.m_nHeight + "px";
+                    oThis.m_nTransitionId = null;
+                    oThis.m_nShowId       = null;
+                    oThis.Set_Selected(true);
+                }, 20);
+            }, 20);
+        }
+    }
+    else
+    {
+        this.Hide_Menu();
+    }
 };
-CDrawingButtonFileMenu.prototype.Hide_Menu = function()
+CDrawingButtonFileMenu.prototype.Hide_Menu = function(bFast)
 {
+    if ("none" !== this.m_oMenuElement.style.display)
+    {
+        if (true === bFast)
+        {
+            this.m_oMenuElement.style.height  = "0px";
+            this.m_oMenuElement.style.display = "none";
+            this.Set_Selected(false);
+        }
+        else
+        {
 
+            if (null !== this.m_nTransitionId)
+            {
+                clearTimeout(this.m_nTransitionId);
+                this.m_nTransitionId = null;
+            }
+
+            this.m_oMenuElement.style.height = "0px";
+            var oThis                               = this;
+            this.m_nTransitionId                    = setTimeout(function()
+            {
+                oThis.m_oMenuElement.style.display = "none";
+                oThis.m_nTransitionId                     = null;
+                oThis.Set_Selected(false);
+            }, 200);
+        }
+    }
+};
+CDrawingButtonFileMenu.prototype.Update_Size = function()
+{
+    CDrawingButtonFileMenu.superclass.Update_Size.apply(this, arguments);
+    var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
+
+    var nLeft = oOffset.X;
+    var nTop  = oOffset.Y + 36 + 5;
+
+    var nOverallW = this.m_oDrawing.Get_Width();
+    var nOverallH = this.m_oDrawing.Get_Height();
+
+    var nMinOffset = 5;
+
+    if (nLeft + this.m_nWidth  > nOverallW - nMinOffset)
+        nLeft = nOverallW - nMinOffset - this.m_nWidth;
+
+    if (nLeft < nMinOffset)
+        nLeft = nMinOffset;
+
+    if (nTop + this.m_nHeight > nOverallH - nMinOffset)
+        nTop = nOverallH - nMinOffset - this.m_nHeight;
+
+    if (nTop < nMinOffset)
+        nTop = nMinOffset;
+
+    this.m_nTop = nTop;
+
+    this.m_oMenuElement.style.left = nLeft + "px";
+    this.m_oMenuElement.style.top  = nTop + "px";
 };
