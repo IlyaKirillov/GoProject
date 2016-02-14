@@ -2159,9 +2159,44 @@ function CDrawingButtonFileMenu(oDrawing)
 
     oMainDiv.appendChild(oMenuElementWrapper);
 
-    this.private_CreateMenuItem(oMenuElementWrapper, "Create New", null);
-    this.private_CreateMenuItem(oMenuElementWrapper, "Open", null);
-    this.private_CreateMenuItem(oMenuElementWrapper, "Open from clipboard", null);
+    var oThis = this;
+    this.private_CreateMenuItem(oMenuElementWrapper, "Create New", function()
+    {
+        CreateWindow(oMainDiv.id, EWindowType.CreateNew, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Load from disk", function()
+    {
+        Common.OpenFileDialog(oGameTree);
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Load from clipboard", function()
+    {
+        var sSgfFile = prompt("Enter here code of ur sgf file", "");
+
+        if (sSgfFile && sSgfFile.length > 0)
+            oGameTree.Load_Sgf(sSgfFile);
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Download as SGF", function()
+    {
+        if (FileReader && Blob)
+        {
+            var sSgf = oGameTree.Save_Sgf();
+            var sGameName = oGameTree.Get_MatchName();
+            if ("" === sGameName)
+                sGameName = "download";
+
+            sGameName += ".sgf";
+            var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
+            Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
+        }
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Create snapshot", function()
+    {
+        oGameTree.Download_PngBoardScreenShot();
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Convert to Askii diagram", function()
+    {
+        CreateWindow(oMainDiv.id, EWindowType.DiagramSL, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+    });
 
     this.m_oMenuElement  = oMenuElementWrapper;
     this.m_nHeight       = oMenuElementWrapper.clientHeight;
@@ -2175,43 +2210,72 @@ CommonExtend(CDrawingButtonFileMenu, CDrawingButtonBase);
 
 CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var shift = 6, size = 12;
-    var x1 = 6, x12 = x1 + size;
-    var y1 = 6, y12 = y1 + size;
+    //var shift = 6, size = 12;
+    //var x1 = 6, x12 = x1 + size;
+    //var y1 = 6, y12 = y1 + size;
+    //
+    //var x2 = x1 + shift, x22 = x2 + size;
+    //var y2 = y1 + shift, y22 = y2 + size;
+    //
+    //var x3 = x2 + shift, x32 = x3 + size;
+    //var y3 = y2 + shift, y32 = y3 + size;
+    //
+    //Canvas.lineWidth = 2;
+    //Canvas.strokeStyle = "rgb(0, 0, 200)";
+    //Canvas.beginPath();
+    //Canvas.moveTo(x12, y2);
+    //Canvas.lineTo(x12, y1);
+    //Canvas.lineTo(x1, y1);
+    //Canvas.lineTo(x1, y12);
+    //Canvas.lineTo(x2, y12);
+    //Canvas.stroke();
+    //
+    //Canvas.strokeStyle = "rgb(0, 100, 0)";
+    //Canvas.beginPath();
+    //Canvas.moveTo(x22, y3);
+    //Canvas.lineTo(x22, y2);
+    //Canvas.lineTo(x2, y2);
+    //Canvas.lineTo(x2, y22);
+    //Canvas.lineTo(x3, y22);
+    //Canvas.stroke();
+    //
+    //Canvas.strokeStyle = "rgb(200, 0, 0)";
+    //Canvas.beginPath();
+    //Canvas.moveTo(x32, y32);
+    //Canvas.lineTo(x32, y3);
+    //Canvas.lineTo(x3, y3);
+    //Canvas.lineTo(x3, y32);
+    //Canvas.closePath();
+    //Canvas.stroke();
 
-    var x2 = x1 + shift, x22 = x2 + size;
-    var y2 = y1 + shift, y22 = y2 + size;
+    var shiftY = 6;
+    var shiftX = 3;
+    var W = 2;
 
-    var x3 = x2 + shift, x32 = x3 + size;
-    var y3 = y2 + shift, y32 = y3 + size;
 
-    Canvas.lineWidth = 2;
-    Canvas.strokeStyle = "rgb(0, 0, 200)";
-    Canvas.beginPath();
-    Canvas.moveTo(x12, y2);
-    Canvas.lineTo(x12, y1);
-    Canvas.lineTo(x1, y1);
-    Canvas.lineTo(x1, y12);
-    Canvas.lineTo(x2, y12);
-    Canvas.stroke();
+    var x1 = shiftX;
+    var x2 = size - shiftX;
 
-    Canvas.strokeStyle = "rgb(0, 100, 0)";
-    Canvas.beginPath();
-    Canvas.moveTo(x22, y3);
-    Canvas.lineTo(x22, y2);
-    Canvas.lineTo(x2, y2);
-    Canvas.lineTo(x2, y22);
-    Canvas.lineTo(x3, y22);
-    Canvas.stroke();
+    var y1 = shiftY;
+    var y2 = (size - 2 * shiftY) / 2;
+    var y3 = y2 + (y2 - y1);
 
-    Canvas.strokeStyle = "rgb(200, 0, 0)";
-    Canvas.beginPath();
-    Canvas.moveTo(x32, y32);
-    Canvas.lineTo(x32, y3);
-    Canvas.lineTo(x3, y3);
-    Canvas.lineTo(x3, y32);
-    Canvas.closePath();
-    Canvas.stroke();
+    //Canvas.lineWidth = W;
+    //Canvas.strokeStyle = "rgb(100, 100, 100)";
+    //Canvas.beginPath();
+    //Canvas.moveTo(x1, y1);
+    //Canvas.lineTo(x2, y1);
+    //Canvas.stroke();
+
+    //Canvas.beginPath();
+    //Canvas.moveTo(x1, y2);
+    //Canvas.lineTo(x2, y2);
+    //Canvas.stroke();
+    //
+    //Canvas.beginPath();
+    //Canvas.moveTo(x1, y3);
+    //Canvas.lineTo(x2, y3);
+    //Canvas.stroke();
 };
 CDrawingButtonFileMenu.prototype.private_CreateMenuItem = function(oMenuElement, sText, pOnClickHandler)
 {
@@ -2290,7 +2354,7 @@ CDrawingButtonFileMenu.prototype.private_CreateMenuItem = function(oMenuElement,
         if (pOnClickHandler)
             pOnClickHandler();
 
-        oThis.Hide_Menu(false);
+        oThis.Hide_Menu(true);
     };
 
     return oItemWrapper;

@@ -1023,7 +1023,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
 
     // INFO
     var oInfoControl = CreateControlContainer(sInfoDivId);
-    oInfoControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, InfoH);
+    oInfoControl.Bounds.SetParams(7 + 36, 0, 1000, 0, true, false, false, false, -1, InfoH);
     oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oCaTControl.AddControl(oInfoControl);
 

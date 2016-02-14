@@ -407,6 +407,45 @@ CCommon.prototype.SaveAs = function(oBlob, sName, sMimeType)
 
     this.Click(oLink);
 };
+CCommon.prototype.OpenFileDialog = function(oGameTree)
+{
+    var aBody = document.getElementsByTagName('body');
+
+    if (aBody.length > 0)
+    {
+        var oBody  = aBody[0];
+        var oInput = document.createElement("input");
+        oBody.appendChild(oInput); // в IE без этого не будет работать
+
+        oInput.type          = "file";
+        oInput.multiple      = false;
+        oInput.accept        = ".sgf,.gib,.ngf";
+        oInput.style.display = "none";
+
+        oInput.addEventListener("change", function (oEvent)
+        {
+            var aFiles = oEvent.target.files;
+
+            if (aFiles.length > 0)
+            {
+                var oFile      = aFiles[0];
+                var sExt       = oFile.name.split('.').pop().toLowerCase();
+                var oReader    = new FileReader();
+                oReader.onload = function (oEvent2)
+                {
+                    oGameTree.Load_Sgf(oEvent2.target.result, null, null, sExt);
+                    oGameTree.Focus();
+                };
+
+                oReader.readAsText(oFile);
+                oGameTree.Focus();
+            }
+        }, false);
+
+        this.Click(oInput);
+        oBody.removeChild(oInput);
+    }
+};
 CCommon.prototype.Click = function(oNode)
 {
     var oEvent = document.createEvent("MouseEvents");
