@@ -2210,72 +2210,37 @@ CommonExtend(CDrawingButtonFileMenu, CDrawingButtonBase);
 
 CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    //var shift = 6, size = 12;
-    //var x1 = 6, x12 = x1 + size;
-    //var y1 = 6, y12 = y1 + size;
-    //
-    //var x2 = x1 + shift, x22 = x2 + size;
-    //var y2 = y1 + shift, y22 = y2 + size;
-    //
-    //var x3 = x2 + shift, x32 = x3 + size;
-    //var y3 = y2 + shift, y32 = y3 + size;
-    //
-    //Canvas.lineWidth = 2;
-    //Canvas.strokeStyle = "rgb(0, 0, 200)";
-    //Canvas.beginPath();
-    //Canvas.moveTo(x12, y2);
-    //Canvas.lineTo(x12, y1);
-    //Canvas.lineTo(x1, y1);
-    //Canvas.lineTo(x1, y12);
-    //Canvas.lineTo(x2, y12);
-    //Canvas.stroke();
-    //
-    //Canvas.strokeStyle = "rgb(0, 100, 0)";
-    //Canvas.beginPath();
-    //Canvas.moveTo(x22, y3);
-    //Canvas.lineTo(x22, y2);
-    //Canvas.lineTo(x2, y2);
-    //Canvas.lineTo(x2, y22);
-    //Canvas.lineTo(x3, y22);
-    //Canvas.stroke();
-    //
-    //Canvas.strokeStyle = "rgb(200, 0, 0)";
-    //Canvas.beginPath();
-    //Canvas.moveTo(x32, y32);
-    //Canvas.lineTo(x32, y3);
-    //Canvas.lineTo(x3, y3);
-    //Canvas.lineTo(x3, y32);
-    //Canvas.closePath();
-    //Canvas.stroke();
-
-    var shiftY = 6;
+    var shiftY = 9;
+    var spaceY = 6;
     var shiftX = 3;
     var W = 2;
 
+    var x1 = X_off + shiftX;
+    var x2 = X_off + Size - shiftX;
 
-    var x1 = shiftX;
-    var x2 = size - shiftX;
+    var y1 = Y_off + shiftY;
+    var y2 = Y_off + spaceY + shiftY;
+    var y3 = Y_off + 2 * spaceY + shiftY;
 
-    var y1 = shiftY;
-    var y2 = (size - 2 * shiftY) / 2;
-    var y3 = y2 + (y2 - y1);
+    Canvas.fillStyle = "rgb(217, 217, 217)";
+    Canvas.fillRect(0, 0, Size + 2 * X_off, Size + 2 * X_off);
 
-    //Canvas.lineWidth = W;
-    //Canvas.strokeStyle = "rgb(100, 100, 100)";
-    //Canvas.beginPath();
-    //Canvas.moveTo(x1, y1);
-    //Canvas.lineTo(x2, y1);
-    //Canvas.stroke();
+    Canvas.lineWidth = W;
+    Canvas.strokeStyle = "rgb(100, 100, 100)";
+    Canvas.beginPath();
+    Canvas.moveTo(x1, y1);
+    Canvas.lineTo(x2, y1);
+    Canvas.stroke();
 
-    //Canvas.beginPath();
-    //Canvas.moveTo(x1, y2);
-    //Canvas.lineTo(x2, y2);
-    //Canvas.stroke();
-    //
-    //Canvas.beginPath();
-    //Canvas.moveTo(x1, y3);
-    //Canvas.lineTo(x2, y3);
-    //Canvas.stroke();
+    Canvas.beginPath();
+    Canvas.moveTo(x1, y2);
+    Canvas.lineTo(x2, y2);
+    Canvas.stroke();
+
+    Canvas.beginPath();
+    Canvas.moveTo(x1, y3);
+    Canvas.lineTo(x2, y3);
+    Canvas.stroke();
 };
 CDrawingButtonFileMenu.prototype.private_CreateMenuItem = function(oMenuElement, sText, pOnClickHandler)
 {
