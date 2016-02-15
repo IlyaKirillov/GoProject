@@ -2620,6 +2620,84 @@ CDrawingCreateNewWindow.prototype.Handle_OK = function()
     this.Close();
 };
 
+function CDrawingClipboardWindow()
+{
+    CDrawingClipboardWindow.superclass.constructor.call(this);
+
+    this.m_oTextArea = null;
+}
+
+CommonExtend(CDrawingClipboardWindow, CDrawingConfirmWindow);
+
+CDrawingClipboardWindow.prototype.Init = function(_sDivId, oPr)
+{
+    CDrawingClipboardWindow.superclass.Init.call(this, _sDivId, true);
+
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+
+    this.Set_Caption("Load file from clipboard");
+
+    var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
+    var oMainControl = this.HtmlElement.ConfirmInnerControl;
+    var sDivId       = this.HtmlElement.ConfirmInnerDiv.id;
+
+    this.m_oGameTree = oPr.GameTree;
+
+    this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId);
+    this.private_FillTextArea(oPr.GameTree);
+    this.m_oTextArea.select();
+};
+CDrawingClipboardWindow.prototype.Show = function(oPr)
+{
+    CDrawingClipboardWindow.superclass.Show.call(this, oPr);
+    this.private_FillTextArea();
+    this.m_oTextArea.select();
+};
+CDrawingClipboardWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId)
+{
+    var oElement   = document.createElement("textarea");
+    var sElementId = sDivId + "TA";
+    oElement.setAttribute("id", sElementId);
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oElement.setAttribute("oncontextmenu", "return false;");
+    oElement.style.fontFamily  = "Courier New, monospacef";
+    oElement.style.fontSize    = "10pt";
+    oElement.style.resize      = "none";
+    oElement.style.outline     = "none";
+    oElement.style.border      = "1px solid rgb(169,169,169)";
+    oElement.style.height      = "100%";
+    oElement.style.width       = "100%";
+    this.m_oTextArea = oElement;
+
+    oMainDiv.appendChild(oElement);
+
+    var oControl = CreateControlContainer(sElementId);
+    oControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oMainControl.AddControl(oControl);
+
+    return oElement;
+};
+CDrawingClipboardWindow.prototype.private_FillTextArea = function(oGameTree)
+{
+    this.m_oTextArea.value = "";
+
+    if (window.clipboardData)
+        this.m_oTextArea.value = window.clipboardData.getData('Text');
+};
+CDrawingClipboardWindow.prototype.Handle_OK = function()
+{
+    var sFile = this.m_oTextArea.value;
+    if (sFile && "" !== sFile)
+        this.m_oGameTree.Load_Sgf(sFile, null, null, null);
+
+    this.Close();
+};
+CDrawingClipboardWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 300, H : 200};
+};
+
 var EWindowType =
 {
     Common        : 0,
@@ -2633,7 +2711,8 @@ var EWindowType =
     About         : 8,
     DiagramSL     : 9,
     ViewPort      : 10,
-    CreateNew     : 11
+    CreateNew     : 11,
+    Clipboard     : 12
 };
 
 var g_aWindows = {};
@@ -2664,6 +2743,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
             case EWindowType.DiagramSL     : sApp = "DiagramSL"; break;
             case EWindowType.ViewPort      : sApp = "ViewPort"; break;
             case EWindowType.CreateNew     : sApp = "CreateNew"; break;
+            case EWindowType.Clipboard     : sApp = "Clipboard"; break;
         }
         var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
 
@@ -2691,6 +2771,7 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
                 case EWindowType.DiagramSL     : oWindow = new CDrawingDiagramSLWindow(); break;
                 case EWindowType.ViewPort      : oWindow = new CDrawingViewPortWindow(); break;
                 case EWindowType.CreateNew     : oWindow = new CDrawingCreateNewWindow(); break;
+                case EWindowType.Clipboard     : oWindow = new CDrawingClipboardWindow(); break;
             }
 
             oWindows[nWindowType] = oWindow;

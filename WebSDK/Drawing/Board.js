@@ -3127,10 +3127,7 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             {
                 if (true === Event.ShiftKey)
                 {
-                    var sSgfFile = prompt("Enter here code of ur sgf file", "");
-
-                    if (sSgfFile && sSgfFile.length > 0)
-                        this.m_oGameTree.Load_Sgf(sSgfFile);
+                    CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.Clipboard, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
                 }
                 else
                 {

@@ -2170,10 +2170,7 @@ function CDrawingButtonFileMenu(oDrawing)
     });
     this.private_CreateMenuItem(oMenuElementWrapper, "Load from clipboard", function()
     {
-        var sSgfFile = prompt("Enter here code of ur sgf file", "");
-
-        if (sSgfFile && sSgfFile.length > 0)
-            oGameTree.Load_Sgf(sSgfFile);
+        CreateWindow(oMainDiv.id, EWindowType.Clipboard, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
     });
     this.private_CreateMenuItem(oMenuElementWrapper, "Download as SGF", function()
     {
@@ -2193,9 +2190,17 @@ function CDrawingButtonFileMenu(oDrawing)
     {
         oGameTree.Download_PngBoardScreenShot();
     });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Export to Gif", function()
+    {
+        oGameTree.Download_GifForCurVariant();
+    });
     this.private_CreateMenuItem(oMenuElementWrapper, "Convert to Askii diagram", function()
     {
         CreateWindow(oMainDiv.id, EWindowType.DiagramSL, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Score Estimate", function()
+    {
+        CreateWindow(oMainDiv.id, EWindowType.ScoreEstimate, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
     });
 
     this.m_oMenuElement  = oMenuElementWrapper;

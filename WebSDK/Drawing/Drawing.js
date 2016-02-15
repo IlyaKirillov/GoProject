@@ -673,7 +673,7 @@ CDrawing.prototype.Disable = function()
         this.m_oMainDiv.appendChild(oDisable);
         this.m_oDisableElement = oDisable;
 
-        var oErrorWindow = g_aWindows[EWindowType.Error];
+        var oErrorWindow = g_aWindows[this.m_oMainDiv.id][EWindowType.Error];
         if (oErrorWindow)
             oErrorWindow = oErrorWindow.HtmlElement.Control.HtmlElement;
 
