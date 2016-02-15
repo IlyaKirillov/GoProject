@@ -973,6 +973,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var oMainControl = this.m_oMainControl;
     var sMainDivId   = this.m_oMainDiv.id;
     var sDivId       = sMainDivId;
+    var bIsEmbedding = oGameTree.Get_LocalSettings().Is_Embedding();
 
     this.m_nMixedRightSide = 344;
     var oDrawingBoard = new CDrawingBoard(this);
@@ -1023,7 +1024,7 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
 
     // INFO
     var oInfoControl = CreateControlContainer(sInfoDivId);
-    oInfoControl.Bounds.SetParams(7 + 36, 0, 1000, 0, true, false, false, false, -1, InfoH);
+    oInfoControl.Bounds.SetParams(true !== bIsEmbedding ? 7 + 36 : 0, 0, 1000, 0, true, false, false, false, -1, InfoH);
     oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oCaTControl.AddControl(oInfoControl);
 
@@ -1047,16 +1048,20 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     var oDrawingBlackInfo = new CDrawingPlayerInfo(this);
     oDrawingBlackInfo.Init(sBlackInfo, oGameTree, BOARD_BLACK);
 
-    var sMenuButton = sCaTDivId + "_M";
-    this.private_CreateDiv(oCaTControl.HtmlElement, sMenuButton);
-    var oMenuButtonControl = CreateControlContainer(sMenuButton);
-    oMenuButtonControl.Bounds.SetParams(7, 7, 1000, 7, true, true, false, true, 36, 36);
-    oMenuButtonControl.Anchor = (g_anchor_top | g_anchor_left);
-    oCaTControl.AddControl(oMenuButtonControl);
+    if (true !== bIsEmbedding)
+    {
+        var sMenuButton = sCaTDivId + "_M";
+        this.private_CreateDiv(oCaTControl.HtmlElement, sMenuButton);
+        var oMenuButtonControl = CreateControlContainer(sMenuButton);
+        oMenuButtonControl.Bounds.SetParams(7, 7, 1000, 7, true, true, false, true, 36, 36);
+        oMenuButtonControl.Anchor = (g_anchor_top | g_anchor_left);
+        oCaTControl.AddControl(oMenuButtonControl);
 
-    var oDrawingMenuButton = new CDrawingButtonFileMenu(this);
-    oDrawingMenuButton.Init(sMenuButton, oGameTree);
-    this.Register_MenuButton(oDrawingMenuButton);
+        var oDrawingMenuButton = new CDrawingButtonFileMenu(this);
+        oDrawingMenuButton.Init(sMenuButton, oGameTree);
+        this.Register_MenuButton(oDrawingMenuButton);
+        this.m_aElements.push(oDrawingMenuButton);
+    }
     // END INFO
 
     var oDrawingMultilevelToolbar = new CDrawingMultiLevelToolbar(this);
@@ -1092,7 +1097,6 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     this.m_aElements.push(oDrawingMultilevelToolbar);
     this.m_aElements.push(oDrawingBlackInfo);
     this.m_aElements.push(oDrawingWhiteInfo);
-    this.m_aElements.push(oDrawingMenuButton);
 
     this.Update_Size();
     oGameTree.On_EndLoadDrawing();
@@ -1104,16 +1108,42 @@ CDrawing.prototype.private_CreateVerFullTemplate = function()
     var oGameTree    = this.m_oGameTree;
     var oMainControl = this.m_oMainControl;
     var sMainDivId   = this.m_oMainDiv.id;
-
+    var bIsEmbedding = oGameTree.Get_LocalSettings().Is_Embedding();
     //------------------------------------------------------------------------------------------------------------------
     // Делим главную дивку на 2 части сверху 50px под информацию об игрока, а снизу все остальное.
     //------------------------------------------------------------------------------------------------------------------
+    var InfoH    = 50;
+
+    var sInfoBackDivId = sMainDivId + "B";
+    this.private_CreateDiv(oMainControl.HtmlElement, sInfoBackDivId).style.background = "rgb(217, 217, 217)";;
+    var oInfoControlBack = CreateControlContainer(sInfoBackDivId);
+    oInfoControlBack.Bounds.SetParams(0, 0, 1000, 0, true, false, false, false, -1, InfoH);
+    oInfoControlBack.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oInfoControlBack);
+
     var sInfoDivId = sMainDivId + "I";
     this.private_CreateDiv(oMainControl.HtmlElement, sInfoDivId);
+    //------------------------------------------------------------------------------------------------------------------
+    // Добавляем кнопку меню слева.
+    //------------------------------------------------------------------------------------------------------------------
 
-    var InfoH    = 50;
+    if (true !== bIsEmbedding)
+    {
+        var sMenuButton           = sMainDivId + "M";
+        this.private_CreateDiv(oMainControl.HtmlElement, sMenuButton);
+        var oMenuButtonControl    = CreateControlContainer(sMenuButton);
+        oMenuButtonControl.Bounds.SetParams(7, 7, 1000, 7, true, true, false, true, 36, 36);
+        oMenuButtonControl.Anchor = (g_anchor_top | g_anchor_left);
+        oMainControl.AddControl(oMenuButtonControl);
+
+        var oDrawingMenuButton = new CDrawingButtonFileMenu(this);
+        oDrawingMenuButton.Init(sMenuButton, oGameTree);
+        this.Register_MenuButton(oDrawingMenuButton);
+        this.m_aElements.push(oDrawingMenuButton);
+    }
+
     var oInfoControl = CreateControlContainer(sInfoDivId);
-    oInfoControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, InfoH);
+    oInfoControl.Bounds.SetParams(true !== bIsEmbedding ? 36 + 7 : 0, 0, 1000, 0, true, false, false, false, -1, InfoH);
     oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
     oMainControl.AddControl(oInfoControl);
 
