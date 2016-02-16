@@ -26,6 +26,7 @@ function LoadFromCache()
 {
     var oFilesInfo = GetCachesFiles();
     GoBoardApi.Load_Sgf(oGameTree, oFilesInfo[sFilePath].File, null, oFilesInfo[sFilePath].MoveRef);
+    document.title = GoBoardApi.Get_MatchName(oGameTree);
 
     document.getElementById("divCachedFile").style.display = "none";
     document.getElementById("idBlurDiv").style.display = "none";
