@@ -528,6 +528,8 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
             oThis.Set_Permissions(oGameTree, oPermissions);
         }
     }
+
+    return oGameTree;
 };
 
 window['GoBoardApi'] = new CGoBoardApi();

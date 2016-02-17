@@ -163,6 +163,21 @@ function CDrawingBoard(oDrawing)
         oPos = oThis.private_GetBoardPosByXY(oPos.X, oPos.Y);
         oThis.private_HandleMouseUp(oPos.X, oPos.Y, global_mouseEvent);
     };
+    this.private_OnMouseWheel = function(Event)
+    {
+        if (oThis.m_bMouseLock)
+            return false;
+
+        if (Event.wheelDelta > 0)
+            oThis.m_oGameTree.Step_Forward(1);
+        else
+            oThis.m_oGameTree.Step_Backward(1);
+
+        if (Event.preventDefault)
+            Event.preventDefault();
+
+        return false;
+    };
     this.private_OnKeyDown = function(e)
     {
         check_KeyboardEvent(e);
@@ -326,6 +341,9 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     oEventDiv.style.outline   = 0;    // Убираем рамку фокуса в остальных браузерах
     oEventDiv['ondragover']   = this.private_OnDragover; // Эти события добавляем таким образом, чтобы
     oEventDiv['ondrop']       = this.private_OnDrop;     // минимизатор не изменил названия.
+    oEventDiv['onmousewheel'] = this.private_OnMouseWheel;
+    if (oEventDiv.addEventListener)
+        oEventDiv.addEventListener("DOMMouseScroll", this.private_OnMouseWheel, false);
 
     return oControl;
 };
