@@ -15,6 +15,7 @@ var bFreshLoad = true;
 
 window.onload         = OnDocumentReady;
 window.onbeforeunload = OnDocumentClose;
+window.onresize       = OnDocumentResize;
 
 function BodyFocus()
 {
@@ -87,12 +88,6 @@ function OnDocumentReady()
             GoBoardApi.Load_Sgf(oGameTree, oFilesInfo["default"].File, null, oFilesInfo["default"].MoveRef);
         }
     }
-
-    window.onresize = function()
-    {
-        if (oGameTree)
-            GoBoardApi.Update_Size(oGameTree);
-    }
 }
 
 function OnDocumentClose()
@@ -141,6 +136,12 @@ function OnDocumentClose()
     }
 
     SetCachedFiles(oFilesInfo);
+}
+
+function OnDocumentResize()
+{
+    if (oGameTree)
+        GoBoardApi.Update_Size(oGameTree);
 }
 
 function GetCachesFiles()
