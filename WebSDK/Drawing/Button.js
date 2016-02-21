@@ -2227,7 +2227,7 @@ CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X
     var y2 = Y_off + spaceY + shiftY;
     var y3 = Y_off + 2 * spaceY + shiftY;
 
-    Canvas.fillStyle = "rgb(217, 217, 217)";
+    Canvas.fillStyle = (true === this.m_oActiveBColor.Compare(BackColor) ? "rgb(167, 167, 167)" : "rgb(217, 217, 217)");
     Canvas.fillRect(0, 0, Size + 2 * X_off, Size + 2 * X_off);
 
     Canvas.lineWidth = W;
@@ -2429,4 +2429,10 @@ CDrawingButtonFileMenu.prototype.Update_Size = function()
 
     this.m_oMenuElement.style.left = nLeft + "px";
     this.m_oMenuElement.style.top  = nTop + "px";
+};
+CDrawingButtonFileMenu.prototype.private_ClickTransformIn = function()
+{
+};
+CDrawingButtonFileMenu.prototype.private_ClickTransformOut = function()
+{
 };

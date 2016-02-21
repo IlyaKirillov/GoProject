@@ -168,7 +168,13 @@ function CDrawingBoard(oDrawing)
         if (oThis.m_bMouseLock)
             return false;
 
-        if (Event.wheelDelta > 0)
+        var delta = 0;
+        if (undefined != Event.wheelDelta)
+            delta = Event.wheelDelta > 0;
+        else
+            delta = Event.detail > 0;
+
+        if (delta > 0)
             oThis.m_oGameTree.Step_Forward(1);
         else
             oThis.m_oGameTree.Step_Backward(1);

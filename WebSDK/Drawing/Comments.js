@@ -123,9 +123,8 @@ CDrawingPlayerInfo.prototype.Init = function(sDivId, oGameTree, nPlayer)
 
     oNameDiv.style.paddingLeft   = "25px";
     oScoresDiv.style.paddingLeft = "25px";
-
     oNameDiv.style.fontSize      = "14pt";
-    oScoresDiv.style.paddingLeft = "10pt";
+    oScoresDiv.style.fontSize    = "10pt";
 
     oImage.setAttribute("id", sDivId + "_Image");
     oImage.setAttribute("style", "position:absolute;padding:0;margin:0;");
