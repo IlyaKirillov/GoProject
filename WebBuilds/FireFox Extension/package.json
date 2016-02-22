@@ -1,9 +1,15 @@
 {
-  "name"       : "webgobadukboard",
   "title"      : "Web Go/Baduk Board",
-  "id"         : "webgobadukboard.js",
+  "name"       : "webgobadukboard",
+  "id"         : "webgobadukboard.js@jetpack",
   "description": "Uses HTML5 to edit SGF files directly in the browser.",
+  "main"       : "index.js",
   "author"     : "Ilya Kirillov",
+  "engines"    : {
+    "firefox": ">=38.0a1",
+    "fennec" : ">=38.0a1"
+  },
   "license"    : "GNU Lesser General Public License version 3.0",
-  "version"    : "0.10.3"
+  "keywords"   : ["jetpack"],
+  "version"    : "0.10.4"
 }
