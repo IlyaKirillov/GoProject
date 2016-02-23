@@ -170,11 +170,11 @@ function CDrawingBoard(oDrawing)
 
         var delta = 0;
         if (undefined != Event.wheelDelta)
-            delta = Event.wheelDelta > 0;
+            delta = Event.wheelDelta;
         else
-            delta = Event.detail > 0;
+            delta = Event.detail;
 
-        if (delta > 0)
+        if (delta < 0)
             oThis.m_oGameTree.Step_Forward(1);
         else
             oThis.m_oGameTree.Step_Backward(1);

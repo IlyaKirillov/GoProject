@@ -7,4 +7,4 @@
  * Time     3:08
  */
 
-CGoBoardApi.prototype.Version = "0.10.4";
+CGoBoardApi.prototype.Version = "0.10.5";

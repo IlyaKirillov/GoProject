@@ -27,7 +27,7 @@
     "incognito": "split",
 
     "name"       : "Web Go Board",
-    "version"    : "0.10.4",
+    "version"    : "0.10.5",
 
     "mime_types": [ "application/x-go-sgf" ],
 
