@@ -172,7 +172,7 @@ function CDrawingBoard(oDrawing)
         if (undefined != Event.wheelDelta)
             delta = Event.wheelDelta;
         else
-            delta = Event.detail;
+            delta = -Event.detail;
 
         if (delta < 0)
             oThis.m_oGameTree.Step_Forward(1);
