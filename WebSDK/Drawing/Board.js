@@ -446,6 +446,7 @@ CDrawingBoard.prototype.On_Resize = function(bForce)
 };
 CDrawingBoard.prototype.On_EndLoadSgf = function()
 {
+    this.m_oImageData.ResizeBoard = null;
     if (null !== this.m_oPresentation)
     {
         if (this.m_oGameTree.Get_CurNode().Count_NodeNumber() >= this.m_oPresentation.Get_NodesCountInSlide())

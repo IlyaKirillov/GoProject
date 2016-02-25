@@ -1099,7 +1099,7 @@ CDrawingSettingsWindow.prototype.private_CreateLoadingSettingsPage = function(oD
     var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "LS";
 
     this.HtmlElement2.LoadUnfinishedSgf = this.private_CreateCheckBox(oDivMainPart, sDivId + "U", this.m_oGameTree.Is_LoadUnfinishedFilesOnLastNode(), "Load unfinished files on the last node");
-    this.HtmlElement2.LoadShowVariants  = this.private_CreateSelect(oDivMainPart, sDivId + "V", this.m_oGameTree.Get_LoadShowVariants(), ["Don't show variants", "Show variations of successor node (children)", "Show variations of current node   (siblings)", "Load option from file"], "Show variants");
+    this.HtmlElement2.LoadShowVariants  = this.private_CreateSelect(oDivMainPart, sDivId + "V", this.m_oGameTree.Get_LoadShowVariants(), ["Don't show variants", "Show variations of current node   (siblings)", "Show variations of successor node (children)", "Load option from file"], "Show variants");
 };
 CDrawingSettingsWindow.prototype.Handle_OK = function()
 {
