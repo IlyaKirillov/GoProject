@@ -2698,6 +2698,16 @@ CDrawingClipboardWindow.prototype.Get_DefaultWindowSize = function()
     return {W : 300, H : 200};
 };
 
+function CDrawingKifuWindow()
+{
+    CDrawingKifuWindow.superclass.constructor.call(this);
+}
+CommonExtend(CDrawingKifuWindow, CDrawingWindow);
+CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
+{
+
+};
+
 var EWindowType =
 {
     Common        : 0,
