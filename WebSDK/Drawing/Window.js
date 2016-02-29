@@ -2707,6 +2707,10 @@ CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
 {
 
 };
+CDrawingKifuWindow.prototype.Get_DefaultWindowSize = function()
+{
+    return {W : 500, H : 300};
+};
 
 var EWindowType =
 {
