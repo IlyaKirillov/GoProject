@@ -2705,7 +2705,12 @@ function CDrawingKifuWindow()
 CommonExtend(CDrawingKifuWindow, CDrawingWindow);
 CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
 {
+    CDrawingKifuWindow.superclass.Init.call(this, sDivId, oPr);
+    this.protected_UpdateSizeAndPosition(oPr.Drawing);
+    this.Set_Caption("Kifu");
 
+    var oMainDiv     = this.HtmlElement.InnerDiv;
+    var oMainControl = this.HtmlElement.InnerControl;
 };
 CDrawingKifuWindow.prototype.Get_DefaultWindowSize = function()
 {
@@ -2726,7 +2731,8 @@ var EWindowType =
     DiagramSL     : 9,
     ViewPort      : 10,
     CreateNew     : 11,
-    Clipboard     : 12
+    Clipboard     : 12,
+    Kifu          : 13
 };
 
 var g_aWindows = {};
@@ -2747,17 +2753,18 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
         var sApp = "unknownwindow";
         switch (nWindowType)
         {
-            case EWindowType.GameInfo      : sApp = "Info"; break;
-            case EWindowType.Settings      : sApp = "Settings"; break;
-            case EWindowType.Error         : sApp = "Error"; break;
-            case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
-            case EWindowType.CountColors   : sApp = "CountColors"; break;
-            case EWindowType.GifWriter     : sApp = "GifWriter"; break;
-            case EWindowType.About         : sApp = "About"; break;
-            case EWindowType.DiagramSL     : sApp = "DiagramSL"; break;
-            case EWindowType.ViewPort      : sApp = "ViewPort"; break;
-            case EWindowType.CreateNew     : sApp = "CreateNew"; break;
-            case EWindowType.Clipboard     : sApp = "Clipboard"; break;
+        case EWindowType.GameInfo      : sApp = "Info"; break;
+        case EWindowType.Settings      : sApp = "Settings"; break;
+        case EWindowType.Error         : sApp = "Error"; break;
+        case EWindowType.ScoreEstimate : sApp = "ScoreEstimate"; break;
+        case EWindowType.CountColors   : sApp = "CountColors"; break;
+        case EWindowType.GifWriter     : sApp = "GifWriter"; break;
+        case EWindowType.About         : sApp = "About"; break;
+        case EWindowType.DiagramSL     : sApp = "DiagramSL"; break;
+        case EWindowType.ViewPort      : sApp = "ViewPort"; break;
+        case EWindowType.CreateNew     : sApp = "CreateNew"; break;
+        case EWindowType.Clipboard     : sApp = "Clipboard"; break;
+        case EWindowType.Kifu          : sApp = "Kifu"; break;
         }
         var sId = sDrawingId + sApp + GoBoardApi.Get_Version();
 
@@ -2775,17 +2782,18 @@ function CreateWindow(sDrawingId, nWindowType, oPr)
 
             switch (nWindowType)
             {
-                case EWindowType.GameInfo      : oWindow = new CDrawingInfoWindow(); break;
-                case EWindowType.Settings      : oWindow = new CDrawingSettingsWindow(); break;
-                case EWindowType.Error         : oWindow = new CDrawingErrorWindow(); break;
-                case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
-                case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
-                case EWindowType.GifWriter     : oWindow = new CDrawingGifWriterWindow(); break;
-                case EWindowType.About         : oWindow = new CDrawingAboutWindow(); break;
-                case EWindowType.DiagramSL     : oWindow = new CDrawingDiagramSLWindow(); break;
-                case EWindowType.ViewPort      : oWindow = new CDrawingViewPortWindow(); break;
-                case EWindowType.CreateNew     : oWindow = new CDrawingCreateNewWindow(); break;
-                case EWindowType.Clipboard     : oWindow = new CDrawingClipboardWindow(); break;
+            case EWindowType.GameInfo      : oWindow = new CDrawingInfoWindow(); break;
+            case EWindowType.Settings      : oWindow = new CDrawingSettingsWindow(); break;
+            case EWindowType.Error         : oWindow = new CDrawingErrorWindow(); break;
+            case EWindowType.ScoreEstimate : oWindow = new CDrawingScoreEstimateWindow(); break;
+            case EWindowType.CountColors   : oWindow = new CDrawingCountColorsWindow(); break;
+            case EWindowType.GifWriter     : oWindow = new CDrawingGifWriterWindow(); break;
+            case EWindowType.About         : oWindow = new CDrawingAboutWindow(); break;
+            case EWindowType.DiagramSL     : oWindow = new CDrawingDiagramSLWindow(); break;
+            case EWindowType.ViewPort      : oWindow = new CDrawingViewPortWindow(); break;
+            case EWindowType.CreateNew     : oWindow = new CDrawingCreateNewWindow(); break;
+            case EWindowType.Clipboard     : oWindow = new CDrawingClipboardWindow(); break;
+            case EWindowType.Kifu          : oWindow = new CDrawingKifuWindow(); break;
             }
 
             oWindows[nWindowType] = oWindow;
