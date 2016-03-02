@@ -2711,10 +2711,25 @@ CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
+
+    var oCanvas = this.private_CreateCanvasElement(oMainDiv, oMainControl, sDivId);
 };
 CDrawingKifuWindow.prototype.Get_DefaultWindowSize = function()
 {
     return {W : 500, H : 300};
+};
+CDrawingKifuWindow.prototype.private_CreateCanvasElement = function(oMainDiv, oMainControl, sDivId)
+{
+    var oElement   = document.createElement("canvas");
+    var sElementId = sDivId + "C";
+    oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
+    oMainDiv.appendChild(oElement);
+
+    var oControl = CreateControlContainer(sElementId);
+    oControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+    oControl.Anchor = (g_anchor_left | g_anchor_top | g_anchor_right | g_anchor_bottom);
+    oMainControl.AddControl(oControl);
+    return oElement;
 };
 
 var EWindowType =
