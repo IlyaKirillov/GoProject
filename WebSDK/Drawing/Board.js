@@ -3137,6 +3137,12 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
             this.m_oGameTree.Download_GifForCurVariant();
         bRetValue = true;
     }
+    else if (75 === KeyCode && true === Event.CtrlKey) // Ctrl + K
+    {
+        // TODO: Это временно, надо будет убрать!!!
+        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.Kifu, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+        bRetValue = true;
+    }
     else if (77 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey) // Ctrl + M
     {
         this.m_oGameTree.Make_CurrentVariantMainly();
