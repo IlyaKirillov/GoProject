@@ -2712,9 +2712,9 @@ CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
 
-    var oCanvas = this.private_CreateCanvasElement(oMainDiv, oMainControl, sDivId);
+   this.HtmlElement.Canvas = this.private_CreateCanvasElement(oMainDiv, oMainControl, sDivId);
 
-    this.private_DrawLogicBoard(oCanvas.getContext("2d"), 500, 300, oPr.GameTree.Get_Board());
+    this.m_oGameTree = oPr.GameTree;
 };
 CDrawingKifuWindow.prototype.Get_DefaultWindowSize = function()
 {
@@ -2738,35 +2738,33 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 {
     oContext.clearRect(0, 0, nWidth, nHeight);
 
-    oContext.strokeStyle = "rgba(255, 0, 0, 1)";
-    oContext.fillStyle   = "rgba(255, 0, 0, 1)";
+    oContext.strokeStyle = "rgba(0, 0, 0, 1)";
+    oContext.fillStyle   = "rgba(0, 0, 0, 1)";
+
+    oContext.lineWidth = 2;
+
+    var nAbsBoardSize = 18 * g_dBoardCellW + 2 * g_dHorOff_2_Cell_W;
+    var dOffset       = (Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardHorOffset) | 0;
+    var nCellSize     = (Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardCellW) | 0;
 
     oContext.lineWidth = 2;
 
     oContext.beginPath();
-    oContext.moveTo(10, 10);
-    oContext.lineTo(20, 20);
-
-    oContext.lineTo(20, 40);
+    oContext.moveTo(dOffset, dOffset);
+    oContext.lineTo(dOffset + 18 * nCellSize, dOffset);
+    oContext.lineTo(dOffset + 18 * nCellSize, dOffset + 18 * nCellSize);
+    oContext.lineTo(dOffset, dOffset + 18 * nCellSize);
     oContext.closePath();
     oContext.stroke();
-
-    //var nAbsBoardSize = 18 * g_dBoardCellW + 2 * g_dHorOff_2_Cell_W;
-    //var dOffset       = Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardHorOffset;
-    //var nCellSize     = Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardCellW;
-    //
-    //oContext.lineWidth = 2;
-    //
-    //oContext.beginPath();
-    //oContext.moveTo(dOffset, dOffset);
-    //oContext.lineTo(dOffset + 18 * nCellSize, dOffset);
-    //oContext.lineTo(dOffset + 18 * nCellSize, dOffset + 18 * nCellSize);
-    //oContext.lineTo(dOffset, dOffset + 18 * nCellSize);
-    //oContext.closePath();
-    ////oContext.stroke();
-    //oContext.fill();
-
 };
+CDrawingKifuWindow.prototype.Show = function()
+{
+    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), 500, 300, this.m_oGameTree.Get_Board());
+};
+CDrawingKifuWindow.prototype.Update_Size = function(bForce)
+{
+    CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
+    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), 500, 300, this.m_oGameTree.Get_Board());};
 
 var EWindowType =
 {
