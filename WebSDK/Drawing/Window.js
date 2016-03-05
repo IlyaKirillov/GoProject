@@ -2743,7 +2743,9 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 
     oContext.lineWidth = 2;
 
-    var nAbsBoardSize = 18 * g_dBoardCellW + 2 * g_dHorOff_2_Cell_W;
+    var oSize = oLogicBoard.Get_Size();
+
+    var nAbsBoardSize = (oSize.X - 1) * g_dBoardCellW + 2 * g_dBoardHorOffset;
     var dOffset       = (Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardHorOffset) | 0;
     var nCellSize     = (Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardCellW) | 0;
 
@@ -2751,20 +2753,39 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 
     oContext.beginPath();
     oContext.moveTo(dOffset, dOffset);
-    oContext.lineTo(dOffset + 18 * nCellSize, dOffset);
-    oContext.lineTo(dOffset + 18 * nCellSize, dOffset + 18 * nCellSize);
-    oContext.lineTo(dOffset, dOffset + 18 * nCellSize);
+    oContext.lineTo(dOffset + (oSize.X - 1) * nCellSize, dOffset);
+    oContext.lineTo(dOffset + (oSize.X - 1) * nCellSize, dOffset + (oSize.Y - 1) * nCellSize);
+    oContext.lineTo(dOffset, dOffset + (oSize.Y - 1) * nCellSize);
     oContext.closePath();
     oContext.stroke();
+
+    oContext.lineWidth = 1.5;
+    oContext.beginPath();
+    for (var nX = 0; nX < oSize.X; ++nX)
+    {
+        oContext.moveTo(dOffset + nX * nCellSize, dOffset);
+        oContext.lineTo(dOffset + nX * nCellSize, dOffset + (oSize.Y - 1) * nCellSize);
+    }
+    for (var nY = 0; nY < oSize.Y; ++nY)
+    {
+        oContext.moveTo(dOffset, dOffset + nY * nCellSize);
+        oContext.lineTo(dOffset + (oSize.X - 1) * nCellSize, dOffset + nY * nCellSize);
+    }
+    oContext.stroke();
+
 };
-CDrawingKifuWindow.prototype.Show = function()
+CDrawingKifuWindow.prototype.Show = function(oPr)
 {
-    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), 500, 300, this.m_oGameTree.Get_Board());
 };
 CDrawingKifuWindow.prototype.Update_Size = function(bForce)
 {
+    var W = this.HtmlElement.InnerDiv.clientWidth;
+    var H = this.HtmlElement.InnerDiv.clientHeight;
+
     CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
-    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), 500, 300, this.m_oGameTree.Get_Board());};
+    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_Board());
+};
+
 
 var EWindowType =
 {
