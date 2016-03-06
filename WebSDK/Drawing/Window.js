@@ -2759,7 +2759,7 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     oContext.closePath();
     oContext.stroke();
 
-    oContext.lineWidth = 1.5;
+    oContext.lineWidth = 1;
     oContext.beginPath();
     for (var nX = 0; nX < oSize.X; ++nX)
     {
@@ -2773,6 +2773,43 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     }
     oContext.stroke();
 
+    oContext.beginPath();
+    var oHandiPoints = oLogicBoard.Get_HandiPoints();
+    for (var nIndex = 0, nCount = oHandiPoints.length; nIndex < nCount; ++nIndex)
+    {
+        var X = oHandiPoints[nIndex][0] * nCellSize + dOffset;
+        var Y = oHandiPoints[nIndex][1] * nCellSize + dOffset;
+        oContext.rect(X - 3, Y - 3, 6, 6);
+    }
+    oContext.fill();
+    var rad = nCellSize / 2 | 0;
+
+    for (var nY = 0; nY < oSize.Y; ++nY)
+    {
+        for (var nX = 0; nX < oSize.X; ++nX)
+        {
+            var Value = oLogicBoard.Get(nX + 1, nY + 1);
+
+            var x = nX * nCellSize + dOffset;
+            var y = nY * nCellSize + dOffset;
+
+            if (BOARD_BLACK === Value)
+            {
+                oContext.fillStyle = "rgb(0, 0, 0)";
+                oContext.beginPath();
+                oContext.arc(x, y, rad, 0, 2 * Math.PI);
+                oContext.fill();
+            }
+            else if (BOARD_WHITE === Value)
+            {
+                oContext.fillStyle = "rgb(255, 255, 255)";
+                oContext.beginPath();
+                oContext.arc(x, y, rad, 0, 2 * Math.PI);
+                oContext.fill();
+                oContext.stroke();
+            }
+        }
+    }
 };
 CDrawingKifuWindow.prototype.Show = function(oPr)
 {
