@@ -2736,6 +2736,9 @@ CDrawingKifuWindow.prototype.private_CreateCanvasElement = function(oMainDiv, oM
 };
 CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth, nHeight, oLogicBoard)
 {
+    var MinSize = Math.min(nWidth, nHeight);
+    var OffY    = (nHeight - MinSize) / 2 | 0;
+    var OffX    = (nWidth - MinSize) / 2  | 0;
     oContext.clearRect(0, 0, nWidth, nHeight);
 
     //oContext.fillStyle   = "rgba(244, 236, 180, 1)";
@@ -2751,13 +2754,16 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     var dOffset       = ((Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardHorOffset) | 0);
     var nCellSize     = (Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardCellW) | 0;
 
+    var dOffsetX = dOffset + OffX;
+    var dOffsetY = dOffset + OffY;
+
     oContext.lineWidth = 2;
 
     oContext.beginPath();
-    oContext.moveTo(dOffset, dOffset);
-    oContext.lineTo(dOffset + (oSize.X - 1) * nCellSize, dOffset);
-    oContext.lineTo(dOffset + (oSize.X - 1) * nCellSize, dOffset + (oSize.Y - 1) * nCellSize);
-    oContext.lineTo(dOffset, dOffset + (oSize.Y - 1) * nCellSize);
+    oContext.moveTo(dOffsetX, dOffsetY);
+    oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize, dOffsetY);
+    oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize, dOffsetY + (oSize.Y - 1) * nCellSize);
+    oContext.lineTo(dOffsetX, dOffsetY + (oSize.Y - 1) * nCellSize);
     oContext.closePath();
     oContext.stroke();
 
@@ -2765,13 +2771,13 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     oContext.beginPath();
     for (var nX = 0; nX < oSize.X; ++nX)
     {
-        oContext.moveTo(dOffset + nX * nCellSize + 0.5, dOffset + 0.5);
-        oContext.lineTo(dOffset + nX * nCellSize+ 0.5, dOffset + (oSize.Y - 1) * nCellSize + 0.5);
+        oContext.moveTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + 0.5);
+        oContext.lineTo(dOffsetX + nX * nCellSize+ 0.5, dOffsetY + (oSize.Y - 1) * nCellSize + 0.5);
     }
     for (var nY = 0; nY < oSize.Y; ++nY)
     {
-        oContext.moveTo(dOffset+ 0.5, dOffset + nY * nCellSize + 0.5);
-        oContext.lineTo(dOffset + (oSize.X - 1) * nCellSize + 0.5, dOffset + nY * nCellSize + 0.5);
+        oContext.moveTo(dOffsetX+  0.5, dOffsetY + nY * nCellSize + 0.5);
+        oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize + 0.5, dOffsetY + nY * nCellSize + 0.5);
     }
     oContext.stroke();
 
@@ -2779,8 +2785,8 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     var oHandiPoints = oLogicBoard.Get_HandiPoints();
     for (var nIndex = 0, nCount = oHandiPoints.length; nIndex < nCount; ++nIndex)
     {
-        var X = oHandiPoints[nIndex][0] * nCellSize + dOffset;
-        var Y = oHandiPoints[nIndex][1] * nCellSize + dOffset;
+        var X = oHandiPoints[nIndex][0] * nCellSize + dOffsetX;
+        var Y = oHandiPoints[nIndex][1] * nCellSize + dOffsetY;
         oContext.rect(X - 3, Y - 3, 7, 7);
     }
     oContext.fill();
@@ -2792,8 +2798,8 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
         {
             var Value = oLogicBoard.Get(nX + 1, nY + 1);
 
-            var x = nX * nCellSize + dOffset;
-            var y = nY * nCellSize + dOffset;
+            var x = nX * nCellSize + dOffsetX;
+            var y = nY * nCellSize + dOffsetY;
 
             if (BOARD_BLACK === Value)
             {
