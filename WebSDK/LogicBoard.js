@@ -200,7 +200,7 @@ function CAreaScoreCounter()
 {
     this.m_oArea  = {};
     this.m_nOwner = BOARD_EMPTY;
-};
+}
 
 CAreaScoreCounter.prototype.Clear = function()
 {
@@ -1023,3 +1023,19 @@ CLogicBoard.prototype.private_MakeErosion = function()
 
     this.m_aScoreEstimate = aNewSE;
 };
+
+/**
+ * Специальный класс для получения кифу партии.
+ * @constructor
+ */
+function CKifuLogicBoard(nW, nH)
+{
+    CKifuLogicBoard.superclass.constructor.call(this, nW, nH);
+
+    this.m_oStartNode = null;
+
+    this.m_aMoveNumbers = null;
+    this.m_aRepetitions = null;
+}
+CommonExtend(CKifuLogicBoard, CLogicBoard);
+
