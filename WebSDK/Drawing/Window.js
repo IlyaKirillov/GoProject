@@ -2776,7 +2776,7 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     }
     for (var nY = 0; nY < oSize.Y; ++nY)
     {
-        oContext.moveTo(dOffsetX+  0.5, dOffsetY + nY * nCellSize + 0.5);
+        oContext.moveTo(dOffsetX + 0.5, dOffsetY + nY * nCellSize + 0.5);
         oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize + 0.5, dOffsetY + nY * nCellSize + 0.5);
     }
     oContext.stroke();
@@ -2791,7 +2791,9 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     }
     oContext.fill();
     var rad = nCellSize / 2 | 0;
+    var d = rad * 2;
 
+    var nCounter = 1;
     for (var nY = 0; nY < oSize.Y; ++nY)
     {
         for (var nX = 0; nX < oSize.X; ++nX)
@@ -2815,6 +2817,22 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
                 oContext.arc(x, y, rad, 0, 2 * Math.PI);
                 oContext.fill();
                 oContext.stroke();
+            }
+
+            if (BOARD_EMPTY !== Value)
+            {
+                var Text = "" + nCounter++;
+                var FontSize = (Text.length <= 2 ? 2 * d / 3 : d / 2);
+                var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
+                var sFont = FontSize + "px " + FontFamily;
+
+                oContext.fillStyle = Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? "rgb(255,255,255)" : "rgb(0,0,0)";
+                oContext.font = sFont;
+
+                var y_offset = FontSize / 3;
+                var x_offset = (d - oContext.measureText(Text).width) / 2 - d / 2;
+
+                oContext.fillText(Text, x + x_offset, y + y_offset);
             }
         }
     }
