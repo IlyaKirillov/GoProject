@@ -1039,3 +1039,27 @@ function CKifuLogicBoard(nW, nH)
 }
 CommonExtend(CKifuLogicBoard, CLogicBoard);
 
+/**
+ *
+ * @param oLogicBoard - стартовое состояние логической доски
+ * @param oNode       - нода, с которой мы начинаем заполнение кифу
+ */
+CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
+{
+    this.m_nW = oLogicBoard.m_nW;
+    this.m_nH = oLogicBoard.m_nH;
+
+    this.m_aBoard = null;
+    this.private_InitBoard();
+
+    for (var Index = 0, nCount = this.m_aBoard.length; Index < nCount; Index++)
+        this.m_aBoard[Index].CopyFrom(oLogicBoard.m_aBoard[Index]);
+
+    // Считаем, что команды текущей ноды уже выполнены
+    while (oNode.Get_NextsCount() > 0)
+    {
+        oNode = oNode.Get_Next(oNode.Get_NextCur());
+        
+
+    }
+};
