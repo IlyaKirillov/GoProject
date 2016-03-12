@@ -1059,7 +1059,7 @@ CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
     while (oNode.Get_NextsCount() > 0)
     {
         oNode = oNode.Get_Next(oNode.Get_NextCur());
-        
+
 
     }
 };
