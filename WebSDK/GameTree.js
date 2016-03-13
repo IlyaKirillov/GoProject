@@ -2507,6 +2507,12 @@ CGameTree.prototype.Set_LocalColorScheme = function(eScheme)
     if (this.m_oDrawingNavigator && true === oResult.Navigator)
         this.m_oDrawingNavigator.Update_All();
 };
+CGameTree.prototype.Get_LogicBoardForKifu = function()
+{
+    var oCurNode = this.Get_CurNode();
+
+
+};
 
 
 function CMatchCommandMove()
