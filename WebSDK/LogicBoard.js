@@ -1060,6 +1060,62 @@ CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
     {
         oNode = oNode.Get_Next(oNode.Get_NextCur());
 
+        var CommandsCount = oNode.Get_CommandsCount();
+        for ( var CommandIndex = 0; CommandIndex < CommandsCount; CommandIndex++ )
+        {
+            var Command = this.m_oCurNode.Get_Command( CommandIndex );
+            var Command_Type  = Command.Get_Type();
+            var Command_Value = Command.Get_Value();
+            var Command_Count = Command.Get_Count();
 
+            switch(Command_Type)
+            {
+            case ECommand.B:
+            {
+                var Pos = Common_ValuetoXY(Command_Value);
+                this.Execute_Move(Pos.X, Pos.Y, BOARD_BLACK, true);
+                break;
+            }
+            case ECommand.W:
+            {
+                var Pos = Common_ValuetoXY(Command_Value);
+                this.Execute_Move(Pos.X, Pos.Y, BOARD_WHITE, true);
+                break;
+            }
+            case ECommand.AB:
+            {
+                for (var Index = 0; Index < Command_Count; Index++)
+                {
+                    var Pos = Common_ValuetoXY(Command_Value[Index]);
+                    this.m_oBoard.Set(Pos.X, Pos.Y, BOARD_BLACK, -1);
+                }
+                break;
+            }
+            case ECommand.AW:
+            {
+                for (var Index = 0; Index < Command_Count; Index++)
+                {
+                    var Pos = Common_ValuetoXY(Command_Value[Index]);
+                    this.m_oBoard.Set(Pos.X, Pos.Y, BOARD_WHITE, -1);
+                }
+                break;
+            }
+            case ECommand.AE:
+            {
+                for (var Index = 0; Index < Command_Count; Index++ )
+                {
+                    var Pos = Common_ValuetoXY(Command_Value[Index]);
+                    this.m_oBoard.Set(Pos.X, Pos.Y, BOARD_EMPTY, -1);
+                }
+                break;
+            }
+            }
+        }
     }
+};
+CKifuLogicBoard.prototype.Add_ToKifu = function(nCommandValue, nValue, bMove)
+{
+    var Pos = Common_ValuetoXY(Command_Value);
+
+    this.Set(Pos.X, Pos.Y, BOARD_BLACK, -1);
 };
