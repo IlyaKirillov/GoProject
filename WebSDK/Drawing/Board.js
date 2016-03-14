@@ -672,7 +672,10 @@ CDrawingBoard.prototype.Estimate_Scores = function()
     this.m_oLogicBoard.Init_ScoreEstimate();
     var oResult = this.m_oLogicBoard.Estimate_Scores(this);
     if (this.m_oEventsCatcher)
-        this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
+    {
+        var nResult = oResult.BlackReal + this.m_oGameTree.Get_BlackCapt() - oResult.WhiteReal - this.m_oGameTree.Get_WhiteCapt() - this.m_oGameTree.Get_Komi();
+        this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential, nResult);
+    }
 
     this.m_oGameTree.Update_InterfaceState();
 };
@@ -3033,7 +3036,10 @@ CDrawingBoard.prototype.private_ScoreEstimate = function(X, Y, event)
     this.m_oLogicBoard.Mark_DeadGroupForEstimate(X, Y);
     var oResult = this.m_oLogicBoard.Estimate_Scores(this);
     if (this.m_oEventsCatcher)
-        this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential);
+    {
+        var nResult = oResult.BlackReal + this.m_oGameTree.Get_BlackCapt() - oResult.WhiteReal - this.m_oGameTree.Get_WhiteCapt() - this.m_oGameTree.Get_Komi();
+        this.m_oEventsCatcher.On_EstimateEnd(oResult.BlackReal, oResult.WhiteReal, oResult.BlackPotential, oResult.WhitePotential, nResult);
+    }
     this.Draw_Marks();
     this.private_UpdateTargetType();
 };

@@ -111,6 +111,7 @@ CGameTree.prototype.Copy_ForScoreEstimate = function()
     oGameTree.m_oBoard = this.m_oBoard.Copy();
     oGameTree.m_oFirstNode = this.m_oFirstNode.Copy_CurrentVariant(this.m_oCurNode);
     oGameTree.m_oCurNode   = oGameTree.m_oFirstNode;
+    oGameTree.m_nKomi      = this.m_nKomi;
     oGameTree.Step_ForwardToEnd();
     return oGameTree;
 };

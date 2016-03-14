@@ -1309,9 +1309,9 @@ CDrawingScoreEstimateWindow.prototype.Update_Size = function(bForce)
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Update_Size(bForce);
 };
-CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, WhiteReal, BlackPotential, WhitePotential)
+CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, WhiteReal, BlackPotential, WhitePotential, nResult)
 {
-    var sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ")";
+    var sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ? "B+" + nResult : (nResult < 0 ? "W+" + Math.abs(nResult) : "Even"));
     this.Set_Caption(sCaption);
 };
 CDrawingScoreEstimateWindow.prototype.Show = function(oPr)
