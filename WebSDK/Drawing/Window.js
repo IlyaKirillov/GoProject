@@ -2799,6 +2799,7 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
         for (var nX = 0; nX < oSize.X; ++nX)
         {
             var Value = oLogicBoard.Get(nX + 1, nY + 1);
+            var nMoveNumber = oLogicBoard.Get_Num(nX + 1, nY + 1);
 
             var x = nX * nCellSize + dOffsetX;
             var y = nY * nCellSize + dOffsetY;
@@ -2819,14 +2820,14 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
                 oContext.stroke();
             }
 
-            if (BOARD_EMPTY !== Value)
+            if (-1 !== nMoveNumber)
             {
-                var Text = "" + nCounter++;
+                var Text = "" + nMoveNumber;
                 var FontSize = (Text.length <= 2 ? 2 * d / 3 : d / 2);
                 var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
                 var sFont = FontSize + "px " + FontFamily;
 
-                oContext.fillStyle = Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? "rgb(255,255,255)" : "rgb(0,0,0)";
+                oContext.fillStyle = Value === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
                 oContext.font = sFont;
 
                 var y_offset = FontSize / 3;
@@ -2842,8 +2843,8 @@ CDrawingKifuWindow.prototype.Show = function(oPr)
     var W = this.HtmlElement.InnerDiv.clientWidth;
     var H = this.HtmlElement.InnerDiv.clientHeight;
 
-    CDrawingKifuWindow.superclass.Show.call(this);
-    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, oPr.GameTree.Get_Board());
+    CDrawingKifuWindow.superclass.Show.call(this, oPr);
+    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, oPr.GameTree.Get_LogicBoardForKifu());
 };
 CDrawingKifuWindow.prototype.Update_Size = function(bForce)
 {
@@ -2851,7 +2852,7 @@ CDrawingKifuWindow.prototype.Update_Size = function(bForce)
     var H = this.HtmlElement.InnerDiv.clientHeight;
 
     CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
-    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_Board());
+    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
 };
 
 

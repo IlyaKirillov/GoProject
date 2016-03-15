@@ -1028,13 +1028,9 @@ CLogicBoard.prototype.private_MakeErosion = function()
  * Специальный класс для получения кифу партии.
  * @constructor
  */
-function CKifuLogicBoard(nW, nH)
+function CKifuLogicBoard()
 {
-    CKifuLogicBoard.superclass.constructor.call(this, nW, nH);
-
-    this.m_oStartNode = null;
-
-    this.m_aMoveNumbers = null;
+    CKifuLogicBoard.superclass.constructor.call(this, 1, 1);
     this.m_aRepetitions = null;
 }
 CommonExtend(CKifuLogicBoard, CLogicBoard);
@@ -1052,8 +1048,17 @@ CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
     this.m_aBoard = null;
     this.private_InitBoard();
 
+    var nMoveNumber = 0;
+
     for (var Index = 0, nCount = this.m_aBoard.length; Index < nCount; Index++)
+    {
         this.m_aBoard[Index].CopyFrom(oLogicBoard.m_aBoard[Index]);
+
+        if (nMoveNumber < this.m_aBoard[Index].Get_Num())
+            nMoveNumber = this.m_aBoard[Index].Get_Num();
+
+        this.m_aBoard[Index].Set_Num(-1);
+    }
 
     // Считаем, что команды текущей ноды уже выполнены
     while (oNode.Get_NextsCount() > 0)
@@ -1061,33 +1066,30 @@ CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
         oNode = oNode.Get_Next(oNode.Get_NextCur());
 
         var CommandsCount = oNode.Get_CommandsCount();
-        for ( var CommandIndex = 0; CommandIndex < CommandsCount; CommandIndex++ )
+        for (var CommandIndex = 0; CommandIndex < CommandsCount; CommandIndex++)
         {
-            var Command = this.m_oCurNode.Get_Command( CommandIndex );
+            var Command       = oNode.Get_Command(CommandIndex);
             var Command_Type  = Command.Get_Type();
             var Command_Value = Command.Get_Value();
             var Command_Count = Command.Get_Count();
 
-            switch(Command_Type)
+            switch (Command_Type)
             {
             case ECommand.B:
             {
-                var Pos = Common_ValuetoXY(Command_Value);
-                this.Execute_Move(Pos.X, Pos.Y, BOARD_BLACK, true);
+                this.Add_ToKifu(Command_Value, BOARD_BLACK, ++nMoveNumber);
                 break;
             }
             case ECommand.W:
             {
-                var Pos = Common_ValuetoXY(Command_Value);
-                this.Execute_Move(Pos.X, Pos.Y, BOARD_WHITE, true);
+                this.Add_ToKifu(Command_Value, BOARD_WHITE, ++nMoveNumber);
                 break;
             }
             case ECommand.AB:
             {
                 for (var Index = 0; Index < Command_Count; Index++)
                 {
-                    var Pos = Common_ValuetoXY(Command_Value[Index]);
-                    this.m_oBoard.Set(Pos.X, Pos.Y, BOARD_BLACK, -1);
+                    this.Add_ToKifu(Command_Value[Index], BOARD_BLACK, -1);
                 }
                 break;
             }
@@ -1095,17 +1097,15 @@ CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
             {
                 for (var Index = 0; Index < Command_Count; Index++)
                 {
-                    var Pos = Common_ValuetoXY(Command_Value[Index]);
-                    this.m_oBoard.Set(Pos.X, Pos.Y, BOARD_WHITE, -1);
+                    this.Add_ToKifu(Command_Value[Index], BOARD_WHITE, -1);
                 }
                 break;
             }
             case ECommand.AE:
             {
-                for (var Index = 0; Index < Command_Count; Index++ )
+                for (var Index = 0; Index < Command_Count; Index++)
                 {
-                    var Pos = Common_ValuetoXY(Command_Value[Index]);
-                    this.m_oBoard.Set(Pos.X, Pos.Y, BOARD_EMPTY, -1);
+                    this.Add_ToKifu(Command_Value[Index], BOARD_EMPTY, -1);
                 }
                 break;
             }
@@ -1113,9 +1113,37 @@ CKifuLogicBoard.prototype.Load_FromNode = function(oLogicBoard, oNode)
         }
     }
 };
-CKifuLogicBoard.prototype.Add_ToKifu = function(nCommandValue, nValue, bMove)
+CKifuLogicBoard.prototype.Add_ToKifu = function(nCommandValue, nValue, nMoveNumber)
 {
-    var Pos = Common_ValuetoXY(Command_Value);
+    if (nCommandValue <= 0)
+        return;
 
-    this.Set(Pos.X, Pos.Y, BOARD_BLACK, -1);
+    var Pos = Common_ValuetoXY(nCommandValue);
+
+    var nPrevValue = this.Get(Pos.X, Pos.Y);
+
+    if (BOARD_EMPTY !== nPrevValue)
+    {
+        if (-1 === nMoveNumber)
+            return;
+
+        var nPosValue = this.private_GetPos(Pos.X, Pos.Y);
+        if (!this.m_aRepetitions || this.m_aRepetitions.length === undefined)
+            this.m_aRepetitions = [];
+
+        for (var nIndex = 0, nCount = this.m_aRepetitions.length; nIndex < nCount; ++nIndex)
+        {
+            if (nPosValue === this.m_aRepetitions[nIndex].nPosValue)
+            {
+                this.m_aRepetitions[nIndex].aReps.push({nValue : nValue, nMoveNumber : nMoveNumber});
+                return;
+            }
+        }
+
+        this.m_aRepetitions.push({nPosValue : nPosValue, nValue : nValue, nMoveNumber : nMoveNumber, aReps : []});
+    }
+    else
+    {
+        this.Set(Pos.X, Pos.Y, nValue, nMoveNumber);
+    }
 };
