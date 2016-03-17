@@ -2736,9 +2736,9 @@ CDrawingKifuWindow.prototype.private_CreateCanvasElement = function(oMainDiv, oM
 };
 CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth, nHeight, oLogicBoard)
 {
-    var MinSize = Math.min(nWidth, nHeight);
-    var OffY    = (nHeight - MinSize) / 2 | 0;
-    var OffX    = (nWidth - MinSize) / 2  | 0;
+    var MinSize = Math.min(nWidth, nHeight - 30);
+    var OffY    = (nHeight - 30 - MinSize) / 2 | 0 + 30;
+    var OffX    = (nWidth - MinSize) / 2 | 0;
     oContext.clearRect(0, 0, nWidth, nHeight);
 
     //oContext.fillStyle   = "rgba(244, 236, 180, 1)";
@@ -2772,9 +2772,9 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     for (var nX = 0; nX < oSize.X; ++nX)
     {
         oContext.moveTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + 0.5);
-        oContext.lineTo(dOffsetX + nX * nCellSize+ 0.5, dOffsetY + (oSize.Y - 1) * nCellSize + 0.5);
+        oContext.lineTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + (oSize.Y - 1) * nCellSize + 0.5);
     }
-    for (var nY = 0; nY < oSize.Y; ++nY)
+    for (var nY      = 0; nY < oSize.Y; ++nY)
     {
         oContext.moveTo(dOffsetX + 0.5, dOffsetY + nY * nCellSize + 0.5);
         oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize + 0.5, dOffsetY + nY * nCellSize + 0.5);
@@ -2790,15 +2790,17 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
         oContext.rect(X - 3, Y - 3, 7, 7);
     }
     oContext.fill();
-    var rad = nCellSize / 2 | 0;
-    var d = rad * 2;
+    var rad         = nCellSize / 2 | 0;
+    var d           = rad * 2;
 
-    var nCounter = 1;
+    var nMinMove = -1;
+    var nMaxMove = -1;
+
     for (var nY = 0; nY < oSize.Y; ++nY)
     {
         for (var nX = 0; nX < oSize.X; ++nX)
         {
-            var Value = oLogicBoard.Get(nX + 1, nY + 1);
+            var Value       = oLogicBoard.Get(nX + 1, nY + 1);
             var nMoveNumber = oLogicBoard.Get_Num(nX + 1, nY + 1);
 
             var x = nX * nCellSize + dOffsetX;
@@ -2822,21 +2824,40 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 
             if (-1 !== nMoveNumber)
             {
-                var Text = "" + nMoveNumber;
-                var FontSize = (Text.length <= 2 ? 2 * d / 3 : d / 2);
+                var Text       = "" + nMoveNumber;
+                var FontSize   = (Text.length <= 2 ? 2 * d / 3 : d / 2);
                 var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-                var sFont = FontSize + "px " + FontFamily;
+                var sFont      = FontSize + "px " + FontFamily;
 
                 oContext.fillStyle = Value === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
-                oContext.font = sFont;
+                oContext.font      = sFont;
 
-                var y_offset = FontSize / 3;
+                var y_offset = FontSize / 3 + 0.1 * FontSize;
                 var x_offset = (d - oContext.measureText(Text).width) / 2 - d / 2;
 
-                oContext.fillText(Text, x + x_offset, y + y_offset);
+                oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
+                oContext.fillText(Text, 0, 0);
+                oContext.setTransform(1, 0, 0, 1, 0, 0);
+
+                if (-1 === nMinMove || nMinMove > nMoveNumber)
+                    nMinMove = nMoveNumber;
+
+                if (-1 === nMaxMove || nMaxMove < nMoveNumber)
+                    nMaxMove = nMoveNumber;
             }
         }
     }
+
+    oContext.fillStyle = "rgb(0,0,0)";
+    oContext.font      = d + "px" + "Arial";
+    var sMovesCaption  = "(" + nMinMove + " ~ " + nMaxMove + ")";
+    var dMovesOffsetY  = 15;
+    var dMovesOffsetX  = dOffsetX + (MinSize - oContext.measureText(Text).width) / 2;
+
+    oContext.fillText(sMovesCaption, dMovesOffsetX, dMovesOffsetY);
+
+    // Дополнительные ходы
+
 };
 CDrawingKifuWindow.prototype.Show = function(oPr)
 {
