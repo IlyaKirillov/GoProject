@@ -1140,7 +1140,7 @@ CKifuLogicBoard.prototype.Add_ToKifu = function(nCommandValue, nValue, nMoveNumb
             }
         }
 
-        this.m_aRepetitions.push({nPosValue : nPosValue, nValue : nValue, nMoveNumber : nMoveNumber, aReps : []});
+        this.m_aRepetitions.push({nPosValue : nPosValue, nValue : nPrevValue, nMoveNumber : this.Get_Num(Pos.X, Pos.Y), aReps : [{nValue : nValue, nMoveNumber : nMoveNumber}]});
     }
     else
     {

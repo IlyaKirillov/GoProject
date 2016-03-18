@@ -2958,7 +2958,7 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
                 oContext.setTransform(1, 0, 0, 1, 0, 0);
             }
 
-            x += nStep;
+            x += 2 * nStep;
         }
     }
 };
