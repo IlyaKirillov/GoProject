@@ -2741,9 +2741,9 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     var OffX    = (nWidth - MinSize) / 2 | 0;
     oContext.clearRect(0, 0, nWidth, nHeight);
 
-    //oContext.fillStyle   = "rgba(244, 236, 180, 1)";
-    //oContext.rect(0, 0, nWidth, nHeight);
-    //oContext.fill();
+    oContext.fillStyle   = "rgba(255, 255, 255, 1)";
+    oContext.rect(0, 0, nWidth, nHeight);
+    oContext.fill();
 
     oContext.strokeStyle = "rgba(0, 0, 0, 1)";
     oContext.fillStyle   = "rgba(0, 0, 0, 1)";
@@ -2825,17 +2825,21 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
             if (-1 !== nMoveNumber)
             {
                 var Text       = "" + nMoveNumber;
-                var FontSize   = (Text.length <= 2 ? 2 * d / 3 : d / 2);
+                var FontSize   = d / 2;//(Text.length <= 2 ? 2 * d / 3 : d / 2);
                 var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
                 var sFont      = FontSize + "px " + FontFamily;
 
                 oContext.fillStyle = Value === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
                 oContext.font      = sFont;
 
-                var y_offset = FontSize / 3 + 0.1 * FontSize;
-                var x_offset = (d - oContext.measureText(Text).width) / 2 - d / 2;
+                var y_offset = FontSize / 3 + 0.15 * FontSize;
+                var x_offset = Text.length > 2 ? (d - oContext.measureText(Text).width) / 2 - d / 2 : (d - 1.4 * oContext.measureText(Text).width) / 2 - d / 2;;
 
-                oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
+                if (Text.length > 2)
+                    oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
+                else
+                    oContext.setTransform(1.4, 0, 0, 1.4, x + x_offset, y + y_offset);
+
                 oContext.fillText(Text, 0, 0);
                 oContext.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -2977,6 +2981,10 @@ CDrawingKifuWindow.prototype.Update_Size = function(bForce)
 
     CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
     this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
+};
+CDrawingKifuWindow.prototype.private_DrawStone = function(oContext, nValue)
+{
+
 };
 
 
