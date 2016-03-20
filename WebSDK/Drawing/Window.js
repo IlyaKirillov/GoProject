@@ -2774,7 +2774,7 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
         oContext.moveTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + 0.5);
         oContext.lineTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + (oSize.Y - 1) * nCellSize + 0.5);
     }
-    for (var nY      = 0; nY < oSize.Y; ++nY)
+    for (var nY = 0; nY < oSize.Y; ++nY)
     {
         oContext.moveTo(dOffsetX + 0.5, dOffsetY + nY * nCellSize + 0.5);
         oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize + 0.5, dOffsetY + nY * nCellSize + 0.5);
@@ -2806,42 +2806,11 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
             var x = nX * nCellSize + dOffsetX;
             var y = nY * nCellSize + dOffsetY;
 
-            if (BOARD_BLACK === Value)
-            {
-                oContext.fillStyle = "rgb(0, 0, 0)";
-                oContext.beginPath();
-                oContext.arc(x, y, rad, 0, 2 * Math.PI);
-                oContext.fill();
-            }
-            else if (BOARD_WHITE === Value)
-            {
-                oContext.fillStyle = "rgb(255, 255, 255)";
-                oContext.beginPath();
-                oContext.arc(x, y, rad, 0, 2 * Math.PI);
-                oContext.fill();
-                oContext.stroke();
-            }
+            this.private_DrawStone(oContext, Value, x, y, rad);
 
             if (-1 !== nMoveNumber)
             {
-                var Text       = "" + nMoveNumber;
-                var FontSize   = d / 2;//(Text.length <= 2 ? 2 * d / 3 : d / 2);
-                var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-                var sFont      = FontSize + "px " + FontFamily;
-
-                oContext.fillStyle = Value === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
-                oContext.font      = sFont;
-
-                var y_offset = FontSize / 3 + 0.15 * FontSize;
-                var x_offset = Text.length > 2 ? (d - oContext.measureText(Text).width) / 2 - d / 2 : (d - 1.4 * oContext.measureText(Text).width) / 2 - d / 2;;
-
-                if (Text.length > 2)
-                    oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
-                else
-                    oContext.setTransform(1.4, 0, 0, 1.4, x + x_offset, y + y_offset);
-
-                oContext.fillText(Text, 0, 0);
-                oContext.setTransform(1, 0, 0, 1, 0, 0);
+                this.private_DrawMoveNumber(oContext, Value, x, y, rad, nMoveNumber);
 
                 if (-1 === nMinMove || nMinMove > nMoveNumber)
                     nMinMove = nMoveNumber;
@@ -2875,40 +2844,8 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
             for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
             {
                 var oRep = oRepetition.aReps[nRepIndex];
-
-                if (BOARD_BLACK === oRep.nValue)
-                    oContext.fillStyle = "rgb(0, 0, 0)";
-                else if (BOARD_WHITE === oRep.nValue)
-                    oContext.fillStyle = "rgb(255, 255, 255)";
-
-                oContext.beginPath();
-                oContext.arc(x, y, rad, 0, 2 * Math.PI);
-
-                if (BOARD_BLACK === oRep.nValue)
-                    oContext.fill();
-                else if (BOARD_WHITE === oRep.nValue)
-                    oContext.stroke();
-
-                var nMoveNumber = oRep.nMoveNumber;
-
-                if (-1 !== nMoveNumber)
-                {
-                    var Text       = "" + nMoveNumber;
-                    var FontSize   = (Text.length <= 2 ? 2 * d / 3 : d / 2);
-                    var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-                    var sFont      = FontSize + "px " + FontFamily;
-
-                    oContext.fillStyle = oRep.nValue === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
-                    oContext.font      = sFont;
-
-                    var y_offset = FontSize / 3 + 0.1 * FontSize;
-                    var x_offset = (d - oContext.measureText(Text).width) / 2 - d / 2;
-
-                    oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
-                    oContext.fillText(Text, 0, 0);
-                    oContext.setTransform(1, 0, 0, 1, 0, 0);
-                }
-
+                this.private_DrawStone(oContext, oRep.nValue, x, y, rad);
+                this.private_DrawMoveNumber(oContext, oRep.nValue, x, y, rad, oRep.nMoveNumber);
                 x += nStep;
             }
 
@@ -2927,41 +2864,9 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
             oContext.fillText(Text, 0, 0);
             oContext.setTransform(1, 0, 0, 1, 0, 0);
 
-            if (BOARD_BLACK === oRepetition.nValue)
-                oContext.fillStyle = "rgb(0, 0, 0)";
-            else if (BOARD_WHITE === oRepetition.nValue)
-                oContext.fillStyle = "rgb(255, 255, 255)";
-
             x += nStep;
-
-            oContext.beginPath();
-            oContext.arc(x, y, rad, 0, 2 * Math.PI);
-
-            if (BOARD_BLACK === oRepetition.nValue)
-                oContext.fill();
-            else if (BOARD_WHITE === oRepetition.nValue)
-                oContext.stroke();
-
-            var nMoveNumber = oRepetition.nMoveNumber;
-
-            if (-1 !== nMoveNumber)
-            {
-                var Text       = "" + nMoveNumber;
-                var FontSize   = (Text.length <= 2 ? 2 * d / 3 : d / 2);
-                var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-                var sFont      = FontSize + "px " + FontFamily;
-
-                oContext.fillStyle = oRepetition.nValue === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
-                oContext.font      = sFont;
-
-                var y_offset = FontSize / 3 + 0.1 * FontSize;
-                var x_offset = (d - oContext.measureText(Text).width) / 2 - d / 2;
-
-                oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
-                oContext.fillText(Text, 0, 0);
-                oContext.setTransform(1, 0, 0, 1, 0, 0);
-            }
-
+            this.private_DrawStone(oContext, oRepetition.nValue, x, y, rad);
+            this.private_DrawMoveNumber(oContext, oRepetition.nValue, x, y, rad, oRepetition.nMoveNumber);
             x += 2 * nStep;
         }
     }
@@ -2982,9 +2887,47 @@ CDrawingKifuWindow.prototype.Update_Size = function(bForce)
     CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
     this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
 };
-CDrawingKifuWindow.prototype.private_DrawStone = function(oContext, nValue)
+CDrawingKifuWindow.prototype.private_DrawStone = function(oContext, nValue, nX, nY, nRad)
 {
+    if (BOARD_BLACK === nValue)
+    {
+        oContext.fillStyle = "rgb(0, 0, 0)";
+        oContext.beginPath();
+        oContext.arc(nX, nY, nRad, 0, 2 * Math.PI);
+        oContext.fill();
+    }
+    else if (BOARD_WHITE === nValue)
+    {
+        oContext.fillStyle = "rgb(255, 255, 255)";
+        oContext.beginPath();
+        oContext.arc(nX, nY, nRad, 0, 2 * Math.PI);
+        oContext.fill();
+        oContext.stroke();
+    }
+};
+CDrawingKifuWindow.prototype.private_DrawMoveNumber = function(oContext, nValue, nX, nY, nRad, nMoveNumber)
+{
+    if (-1 === nMoveNumber)
+        return;
 
+    var Text       = "" + nMoveNumber;
+    var FontSize   = nRad;
+    var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
+    var sFont      = FontSize + "px " + FontFamily;
+
+    oContext.fillStyle = nValue === BOARD_WHITE ? "rgb(0,0,0)" : "rgb(255,255,255)";
+    oContext.font      = sFont;
+
+    var y_offset = FontSize / 3 + 0.15 * FontSize;
+    var x_offset = Text.length > 2 ? (2 * nRad - oContext.measureText(Text).width) / 2 - nRad : (2 * nRad - 1.4 * oContext.measureText(Text).width) / 2 - nRad;
+
+    if (Text.length > 2)
+        oContext.setTransform(1, 0, 0, 1.4, nX + x_offset, nY + y_offset);
+    else
+        oContext.setTransform(1.4, 0, 0, 1.4, nX + x_offset, nY + y_offset);
+
+    oContext.fillText(Text, 0, 0);
+    oContext.setTransform(1, 0, 0, 1, 0, 0);
 };
 
 
