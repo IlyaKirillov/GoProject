@@ -2748,86 +2748,19 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     oContext.strokeStyle = "rgba(0, 0, 0, 1)";
     oContext.fillStyle   = "rgba(0, 0, 0, 1)";
 
-    var oSize = oLogicBoard.Get_Size();
+    var oResult = this.private_DrawBoard(oContext, oLogicBoard, OffX, OffY, MinSize);
 
-    var nAbsBoardSize = (oSize.X - 1) * g_dBoardCellW + 2 * g_dBoardHorOffset;
-    var dOffset       = ((Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardHorOffset) | 0);
-    var nCellSize     = (Math.min(nWidth, nHeight) / nAbsBoardSize * g_dBoardCellW) | 0;
-
-    var dOffsetX = dOffset + OffX;
-    var dOffsetY = dOffset + OffY;
-
-    oContext.lineWidth = 2;
-
-    oContext.beginPath();
-    oContext.moveTo(dOffsetX, dOffsetY);
-    oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize, dOffsetY);
-    oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize, dOffsetY + (oSize.Y - 1) * nCellSize);
-    oContext.lineTo(dOffsetX, dOffsetY + (oSize.Y - 1) * nCellSize);
-    oContext.closePath();
-    oContext.stroke();
-
-    oContext.lineWidth = 1;
-    oContext.beginPath();
-    for (var nX = 0; nX < oSize.X; ++nX)
-    {
-        oContext.moveTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + 0.5);
-        oContext.lineTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + (oSize.Y - 1) * nCellSize + 0.5);
-    }
-    for (var nY = 0; nY < oSize.Y; ++nY)
-    {
-        oContext.moveTo(dOffsetX + 0.5, dOffsetY + nY * nCellSize + 0.5);
-        oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize + 0.5, dOffsetY + nY * nCellSize + 0.5);
-    }
-    oContext.stroke();
-
-    oContext.beginPath();
-    var oHandiPoints = oLogicBoard.Get_HandiPoints();
-    for (var nIndex = 0, nCount = oHandiPoints.length; nIndex < nCount; ++nIndex)
-    {
-        var X = oHandiPoints[nIndex][0] * nCellSize + dOffsetX;
-        var Y = oHandiPoints[nIndex][1] * nCellSize + dOffsetY;
-        oContext.rect(X - 3, Y - 3, 7, 7);
-    }
-    oContext.fill();
-    var rad         = nCellSize / 2 | 0;
-    var d           = rad * 2;
-
-    var nMinMove = -1;
-    var nMaxMove = -1;
-
-    for (var nY = 0; nY < oSize.Y; ++nY)
-    {
-        for (var nX = 0; nX < oSize.X; ++nX)
-        {
-            var Value       = oLogicBoard.Get(nX + 1, nY + 1);
-            var nMoveNumber = oLogicBoard.Get_Num(nX + 1, nY + 1);
-
-            var x = nX * nCellSize + dOffsetX;
-            var y = nY * nCellSize + dOffsetY;
-
-            this.private_DrawStone(oContext, Value, x, y, rad);
-
-            if (-1 !== nMoveNumber)
-            {
-                this.private_DrawMoveNumber(oContext, Value, x, y, rad, nMoveNumber);
-
-                if (-1 === nMinMove || nMinMove > nMoveNumber)
-                    nMinMove = nMoveNumber;
-
-                if (-1 === nMaxMove || nMaxMove < nMoveNumber)
-                    nMaxMove = nMoveNumber;
-            }
-        }
-    }
 
     oContext.fillStyle = "rgb(0,0,0)";
     oContext.font      = d + "px" + "Arial";
-    var sMovesCaption  = "(" + nMinMove + " ~ " + nMaxMove + ")";
+    var sMovesCaption  = "(" + oResult.Min + " ~ " + oResult.Max + ")";
     var dMovesOffsetY  = 15;
-    var dMovesOffsetX  = dOffsetX + (MinSize - oContext.measureText(Text).width) / 2;
+    var dMovesOffsetX  = (MinSize - oContext.measureText(Text).width) / 2;
 
     oContext.fillText(sMovesCaption, dMovesOffsetX, dMovesOffsetY);
+
+    var rad = 15;
+    var d = 2 * rad;
 
     if (oLogicBoard.m_aRepetitions)
     {
@@ -2928,6 +2861,82 @@ CDrawingKifuWindow.prototype.private_DrawMoveNumber = function(oContext, nValue,
 
     oContext.fillText(Text, 0, 0);
     oContext.setTransform(1, 0, 0, 1, 0, 0);
+};
+CDrawingKifuWindow.prototype.private_DrawBoard = function(oContext, oLogicBoard, nStartX, nStartY, nRealSize)
+{
+    var oSize = oLogicBoard.Get_Size();
+
+    var nAbsBoardSize = (oSize.X - 1) * g_dBoardCellW + 2 * g_dBoardHorOffset;
+    var dOffset       = (nRealSize / nAbsBoardSize * g_dBoardHorOffset) | 0;
+    var nCellSize     = (nRealSize / nAbsBoardSize * g_dBoardCellW) | 0;
+
+    var dOffsetX = dOffset + nStartX;
+    var dOffsetY = dOffset + nStartY;
+
+    oContext.lineWidth = 2;
+
+    oContext.beginPath();
+    oContext.moveTo(dOffsetX, dOffsetY);
+    oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize, dOffsetY);
+    oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize, dOffsetY + (oSize.Y - 1) * nCellSize);
+    oContext.lineTo(dOffsetX, dOffsetY + (oSize.Y - 1) * nCellSize);
+    oContext.closePath();
+    oContext.stroke();
+
+    oContext.lineWidth = 1;
+    oContext.beginPath();
+    for (var nX = 0; nX < oSize.X; ++nX)
+    {
+        oContext.moveTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + 0.5);
+        oContext.lineTo(dOffsetX + nX * nCellSize + 0.5, dOffsetY + (oSize.Y - 1) * nCellSize + 0.5);
+    }
+    for (var nY = 0; nY < oSize.Y; ++nY)
+    {
+        oContext.moveTo(dOffsetX + 0.5, dOffsetY + nY * nCellSize + 0.5);
+        oContext.lineTo(dOffsetX + (oSize.X - 1) * nCellSize + 0.5, dOffsetY + nY * nCellSize + 0.5);
+    }
+    oContext.stroke();
+
+    oContext.beginPath();
+    var oHandiPoints = oLogicBoard.Get_HandiPoints();
+    for (var nIndex = 0, nCount = oHandiPoints.length; nIndex < nCount; ++nIndex)
+    {
+        var X = oHandiPoints[nIndex][0] * nCellSize + dOffsetX;
+        var Y = oHandiPoints[nIndex][1] * nCellSize + dOffsetY;
+        oContext.rect(X - 3, Y - 3, 7, 7);
+    }
+    oContext.fill();
+    var dRad = nCellSize / 2 | 0;
+
+    var nMinMove = -1;
+    var nMaxMove = -1;
+
+    for (var nY = 0; nY < oSize.Y; ++nY)
+    {
+        for (var nX = 0; nX < oSize.X; ++nX)
+        {
+            var Value       = oLogicBoard.Get(nX + 1, nY + 1);
+            var nMoveNumber = oLogicBoard.Get_Num(nX + 1, nY + 1);
+
+            var x = nX * nCellSize + dOffsetX;
+            var y = nY * nCellSize + dOffsetY;
+
+            this.private_DrawStone(oContext, Value, x, y, dRad);
+
+            if (-1 !== nMoveNumber)
+            {
+                this.private_DrawMoveNumber(oContext, Value, x, y, dRad, nMoveNumber);
+
+                if (-1 === nMinMove || nMinMove > nMoveNumber)
+                    nMinMove = nMoveNumber;
+
+                if (-1 === nMaxMove || nMaxMove < nMoveNumber)
+                    nMaxMove = nMoveNumber;
+            }
+        }
+    }
+
+    return {Min : nMinMove, Max : nMaxMove};
 };
 
 
