@@ -2749,15 +2749,7 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     oContext.fillStyle   = "rgba(0, 0, 0, 1)";
 
     var oResult = this.private_DrawBoard(oContext, oLogicBoard, OffX, OffY, MinSize);
-
-
-    oContext.fillStyle = "rgb(0,0,0)";
-    oContext.font      = d + "px" + "Arial";
-    var sMovesCaption  = "(" + oResult.Min + " ~ " + oResult.Max + ")";
-    var dMovesOffsetY  = 15;
-    var dMovesOffsetX  = (MinSize - oContext.measureText(Text).width) / 2;
-
-    oContext.fillText(sMovesCaption, dMovesOffsetX, dMovesOffsetY);
+    this.private_DrawKifuCaption(oContext, nWidth, "(" + oResult.Min + " ~ " + oResult.Max + ")");
 
     var rad = 15;
     var d = 2 * rad;
@@ -2937,6 +2929,14 @@ CDrawingKifuWindow.prototype.private_DrawBoard = function(oContext, oLogicBoard,
     }
 
     return {Min : nMinMove, Max : nMaxMove};
+};
+CDrawingKifuWindow.prototype.private_DrawKifuCaption = function(oContext, nWidth, sText)
+{
+    oContext.fillStyle = "rgb(0,0,0)";
+    oContext.font      = "16px Arial";
+    var dMovesOffsetY  = 20;
+    var dMovesOffsetX  = (nWidth - oContext.measureText(sText).width) / 2;
+    oContext.fillText(sText, dMovesOffsetX, dMovesOffsetY);
 };
 
 
