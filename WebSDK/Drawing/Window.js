@@ -2748,8 +2748,16 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
     oContext.strokeStyle = "rgba(0, 0, 0, 1)";
     oContext.fillStyle   = "rgba(0, 0, 0, 1)";
 
+    var nSize = 15;
+    var nRepetitionHeight = this.private_CalculateRepetitionsHeight(nWidth, oLogicBoard, nSize);
+
+    MinSize = Math.min(nWidth, nHeight - 30 - nRepetitionHeight);
+
     var oResult = this.private_DrawBoard(oContext, oLogicBoard, OffX, OffY, MinSize);
     this.private_DrawKifuCaption(oContext, nWidth, "(" + oResult.Min + " ~ " + oResult.Max + ")");
+
+
+
 
     var rad = 15;
     var d = 2 * rad;
@@ -2938,7 +2946,112 @@ CDrawingKifuWindow.prototype.private_DrawKifuCaption = function(oContext, nWidth
     var dMovesOffsetX  = (nWidth - oContext.measureText(sText).width) / 2;
     oContext.fillText(sText, dMovesOffsetX, dMovesOffsetY);
 };
+CDrawingKifuWindow.prototype.private_CalculateRepetitionsHeight = function(nWidth, oLogicBoard, nSize)
+{
+    // Под место с точками используем целое nSize, отступы справа, слева расстояние между элементами nSize / 2
+    // Расстояние между строками 5px.
 
+    var nHorMargin = (nSize / 2) | 0;
+    var nLineGap   = 5;
+    var nSpace     = (nSize / 2) | 0;
+    var nDotsSize  = nSize | 0;
+    var nVerMargin = 5;
+    var nLimitX    = nWidth - nHorMargin;
+    var nHeight = 2 * nVerMargin + nSize;
+
+    function privateCheckSize(nCheckSize)
+    {
+        if (nX + nCheckSize < nLimitX || true === bFirstOnLine)
+        {
+            nX += nCheckSize;
+            bFirstOnLine = false;
+        }
+        else
+        {
+            nX = nHorMargin + nCheckSize;
+            bFirstOnLine = false;
+            nHeight += nSize + nLineGap;
+        }
+    }
+
+    if (oLogicBoard.m_aRepetitions)
+    {
+        var nX = nHorMargin;
+        var bFirstOnLine = true;
+        for (var nIndex = 0, nCount = oLogicBoard.m_aRepetitions.length; nIndex < nCount; ++nIndex)
+        {
+            var oRepetition = oLogicBoard.m_aRepetitions[nIndex];
+            if (oRepetition.aReps.length <= 0)
+                continue;
+
+            for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
+            {
+                privateCheckSize(nSize);
+            }
+
+            privateCheckSize(nDotsSize);
+            privateCheckSize(nSize);
+
+            nX += nSpace;
+        }
+    }
+
+    return nHeight;
+};
+CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStartY, oLogicBoard, nSize, bDraw)
+{
+    // Под место с точками используем целое nSize, отступы справа, слева расстояние между элементами nSize / 2
+    // Расстояние между строками 5px.
+
+    var nHorMargin = (nSize / 2) | 0;
+    var nLineGap   = 5;
+    var nSpace     = (nSize / 2) | 0;
+    var nDotsSize  = nSize | 0;
+    var nVerMargin = 5;
+    var nLimitX    = nWidth - nHorMargin;
+    var nHeight = 2 * nVerMargin + nSize;
+
+    function privateCheckSize(nCheckSize)
+    {
+        if (nX + nCheckSize < nLimitX || true === bFirstOnLine)
+        {
+            nX += nCheckSize;
+            bFirstOnLine = false;
+            return true;
+        }
+        else
+        {
+            nX = nHorMargin + nCheckSize;
+            bFirstOnLine = false;
+            nHeight += nSize + nLineGap;
+            return false;
+        }
+    }
+
+    if (oLogicBoard.m_aRepetitions)
+    {
+        var nX = nHorMargin;
+        var bFirstOnLine = true;
+        for (var nIndex = 0, nCount = oLogicBoard.m_aRepetitions.length; nIndex < nCount; ++nIndex)
+        {
+            var oRepetition = oLogicBoard.m_aRepetitions[nIndex];
+            if (oRepetition.aReps.length <= 0)
+                continue;
+
+            for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
+            {
+                privateCheckSize(nSize);
+            }
+
+            privateCheckSize(nDotsSize);
+            privateCheckSize(nSize);
+
+            nX += nSpace;
+        }
+    }
+
+    return nHeight;
+};
 
 var EWindowType =
 {
