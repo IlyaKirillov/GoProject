@@ -3009,7 +3009,8 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
     var nDotsSize  = nSize | 0;
     var nVerMargin = 5;
     var nLimitX    = nWidth - nHorMargin;
-    var nHeight = 2 * nVerMargin + nSize;
+    var nY         = nVerMargin;
+    var nRad       = (nSize / 2) | 0;
 
     function privateCheckSize(nCheckSize)
     {
@@ -3023,13 +3024,14 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
         {
             nX = nHorMargin + nCheckSize;
             bFirstOnLine = false;
-            nHeight += nSize + nLineGap;
+            nY += nSize + nLineGap;
             return false;
         }
     }
 
     if (oLogicBoard.m_aRepetitions)
     {
+        nY += nSize;
         var nX = nHorMargin;
         var bFirstOnLine = true;
         for (var nIndex = 0, nCount = oLogicBoard.m_aRepetitions.length; nIndex < nCount; ++nIndex)
@@ -3041,16 +3043,29 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
             for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
             {
                 privateCheckSize(nSize);
+
+                if (true === bDraw)
+                {
+                    this.private_DrawStone(oContext, oRep.nValue, nX, nY + nStartY, nRad);
+                    this.private_DrawMoveNumber(oContext, oRep.nValue, nX + nY, nStartY, nRad, oRep.nMoveNumber);
+                }
             }
 
             privateCheckSize(nDotsSize);
+            if (true === bDraw)
+            {
+                
+            }
+
             privateCheckSize(nSize);
 
             nX += nSpace;
         }
     }
 
-    return nHeight;
+    nY += nVerMargin;
+
+    return nY;
 };
 
 var EWindowType =
