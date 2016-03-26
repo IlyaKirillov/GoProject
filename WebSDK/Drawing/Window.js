@@ -2736,73 +2736,21 @@ CDrawingKifuWindow.prototype.private_CreateCanvasElement = function(oMainDiv, oM
 };
 CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth, nHeight, oLogicBoard)
 {
-    var MinSize = Math.min(nWidth, nHeight - 60);
-    var OffY    = (nHeight - 60 - MinSize) / 2 | 0 + 30;
-    var OffX    = (nWidth - MinSize) / 2 | 0;
     oContext.clearRect(0, 0, nWidth, nHeight);
-
-    oContext.fillStyle   = "rgba(255, 255, 255, 1)";
-    oContext.rect(0, 0, nWidth, nHeight);
-    oContext.fill();
 
     oContext.strokeStyle = "rgba(0, 0, 0, 1)";
     oContext.fillStyle   = "rgba(0, 0, 0, 1)";
 
-    var nSize = 15;
-    var nRepetitionHeight = this.private_CalculateRepetitionsHeight(nWidth, oLogicBoard, nSize);
+    var nSize = 30;
+    var nTopSize = 30;
+    var nRepetitionHeight = this.private_DrawRepetitions(oContext, 0, nWidth, oLogicBoard, nSize, false);
+    var nMinSize = Math.max(50, Math.min(nWidth, nHeight - nTopSize - nRepetitionHeight));
+    var nBoardX = (nWidth - nMinSize) / 2 | 0;
+    var nBoardY = nTopSize;
 
-    MinSize = Math.min(nWidth, nHeight - 30 - nRepetitionHeight);
-
-    var oResult = this.private_DrawBoard(oContext, oLogicBoard, OffX, OffY, MinSize);
+    var oResult = this.private_DrawBoard(oContext, oLogicBoard, nBoardX, nBoardY, nMinSize);
     this.private_DrawKifuCaption(oContext, nWidth, "(" + oResult.Min + " ~ " + oResult.Max + ")");
-
-
-
-
-    var rad = 15;
-    var d = 2 * rad;
-
-    if (oLogicBoard.m_aRepetitions)
-    {
-        var nStep = rad * 2;
-        var x     = nStep;
-        var y     = nHeight - nStep / 2;
-        // Дополнительные ходы
-        for (var nIndex = 0, nCount = oLogicBoard.m_aRepetitions.length; nIndex < nCount; ++nIndex)
-        {
-            var oRepetition = oLogicBoard.m_aRepetitions[nIndex];
-            if (oRepetition.aReps.length <= 0)
-                continue;
-
-            for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
-            {
-                var oRep = oRepetition.aReps[nRepIndex];
-                this.private_DrawStone(oContext, oRep.nValue, x, y, rad);
-                this.private_DrawMoveNumber(oContext, oRep.nValue, x, y, rad, oRep.nMoveNumber);
-                x += nStep;
-            }
-
-            var Text       = "...";
-            var FontSize   = (Text.length <= 2 ? 2 * d / 3 : d / 2);
-            var FontFamily = (Common_IsInt(Text) ? "Arial" : "Helvetica, Arial, Verdana");
-            var sFont      = FontSize + "px " + FontFamily;
-
-            oContext.fillStyle = "rgb(0,0,0)";
-            oContext.font      = sFont;
-
-            var y_offset = FontSize / 3 + 0.1 * FontSize;
-            var x_offset = (d - oContext.measureText(Text).width) / 2 - d / 2;
-
-            oContext.setTransform(1, 0, 0, 1.4, x + x_offset, y + y_offset);
-            oContext.fillText(Text, 0, 0);
-            oContext.setTransform(1, 0, 0, 1, 0, 0);
-
-            x += nStep;
-            this.private_DrawStone(oContext, oRepetition.nValue, x, y, rad);
-            this.private_DrawMoveNumber(oContext, oRepetition.nValue, x, y, rad, oRepetition.nMoveNumber);
-            x += 2 * nStep;
-        }
-    }
+    this.private_DrawRepetitions(oContext, nHeight - nRepetitionHeight /*nMinSize + 30*/, nWidth, oLogicBoard, nSize, true);
 };
 CDrawingKifuWindow.prototype.Show = function(oPr)
 {
@@ -2946,7 +2894,7 @@ CDrawingKifuWindow.prototype.private_DrawKifuCaption = function(oContext, nWidth
     var dMovesOffsetX  = (nWidth - oContext.measureText(sText).width) / 2;
     oContext.fillText(sText, dMovesOffsetX, dMovesOffsetY);
 };
-CDrawingKifuWindow.prototype.private_CalculateRepetitionsHeight = function(nWidth, oLogicBoard, nSize)
+CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStartY, nWidth, oLogicBoard, nSize, bDraw)
 {
     // Под место с точками используем целое nSize, отступы справа, слева расстояние между элементами nSize / 2
     // Расстояние между строками 5px.
@@ -2957,60 +2905,9 @@ CDrawingKifuWindow.prototype.private_CalculateRepetitionsHeight = function(nWidt
     var nDotsSize  = nSize | 0;
     var nVerMargin = 5;
     var nLimitX    = nWidth - nHorMargin;
-    var nHeight = 2 * nVerMargin + nSize;
-
-    function privateCheckSize(nCheckSize)
-    {
-        if (nX + nCheckSize < nLimitX || true === bFirstOnLine)
-        {
-            nX += nCheckSize;
-            bFirstOnLine = false;
-        }
-        else
-        {
-            nX = nHorMargin + nCheckSize;
-            bFirstOnLine = false;
-            nHeight += nSize + nLineGap;
-        }
-    }
-
-    if (oLogicBoard.m_aRepetitions)
-    {
-        var nX = nHorMargin;
-        var bFirstOnLine = true;
-        for (var nIndex = 0, nCount = oLogicBoard.m_aRepetitions.length; nIndex < nCount; ++nIndex)
-        {
-            var oRepetition = oLogicBoard.m_aRepetitions[nIndex];
-            if (oRepetition.aReps.length <= 0)
-                continue;
-
-            for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
-            {
-                privateCheckSize(nSize);
-            }
-
-            privateCheckSize(nDotsSize);
-            privateCheckSize(nSize);
-
-            nX += nSpace;
-        }
-    }
-
-    return nHeight;
-};
-CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStartY, oLogicBoard, nSize, bDraw)
-{
-    // Под место с точками используем целое nSize, отступы справа, слева расстояние между элементами nSize / 2
-    // Расстояние между строками 5px.
-
-    var nHorMargin = (nSize / 2) | 0;
-    var nLineGap   = 5;
-    var nSpace     = (nSize / 2) | 0;
-    var nDotsSize  = nSize | 0;
-    var nVerMargin = 5;
-    var nLimitX    = nWidth - nHorMargin;
-    var nY         = nVerMargin;
+    var nY         = nVerMargin + nStartY;
     var nRad       = (nSize / 2) | 0;
+    var nX         = nHorMargin;
 
     function privateCheckSize(nCheckSize)
     {
@@ -3031,8 +2928,7 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
 
     if (oLogicBoard.m_aRepetitions)
     {
-        nY += nSize;
-        var nX = nHorMargin;
+        nY += (nSize / 2) | 0;
         var bFirstOnLine = true;
         for (var nIndex = 0, nCount = oLogicBoard.m_aRepetitions.length; nIndex < nCount; ++nIndex)
         {
@@ -3042,25 +2938,39 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
 
             for (var nRepIndex = 0, nRepsCount = oRepetition.aReps.length; nRepIndex < nRepsCount; ++nRepIndex)
             {
+                var oRep = oRepetition.aReps[nRepIndex];
                 privateCheckSize(nSize);
 
                 if (true === bDraw)
                 {
-                    this.private_DrawStone(oContext, oRep.nValue, nX, nY + nStartY, nRad);
-                    this.private_DrawMoveNumber(oContext, oRep.nValue, nX + nY, nStartY, nRad, oRep.nMoveNumber);
+                    this.private_DrawStone(oContext, oRep.nValue, nX, nY, nRad);
+                    this.private_DrawMoveNumber(oContext, oRep.nValue, nX, nY, nRad, oRep.nMoveNumber);
                 }
             }
 
             privateCheckSize(nDotsSize);
             if (true === bDraw)
             {
-                
+                var Text      = "...";
+                var nFontSize = nSize / 2;
+                oContext.fillStyle = "rgb(0,0,0)";
+                oContext.font      = nFontSize + "px " + "Arial";
+
+                var nTextY = nFontSize / 3 + 0.1 * nFontSize;
+                var nTextX = (nDotsSize - oContext.measureText(Text).width) / 2 - nDotsSize / 2;
+                oContext.fillText(Text, nX + nTextX, nY + nTextY);
             }
 
             privateCheckSize(nSize);
+            if (true === bDraw)
+            {
+                this.private_DrawStone(oContext, oRepetition.nValue, nX, nY, nRad);
+                this.private_DrawMoveNumber(oContext, oRepetition.nValue, nX, nY, nRad, oRepetition.nMoveNumber);
+            }
 
             nX += nSpace;
         }
+        nY += (nSize / 2) | 0;
     }
 
     nY += nVerMargin;
