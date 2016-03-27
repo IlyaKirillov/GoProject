@@ -2718,7 +2718,7 @@ CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
 };
 CDrawingKifuWindow.prototype.Get_DefaultWindowSize = function()
 {
-    return {W : 500, H : 300};
+    return {W : 650, H : 730};
 };
 CDrawingKifuWindow.prototype.private_CreateCanvasElement = function(oMainDiv, oMainControl, sDivId)
 {
@@ -2754,18 +2754,16 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 };
 CDrawingKifuWindow.prototype.Show = function(oPr)
 {
+    CDrawingKifuWindow.superclass.Show.call(this, oPr);
     var W = this.HtmlElement.InnerDiv.clientWidth;
     var H = this.HtmlElement.InnerDiv.clientHeight;
-
-    CDrawingKifuWindow.superclass.Show.call(this, oPr);
-    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, oPr.GameTree.Get_LogicBoardForKifu());
+    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
 };
 CDrawingKifuWindow.prototype.Update_Size = function(bForce)
 {
+    CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
     var W = this.HtmlElement.InnerDiv.clientWidth;
     var H = this.HtmlElement.InnerDiv.clientHeight;
-
-    CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
     this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
 };
 CDrawingKifuWindow.prototype.private_DrawStone = function(oContext, nValue, nX, nY, nRad)
