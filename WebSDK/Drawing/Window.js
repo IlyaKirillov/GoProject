@@ -2913,13 +2913,12 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
     {
         if (nX + nCheckSize < nLimitX || true === bFirstOnLine)
         {
-            nX += nCheckSize;
             bFirstOnLine = false;
             return true;
         }
         else
         {
-            nX = nHorMargin + nCheckSize;
+            nX = nHorMargin;
             bFirstOnLine = false;
             nY += nSize + nLineGap;
             return false;
@@ -2943,32 +2942,26 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
 
                 if (true === bDraw)
                 {
-                    this.private_DrawStone(oContext, oRep.nValue, nX, nY, nRad);
-                    this.private_DrawMoveNumber(oContext, oRep.nValue, nX, nY, nRad, oRep.nMoveNumber);
+                    this.private_DrawStone(oContext, oRep.nValue, nX + nRad , nY, nRad);
+                    this.private_DrawMoveNumber(oContext, oRep.nValue, nX + nRad, nY, nRad, oRep.nMoveNumber);
                 }
+                nX += nSize;
             }
 
             privateCheckSize(nDotsSize);
             if (true === bDraw)
             {
-                var Text      = "...";
-                var nFontSize = nSize / 2;
-                oContext.fillStyle = "rgb(0,0,0)";
-                oContext.font      = nFontSize + "px " + "Arial";
-
-                var nTextY = nFontSize / 3 + 0.1 * nFontSize;
-                var nTextX = (nDotsSize - oContext.measureText(Text).width) / 2 - nDotsSize / 2;
-                oContext.fillText(Text, nX + nTextX, nY + nTextY);
+                this.private_DrawDots(oContext, nX + nRad, nY, nSize);
             }
+            nX += nDotsSize;
 
             privateCheckSize(nSize);
             if (true === bDraw)
             {
-                this.private_DrawStone(oContext, oRepetition.nValue, nX, nY, nRad);
-                this.private_DrawMoveNumber(oContext, oRepetition.nValue, nX, nY, nRad, oRepetition.nMoveNumber);
+                this.private_DrawStone(oContext, oRepetition.nValue, nX + nRad, nY, nRad);
+                this.private_DrawMoveNumber(oContext, oRepetition.nValue, nX + nRad, nY, nRad, oRepetition.nMoveNumber);
             }
-
-            nX += nSpace;
+            nX += nSize + nSpace;
         }
         nY += (nSize / 2) | 0;
     }
@@ -2976,6 +2969,19 @@ CDrawingKifuWindow.prototype.private_DrawRepetitions = function(oContext, nStart
     nY += nVerMargin;
 
     return nY;
+};
+CDrawingKifuWindow.prototype.private_DrawDots = function(oContext, nX, nY, nSize)
+{
+    var nDotsX      = (nX - nSize / 2) | 0;
+    var nDotsRad    = (nSize / 15) | 0;
+    var nDotsSpace  = (nSize / 10 * 3) | 0;
+    var nDotsMargin = (nSize / 5) | 0;
+    oContext.fillStyle = "rgb(0,0,0)";
+    oContext.beginPath();
+    oContext.arc(nDotsX + nDotsMargin, nY, nDotsRad, 0, 2 * Math.PI);
+    oContext.arc(nDotsX + nDotsMargin + nDotsSpace, nY, nDotsRad, 0, 2 * Math.PI);
+    oContext.arc(nDotsX + nDotsMargin + 2 * nDotsSpace, nY, nDotsRad, 0, 2 * Math.PI);
+    oContext.fill();
 };
 
 var EWindowType =
