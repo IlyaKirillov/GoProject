@@ -312,6 +312,10 @@ function CDrawingMultiLevelToolbar(oDrawing)
     this.m_oGeneralNavigation.Add_Control(new CDrawingButtonForward5(oDrawing), 36, 1, EToolbarFloat.Left);
     this.m_oGeneralNavigation.Add_Control(new CDrawingButtonForwardToEnd(oDrawing), 36, 1, EToolbarFloat.Left);
 
+    //TEST
+    this.m_oGeneralNavigation.Add_Control(new CDrawingButtonKifuWindow(oDrawing), 36, 1, EToolbarFloat.Left);
+    //TEST
+
     this.m_oTreeNavigation = new CDrawingToolbar(oDrawing);
     this.m_oTreeNavigation.Add_Control(new CDrawingButtonNextVariant(oDrawing), 36, 1, EToolbarFloat.Left);
     this.m_oTreeNavigation.Add_Control(new CDrawingButtonPrevVariant(oDrawing), 36, 1, EToolbarFloat.Left);
