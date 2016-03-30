@@ -314,6 +314,7 @@ function CDrawingMultiLevelToolbar(oDrawing)
 
     //TEST
     this.m_oGeneralNavigation.Add_Control(new CDrawingButtonKifuWindow(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oGeneralNavigation.Add_Control(new CDrawingButtonKifuMode(oDrawing), 36, 1, EToolbarFloat.Left);
     //TEST
 
     this.m_oTreeNavigation = new CDrawingToolbar(oDrawing);

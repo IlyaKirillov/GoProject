@@ -2478,3 +2478,54 @@ CDrawingButtonKifuWindow.prototype.private_GetHint = function()
 {
     return "Kifu";
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+// Кнопка Kifu-Mode
+//----------------------------------------------------------------------------------------------------------------------
+function CDrawingButtonKifuMode(oDrawing)
+{
+    CDrawingButtonKifuWindow.superclass.constructor.call(this, oDrawing);
+}
+CommonExtend(CDrawingButtonKifuMode, CDrawingButtonBase);
+
+CDrawingButtonKifuMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+    var PenWidth = 0.02 * Size;
+    var r     = Size / 2;
+    var shift = PenWidth * 4;
+
+    Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
+    Canvas.beginPath();
+    Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
+    Canvas.stroke();
+
+    var Text       = "?";
+    var FontSize   = Size * 0.9;
+    var FontFamily = "Times New Roman, Sans serif";
+    var sFont      = FontSize + "px " + FontFamily;
+
+
+    Canvas.font = sFont;
+
+    var Y = Y_off + Size / 2 + FontSize / 3;
+    var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+
+    Canvas.fillText(Text, X, Y);
+};
+CDrawingButtonKifuMode.prototype.private_HandleMouseDown = function()
+{
+    if (true === this.m_bSelected)
+    {
+        this.m_bSelected = false;
+        this.m_oGameTree.Stop_KifuMode();
+    }
+    else
+    {
+        this.m_bSelected = true;
+        this.m_oGameTree.Start_KifuMode();
+    }
+};
+CDrawingButtonKifuMode.prototype.private_GetHint = function()
+{
+    return "Kifu";
+};

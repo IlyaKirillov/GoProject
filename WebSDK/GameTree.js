@@ -104,6 +104,9 @@ function CGameTree(Drawing)
     this.m_oHandler            = null;
 
     this.m_bModified           = false;
+
+    this.m_bKifuMode           = false;
+    this.m_nKifuEditFlags      = 0;
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -593,6 +596,9 @@ CGameTree.prototype.GoTo_MainVariant = function()
 
     CurNode.GoTo_MainVariant();
     this.GoTo_Node(CurNode);
+
+    if (this.m_oDrawingNavigator)
+        this.m_oDrawingNavigator.Update();
 };
 CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
 {
@@ -671,6 +677,9 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
         var oNode = this.m_oCurNode.Get_Next( Index );
         var oMove = oNode.Get_Move();
         var nType = oMove.Get_Type();
+
+        if (true === this.Is_KifuMode() && 0 !== Index)
+            return false;
 
         if (Pos === oMove.Get_Value() && (Value === nType && (BOARD_BLACK === Value || BOARD_WHITE === Value)))
         {
@@ -1268,6 +1277,9 @@ CGameTree.prototype.GoTo_Node = function(Node, bForce)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE) && true !== bForce)
         return;
+
+    if (true === this.Is_KifuMode())
+        this.Stop_KifuMode();
 
     if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
         this.m_oHandler["GoTo_Node"](Node.Get_Id());
@@ -2522,7 +2534,26 @@ CGameTree.prototype.Get_LogicBoardForKifu = function()
 
     return oKifu;
 };
+CGameTree.prototype.Start_KifuMode = function()
+{
+    this.m_nKifuEditFlags = this.m_nEditingFlags;
+    this.Forbid_All();
+    this.Set_EditingFlags({Move : true});
 
+    this.GoTo_MainVariant();
+
+
+    this.m_bKifuMode = true;
+};
+CGameTree.prototype.Stop_KifuMode = function()
+{
+    this.m_nEditingFlags = this.m_nKifuEditFlags;
+    this.m_bKifuMode = false;
+};
+CGameTree.prototype.Is_KifuMode = function()
+{
+    return this.m_bKifuMode;
+};
 
 function CMatchCommandMove()
 {
