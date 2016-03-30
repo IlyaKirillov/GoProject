@@ -2514,18 +2514,16 @@ CDrawingButtonKifuMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X
 };
 CDrawingButtonKifuMode.prototype.private_HandleMouseDown = function()
 {
-    if (true === this.m_bSelected)
-    {
-        this.m_bSelected = false;
+    if (true === this.m_oGameTree.Is_KifuMode())
         this.m_oGameTree.Stop_KifuMode();
-    }
     else
-    {
-        this.m_bSelected = true;
         this.m_oGameTree.Start_KifuMode();
-    }
 };
 CDrawingButtonKifuMode.prototype.private_GetHint = function()
 {
     return "Kifu";
+};
+CDrawingButtonKifuMode.prototype.private_RegisterButton = function()
+{
+    this.m_oDrawing.Register_KifuModeButton(this);
 };

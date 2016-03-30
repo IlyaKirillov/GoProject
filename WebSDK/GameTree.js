@@ -1763,7 +1763,6 @@ CGameTree.prototype.Update_InterfaceState = function(bUpdateInfo)
             this.m_oDrawing.Update_WhiteName(this.m_sWhite);
         }
     }
-
 };
 CGameTree.prototype.Set_EditingFlags = function(oFlags)
 {
@@ -2542,13 +2541,18 @@ CGameTree.prototype.Start_KifuMode = function()
 
     this.GoTo_MainVariant();
 
-
     this.m_bKifuMode = true;
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_KifuMode();
 };
 CGameTree.prototype.Stop_KifuMode = function()
 {
     this.m_nEditingFlags = this.m_nKifuEditFlags;
     this.m_bKifuMode = false;
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Update_KifuMode();
 };
 CGameTree.prototype.Is_KifuMode = function()
 {

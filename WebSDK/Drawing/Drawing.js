@@ -592,7 +592,8 @@ function CDrawing(oGameTree)
         BoardModeColor  : [],
 
         ToolbarCustomize: null,
-        Menu            : null
+        Menu            : null,
+        KifuMode        : null
     };
 
     this.m_oAddLabelElement = null;
@@ -1579,6 +1580,10 @@ CDrawing.prototype.Register_MenuButton = function(oElement)
 {
     this.m_oButtons.Menu = oElement;
 };
+CDrawing.prototype.Register_KifuModeButton = function(oElement)
+{
+    this.m_oButtons.KifuMode = oElement;
+};
 CDrawing.prototype.Remove_LabelElement = function()
 {
     if (this.m_oAddLabelElement)
@@ -1602,6 +1607,11 @@ CDrawing.prototype.Update_AutoPlaySpeed = function(dPos)
 {
     if (this.m_oAutoPlaySlider)
         this.m_oAutoPlaySlider.Update_Pos(dPos);
+};
+CDrawing.prototype.Update_KifuMode = function()
+{
+    if (this.m_oButtons.KifuMode)
+        this.m_oButtons.KifuMode.Set_Selected(this.m_oGameTree.Is_KifuMode());
 };
 CDrawing.prototype.Register_BlackInfo = function(oInfo)
 {
