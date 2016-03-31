@@ -42,9 +42,8 @@ class WpWebGoBoardPlugin {
 			while(have_posts()) {
 				the_post();
 				if (has_shortcode($post->post_content, 'webgoboard')) {
-					wp_register_script('goboardmin_js', plugins_url('goboardmin.js', __FILE__));
-					//wp_register_script('main_js', plugins_url('main.js', __FILE__));
-					//wp_enqueue_script('main_js');
+					
+					wp_register_script('goboardmin_js', plugins_url( basename( __DIR__ ) . 'goboardmin.js' ));
 					wp_enqueue_script('goboardmin_js');
 				}
 			}
@@ -100,7 +99,6 @@ class WpWebGoBoardPlugin {
 		
 		$config = json_encode($config);
 		
-		//$out .= "<script>WebGoBoard_Create('".$divId."',{$config});</script>";
 		$out .= "<script>GoBoardApi.Embed('".$divId."',{$config});</script>";
 		
 		return $out;
