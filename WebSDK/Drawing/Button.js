@@ -2448,26 +2448,63 @@ CommonExtend(CDrawingButtonKifuWindow, CDrawingButtonBase);
 
 CDrawingButtonKifuWindow.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var PenWidth = 0.02 * Size;
-    var r     = Size / 2;
-    var shift = PenWidth * 4;
+    //var PenWidth = 0.02 * Size;
+    //var r     = Size / 2;
+    //var shift = PenWidth * 4;
+    //
+    //Canvas.fillStyle = "rgb(0, 0, 0)";
+    //Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
+    //Canvas.beginPath();
+    //Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
+    //Canvas.fill();
+    //
+    //var Text       = "白";
+    ////var Text       = "黒";
+    //var FontSize   = Size * 0.5 * 1.4;
+    //var FontFamily = "Times New Roman, Sans serif";
+    //var sFont      = FontSize + "px " + FontFamily;
+    //
+    //
+    //Canvas.font = sFont;
+    //Canvas.fillStyle = "rgb(255, 255, 255)";
+    //var Y = Y_off + Size / 2 + FontSize / 3;
+    //var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+    //
+    //Canvas.fillText(Text, X, Y);
 
-    Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
+    var X = Math.ceil(X_off + 0.5 * Size - Size / 10 + 0.5);
+    var Y = Math.ceil(Y_off + 0.5 * Size - Size / 10 + 0.5);
+    var R = Math.ceil(0.35 * Size + 0.5);
+
+    Canvas.fillStyle   = (new CColor(255, 255, 255)).ToString();
+    Canvas.strokeStyle = (new CColor(0, 0, 0)).ToString();
     Canvas.beginPath();
-    Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
+    Canvas.arc(X, Y, R, 0, 2 * Math.PI, false);
+    Canvas.fill();
     Canvas.stroke();
 
-    var Text       = "?";
-    var FontSize   = Size * 0.9;
+    var Text       = "白";
+    var FontSize   = Size * 0.4 * 1.4;
     var FontFamily = "Times New Roman, Sans serif";
     var sFont      = FontSize + "px " + FontFamily;
-
-
     Canvas.font = sFont;
+    Canvas.fillStyle = "rgb(0, 0, 0)";
+    Y = Y + FontSize / 3;
+    X = X + (-Canvas.measureText(Text).width) / 2;
+    Canvas.fillText(Text, X, Y);
 
-    var Y = Y_off + Size / 2 + FontSize / 3;
-    var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+    Canvas.fillStyle = (new CColor(0, 0, 0)).ToString();
+    X = Math.ceil(X_off + 0.5 * Size + Size / 10 + 0.5);
+    Y = Math.ceil(Y_off + 0.5 * Size + Size / 10 + 0.5);
 
+    Canvas.beginPath();
+    Canvas.arc(X, Y, R, 0, 2 * Math.PI, false);
+    Canvas.fill();
+
+    var Text       = "黒";
+    Canvas.fillStyle = "rgb(255, 255, 255)";
+    Y = Y + FontSize / 3;
+    X = X + (-Canvas.measureText(Text).width) / 2;
     Canvas.fillText(Text, X, Y);
 };
 CDrawingButtonKifuWindow.prototype.private_HandleMouseDown = function()
@@ -2511,6 +2548,7 @@ CDrawingButtonKifuMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X
     var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
 
     Canvas.fillText(Text, X, Y);
+
 };
 CDrawingButtonKifuMode.prototype.private_HandleMouseDown = function()
 {
