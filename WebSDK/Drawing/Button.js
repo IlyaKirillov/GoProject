@@ -2448,30 +2448,6 @@ CommonExtend(CDrawingButtonKifuWindow, CDrawingButtonBase);
 
 CDrawingButtonKifuWindow.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    //var PenWidth = 0.02 * Size;
-    //var r     = Size / 2;
-    //var shift = PenWidth * 4;
-    //
-    //Canvas.fillStyle = "rgb(0, 0, 0)";
-    //Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
-    //Canvas.beginPath();
-    //Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
-    //Canvas.fill();
-    //
-    //var Text       = "白";
-    ////var Text       = "黒";
-    //var FontSize   = Size * 0.5 * 1.4;
-    //var FontFamily = "Times New Roman, Sans serif";
-    //var sFont      = FontSize + "px " + FontFamily;
-    //
-    //
-    //Canvas.font = sFont;
-    //Canvas.fillStyle = "rgb(255, 255, 255)";
-    //var Y = Y_off + Size / 2 + FontSize / 3;
-    //var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
-    //
-    //Canvas.fillText(Text, X, Y);
-
     var X = Math.ceil(X_off + 0.5 * Size - Size / 10 + 0.5);
     var Y = Math.ceil(Y_off + 0.5 * Size - Size / 10 + 0.5);
     var R = Math.ceil(0.35 * Size + 0.5);

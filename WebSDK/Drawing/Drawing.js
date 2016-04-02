@@ -596,6 +596,11 @@ function CDrawing(oGameTree)
         KifuMode        : null
     };
 
+    this.m_oWindows =
+    {
+        Kifu : null
+    };
+
     this.m_oAddLabelElement = null;
 
     this.m_oBoard     = null;
@@ -1584,6 +1589,10 @@ CDrawing.prototype.Register_KifuModeButton = function(oElement)
 {
     this.m_oButtons.KifuMode = oElement;
 };
+CDrawing.prototype.Register_KifuWindow = function(oWindow)
+{
+    this.m_oWindows.Kifu = oWindow;
+};
 CDrawing.prototype.Remove_LabelElement = function()
 {
     if (this.m_oAddLabelElement)
@@ -1739,6 +1748,9 @@ CDrawing.prototype.Update_InterfaceState = function(oIState)
 
     if (this.m_oSelectBoardModeButton)
         this.m_oSelectBoardModeButton.On_UpdateBoardMode(oIState.BoardMode);
+
+    if (this.m_oWindows.Kifu)
+        this.m_oWindows.Kifu.Update_NextMove();
 
     this.Update_ColorsCounter();
 };

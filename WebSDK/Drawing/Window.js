@@ -2712,9 +2712,13 @@ CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
 
-   this.HtmlElement.Canvas = this.private_CreateCanvasElement(oMainDiv, oMainControl, sDivId);
+    this.HtmlElement.Canvas = this.private_CreateCanvasElement(oMainDiv, oMainControl, sDivId);
 
     this.m_oGameTree = oPr.GameTree;
+    this.m_oDrawing  = oPr.Drawing;
+
+    if (this.m_oDrawing && this.m_oDrawing.Register_KifuWindow)
+        this.m_oDrawing.Register_KifuWindow(this);
 };
 CDrawingKifuWindow.prototype.Get_DefaultWindowSize = function()
 {
@@ -2750,7 +2754,8 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 
     var oResult = this.private_DrawBoard(oContext, oLogicBoard, nBoardX, nBoardY, nMinSize);
     this.private_DrawKifuCaption(oContext, nWidth, "(" + oResult.Min + " ~ " + oResult.Max + ")");
-    this.private_DrawRepetitions(oContext, nHeight - nRepetitionHeight /*nMinSize + 30*/, nWidth, oLogicBoard, nSize, true);
+    this.private_DrawRepetitions(oContext, nHeight - nRepetitionHeight, nWidth, oLogicBoard, nSize, true);
+    this.private_DrawNextMove(oContext, 25);
 };
 CDrawingKifuWindow.prototype.Show = function(oPr)
 {
@@ -2980,6 +2985,42 @@ CDrawingKifuWindow.prototype.private_DrawDots = function(oContext, nX, nY, nSize
     oContext.arc(nDotsX + nDotsMargin + nDotsSpace, nY, nDotsRad, 0, 2 * Math.PI);
     oContext.arc(nDotsX + nDotsMargin + 2 * nDotsSpace, nY, nDotsRad, 0, 2 * Math.PI);
     oContext.fill();
+};
+CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
+{
+    if (!this.m_oGameTree)
+        return;
+
+    var nNextMoveNumber = this.m_oGameTree.Get_MovesCount() + 1;
+    var nValue          = this.m_oGameTree.Get_NextMove();
+
+    var nRad = nSize / 2 | 0;
+    oContext.clearRect(0, 0, 70 + nRad + 2, 28 + 2);
+    if (nNextMoveNumber > 0)
+    {
+        var sText          = "Next";
+        oContext.fillStyle = "rgb(0,0,0)";
+        oContext.font      = "16px Arial";
+        var dOffsetY       = 20;
+        var dOffsetX       = 20;
+        oContext.fillText(sText, dOffsetX, dOffsetY);
+
+        this.private_DrawStone(oContext, nValue, 70, 28 - nRad, nRad);
+        this.private_DrawMoveNumber(oContext, nValue, 70, 28 - nRad, nRad, nNextMoveNumber);
+
+        //oContext.strokeStyle = "rgb(0,0,0)";
+        //oContext.beginPath();
+        //oContext.moveTo(0, 0);
+        //oContext.lineTo(70 + nRad + 2, 0);
+        //oContext.lineTo(70 + nRad + 2, 28 + 2);
+        //oContext.lineTo(0, 28 + 2);
+        //oContext.closePath();
+        //oContext.stroke();
+    }
+};
+CDrawingKifuWindow.prototype.Update_NextMove = function()
+{
+    this.private_DrawNextMove(this.HtmlElement.Canvas.getContext("2d"), 25);
 };
 
 var EWindowType =
