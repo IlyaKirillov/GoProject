@@ -2701,6 +2701,9 @@ CDrawingClipboardWindow.prototype.Get_DefaultWindowSize = function()
 function CDrawingKifuWindow()
 {
     CDrawingKifuWindow.superclass.constructor.call(this);
+
+    this.m_nKifuW = -1;
+    this.m_nKifuH = -1;
 }
 CommonExtend(CDrawingKifuWindow, CDrawingWindow);
 CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
@@ -2767,9 +2770,16 @@ CDrawingKifuWindow.prototype.Show = function(oPr)
 CDrawingKifuWindow.prototype.Update_Size = function(bForce)
 {
     CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
+
     var W = this.HtmlElement.InnerDiv.clientWidth;
     var H = this.HtmlElement.InnerDiv.clientHeight;
-    this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
+    if (true === bForce || Math.abs(W - this.m_nKifuW) > 0.001 || Math.abs(H - this.m_nKifuH) > 0.001)
+    {
+        this.m_nKifuW = W;
+        this.m_nKifuH = H;
+        this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
+        console.log("Redraw");
+    }
 };
 CDrawingKifuWindow.prototype.private_DrawStone = function(oContext, nValue, nX, nY, nRad)
 {
