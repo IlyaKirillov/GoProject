@@ -11,6 +11,7 @@
 
 /**
  * Апи для работы с данной библиотекой.
+ * @constructor
  */
 function CGoBoardApi()
 {
@@ -19,6 +20,7 @@ function CGoBoardApi()
 
 /**
  * Создаем основной объект GameTree, который будет хранит саму партию.
+ * @returns {CGameTree}
  */
 CGoBoardApi.prototype.Create_GameTree = function()
 {
@@ -27,6 +29,8 @@ CGoBoardApi.prototype.Create_GameTree = function()
 
 /**
  * Тимплейт с простой доской без дополнительных элементов.
+ * @param {CGameTree} oGameTree
+ * @param {string} sDivId
  */
 CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
 {
@@ -36,6 +40,8 @@ CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
 
 /**
  * Тимплейт для просмотрщика.
+ * @param {CGameTree} oGameTree
+ * @param {string} sDivId
  */
 CGoBoardApi.prototype.Create_Viewer = function(oGameTree, sDivId)
 {
@@ -45,6 +51,8 @@ CGoBoardApi.prototype.Create_Viewer = function(oGameTree, sDivId)
 
 /**
  * Тимплейт для вертикального редактора.
+ * @param {CGameTree} oGameTree
+ * @param {string} sDivId
  */
 CGoBoardApi.prototype.Create_EditorVer = function(oGameTree, sDivId)
 {
@@ -54,6 +62,8 @@ CGoBoardApi.prototype.Create_EditorVer = function(oGameTree, sDivId)
 
 /**
  * Тимплейт для горизонтального редактора.
+ * @param {CGameTree} oGameTree
+ * @param {string} sDivId
  */
 CGoBoardApi.prototype.Create_EditorHor = function(oGameTree, sDivId)
 {
@@ -63,6 +73,8 @@ CGoBoardApi.prototype.Create_EditorHor = function(oGameTree, sDivId)
 
 /**
  * Создаем графическую доску и кнопки управления снизу.
+ * @param {CGameTree} oGameTree
+ * @param {string} sDivId
  */
 CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDivId)
 {
@@ -70,6 +82,10 @@ CGoBoardApi.prototype.Create_BoardWithNavigateButtons = function(oGameTree, sDiv
     oDrawing.Create_BoardWithNavigateButtons(sDivId);
 };
 
+/**
+ * @param {CGameTree} oGameTree
+ * @param {string} sDivId
+ */
 CGoBoardApi.prototype.Create_BoardCommentsButtonsNavigator = function(oGameTree, sDivId)
 {
     var oDrawing = new CDrawing(oGameTree);
@@ -145,6 +161,14 @@ CGoBoardApi.prototype.Stop_AutoPlay = function(oGameTree)
 
 /**
  * Накладываем ограничения на редактирование.
+ * @param {CGameTree} oGameTree - Дерево партии
+ * @param {Object} oFlags - Запрещающие флаги
+ * @param {boolean} oFlags.NewNode
+ * @param {boolean} oFlags.Move
+ * @param {boolean} oFlags.ChangeBoardMode
+ * @param {boolean} oFlags.LoadFile
+ * @param {boolean} oFlags.GameInfo
+ * @param {boolean} oFlags.ViewPort
  */
 CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
 {
