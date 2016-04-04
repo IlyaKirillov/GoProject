@@ -2778,7 +2778,6 @@ CDrawingKifuWindow.prototype.Update_Size = function(bForce)
         this.m_nKifuW = W;
         this.m_nKifuH = H;
         this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
-        console.log("Redraw");
     }
 };
 CDrawingKifuWindow.prototype.private_DrawStone = function(oContext, nValue, nX, nY, nRad)
@@ -3017,15 +3016,6 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
 
         this.private_DrawStone(oContext, nValue, 70, 28 - nRad, nRad);
         this.private_DrawMoveNumber(oContext, nValue, 70, 28 - nRad, nRad, nNextMoveNumber);
-
-        //oContext.strokeStyle = "rgb(0,0,0)";
-        //oContext.beginPath();
-        //oContext.moveTo(0, 0);
-        //oContext.lineTo(70 + nRad + 2, 0);
-        //oContext.lineTo(70 + nRad + 2, 28 + 2);
-        //oContext.lineTo(0, 28 + 2);
-        //oContext.closePath();
-        //oContext.stroke();
     }
 };
 CDrawingKifuWindow.prototype.Update_NextMove = function()
