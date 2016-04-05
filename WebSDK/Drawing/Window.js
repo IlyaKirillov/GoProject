@@ -546,8 +546,11 @@ CDrawingWindow.prototype.protected_UpdateSizeAndPosition = function(oDrawing)
     var nWindowW = parseInt(oWindowDiv.style.width);
     var nWindowH = parseInt(oWindowDiv.style.height);
 
-    oWindowDiv.style.left = ((this.m_oDrawing.Get_Width()  - nWindowW) / 2) + "px";
-    oWindowDiv.style.top  = ((this.m_oDrawing.Get_Height() - nWindowH) / 2) + "px";
+    var nX = Math.max(0, ((this.m_oDrawing.Get_Width()  - nWindowW) / 2));
+    var nY = Math.max(0, ((this.m_oDrawing.Get_Height() - nWindowH) / 2));
+
+    oWindowDiv.style.left = nX + "px";
+    oWindowDiv.style.top  = nY + "px";
 };
 CDrawingWindow.prototype.Get_DefaultWindowSize = function()
 {
