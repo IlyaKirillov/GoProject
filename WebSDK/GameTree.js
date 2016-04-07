@@ -2523,7 +2523,7 @@ CGameTree.prototype.Get_LogicBoardForKifu = function()
 {
     var oCurNode = this.Get_CurNode();
 
-    var oNode = oCurNode;//this.Get_FirstNode();
+    var oNode = this.Get_FirstNode();
     this.GoTo_Node(oNode);
 
     var oKifu = new CKifuLogicBoard();
