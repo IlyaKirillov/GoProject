@@ -273,7 +273,10 @@ function CDrawingMultiLevelToolbar(oDrawing)
         GeneralNavigationControl : null,
 
         TreeNavigationControl    : null,
-        TreeNavigationElement    : null
+        TreeNavigationElement    : null,
+
+        KifuModeElement : null,
+        KifuModeControl : null
     };
 
     this.m_bGeneralNavigation = g_oGlobalSettings.Is_MultiLevelToolbarMainNavigation();
@@ -281,6 +284,7 @@ function CDrawingMultiLevelToolbar(oDrawing)
     this.m_bGeneralToolbar    = g_oGlobalSettings.Is_MultiLevelToolbarGeneral();
     this.m_bAutoPlayToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay();
     this.m_bTimelimeToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarTimeline();
+    this.m_bKifuModeToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarKifuMode();
 
     this.m_nW = -1;
     this.m_nH = -1;
@@ -312,11 +316,6 @@ function CDrawingMultiLevelToolbar(oDrawing)
     this.m_oGeneralNavigation.Add_Control(new CDrawingButtonForward5(oDrawing), 36, 1, EToolbarFloat.Left);
     this.m_oGeneralNavigation.Add_Control(new CDrawingButtonForwardToEnd(oDrawing), 36, 1, EToolbarFloat.Left);
 
-    //TEST
-    this.m_oGeneralNavigation.Add_Control(new CDrawingButtonKifuWindow(oDrawing), 36, 1, EToolbarFloat.Left);
-    this.m_oGeneralNavigation.Add_Control(new CDrawingButtonKifuMode(oDrawing), 36, 1, EToolbarFloat.Left);
-    //TEST
-
     this.m_oTreeNavigation = new CDrawingToolbar(oDrawing);
     this.m_oTreeNavigation.Add_Control(new CDrawingButtonNextVariant(oDrawing), 36, 1, EToolbarFloat.Left);
     this.m_oTreeNavigation.Add_Control(new CDrawingButtonPrevVariant(oDrawing), 36, 1, EToolbarFloat.Left);
@@ -332,6 +331,10 @@ function CDrawingMultiLevelToolbar(oDrawing)
 
     this.m_oTimelineToolbar = new CDrawingToolbar(oDrawing);
     this.m_oTimelineToolbar.Add_Control(new CDrawingSlider(oDrawing, EDrawingSliderType.Timeline), -1, 1, EToolbarFloat.Left);
+
+    this.m_oKifuToolbar = new CDrawingToolbar(oDrawing);
+    this.m_oKifuToolbar.Add_Control(new CDrawingButtonKifuWindow(oDrawing), 36, 1, EToolbarFloat.Left);
+    this.m_oKifuToolbar.Add_Control(new CDrawingButtonKifuMode(oDrawing), 36, 1, EToolbarFloat.Left);
 
     this.m_nLevelsCount = 1;
     this.m_aElements = [];
@@ -350,6 +353,7 @@ CDrawingMultiLevelToolbar.prototype.Init = function(sDivId)
     var sGeneralDivId  = sDivId + "GL";
     var sAutoPlayDivId = sDivId + "AP";
     var sTimelineDivId = sDivId + "TL";
+    var sKifuDivId     = sDivId + "KF";
 
     this.HtmlElement.SettingsElement          = Common.Create_DivElement(oMainElement, sSettingsDivId);
     this.HtmlElement.GeneralNavigationElement = Common.Create_DivElement(oMainElement, sGenNavDivId);
@@ -357,6 +361,7 @@ CDrawingMultiLevelToolbar.prototype.Init = function(sDivId)
     this.HtmlElement.GeneralElement           = Common.Create_DivElement(oMainElement, sGeneralDivId);
     this.HtmlElement.AutoPlayElement          = Common.Create_DivElement(oMainElement, sAutoPlayDivId);
     this.HtmlElement.TimelineElement          = Common.Create_DivElement(oMainElement, sTimelineDivId);
+    this.HtmlElement.KifuModeElement          = Common.Create_DivElement(oMainElement, sKifuDivId);
 
     this.HtmlElement.SettingsControl = CreateControlContainer(sSettingsDivId);
     oMainControl.AddControl(this.HtmlElement.SettingsControl);
@@ -381,6 +386,10 @@ CDrawingMultiLevelToolbar.prototype.Init = function(sDivId)
     this.HtmlElement.TimelineControl = CreateControlContainer(sTimelineDivId);
     oMainControl.AddControl(this.HtmlElement.TimelineControl);
     this.m_oTimelineToolbar.Init(sTimelineDivId, this.m_oDrawing.Get_GameTree());
+
+    this.HtmlElement.KifuModeControl = CreateControlContainer(sKifuDivId);
+    oMainControl.AddControl(this.HtmlElement.KifuModeControl);
+    this.m_oKifuToolbar.Init(sKifuDivId, this.m_oDrawing.Get_GameTree());
 
     this.private_UpdateElements();
     this.private_UpdateControls();
@@ -445,6 +454,12 @@ CDrawingMultiLevelToolbar.prototype.Set_Timeline = function(bTimeline)
     this.private_Update();
     this.Update_Size(true);
 };
+CDrawingMultiLevelToolbar.prototype.Set_KifuMode = function(bKifuMode)
+{
+    this.m_bKifuModeToolbar = bKifuMode;
+    this.private_Update();
+    this.Update_Size(true);
+};
 CDrawingMultiLevelToolbar.prototype.private_Update = function()
 {
     this.private_UpdateElements();
@@ -462,6 +477,7 @@ CDrawingMultiLevelToolbar.prototype.private_UpdateElements = function()
     this.private_UpdateElement(this.m_bGeneralToolbar, this.m_oGeneralToolbar, this.HtmlElement.GeneralElement);
     this.private_UpdateElement(this.m_bAutoPlayToolbar, this.m_oAutoPlayToolbar, this.HtmlElement.AutoPlayElement);
     this.private_UpdateElement(this.m_bTimelimeToolbar, this.m_oTimelineToolbar, this.HtmlElement.TimelineElement);
+    this.private_UpdateElement(this.m_bKifuModeToolbar, this.m_oKifuToolbar, this.HtmlElement.KifuModeElement);
 };
 CDrawingMultiLevelToolbar.prototype.private_UpdateElement = function(isUse, oElement, oHtmlElement)
 {
@@ -534,6 +550,8 @@ CDrawingMultiLevelToolbar.prototype.private_GetHtmlControlByControl = function(o
         oHtmlControl = this.HtmlElement.AutoPlayControl;
     else if (oControl === this.m_oTimelineToolbar)
         oHtmlControl = this.HtmlElement.TimelineControl;
+    else if (oControl === this.m_oKifuToolbar)
+        oHtmlControl = this.HtmlElement.KifuModeControl;
 
     return oHtmlControl;
 };

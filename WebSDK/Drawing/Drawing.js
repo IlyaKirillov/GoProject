@@ -199,6 +199,7 @@ function CSettings()
     this.m_bMultiLevelToolbarGeneral        = true;
     this.m_bMultiLevelToolbarAutoPlay       = true;
     this.m_bMultiLevelToolbarTimeline       = true;
+    this.m_bMultiLevelToolbarKifuMode       = true;
 }
 CommonExtend(CSettings, CSettingsBase);
 CSettings.prototype.Load_FromLocalStorage = function()
@@ -239,6 +240,7 @@ CSettings.prototype.Load_FromLocalStorage = function()
     this.m_bMultiLevelToolbarGeneral        = Common.Get_LocalStorageItem("MultiLevelToolbarGeneral") == "0" ? false : true;
     this.m_bMultiLevelToolbarAutoPlay       = Common.Get_LocalStorageItem("MultiLevelToolbarAutoPlay") == "1" ? true : false;
     this.m_bMultiLevelToolbarTimeline       = Common.Get_LocalStorageItem("MultiLevelToolbarTimeline") == "1" ? true : false;
+    this.m_bMultiLevelToolbarKifuMode       = Common.Get_LocalStorageItem("MultiLevelToolbarKifuMode") == "1" ? true : false;
 };
 CSettings.prototype.Set_Sound = function(Value)
 {
@@ -345,6 +347,12 @@ CSettings.prototype.Toggle_MultiLevelToolbarTimeline = function()
     Common.Set_LocalStorageItem("MultiLevelToolbarTimeline", true === this.m_bMultiLevelToolbarTimeline ? "1" : "0");
     return this.m_bMultiLevelToolbarTimeline;
 };
+CSettings.prototype.Toggle_MultiLevelToolbarKifuMode = function()
+{
+    this.m_bMultiLevelToolbarKifuMode = !this.m_bMultiLevelToolbarKifuMode;
+    Common.Set_LocalStorageItem("MultiLevelToolbarKifuMode", true === this.m_bMultiLevelToolbarKifuMode ? "1" : "0");
+    return this.m_bMultiLevelToolbarKifuMode;
+};
 CSettings.prototype.Is_MultiLevelToolbarMainNavigation = function()
 {
     return this.m_bMultiLevelToolbarMainNavigation;
@@ -364,6 +372,10 @@ CSettings.prototype.Is_MultiLevelToolbarAutoPlay = function()
 CSettings.prototype.Is_MultiLevelToolbarTimeline = function()
 {
     return this.m_bMultiLevelToolbarTimeline;
+};
+CSettings.prototype.Is_MultiLevelToolbarKifuMode = function()
+{
+    return this.m_bMultiLevelToolbarKifuMode;
 };
 var g_oGlobalSettings = new CSettings();
 
@@ -1807,6 +1819,15 @@ CDrawing.prototype.Toggle_MultiLevelToolbarTimeline = function()
 
     if (this.m_oButtons.ToolbarCustomize)
         this.m_oButtons.ToolbarCustomize.Set_Timeline(bShow);
+
+    return bShow;
+};
+CDrawing.prototype.Toggle_MultiLevelToolbarKifuMode = function()
+{
+    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarKifuMode();
+
+    if (this.m_oButtons.ToolbarCustomize)
+        this.m_oButtons.ToolbarCustomize.Set_KifuMode(bShow);
 
     return bShow;
 };

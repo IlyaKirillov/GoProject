@@ -1845,7 +1845,7 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     var oMainDiv = oDrawing.Get_MainDiv();
 
     this.m_nWidth  = 160;
-    this.m_nHeight = 14 + 5 * 20;
+    this.m_nHeight = 14 + 6 * 20;
 
     var oContextMenuElementWrapper              = document.createElement("div");
     oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
@@ -1884,6 +1884,7 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     this.m_oGeneralCheckElement  = this.private_CreateListItem(oList, "General toolbar", function(){oDrawing.Toggle_MultiLevelToolbarGeneral()}, g_oGlobalSettings.Is_MultiLevelToolbarGeneral());
     this.m_oAutoPlayCheckElement = this.private_CreateListItem(oList, "Autoplay toolbar", function(){oDrawing.Toggle_MultiLevelToolbarAutoPlay()}, g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay());
     this.m_oTimelineCheckElement = this.private_CreateListItem(oList, "Timeline toolbar", function(){oDrawing.Toggle_MultiLevelToolbarTimeline()}, g_oGlobalSettings.Is_MultiLevelToolbarTimeline());
+    this.m_oKifuModeCheckElement = this.private_CreateListItem(oList, "Kifu mode", function(){oDrawing.Toggle_MultiLevelToolbarKifuMode()}, g_oGlobalSettings.Is_MultiLevelToolbarKifuMode());
 
     oContextMenuElementWrapper.appendChild(oList);
 }
@@ -2109,12 +2110,12 @@ CDrawingButtonToolbarCustomize.prototype.Set_Timeline = function(bChecked)
 
     this.private_UpdateCheckElement(this.m_oTimelineCheckElement, bChecked);
 };
-CDrawingButtonToolbarCustomize.prototype.Set_General = function(bGeneral)
+CDrawingButtonToolbarCustomize.prototype.Set_KifuMode = function(bKifuMode)
 {
     if (this.m_oMultiLevelToolbar)
-        this.m_oMultiLevelToolbar.Set_General(bGeneral);
+        this.m_oMultiLevelToolbar.Set_KifuMode(bKifuMode);
 
-    this.private_UpdateCheckElement(this.m_oGeneralCheckElement, bGeneral);
+    this.private_UpdateCheckElement(this.m_oKifuModeCheckElement, bKifuMode);
 };
 CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(oCheckElement, bChecked)
 {
