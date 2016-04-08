@@ -33,6 +33,7 @@ function LoadFromCache()
     document.getElementById("idBlurDiv").style.display = "none";
 
     bFreshLoad = false;
+    BodyFocus();
 }
 
 function FreshLoad()
@@ -56,6 +57,7 @@ function FreshLoad()
 
     document.getElementById("divCachedFile").style.display = "none";
     document.getElementById("idBlurDiv").style.display = "none";
+    BodyFocus();
 }
 
 function OnDocumentReady()
