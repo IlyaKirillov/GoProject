@@ -655,7 +655,6 @@ CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
     if (this.m_oHandler && this.m_oHandler.Add_NewNode)
         this.m_oHandler.Add_NewNode(oNode.Get_Id());
 
-    oNewNode.Set_Prev(this.m_oCurNode);
     this.m_oCurNode.Add_Next(oNewNode, bSetCur);
     this.Set_CurNode(oNewNode);
     this.m_nCurNodeDepth++;

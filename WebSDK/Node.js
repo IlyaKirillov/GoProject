@@ -130,12 +130,25 @@ CNode.prototype.Get_NextsCount = function()
 {
     return this.m_aNext.length;
 };
-CNode.prototype.Add_Next = function(Node, bSetCur)
+CNode.prototype.Add_Next = function(Node, bSetCur, nPos)
 {
-    this.m_aNext.push(Node);
+    Node.Set_Prev(this);
 
-    if (true === bSetCur || -1 === this.m_nNextCur)
-        this.m_nNextCur = this.m_aNext.length - 1;
+    if (undefined === nPos)
+    {
+        this.m_aNext.push(Node);
+
+        if (true === bSetCur || -1 === this.m_nNextCur)
+            this.m_nNextCur = this.m_aNext.length - 1;
+    }
+    else
+    {
+        nPos = Math.max(0, Math.min(this.m_aNext.length, nPos));
+        this.m_aNext.splice(nPos, 0, Node);
+
+        if (true === bSetCur || -1 === this.m_nNextCur)
+            this.m_nNextCur = nPos;
+    }
 
     if (this.m_oGameTree)
         this.m_oGameTree.Set_Modified(true);

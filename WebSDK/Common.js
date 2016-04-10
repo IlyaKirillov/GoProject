@@ -47,6 +47,12 @@ CColor.prototype.FromLong = function(nLong)
     this.b = (nLong >> 8) & 0xFF;
     this.a = (nLong      ) & 0xFF;
 };
+CColor.prototype.Set = function(r, g, b)
+{
+    this.r = r;
+    this.g = g;
+    this.b = b;
+};
 
 function Common_ValuetoXY(Value)
 {
