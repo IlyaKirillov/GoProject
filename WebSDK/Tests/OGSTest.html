@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/sgf; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<head>
+    <title>Тестируем вставление доски в DIV</title>
+</head>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Common.js"></script>
+
+<script type="text/javascript" language="JavaScript" src="../Drawing/Controls.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Board.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/BoardTarget.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/HtmlEvents.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Mark.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Button.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Toolbar.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Drawing.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/InterfaceState.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Comments.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Navigator.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/NavigatorMap.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Slider.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Sound.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Presentation.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/VerticalTabs.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Drawing/Window.js"></script>
+
+<script type="text/javascript" language="JavaScript" src="../Command.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Consts.js"></script>
+<script type="text/javascript" language="JavaScript" src="../GameTree.js"></script>
+<script type="text/javascript" language="JavaScript" src="../GifWriter.js"></script>
+<script type="text/javascript" language="JavaScript" src="../LogicBoard.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Memory.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Move.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Node.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Territory.js"></script>
+<script type="text/javascript" language="JavaScript" src="../SgfReader.js"></script>
+<script type="text/javascript" language="JavaScript" src="../SgfWriter.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Api.js"></script>
+<script type="text/javascript" language="JavaScript" src="../Version.js"></script>
+<body onselectstart="return false;"
+      style="text-size-adjust:100%;-webkit-text-size-adjust:100%; -moz-text-size-adjust:100%; -ms-text-size-adjust:100%; position: absolute;top:0px; left:0px;padding:0;margin:0;height: 100vh;width: 100vw; background-repeat: repeat; background-image: url('../../../Background3.png');-moz-user-select: none; user-select: none;">
+
+<div id="divId" style="width: 1000px;" onfocus="BodyFocus()" tabindex="-1"></div>
+
+<input id="divConnectValue" type="number"/>
+<input id="divConnectButton" type="button" value="Connect" onclick="OGS_OnConnect()"/>
+<input id="divDisconnectButton" type="button" value="Disconnect" onclick="OGS_OnDisconnect()"/>
+
+
+<script>
+
+    function BodyFocus()
+    {
+        if (oGameTree)
+            oGameTree.Focus();
+    }
+
+    var oGameTree = GoBoardApi.Create_GameTree();
+    GoBoardApi.Set_Sound(oGameTree, "../../Resources/Sound");
+    GoBoardApi.Create_EditorHor(oGameTree, "divId");
+
+    document.getElementById("divId").style.height = GoBoardApi.Get_DivHeightByWidth(oGameTree, parseInt(document.getElementById("divId").style.width)) + "px";
+
+    GoBoardApi.Update_Size(oGameTree);
+
+</script>
+
+<script>
+
+    var socketOGS = io.connect("https://ggs.online-go.com/");
+    var gameId = null;
+
+//    socketOGS.emit("seek_graph/connect", {channel: "global"});
+//
+//    socketOGS.on("seekgraph/global", function(e)
+//    {
+//        console.log(e);
+//    });
+
+    socketOGS.emit("gamelist/subscribe", {gamelist: "gamelist/global"});
+
+    socketOGS.on("gamelist/global-by-rank", function(event)
+    {
+        console.log(event)
+    });
+
+
+    function OGS_OnConnect()
+    {
+        var oCurNode = null;
+        if (null !== gameId)
+            socketOGS.emit("game/disconnect", {game_id : gameId});
+
+        gameId = parseInt(document.getElementById("divConnectValue").value);
+        if (isNaN(gameId))
+        {
+            gameId = null;
+            return;
+        }
+
+        socketOGS.emit("game/connect", {game_id: gameId, player_id: null, chat: true});
+
+        socketOGS.on('game/'+gameId+'/gamedata', function(e)
+        {
+            console.log(e);
+
+            var sSGF = "(;FF[4]";
+            sSGF += "SZ[" + (e.height === e.width ? e.width : e.width + ":" + e.height) + "]";
+            sSGF += "KM[" + e.komi + "]";
+            sSGF += "PB[" + e.players.black.username + "]";
+            sSGF += "PW[" + e.players.white.username + "]";
+            sSGF += "WR[" + e.players.black.egf + "]";
+            sSGF += "BR[" + e.players.white.egf + "]";
+            sSGF += "HA[" + e.handicap + "]";
+
+            if (e.initial_state)
+            {
+                if (e.initial_state.black && e.initial_state.black.length > 0)
+                {
+                    sSGF += "AB";
+                    for (var nIndex = 0, nCount = e.initial_state.black.length; nIndex < nCount; nIndex += 2)
+                    {
+                        sSGF += "[" + e.initial_state.black.charAt(nIndex) + e.initial_state.black.charAt(nIndex + 1) + "]";
+                    }
+                }
+                if (e.initial_state.black && e.initial_state.white.length > 0)
+                {
+                    sSGF += "AW";
+                    for (var nIndex = 0, nCount = e.initial_state.white.length; nIndex < nCount; nIndex += 2)
+                    {
+                        sSGF += "[" + e.initial_state.black.charAt(nIndex) + e.initial_state.black.charAt(nIndex + 1) + "]";
+                    }
+                }
+            }
+
+            if ("white" == e.initial_player)
+                sSGF += "PL[W]";
+
+            sSGF += ")";
+            oGameTree.Load_Sgf(sSGF, null, null, "sgf");
+
+            oCurNode = oGameTree.Get_CurNode();
+
+            for (var nMoveNumber = 0; nMoveNumber < e.moves.length; ++nMoveNumber)
+            {
+                var oMove = e.moves[nMoveNumber];
+                var nX = oMove[0];
+                var nY = oMove[1];
+
+                var oNewNode = new CNode(oGameTree);
+                oNewNode.Add_Move(nX + 1, nY + 1, oGameTree.Get_NextMove());
+                oCurNode.Add_Next(oNewNode, true, 0);
+                oCurNode = oNewNode;
+                oGameTree.GoTo_Node(oCurNode);
+            }
+
+            if (oGameTree.m_oDrawingNavigator)
+            {
+                oGameTree.m_oDrawingNavigator.Create_FromGameTree();
+                oGameTree.m_oDrawingNavigator.Update();
+            }
+        });
+        socketOGS.on('game/'+gameId+'/move', function(e)
+        {
+            if (e.move)
+            {
+                var oMove = e.move;
+                var nX = oMove[0];
+                var nY = oMove[1];
+
+                var oGameTreeCurNode = oGameTree.Get_CurNode();
+
+                oGameTree.GoTo_Node(oCurNode);
+
+                var oNewNode = new CNode(oGameTree);
+                oNewNode.Add_Move(nX + 1, nY + 1, oGameTree.Get_NextMove());
+                oCurNode.Add_Next(oNewNode, true, 0);
+
+                if (oGameTree.m_oDrawingNavigator)
+                {
+                    oGameTree.m_oDrawingNavigator.Create_FromGameTree();
+                    oGameTree.m_oDrawingNavigator.Update();
+                }
+
+                if (oCurNode === oGameTreeCurNode)
+                    oGameTree.GoTo_Node(oNewNode);
+                else
+                    oGameTree.GoTo_Node(oGameTreeCurNode);
+
+                oCurNode = oNewNode;
+            }
+        });
+
+    }
+
+    function OGS_OnDisconnect()
+    {
+        if (null !== gameId)
+        {
+            socketOGS.emit("game/disconnect", {game_id : gameId});
+            gameId = null;
+        }
+    }
+
+</script>
+
+</body>
+</html>
