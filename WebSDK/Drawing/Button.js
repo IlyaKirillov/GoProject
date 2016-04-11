@@ -2490,7 +2490,7 @@ CDrawingButtonKifuWindow.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonKifuWindow.prototype.private_GetHint = function()
 {
-    return "Kifu";
+    return "Show kifu";
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2504,25 +2504,50 @@ CommonExtend(CDrawingButtonKifuMode, CDrawingButtonBase);
 
 CDrawingButtonKifuMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var PenWidth = 0.02 * Size;
-    var r     = Size / 2;
-    var shift = PenWidth * 4;
+    X_off = 0, Y_off = 0, Size = 36;
+    var X1 = (X_off + 10 ) | 0 + 0.5;
+    var X2 = (X_off + 25) | 0 + 0.5;
+    var Y1 = (Y_off + 10 ) | 0 + 0.5;
+    var Y2 = (Y_off + 25) | 0 + 0.5;
 
-    Canvas.lineWidth = Math.ceil(PenWidth + 0.5);
+    Canvas.lineWidth = 2;
+
+    Canvas.strokeStyle = "rgb(0, 0, 0)";
     Canvas.beginPath();
-    Canvas.arc(X_off + Size / 2, Y_off + Size / 2, r - shift, 0, 2 * Math.PI, false);
+    Canvas.moveTo(X_off + 1, Y1);
+    Canvas.lineTo(Size / 2 + 1, Y1);
+    Canvas.moveTo(X_off + 1, Y2);
+    Canvas.lineTo(Size + X_off - 1, Y2);
+    Canvas.moveTo(X1, Y_off + 1);
+    Canvas.lineTo(X1, Size + Y_off - 1);
+    Canvas.moveTo(X2, Size / 2);
+    Canvas.lineTo(X2, Size + Y_off - 1);
     Canvas.stroke();
 
+    Canvas.fillStyle = "rgb(255, 255, 255)";
+    Canvas.beginPath();
+    Canvas.arc(X1, Y1, 11 / 2, 0, 2 * Math.PI, false);
+    Canvas.stroke();
+    Canvas.fill();
+    Canvas.beginPath();
+    Canvas.arc(X2, Y2, 11 / 2, 0, 2 * Math.PI, false);
+    Canvas.stroke();
+    Canvas.fill();
+    Canvas.fillStyle = "rgb(0, 0, 0)";
+    Canvas.beginPath();
+    Canvas.arc(X1, Y2, 11 / 2, 0, 2 * Math.PI, false);
+    Canvas.stroke();
+    Canvas.fill();
+
     var Text       = "?";
-    var FontSize   = Size * 0.9;
+    var FontSize   = 22;
     var FontFamily = "Times New Roman, Sans serif";
     var sFont      = FontSize + "px " + FontFamily;
 
-
     Canvas.font = sFont;
 
-    var Y = Y_off + Size / 2 + FontSize / 3;
-    var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+    var Y = Y1 + FontSize / 3;
+    var X = X2 - Canvas.measureText(Text).width / 2;
 
     Canvas.fillText(Text, X, Y);
 
@@ -2536,7 +2561,7 @@ CDrawingButtonKifuMode.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonKifuMode.prototype.private_GetHint = function()
 {
-    return "Kifu";
+    return "Kifu mode";
 };
 CDrawingButtonKifuMode.prototype.private_RegisterButton = function()
 {
