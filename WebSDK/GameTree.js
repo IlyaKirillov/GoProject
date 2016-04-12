@@ -1278,7 +1278,7 @@ CGameTree.prototype.GoTo_Node = function(Node, bForce)
         return;
 
     if (true === this.Is_KifuMode())
-        this.Stop_KifuMode();
+        return;
 
     if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
         this.m_oHandler["GoTo_Node"](Node.Get_Id());
@@ -2520,6 +2520,12 @@ CGameTree.prototype.Set_LocalColorScheme = function(eScheme)
 };
 CGameTree.prototype.Get_LogicBoardForKifu = function()
 {
+    var isKifuMode = this.m_bKifuMode;
+
+    if (true === isKifuMode)
+        this.m_bKifuMode = false;
+
+
     var oCurNode = this.Get_CurNode();
 
     var oNode = this.Get_FirstNode();
@@ -2530,6 +2536,9 @@ CGameTree.prototype.Get_LogicBoardForKifu = function()
 
     this.GoTo_Node(oCurNode);
 
+    if (true === isKifuMode)
+        this.m_bKifuMode = true;
+
     return oKifu;
 };
 CGameTree.prototype.Start_KifuMode = function()
@@ -2537,6 +2546,7 @@ CGameTree.prototype.Start_KifuMode = function()
     this.m_nKifuEditFlags = this.m_nEditingFlags;
     this.Forbid_All();
     this.Set_EditingFlags({Move : true});
+    this.Set_ShowVariants(EShowVariants.None);
 
     this.GoTo_MainVariant();
 
@@ -2557,33 +2567,3 @@ CGameTree.prototype.Is_KifuMode = function()
 {
     return this.m_bKifuMode;
 };
-
-function CMatchCommandMove()
-{
-    this.m_nColor = BOARD_EMPTY;
-    this.m_nPos   = 0;
-}
-
-function CMatchCommandComment()
-{
-    this.m_sAuthor  = "";
-    this.m_sComment = "";
-}
-
-function CMatchCommandPass()
-{
-    this.m_nColor = BOARD_EMPTY;
-}
-
-function CMatchCommnadResign()
-{
-    this.m_nColor = BOARD_EMPTY;
-}
-
-function CMatchMode()
-{
-    this.m_bMode     = false;
-    this.m_nColor    = BOARD_EMPTY;
-    this.m_sStartSgf = "";
-    this.m_aCommands = [];
-}
