@@ -2707,6 +2707,9 @@ function CDrawingKifuWindow()
 
     this.m_nKifuW = -1;
     this.m_nKifuH = -1;
+
+    this.m_nMoveMin = -1;
+    this.m_nMoveMax = -1;
 }
 CommonExtend(CDrawingKifuWindow, CDrawingWindow);
 CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
@@ -2899,6 +2902,9 @@ CDrawingKifuWindow.prototype.private_DrawBoard = function(oContext, oLogicBoard,
         }
     }
 
+    this.m_nMoveMin = nMinMove;
+    this.m_nMoveMax = nMaxMove;
+
     return {Min : nMinMove, Max : nMaxMove};
 };
 CDrawingKifuWindow.prototype.private_DrawKifuCaption = function(oContext, nWidth, sText)
@@ -3008,7 +3014,8 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
 
     var nRad = nSize / 2 | 0;
     oContext.clearRect(0, 0, 70 + nRad + 2, 28 + 2);
-    if (nNextMoveNumber > 0)
+
+    if (nNextMoveNumber > 0 && nNextMoveNumber <= this.m_nMoveMax)
     {
         var sText          = "Next";
         oContext.fillStyle = "rgb(0,0,0)";
@@ -3019,6 +3026,15 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
 
         this.private_DrawStone(oContext, nValue, 70, 28 - nRad, nRad);
         this.private_DrawMoveNumber(oContext, nValue, 70, 28 - nRad, nRad, nNextMoveNumber);
+    }
+    else if (nNextMoveNumber > 0)
+    {
+        var sText          = "End";
+        oContext.fillStyle = "rgb(0,0,0)";
+        oContext.font      = "16px Arial";
+        var dOffsetY       = 20;
+        var dOffsetX       = 20;
+        oContext.fillText(sText, dOffsetX, dOffsetY);
     }
 };
 CDrawingKifuWindow.prototype.Update_NextMove = function()

@@ -1241,6 +1241,9 @@ CGameTree.prototype.GoTo_Next = function(bForce)
     if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE) && true !== bForce)
         return false;
 
+    if (true === this.Is_KifuMode() && true !== bForce)
+        return false;
+
     if (0 === this.m_oCurNode.Get_NextsCount() || -1 === this.m_oCurNode.Get_NextCur())
         return false;
 
