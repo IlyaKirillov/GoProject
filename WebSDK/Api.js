@@ -225,12 +225,20 @@ CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
 
 /**
  * Получаем ссылку на ход, чтобы потом можно было переоткрыть файл с данной ссылкой
- * bStrong - получаем сильную ссылку или нет. Сильная, значит в ссылку записывается весь вариант, не считая нод, которые
+ * @param {CGameTree} oGameTree - Ссылка на основной класс.
+ * @param {boolean} bStrong - Получаем сильную ссылку или нет. Сильная, значит в ссылку записывается весь вариант, не считая нод, которые
  * были в файле изначально. В слабой ссылка просто указывает на место, но не сохраняет ее как самостоятельный вариант.
+ * @param {?number} nType - 0 (undefined) - CurNode, 1 - StartNode
  */
-CGoBoardApi.prototype.Get_MoveReference = function(oGameTree, bStrong)
+CGoBoardApi.prototype.Get_MoveReference = function(oGameTree, bStrong, nType)
 {
-    return oGameTree.Get_MoveReference(bStrong);
+    var oNode;
+    if (1 === nType)
+        oNode = oGameTree.Get_StartNode();
+    else
+        oNode = oGameTree.Get_CurNode();
+
+    return oNode.Get_Reference(bStrong);
 };
 
 /**

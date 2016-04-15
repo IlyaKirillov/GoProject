@@ -591,6 +591,145 @@ CNode.prototype.Move_Variant = function(nCount)
         oPrevNode = oPrevNode.Get_Prev();
     }
 };
+CNode.prototype.Get_Reference = function(bStrong)
+{
+    var oCurNode = this;
+    var oEndNode = oCurNode;
+
+    var oStream = new CStreamWriter();
+    oStream.Write_String("GBMR"); // GoBoard Move Reference (сигнатура)
+
+    if (false !== bStrong)
+    {
+        while (!oCurNode.Is_FromFile())
+        {
+            var oPrev = oCurNode.Get_Prev();
+            if (null === oPrev)
+                return "";
+
+            oCurNode = oPrev;
+        }
+
+        oStream.Write_Short(1);       // версия
+        oStream.Write_String2(oCurNode.Get_Id());
+
+        // Значит добавленный вариант, которого не было в исходном файле
+        if (oCurNode !== oEndNode)
+        {
+            oStream.Write_Byte(0x01);
+
+            var aNodes       = [];
+            var oTempCurNode = oEndNode;
+
+            while (oTempCurNode !== oCurNode)
+            {
+                aNodes.splice(0, 0, oTempCurNode);
+                oTempCurNode = oTempCurNode.Get_Prev();
+            }
+
+            oStream.Write_Long(aNodes.length);
+            for (var nIndex = 0, nCount = aNodes.length; nIndex < nCount; nIndex++)
+            {
+                var oNode = aNodes[nIndex];
+                oStream.Write_Short(0x01); // Начало ноды
+
+                // Мы записываем только команды добавления камней и ходов
+                var nStartPos = oStream.Get_CurPosition();
+                oStream.Skip(4);
+
+                var nWrittenCommansCount = 0;
+                for (var CommandIndex = 0, CommandsCount = oNode.Get_CommandsCount(); CommandIndex < CommandsCount; CommandIndex++)
+                {
+                    var Command       = oNode.Get_Command(CommandIndex);
+                    var Command_Type  = Command.Get_Type();
+                    var Command_Value = Command.Get_Value();
+                    var Command_Count = Command.Get_Count();
+
+                    // Начало всегда такое
+                    // Short : тип команды
+                    // Long  : длина бинарника под данную команду
+
+                    switch (Command_Type)
+                    {
+                    case ECommand.B:
+                    {
+                        oStream.Write_Short(0x10); // B
+                        oStream.Write_Long(4);
+                        oStream.Write_Long(Command_Value);
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    case ECommand.W:
+                    {
+                        oStream.Write_Short(0x11); // W
+                        oStream.Write_Long(4);
+                        oStream.Write_Long(Command_Value);
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    case ECommand.AB:
+                    case ECommand.AW:
+                    case ECommand.AE:
+                    {
+                        switch (Command_Type)
+                        {
+                        case ECommand.AB:
+                            oStream.Write_Short(0x20);
+                            break;
+                        case ECommand.AW:
+                            oStream.Write_Short(0x21);
+                            break;
+                        case ECommand.AE:
+                            oStream.Write_Short(0x22);
+                            break;
+                        }
+
+                        oStream.Write_Long(4 * (Command_Count + 1));
+                        oStream.Write_Long(Command_Count);
+
+                        for (var Index = 0; Index < Command_Count; Index++)
+                            oStream.Write_Long(Command_Value[Index]);
+
+                        nWrittenCommansCount++;
+                        break;
+                    }
+                    }
+                }
+
+                var nEndPos = oStream.Get_CurPosition();
+                oStream.Seek(nStartPos);
+                oStream.Write_Long(nWrittenCommansCount);
+                oStream.Seek(nEndPos);
+                oStream.Write_Short(0x00);
+            }
+        }
+        else
+            oStream.Write_Byte(0x00);
+    }
+    else
+    {
+        oStream.Write_Short(2);       // версия
+
+        var nCountPos = oStream.Get_CurPosition();
+        oStream.Skip(4);
+
+        var oCurNode = this.Get_FirstNode();
+        var nCount = 0;
+        while (oCurNode !== oEndNode && oCurNode.Get_NextsCount() > 0)
+        {
+            nCount++;
+            oStream.Write_Long(oCurNode.Get_NextCur());
+            oCurNode = oCurNode.Get_Next();
+        }
+
+        var nEndPos = oStream.Get_CurPosition();
+        oStream.Seek(nCountPos);
+        oStream.Write_Long(nCount);
+        oStream.Seek(nEndPos);
+    }
+
+    return Common.Encode_Base64_UrlSafe(oStream.Get_Bytes());
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Функции, которые приходят из вне
 //----------------------------------------------------------------------------------------------------------------------
