@@ -1,2 +1,2 @@
 # Web Go/Baduk Board
-Using this js-library u can view/edit sgf/ngf/gib files right in ur browser. It's pure html5+javascript.
+Using this js-library you can view/edit sgf/ngf/gib files right in your browser. It's pure html5+javascript.
