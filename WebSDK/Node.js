@@ -730,6 +730,14 @@ CNode.prototype.Get_Reference = function(bStrong)
 
     return Common.Encode_Base64_UrlSafe(oStream.Get_Bytes());
 };
+CNode.prototype.Get_FirstNode = function()
+{
+    var oCurNode = this;
+    while (null !== oCurNode.Get_Prev())
+        oCurNode = oCurNode.Get_Prev();
+
+    return oCurNode;
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Функции, которые приходят из вне
 //----------------------------------------------------------------------------------------------------------------------
