@@ -2435,3 +2435,17 @@ CGameTree.prototype.Is_KifuMode = function()
 {
     return this.m_bKifuMode;
 };
+CGameTree.prototype.Set_StartNode = function(oNode)
+{
+    this.m_oStartNode = oNode;
+};
+CGameTree.prototype.Get_NodeReference = function(bStrong, oNode)
+{
+    var oCurNode = this.Get_CurNode();
+
+    oNode.Make_ThisNodeCurrent();
+    var sRef = oNode.Get_Reference(bStrong);
+
+    oCurNode.Make_CurrentVariantMainly();
+    return sRef;
+};

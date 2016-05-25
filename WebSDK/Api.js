@@ -228,7 +228,7 @@ CGoBoardApi.prototype.Save_Sgf = function(oGameTree)
  * @param {CGameTree} oGameTree - Ссылка на основной класс.
  * @param {boolean} bStrong - Получаем сильную ссылку или нет. Сильная, значит в ссылку записывается весь вариант, не считая нод, которые
  * были в файле изначально. В слабой ссылка просто указывает на место, но не сохраняет ее как самостоятельный вариант.
- * @param {?number} nType - 0 (undefined) - CurNode, 1 - StartNode
+ * @param {number} [nType=0] - 0 (undefined) - CurNode, 1 - StartNode
  */
 CGoBoardApi.prototype.Get_MoveReference = function(oGameTree, bStrong, nType)
 {
@@ -238,7 +238,23 @@ CGoBoardApi.prototype.Get_MoveReference = function(oGameTree, bStrong, nType)
     else
         oNode = oGameTree.Get_CurNode();
 
-    return oNode.Get_Reference(bStrong);
+    return oGameTree.Get_NodeReference(bStrong, oNode);
+};
+
+/**
+ * Выставляем стартовую ноду по заданной ссылке.
+ * @param {CGameTree} oGameTree - Ссылка на основной класс.
+ * @param {string} sMoveReference - Ссылка на стартовую ноду.
+ */
+CGoBoardApi.prototype.Set_StartNodeByReference = function(oGameTree, sMoveReference)
+{
+    if (oGameTree && sMoveReference)
+    {
+        var oCurNode = oGameTree.Get_CurNode();
+        oGameTree.GoTo_MoveReference(sMoveReference);
+        oGameTree.Set_StartNode(oGameTree.Get_CurNode());
+        oGameTree.GoTo_Node(oCurNode, true);
+    }
 };
 
 /**
@@ -582,6 +598,7 @@ CGoBoardApi.prototype['Set_Permissions']                      = CGoBoardApi.prot
 CGoBoardApi.prototype['Load_Sgf']                             = CGoBoardApi.prototype.Load_Sgf;
 CGoBoardApi.prototype['Save_Sgf']                             = CGoBoardApi.prototype.Save_Sgf;
 CGoBoardApi.prototype['Get_MoveReference']                    = CGoBoardApi.prototype.Get_MoveReference;
+CGoBoardApi.prototype['Set_StartNodeByReference']             = CGoBoardApi.prototype.Set_StartNodeByReference;
 CGoBoardApi.prototype['Is_Modified']                          = CGoBoardApi.prototype.Is_Modified;
 CGoBoardApi.prototype['Update_Size']                          = CGoBoardApi.prototype.Update_Size;
 CGoBoardApi.prototype['Set_Sound']                            = CGoBoardApi.prototype.Set_Sound;
