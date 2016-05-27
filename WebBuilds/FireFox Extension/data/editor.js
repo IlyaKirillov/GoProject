@@ -51,6 +51,7 @@ function FreshLoad()
 
 function OnDocumentReady()
 {
+    document.getElementById("divId").onfocus             = BodyFocus;
     document.getElementById("idButtonCacheLoad").onclick = LoadFromCache;
     document.getElementById("idButtonFreshLoad").onclick = FreshLoad;
 

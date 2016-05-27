@@ -27,6 +27,10 @@ function LoadFromCache()
 {
     var oFilesInfo = GetCachesFiles();
     GoBoardApi.Load_Sgf(oGameTree, oFilesInfo[sFilePath].File, null, oFilesInfo[sFilePath].MoveRef);
+
+    if (oFilesInfo[sFilePath].StartNodeRef)
+        GoBoardApi.Set_StartNodeByReference(oGameTree, oFilesInfo[sFilePath].StartNodeRef);
+
     document.title = GoBoardApi.Get_MatchName(oGameTree);
 
     document.getElementById("divCachedFile").style.display = "none";
@@ -62,6 +66,7 @@ function FreshLoad()
 
 function OnDocumentReady()
 {
+    document.getElementById("divId").onfocus             = BodyFocus;
     document.getElementById("idButtonCacheLoad").onclick = LoadFromCache;
     document.getElementById("idButtonFreshLoad").onclick = FreshLoad;
 
@@ -101,8 +106,9 @@ function OnDocumentClose()
     if (!oFilesInfo)
         oFilesInfo = {};
 
-    var sSgf     = GoBoardApi.Save_Sgf(oGameTree);
-    var sMoveRef = GoBoardApi.Get_MoveReference(oGameTree, false);
+    var sSgf          = GoBoardApi.Save_Sgf(oGameTree);
+    var sMoveRef      = GoBoardApi.Get_MoveReference(oGameTree, false);
+    var sStartNodeRef = GoBoardApi.Get_MoveReference(oGameTree, false, 1);
     if (sFilePath && "" !== sFilePath)
     {
         var nCurIndex = -1;
@@ -123,17 +129,19 @@ function OnDocumentClose()
 
         oFilesInfo[sFilePath] =
         {
-            Index   : 0,
-            File    : sSgf,
-            MoveRef : sMoveRef
+            Index        : 0,
+            File         : sSgf,
+            MoveRef      : sMoveRef,
+            StartNodeRef : sStartNodeRef
         };
     }
     else
     {
         oFilesInfo["default"] =
         {
-            File    : sSgf,
-            MoveRef : sMoveRef
+            File         : sSgf,
+            MoveRef      : sMoveRef,
+            StartNodeRef : sStartNodeRef
         };
     }
 
