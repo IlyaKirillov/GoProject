@@ -34,7 +34,7 @@ function LoadFromCache()
     document.title = GoBoardApi.Get_MatchName(oGameTree);
 
     document.getElementById("divCachedFile").style.display = "none";
-    document.getElementById("idBlurDiv").style.display = "none";
+    document.getElementById("idBlurDiv").style.display     = "none";
 
     bFreshLoad = false;
     BodyFocus();
