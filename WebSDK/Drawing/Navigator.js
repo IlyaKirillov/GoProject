@@ -15,8 +15,9 @@ function CDrawingNavigator(oDrawing)
     this.m_oGameTree = null;
     this.m_oMap      = new CNavigatorMap();
 
-    this.m_bNeedRedrawCurrent = true;
-    this.m_bNeedRedrawMap     = true;
+    this.m_bNeedRedrawCurrent     = true;
+    this.m_bNeedRedrawMap         = true;
+    this.m_bNeedRedrawGameCurrent = true;
 
     this.HtmlElement =
     {
@@ -77,6 +78,7 @@ function CDrawingNavigator(oDrawing)
         Triangle_WT   : null,
         Target        : null,
         Current       : null,
+        GameCurrent   : null,
         Shadow        : null,
         ShadowOff     : 0
     };
@@ -710,12 +712,18 @@ CDrawingNavigator.prototype.Update_Current = function(bScrollToCurPos)
         this.private_DrawMap();
     }
 };
+CDrawingNavigator.prototype.Update_GameCurrent = function()
+{
+    this.m_bNeedRedrawGameCurrent = true;
+};
 CDrawingNavigator.prototype.Draw = function()
 {
     if (this.m_bNeedRedrawCurrent)
         this.private_DrawCurrentOnTimer();
     if (this.m_bNeedRedrawMap)
         this.private_DrawMapOnTimer();
+    if (this.m_bNeedRedrawGameCurrent)
+        this.private_DrawGameCurrentOnTimer();
 };
 CDrawingNavigator.prototype.Need_Redraw = function()
 {
@@ -755,6 +763,7 @@ CDrawingNavigator.prototype.private_OnResize = function(W, H, bForce)
     this.private_DrawBackground(W, H, bForce);
     this.Update();
     this.Update_Current(true);
+    this.Update_GameCurrent();
 };
 CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
 {
@@ -1448,10 +1457,13 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
     var Size = 24;
     var Canvas = this.HtmlElement.Selection.Control.HtmlElement.getContext("2d");
 
-    this.m_oImageData.Target  = Canvas.createImageData(Size, Size);
-    this.m_oImageData.Current = Canvas.createImageData(Size, Size);
-    var TargetBitmap  = this.m_oImageData.Target.data;
-    var CurrentBitmap = this.m_oImageData.Current.data;
+    this.m_oImageData.Target      = Canvas.createImageData(Size, Size);
+    this.m_oImageData.Current     = Canvas.createImageData(Size, Size);
+    this.m_oImageData.GameCurrent = Canvas.createImageData(Size, Size);
+
+    var TargetBitmap      = this.m_oImageData.Target.data;
+    var CurrentBitmap     = this.m_oImageData.Current.data;
+    var GameCurrentBitmap = this.m_oImageData.GameCurrent.data;
 
     for (var Y = 0; Y < Size; Y++)
     {
@@ -1461,6 +1473,7 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
 
             TargetBitmap[Index + 3] = 255;
             CurrentBitmap[Index + 3] = 255;
+            GameCurrentBitmap[Index  + 3] = 255;
             if ((0 === X && Size - 1 === Y) || (Size - 1 === X && 0 === Y))
             {
                 TargetBitmap[Index + 0] = 135;
@@ -1470,6 +1483,10 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
                 CurrentBitmap[Index + 0] = 216;
                 CurrentBitmap[Index + 1] = 0;
                 CurrentBitmap[Index + 2] = 0;
+
+                GameCurrentBitmap[Index  + 0] = (0x2a * (216 / 255.0)) | 0;
+                GameCurrentBitmap[Index  + 1] = (0x75 * (216 / 255.0)) | 0;
+                GameCurrentBitmap[Index  + 2] = (0xf3 * (216 / 255.0)) | 0;
             }
             else if (Size - 1 === X || Size - 1 === Y)
             {
@@ -1480,6 +1497,10 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
                 CurrentBitmap[Index + 0] = 178;
                 CurrentBitmap[Index + 1] = 0;
                 CurrentBitmap[Index + 2] = 0;
+
+                GameCurrentBitmap[Index  + 0] = (0x2a * (178 / 255.0)) | 0;
+                GameCurrentBitmap[Index  + 1] = (0x75 * (178 / 255.0)) | 0;
+                GameCurrentBitmap[Index  + 2] = (0xf3 * (178 / 255.0)) | 0;
             }
             else if (0 === Y || 0 === X)
             {
@@ -1490,6 +1511,10 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
                 CurrentBitmap[Index + 0] = 255;
                 CurrentBitmap[Index + 1] = 0;
                 CurrentBitmap[Index + 2] = 0;
+
+                GameCurrentBitmap[Index  + 0] = 0x2a;
+                GameCurrentBitmap[Index  + 1] = 0x75;
+                GameCurrentBitmap[Index  + 2] = 0xf3;
             }
             else
             {
@@ -1500,12 +1525,17 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
                 CurrentBitmap[Index + 0] = 255;
                 CurrentBitmap[Index + 1] = 0;
                 CurrentBitmap[Index + 2] = 0;
+
+                GameCurrentBitmap[Index  + 0] = 0x2a;
+                GameCurrentBitmap[Index  + 1] = 0x75;
+                GameCurrentBitmap[Index  + 2] = 0xf3;
             }
         }
     }
 
     Canvas.putImageData(this.m_oImageData.Target, 0, 0);
     Canvas.putImageData(this.m_oImageData.Current, 0, 30);
+    Canvas.putImageData(this.m_oImageData.GameCurrent, 0, 60)
 };
 CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha, oStoneImageData)
 {
@@ -1929,7 +1959,42 @@ CDrawingNavigator.prototype.private_DrawCurrentOnTimer = function()
         Canvas.putImageData(this.m_oImageData.Current, RealX, RealY);
     }
 
+    this.private_DrawGameCurrentOnTimer();
+
     this.m_bNeedRedrawCurrent = false;
+};
+CDrawingNavigator.prototype.private_DrawGameCurrentOnTimer = function()
+{
+    if (!this.m_oGameTree)
+        return;
+
+    var W = this.m_oImageData.W;
+    var H = this.m_oImageData.H;
+
+    if (W <= 0 || H <= 0)
+        return;
+
+    this.m_bNeedRedrawGameCurrent = false;
+
+    var oCurNode     = this.m_oGameTree.Get_CurNode();
+    var oGameCurNode = this.m_oGameTree.Get_GameCurNode();
+    if (null === oGameCurNode || oGameCurNode === oCurNode)
+        return;
+
+
+    var oCurNodePos = oGameCurNode.Get_NavigatorInfo();
+    var X = oCurNodePos.X, Y = oCurNodePos.Y;
+
+    var RealX = 10 + this.m_oOffset.X + X * 24;
+    var RealY = 10 + this.m_oOffset.Y + Y * 24;
+
+    var Canvas = this.HtmlElement.Current.Control.HtmlElement.getContext("2d");
+    //Canvas.clearRect(0, 0, W, H);
+
+    if (RealX  >= -24 && RealX <= W + 24 && RealY >= -24 && RealY <= H + 24)
+    {
+        Canvas.putImageData(this.m_oImageData.GameCurrent, RealX, RealY);
+    }
 };
 CDrawingNavigator.prototype.private_GetSettings_TrueColorBoard = function()
 {

@@ -37,6 +37,7 @@ function CGameTree(Drawing)
     this.m_oFirstNode        = new CNode(this);   // Первая нода
     this.m_oCurNode          = this.m_oFirstNode; // Текущая нода
     this.m_oStartNode        = this.m_oFirstNode; // Стартовая нода для просмотра файла
+    this.m_oGameCurNode      = null;              // Активная нода в онлайн игре
 
     this.m_nBlackCapt        = 0; // количество пленников черного игрока
     this.m_nWhiteCapt        = 0; // количество пленников белого игрока
@@ -641,6 +642,14 @@ CGameTree.prototype.Set_CurNode = function(oNode)
         this.m_oHandler.Set_CurNode(oNode.Get_Id());
 
     this.m_oCurNode = oNode;
+};
+CGameTree.prototype.Set_GameCurNode = function(oNode)
+{
+    this.m_oGameCurNode = oNode;
+};
+CGameTree.prototype.Get_GameCurNode = function()
+{
+    return this.m_oGameCurNode;
 };
 CGameTree.prototype.Add_Move = function(X, Y, Value)
 {
