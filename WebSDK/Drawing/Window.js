@@ -453,6 +453,8 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCloseButton.m_oActiveFColor = new CColor(153, 61, 61, 255);
 
     this.HtmlElement.CloseButton = oCloseButton;
+
+    this.private_UpdateSize();
 };
 CDrawingWindow.prototype.Update_Size = function(bForce)
 {
@@ -536,13 +538,6 @@ CDrawingWindow.prototype.protected_UpdateSizeAndPosition = function(oDrawing)
     this.m_oDrawing = oDrawing;
     var oWindowDiv = this.HtmlElement.Control.HtmlElement;
 
-    var oSize = this.Get_DefaultWindowSize();
-    if (null !== oSize && undefined !== oSize)
-    {
-        oWindowDiv.style.width  = oSize.W + "px";
-        oWindowDiv.style.height = oSize.H + "px";
-    }
-
     var nWindowW = parseInt(oWindowDiv.style.width);
     var nWindowH = parseInt(oWindowDiv.style.height);
 
@@ -551,6 +546,16 @@ CDrawingWindow.prototype.protected_UpdateSizeAndPosition = function(oDrawing)
 
     oWindowDiv.style.left = nX + "px";
     oWindowDiv.style.top  = nY + "px";
+};
+CDrawingWindow.prototype.private_UpdateSize = function()
+{
+    var oWindowDiv = this.HtmlElement.Control.HtmlElement;
+    var oSize = this.Get_DefaultWindowSize();
+    if (null !== oSize && undefined !== oSize)
+    {
+        oWindowDiv.style.width  = oSize.W + "px";
+        oWindowDiv.style.height = oSize.H + "px";
+    }
 };
 CDrawingWindow.prototype.Get_DefaultWindowSize = function()
 {

@@ -594,6 +594,28 @@ CCommon.prototype.Create_DivElement = function(oParentElement, sName)
     oParentElement.appendChild(oElement);
     return oElement;
 };
+CCommon.prototype.Compare_Strings = function(sString1, sString2)
+{
+	if (!sString1)
+		return -1;
+
+	if (!sString2)
+		return 1;
+
+	var sStr1 = sString1.toLowerCase();
+	var sStr2 = sString2.toLowerCase();
+
+	if (sStr1 < sStr2)
+		return -1;
+	else if (sStr1 > sStr2)
+		return 1;
+	else if (sString1 < sString2)
+		return -1;
+	else if (sString1 > sString2)
+		return 1;
+
+	return 0;
+};
 
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
