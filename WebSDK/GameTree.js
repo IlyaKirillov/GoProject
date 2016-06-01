@@ -939,6 +939,9 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         // Очистим доску от отметок и комментариев предыдущей ноды
         this.m_oDrawingBoard.Remove_AllMarks();
         this.Show_Variants();
+        
+        if (this.m_oCurNode.Is_TerritoryForceUse())
+            this.m_oBoard.Init_CountScores();
     }
 
     for (var CommandIndex = 0, CommandsCount = this.m_oCurNode.Get_CommandsCount(); CommandIndex < CommandsCount; CommandIndex++)
@@ -1092,8 +1095,17 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         else
             this.m_oDrawingBoard.Set_LastMoveMark(-1, -1);
 
-        if (this.m_oCurNode.Is_TerritoryUse())
+        if (this.m_oCurNode.Is_TerritoryForceUse())
+        {
+            this.m_oCurNode.Fill_TerritoryToLogicBoard(this.m_oBoard);
+            this.Count_Scores();
+            this.m_oDrawing.m_eMode = EBoardMode.CountScores;
+            this.Update_InterfaceState();
+        }
+        else if (this.m_oCurNode.Is_TerritoryUse())
+        {
             this.m_oDrawingBoard.Set_Mode(EBoardMode.CountScores);
+        }
 
         this.m_oDrawingBoard.Draw_Marks();
         this.m_oCurNode.Draw_ColorMap(this.m_oDrawingBoard);

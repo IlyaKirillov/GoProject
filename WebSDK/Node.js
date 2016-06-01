@@ -230,9 +230,17 @@ CNode.prototype.Is_TerritoryUse = function()
 {
     return this.m_oTerritory.Is_Use();
 };
+CNode.prototype.Is_TerritoryForceUse = function()
+{
+    return this.m_oTerritory.Is_ForceUse();
+};
 CNode.prototype.Set_TerritoryUse = function(Use)
 {
     this.m_oTerritory.Set_Use(Use);
+};
+CNode.prototype.Set_TerritoryForceUse = function(Use)
+{
+    this.m_oTerritory.Set_ForceUse(Use);
 };
 CNode.prototype.Add_TerritoryPoint = function(Pos, Value)
 {

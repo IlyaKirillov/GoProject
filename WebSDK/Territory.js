@@ -9,17 +9,29 @@
 
 function CTerritory(Use, Points)
 {
-    this.m_bUse    = Use;
-    this.m_aPoints = Points;
+    this.m_bUse      = Use;
+    this.m_aPoints   = Points;
+    this.m_bForceUse = false;
 }
 
 CTerritory.prototype.Is_Use = function()
 {
+    if (true === this.Is_ForceUse())
+        return true;
+
     return this.m_bUse;
+};
+CTerritory.prototype.Is_ForceUse = function()
+{
+    return this.m_bForceUse;
 };
 CTerritory.prototype.Set_Use = function(Use)
 {
     this.m_bUse = Use;
+};
+CTerritory.prototype.Set_ForceUse = function(Use)
+{
+    this.m_bForceUse = Use;
 };
 CTerritory.prototype.Add_Point = function(Pos, Value)
 {
@@ -34,7 +46,7 @@ CTerritory.prototype.Fill_PointsToLogicBoard = function(LogicBoard)
     for (var Place in this.m_aPoints)
     {
         var Pos = Common_ValuetoXY(parseInt(Place));
-        Board.Set_ScorePoint(Pos.X, Pos.X, this.m_aPoints[Pos]);
+        LogicBoard.Set_ScorePoint(Pos.X, Pos.Y, this.m_aPoints[Place]);
     }
 };
 CTerritory.prototype.Fill_PointsFromLogicBoard = function(LogicBoard)
