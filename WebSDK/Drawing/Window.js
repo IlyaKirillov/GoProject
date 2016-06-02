@@ -263,6 +263,7 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oMainDiv.style.border          = "1px solid " + this.m_oOuterBorderColor.ToString();
     oMainDiv.style.backgroundColor = this.m_oBackColor.ToString();
     oMainDiv.style.boxSizing       = "content-box";
+    oMainDiv.style.boxShadow       = "0px 1px 15px rgba(0,0,0,0.8)";
 
     // InnerDiv
     var sInnerDivId                     = sDivId + "_Inner";
@@ -492,7 +493,7 @@ CDrawingWindow.prototype.Show = function(oPr)
     var nLeft = parseInt(oDiv.style.left);
     var nTop  = parseInt(oDiv.style.top);
 
-    if (oPr.Drawing)
+    if (oPr && oPr.Drawing)
     {
         var oDrawing = oPr.Drawing;
         var DrawingW = oDrawing.Get_Width();
