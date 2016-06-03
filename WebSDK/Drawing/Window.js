@@ -41,6 +41,8 @@ function CDrawingWindow()
 
     this.m_bVisible = false;
 
+    this.m_sWindowId = null;
+
     var oThis = this;
 
     this.private_OnDragLeftHandler = function()
@@ -255,6 +257,7 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     var oThis = this;
 
     this.m_bVisible = true;
+    this.m_sWindowId = sDivId;
 
     this.HtmlElement.Control = CreateControlContainer(sDivId);
     var oMainDiv             = this.HtmlElement.Control.HtmlElement;
@@ -456,6 +459,10 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     this.HtmlElement.CloseButton = oCloseButton;
 
     this.private_UpdateSize();
+};
+CDrawingWindow.prototype.Get_Id = function()
+{
+    return this.m_sWindowId;
 };
 CDrawingWindow.prototype.Update_Size = function(bForce)
 {
