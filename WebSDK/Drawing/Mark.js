@@ -35,7 +35,7 @@ CDrawingMark.prototype.Get_Pos = function()
 CDrawingMark.prototype.Get_X = function()
 {
     return this.m_oPos.X;
-}
+};
 CDrawingMark.prototype.Get_Y = function()
 {
     return this.m_oPos.Y;

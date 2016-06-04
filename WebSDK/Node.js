@@ -246,6 +246,10 @@ CNode.prototype.Add_TerritoryPoint = function(Pos, Value)
 {
     this.m_oTerritory.Add_Point(Pos, Value);
 };
+CNode.prototype.Remove_TerritoryPoint = function(Pos)
+{
+    this.m_oTerritory.Remove_Point(Pos);
+};
 CNode.prototype.Clear_TerritoryPoints = function()
 {
     this.m_oTerritory.Clear_Points();

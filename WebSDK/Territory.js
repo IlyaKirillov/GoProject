@@ -37,6 +37,10 @@ CTerritory.prototype.Add_Point = function(Pos, Value)
 {
     this.m_aPoints["" + Pos] = Value;
 };
+CTerritory.prototype.Remove_Point = function(Pos)
+{
+    delete this.m_aPoints["" + Pos];
+};
 CTerritory.prototype.Clear_Points = function()
 {
     this.m_aPoints = {};
