@@ -267,6 +267,10 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oMainDiv.style.backgroundColor = this.m_oBackColor.ToString();
     oMainDiv.style.boxSizing       = "content-box";
     oMainDiv.style.boxShadow       = "0px 1px 15px rgba(0,0,0,0.8)";
+    oMainDiv.addEventListener("mousedown", function()
+    {
+        oThis.private_OnFocus();
+    }, false);
 
     // InnerDiv
     var sInnerDivId                     = sDivId + "_Inner";
@@ -574,6 +578,9 @@ CDrawingWindow.prototype.Is_Visible = function()
     return this.m_bVisible;
 };
 CDrawingWindow.prototype.Update = function()
+{
+};
+CDrawingWindow.prototype.private_OnFocus = function()
 {
 };
 
