@@ -17,6 +17,8 @@ function CBoardSound()
     this.Capture5   = null;
     this.CaptureN   = null;
 
+    this.NewMessage = null;
+
     this.m_bIE      = false;
     this.m_bOn      = true;
 }
@@ -38,6 +40,7 @@ CBoardSound.prototype.Init = function(sPath, bIE)
     this.Capture3   = this.private_AddSound(oBody, "GoBoardApiSoundCapture3",   sPath + "/Capture3.mp3");
     this.Capture5   = this.private_AddSound(oBody, "GoBoardApiSoundCapture5",   sPath + "/Capture5.mp3");
     this.CaptureN   = this.private_AddSound(oBody, "GoBoardApiSoundCaptureN",   sPath + "/CaptureN.mp3");
+    this.NewMessage = this.private_AddSound(oBody, "GoBoardApiSoundNewMessage", sPath + "/NewMessage.mp3");
 };
 CBoardSound.prototype.Play_PlaceStone = function()
 {
@@ -54,6 +57,10 @@ CBoardSound.prototype.Play_CaptureStones = function(nCount)
     else
         this.private_PlaySound(this.CaptureN);
 
+};
+CBoardSound.prototype.Play_NewMessage = function()
+{
+    this.private_PlaySound(this.NewMessage);
 };
 CBoardSound.prototype.On = function()
 {

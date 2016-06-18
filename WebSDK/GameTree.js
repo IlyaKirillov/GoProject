@@ -1296,6 +1296,10 @@ CGameTree.prototype.Set_Sound = function(sPath)
 {
     this.m_oSound.Init(sPath);
 };
+CGameTree.prototype.Set_SoundClass = function(oSound)
+{
+    this.m_oSound = oSound;
+};
 CGameTree.prototype.GoTo_Node = function(Node, bForce)
 {
     if (!(this.m_nEditingFlags & EDITINGFLAGS_MOVE) && true !== bForce)
