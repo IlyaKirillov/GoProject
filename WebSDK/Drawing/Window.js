@@ -588,8 +588,11 @@ function CDrawingConfirmWindow()
 {
     CDrawingConfirmWindow.superclass.constructor.call(this);
 
-    this.HtmlElement.OKButton     = null;
-    this.HtmlElement.CancelButton = null;
+    this.HtmlElement.OKButton            = null;
+    this.HtmlElement.CancelButton        = null;
+    this.HtmlElement.OkButtonControl     = null;
+    this.HtmlElement.CancelButtonControl = null;
+    this.HtmlElement.OkCancelDiv         = null;
 
     this.HtmlElement.ConfirmInnerDiv     = null;
     this.HtmlElement.ConfirmInnerControl = null;
@@ -627,6 +630,7 @@ CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
     // TODO: Цвета должны быть из темы
     oButtonsDiv.style.borderTop = "1px solid rgb(172,172,172)";
     oButtonsDiv.style.backgroundColor = "rgb(240,240,240)";
+    this.HtmlElement.OkCancelDiv = oButtonsDiv;
 
     // Butttons OK Cancel
 
@@ -639,6 +643,7 @@ CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
     var oDrawingButttonOK = new CDrawingButtonOK(this.m_oDrawing);
     oDrawingButttonOK.Init(sButtonOk, this);
     this.HtmlElement.OKButton = oDrawingButttonOK;
+    this.HtmlElement.OkButtonControl = oButtonOkControl;
 
     oDrawingButttonOK.m_oNormaBColor    = new CColor(234, 234, 234, 255); // 229,229,229 -> 240,240,240
     oDrawingButttonOK.m_oNormaFColor    = new CColor(172, 172, 172, 255);
@@ -658,6 +663,7 @@ CDrawingConfirmWindow.prototype.Init = function(_sDivId, bResizable)
     var oDrawingButttonCancel = new CDrawingButtonCancel(this.m_oDrawing);
     oDrawingButttonCancel.Init(sButtonCancel, this);
     this.HtmlElement.CancelButton = oDrawingButttonCancel;
+    this.HtmlElement.CancelButtonControl = oButtonCancelControl;
 
     oDrawingButttonCancel.m_oNormaBColor    = new CColor(234, 234, 234, 255); // 229,229,229 -> 240,240,240
     oDrawingButttonCancel.m_oNormaFColor    = new CColor(172, 172, 172, 255);
