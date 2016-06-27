@@ -775,7 +775,7 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     this.HtmlElement2.Transcriber = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Transcriber", oGameTree.Get_GameTranscriber(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
 
-    this.HtmlElement2.Transcriber = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game Info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.GameInfo = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game Info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
     TopOffset += 3 * RowHeight;
 
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
@@ -941,6 +941,37 @@ CDrawingInfoWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, 
     oValueElement.value = sValue;
 
     return oValueElement;
+};
+CDrawingInfoWindow.prototype.Show = function(oPr)
+{
+    CDrawingInfoWindow.superclass.Show.call(this, oPr);
+
+    var oGameTree = this.m_oGameTree;
+
+    this.HtmlElement2.GameName.value     = oGameTree.Get_GameName();
+    this.HtmlElement2.Result.value       = oGameTree.Get_Result();
+    this.HtmlElement2.Rules.value        = oGameTree.Get_Rules();
+    this.HtmlElement2.Komi.value         = oGameTree.Get_Komi();
+    this.HtmlElement2.Handicap.value     = oGameTree.Get_Handicap();
+    this.HtmlElement2.TimeSettings.value = oGameTree.Get_TimeLimit() + (oGameTree.Get_OverTime() === "" ? "" : " + " + oGameTree.Get_OverTime());
+
+    this.HtmlElement2.BlackName.value = oGameTree.Get_BlackName();
+    this.HtmlElement2.BlackRank.value = oGameTree.Get_BlackRating();
+    this.HtmlElement2.WhiteName.value = oGameTree.Get_WhiteName();
+    this.HtmlElement2.WhiteRank.value = oGameTree.Get_WhiteRating();
+
+    this.HtmlElement2.Copyright.value = oGameTree.Get_Copyright();
+    this.HtmlElement2.Date.value      = oGameTree.Get_DateTime();
+    this.HtmlElement2.Event.value     = oGameTree.Get_GameEvent();
+    this.HtmlElement2.Round.value     = oGameTree.Get_GameRound();
+    this.HtmlElement2.Place.value     = oGameTree.Get_GamePlace();
+
+    this.HtmlElement2.Annotator.value   = oGameTree.Get_GameAnnotator();
+    this.HtmlElement2.Fuseki.value      = oGameTree.Get_GameFuseki();
+    this.HtmlElement2.Source.value      = oGameTree.Get_GameSource();
+    this.HtmlElement2.Transcriber.value = oGameTree.Get_GameTranscriber();
+
+    this.HtmlElement2.GameInfo.value  = oGameTree.Get_GameInfo();
 };
 
 function CDrawingErrorWindow()
