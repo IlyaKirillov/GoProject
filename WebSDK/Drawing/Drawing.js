@@ -1871,10 +1871,10 @@ CDrawing.prototype.Get_TemplateType = function()
     return this.m_eTemplateType;
 };
 
-CDrawing.prototype.Create_GoUniverseViewerTemplate = function(sDivId, oApp, nGameRoomId)
+CDrawing.prototype.Create_GoUniverseViewerTemplate = function(sDivId, oApp, oTab)
 {
     this.m_oGoUniverseApp = oApp;
-    this.m_nGameRoomId    = nGameRoomId;
+    this.m_oVisualTab     = oTab;
 
     this.private_CreateWrappingMainDiv(sDivId);
     this.private_GoUniverseCreateHorFullTemplate();
@@ -1886,7 +1886,6 @@ CDrawing.prototype.private_GoUniverseCreateHorFullTemplate = function()
     var oMainControl = this.m_oMainControl;
     var sMainDivId   = this.m_oMainDiv.id;
     var sDivId       = sMainDivId;
-    var bIsEmbedding = oGameTree.Get_LocalSettings().Is_Embedding();
 
     this.m_nMixedRightSide = 344;
 
@@ -1896,8 +1895,8 @@ CDrawing.prototype.private_GoUniverseCreateHorFullTemplate = function()
     var oDrawingBoard = new CDrawingBoard(this);
     oMainControl.Set_Type(1, oDrawingBoard, {RMin : this.m_nMixedRightSide});
 
-    var sBoardDivId = sDivId + "_Board";
-    var sPanelDivId = sDivId + "_Panel";
+    var sBoardDivId = sDivId + "B";
+    var sPanelDivId = sDivId + "P";
 
     this.private_CreateDiv(oMainControl.HtmlElement, sBoardDivId);
     this.private_CreateDiv(oMainControl.HtmlElement, sPanelDivId);
@@ -2057,13 +2056,13 @@ CDrawing.prototype.private_GoUniverseCreateHorFullTemplate = function()
     var oThis = this;
     oChatInputArea.addEventListener("keydown", function(e)
     {
-        if (13 === e.keyCode && true !== e.ctrlKey && true !== e.shiftKey && oThis.m_oGoUniverseApp && oThis.m_nGameRoomId)
+        if (13 === e.keyCode && true !== e.ctrlKey && true !== e.shiftKey && oThis.m_oGoUniverseApp && oThis.m_oVisualTab)
         {
             if ("" !== oChatInputArea.value)
             {
                 var sMessage = oChatInputArea.value;
                 sMessage = sMessage.replace(/\u000A/g, String.fromCharCode(0xFF0A));
-                oThis.m_oGoUniverseApp.SendChatMessageInGameRoom(oThis.m_nGameRoomId, sMessage);
+                oThis.m_oGoUniverseApp.SendChatMessageInGameRoom(oThis.m_oVisualTab.GetId(), sMessage);
             }
 
             oChatInputArea.value = "";
