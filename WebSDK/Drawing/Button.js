@@ -2130,7 +2130,7 @@ CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(o
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка меню
 //----------------------------------------------------------------------------------------------------------------------
-function CDrawingButtonFileMenu(oDrawing)
+function CDrawingButtonFileMenu(oDrawing, bNoLoad)
 {
     CDrawingButtonFileMenu.superclass.constructor.call(this, oDrawing);
 
@@ -2161,18 +2161,23 @@ function CDrawingButtonFileMenu(oDrawing)
     oMainDiv.appendChild(oMenuElementWrapper);
 
     var oThis = this;
-    this.private_CreateMenuItem(oMenuElementWrapper, "Create New", function()
+
+    if (true !== bNoLoad)
     {
-        CreateWindow(oMainDiv.id, EWindowType.CreateNew, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
-    });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Load from disk", function()
-    {
-        Common.OpenFileDialog(oGameTree);
-    });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Load from clipboard", function()
-    {
-        CreateWindow(oMainDiv.id, EWindowType.Clipboard, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
-    });
+        this.private_CreateMenuItem(oMenuElementWrapper, "Create New", function()
+        {
+            CreateWindow(oMainDiv.id, EWindowType.CreateNew, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+        });
+        this.private_CreateMenuItem(oMenuElementWrapper, "Load from disk", function()
+        {
+            Common.OpenFileDialog(oGameTree);
+        });
+        this.private_CreateMenuItem(oMenuElementWrapper, "Load from clipboard", function()
+        {
+            CreateWindow(oMainDiv.id, EWindowType.Clipboard, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+        });
+    }
+
     this.private_CreateMenuItem(oMenuElementWrapper, "Download as SGF", function()
     {
         if (FileReader && Blob)

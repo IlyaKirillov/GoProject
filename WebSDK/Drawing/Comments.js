@@ -50,6 +50,7 @@ CDrawingComments.prototype.Init = function(sDivId, oGameTree)
     oAreaElement.style.outline = "none";
     oAreaElement.style.margin  = "0px";
     oAreaElement.style.border  = "1px solid rgb(172,172,172)";
+    oAreaElement.style.overflowY = "auto";
 
     var oDivControl = this.HtmlElement.Control;
     this.HtmlElement.TextArea.Control = CreateControlContainer(sAreaName);
@@ -407,4 +408,80 @@ CDrawingViewerTitle.prototype.Update_Size = function()
 CDrawingViewerTitle.prototype.private_Update = function()
 {
     Common.Set_InnerTextToElement(this.HtmlElement.TitleDiv, "" + this.m_sTitle);
+};
+
+
+function CGoUniverseDrawingComments(oDrawing)
+{
+    this.m_oDrawing  = oDrawing;
+    this.m_oGameTree = null;
+    this.HtmlElement =
+    {
+        Control  : null,
+        TextArea : {Control : null}
+    };
+
+    var oThis = this;
+
+    this.private_OnValueChange = function()
+    {
+        oThis.private_OnChangeComment();
+    };
+}
+
+CGoUniverseDrawingComments.prototype.Init = function(sDivId, oGameTree)
+{
+    this.m_oGameTree = oGameTree;
+
+    this.HtmlElement.Control = CreateControlContainer(sDivId);
+    var oDivElement = this.HtmlElement.Control.HtmlElement;
+
+    oDivElement.style.background = new CColor(217, 217, 217, 255).ToString();
+    oDivElement.style.boxSizing = "content-box";
+
+    var sAreaName = sDivId + "_TextArea";
+
+    // Создаем TextArea
+    var oAreaElement = document.createElement("textarea");
+    oAreaElement.setAttribute("id", sAreaName);
+    oAreaElement.setAttribute("style", "position:absolute;padding:0;margin:0;resize:none;outline: none;-moz-appearance: none;padding:2px;");
+    oDivElement.appendChild(oAreaElement);
+
+    oAreaElement['onchange']      = this.private_OnValueChange;
+    oAreaElement['onblur']        = this.private_OnValueChange;
+    oAreaElement.style.outline    = "none";
+    oAreaElement.style.margin     = "0px";
+    oAreaElement.style.border     = "1px solid rgb(172,172,172)";
+    oAreaElement.style.fontFamily = "'Segoe UI',Helvetica,Tahoma,Geneva,Verdana,sans-serif";
+    oAreaElement.disabled         = "disabled";
+    oAreaElement.style.color      = "rgb(0, 0, 0)";
+
+    var oDivControl = this.HtmlElement.Control;
+    this.HtmlElement.TextArea.Control = CreateControlContainer(sAreaName);
+    var oTextAreaControl = this.HtmlElement.TextArea.Control;
+    oTextAreaControl.Bounds.SetParams(0, 0, 0, 0, true, true, true, true, -1,-1);
+    oTextAreaControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom | g_anchor_right);
+    oDivControl.AddControl(oTextAreaControl);
+
+    oAreaElement.value = "Test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test testtest test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test";
+
+    if (this.m_oDrawing)
+        this.m_oDrawing.Register_Comments(this);
+
+    this.Update_Size();
+};
+CGoUniverseDrawingComments.prototype.Update_Comments = function(sComments)
+{
+    this.HtmlElement.TextArea.Control.HtmlElement.value = sComments;
+};
+CGoUniverseDrawingComments.prototype.Update_Size = function()
+{
+    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
+    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
+
+    this.HtmlElement.Control.Resize(W, H);
+};
+CGoUniverseDrawingComments.prototype.private_OnChangeComment = function()
+{
+    this.m_oGameTree.Set_Comment(this.HtmlElement.TextArea.Control.HtmlElement.value);
 };
