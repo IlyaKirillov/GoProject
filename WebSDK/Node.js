@@ -38,6 +38,7 @@ function CNode(oGameTree)
     this.m_oNavInfo   = {X : -1, Y : -1, Num : -1};// Позиция данной ноды в навигаторе и номер данного хода
     this.m_bLoaded    = false;                     // Была ли данная нода в исходном загруженном файле.
     this.m_oColorMap  = {};                        // Карта цветов
+    this.m_nMoveNumber= -1;
 }
 CNode.prototype.Get_Id = function()
 {
@@ -749,6 +750,29 @@ CNode.prototype.Get_FirstNode = function()
         oCurNode = oCurNode.Get_Prev();
 
     return oCurNode;
+};
+CNode.prototype.Get_MoveNumber = function()
+{
+    if (-1 === this.m_nMoveNumber)
+    {
+        var nMoveNumber = 0;
+        var oNode = this;
+        var oPrevNode = oNode.Get_Prev();
+        if (oNode.Have_Move())
+            nMoveNumber++;
+
+        while (null !== oPrevNode)
+        {
+            oNode = oPrevNode;
+            oPrevNode = oNode.Get_Prev();
+            if (oNode.Have_Move())
+                nMoveNumber++;
+        }
+
+        this.m_nMoveNumber = nMoveNumber;
+    }
+
+    return this.m_nMoveNumber;
 };
 //----------------------------------------------------------------------------------------------------------------------
 // Функции, которые приходят из вне
