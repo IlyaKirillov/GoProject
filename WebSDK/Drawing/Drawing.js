@@ -652,6 +652,8 @@ function CDrawing(oGameTree)
     this.m_nVerEditorToolbarH = 0;
     this.m_nVerEditorComNavH  = 0;
 
+    this.m_arrStateHandlers = [];
+
     this.private_OnMainDivClick = function()
     {
         if (oThis.m_oSelectBoardModeButton)
@@ -1768,6 +1770,13 @@ CDrawing.prototype.Update_InterfaceState = function(oIState)
         this.m_oWindows.Kifu.Update_NextMove();
 
     this.Update_ColorsCounter();
+
+    for (var nIndex = 0, nCount = this.m_arrStateHandlers.length; nIndex < nCount; ++nIndex)
+    {
+        var oHandler = this.m_arrStateHandlers[nIndex];
+        if (oHandler && oHandler.OnGameTreeStateChange)
+            oHandler.OnGameTreeStateChange(this.m_oGameTree, oIState);
+    }
 };
 CDrawing.prototype.Update_Comments = function(sComment)
 {
@@ -1869,6 +1878,10 @@ CDrawing.prototype.Get_DivHeightByWidth = function(nWidth)
 CDrawing.prototype.Get_TemplateType = function()
 {
     return this.m_eTemplateType;
+};
+CDrawing.prototype.Add_StateHandler = function(oHandler)
+{
+    this.m_arrStateHandlers.push(oHandler);
 };
 
 
