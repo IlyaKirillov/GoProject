@@ -654,6 +654,8 @@ function CDrawing(oGameTree)
 
     this.m_arrStateHandlers = [];
 
+    this.m_nRequestFrame = null;
+
     this.private_OnMainDivClick = function()
     {
         if (oThis.m_oSelectBoardModeButton)
@@ -667,7 +669,7 @@ function CDrawing(oGameTree)
     };
     this.private_OnTimerDraw = function()
     {
-        Common_RequestAnimationFrame(oThis.private_OnTimerDraw);
+        oThis.m_nRequestFrame = setTimeout(oThis.private_OnTimerDraw, 1000 / 60);// Common_RequestAnimationFrame(oThis.private_OnTimerDraw);
 
         if (oThis.m_oNavigator && oThis.m_oNavigator.Need_Redraw())
         {
@@ -680,6 +682,35 @@ function CDrawing(oGameTree)
 
     this.private_OnTimerDraw();
 }
+CDrawing.prototype.Destroy = function()
+{
+    // if (this.m_nRequestFrame)
+    //     Common_CancelAnimationFrame(this.m_nRequestFrame);
+
+    if (this.m_nRequestFrame)
+        clearTimeout(this.m_nRequestFrame);
+
+    if (this.m_oBoard)
+    {
+        this.m_oBoard.Clear_Board();
+        this.m_oBoard.m_oImageData = null;
+        this.m_oBoard.HtmlElement = null;
+    }
+
+    this.m_oBoard     = null;
+    this.m_oNavigator = null;
+
+    var oGameTree = this.m_oGameTree;
+    if (oGameTree)
+    {
+        oGameTree.m_oDrawingBoard     = null;
+        oGameTree.m_oDrawingNavigator = null;
+    }
+
+    this.m_oGameTree = null;
+
+    this.m_aElements = [];
+};
 CDrawing.prototype.Disable = function()
 {
     if (this.m_oMainDiv)

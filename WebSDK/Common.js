@@ -368,13 +368,12 @@ function CommonExtend(Child, Parent)
 
 var Common_RequestAnimationFrame = (window['requestAnimationFrame'] ? window['requestAnimationFrame'] : (function()
 {
-    return window['webkitRequestAnimationFrame'] ||
-           window['oRequestAnimationFrame']      ||
-           window['msRequestAnimationFrame']     ||
-           function(callback)
-           {
-               window.setTimeout(callback, 1000 / 60);
-           };
+    return window.setTimeout(callback, 1000 / 60);
+})());
+
+var Common_CancelAnimationFrame = (window['cancelAnimationFrame'] ? window['cancelAnimationFrame']: (function(nId)
+{
+    window.clearTimeout(nId);
 })());
 
 function CCommon()

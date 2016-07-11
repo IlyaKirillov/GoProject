@@ -385,6 +385,17 @@ CControlContainer.prototype.Clear = function()
     this.DrawingElement = null;
     this.RMin           = 400;
 };
+CControlContainer.prototype.RemoveControl = function(oControl)
+{
+	for (var nIndex = 0, nCount = this.Controls.length; nIndex < nCount; ++nIndex)
+	{
+		if (oControl === this.Controls[nIndex])
+		{
+			this.Controls.splice(nIndex, 1);
+			return;
+		}
+	}
+};
 
 function CreateControlContainer(name)
 {

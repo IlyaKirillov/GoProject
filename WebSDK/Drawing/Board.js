@@ -247,17 +247,28 @@ function CDrawingBoard(oDrawing)
     };
     this.private_StartDrawingTimer = function()
     {
-        return setTimeout(function()
-        {
-            oThis.private_CreateTrueColorBoard();
-            oThis.private_CreateLines();
-            oThis.private_CreateTrueColorStones();
-            oThis.private_CreateShadows();
-            oThis.private_CreateMarks();
-            oThis.private_OnResize();
+        oThis.private_CreateTrueColorBoard();
+        oThis.private_CreateLines();
+        oThis.private_CreateTrueColorStones();
+        oThis.private_CreateShadows();
+        oThis.private_CreateMarks();
+        //oThis.private_OnResize();
 
-            oThis.m_oImageData.ResizeBoard = oThis.Get_FullImage(true);
-        }, 20);
+        oThis.m_oImageData.ResizeBoard = oThis.Get_FullImage(true);
+
+        return null;
+
+        // return setTimeout(function()
+        // {
+        //     oThis.private_CreateTrueColorBoard();
+        //     oThis.private_CreateLines();
+        //     oThis.private_CreateTrueColorStones();
+        //     oThis.private_CreateShadows();
+        //     oThis.private_CreateMarks();
+        //     oThis.private_OnResize();
+		//
+        //     oThis.m_oImageData.ResizeBoard = oThis.Get_FullImage(true);
+        // }, 20);
     };
     this.private_OnDragover = function(e)
     {
@@ -872,6 +883,20 @@ CDrawingBoard.prototype.private_OnResize = function(bForce)
 {
     var W = this.HtmlElement.Board.Control.HtmlElement.width;
     var H = this.HtmlElement.Board.Control.HtmlElement.height;
+
+    // this.private_DrawSimpleBoard(W, H);
+    // return;
+
+    if (0 === W || 0 === H)
+        return;
+
+    this.m_oImageData.W = W;
+    this.m_oImageData.H = H;
+
+    this.private_StartDrawingTimer();
+    this.private_DrawTrueColorFullBoard();
+
+    return;
 
     if (W != this.m_oImageData.W || H != this.m_oImageData.H || null === this.m_oImageData.Board || null !== this.m_oCreateWoodyId || true === bForce)
     {
