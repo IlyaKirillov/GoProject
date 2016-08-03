@@ -775,7 +775,7 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     this.HtmlElement2.Transcriber = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Transcriber", oGameTree.Get_GameTranscriber(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
 
-    this.HtmlElement2.GameInfo = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game Info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.GameInfo = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
     TopOffset += 3 * RowHeight;
 
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
@@ -1134,7 +1134,7 @@ CDrawingSettingsWindow.prototype.private_CreateAppearancePage = function(oDiv, o
     var oDivMainPart = this.private_CreatePage(oDiv);
     var sDivId       = this.HtmlElement.ConfirmInnerDiv.id + "A";
 
-    this.HtmlElement2.ShowTarget           = this.private_CreateCheckBox(oDivMainPart, sDivId + "T", this.m_oGameTree.Is_ShowTarget(), "Show Target");
+    this.HtmlElement2.ShowTarget           = this.private_CreateCheckBox(oDivMainPart, sDivId + "T", this.m_oGameTree.Is_ShowTarget(), "Show target");
     this.HtmlElement2.CycleThroughVariants = this.private_CreateCheckBox(oDivMainPart, sDivId + "C", this.m_oGameTree.Is_CycleThroughVariants(), "Cycle through variants");
     this.HtmlElement2.Sound                = this.private_CreateCheckBox(oDivMainPart, sDivId + "S", this.m_oGameTree.Is_SoundOn(), "Sound");
     this.HtmlElement2.NavigatorLabel       = this.private_CreateSelect(oDivMainPart, sDivId + "N", this.m_oGameTree.Get_NavigatorLabel(), ["No labels", "Move numbers", "Move numbers current variant only", "Move coordinates"], "Labels in navigator");
@@ -1857,7 +1857,7 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     oString                  = document.createElement("div");
     oString.style.paddingTop = "30px";
     oDivMainPart.appendChild(oString);
-    Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2015. All rights reserved.");
+    Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2016. All rights reserved.");
 };
 CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv, oPr)
 {

@@ -2196,15 +2196,15 @@ function CDrawingButtonFileMenu(oDrawing, bNoLoad)
     {
         oGameTree.Download_PngBoardScreenShot();
     });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Export to Gif", function()
+    this.private_CreateMenuItem(oMenuElementWrapper, "Export to GIF", function()
     {
         oGameTree.Download_GifForCurVariant();
     });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Convert to Askii diagram", function()
+    this.private_CreateMenuItem(oMenuElementWrapper, "Convert to ASCII diagram", function()
     {
         CreateWindow(oMainDiv.id, EWindowType.DiagramSL, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
     });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Score Estimate", function()
+    this.private_CreateMenuItem(oMenuElementWrapper, "Score estimate", function()
     {
         CreateWindow(oMainDiv.id, EWindowType.ScoreEstimate, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
     });
