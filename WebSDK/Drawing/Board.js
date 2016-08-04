@@ -70,6 +70,7 @@ function CDrawingBoard(oDrawing)
         X_White     : null,
         Tr_Black    : null,
         Tr_White    : null,
+        Tr_Hint     : null,
         Sq_Black    : null,
         Sq_White    : null,
         Ter_Black   : null,
@@ -111,6 +112,7 @@ function CDrawingBoard(oDrawing)
 
     this.m_oMarks = {};
     this.m_oLastMoveMark = -1;
+    this.m_oHints = {};
 
     // Параметры, которые контролируют, какую часть доски мы отрисовываем
     this.m_oViewPort = {X0 : 0, Y0 : 0, X1 : 18, Y1 : 18};
@@ -2089,6 +2091,7 @@ CDrawingBoard.prototype.private_CreateMarks = function()
     this.m_oImageData.X_White   = this.private_DrawX           (d, d, d * 0.05, new CColor(255, 255, 255, 255));
     this.m_oImageData.Tr_Black  = this.private_DrawTriangle    (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Tr_White  = this.private_DrawTriangle    (d, d, d * 0.05, new CColor(255, 255, 255, 255));
+    this.m_oImageData.Tr_Hint   = this.private_DrawTriangle    (d, d, d * 0.05, new CColor(255, 0, 0, 255));
     this.m_oImageData.Sq_Black  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(0, 0, 0, 255));
     this.m_oImageData.Sq_White  = this.private_DrawEmptySquare (d, d, d * 0.05, new CColor(255, 255, 255, 255));
     this.m_oImageData.Ter_Black = this.private_DrawFilledSquare(d, d, d * 0.05, false, new CColor(  0,   0,   0, 255), bTrueColorBoard ? new CColor(  0,   0,   0, 255) : bDarkBoard ? new CColor(255, 255, 255, 255) : new CColor(0, 0, 0, 255));
@@ -2360,10 +2363,21 @@ CDrawingBoard.prototype.private_DrawMarks = function()
     for (var Pos in this.m_oMarks)
     {
         var Mark = this.m_oMarks[Pos];
-        this.private_DrawMark(Mark);
 
-        if (EDrawingMark.Tx === Mark.Get_Type())
-            Exclude.push({X : Mark.Get_X(), Y : Mark.Get_Y()});
+        if (undefined === this.m_oHints[Pos])
+        {
+            this.private_DrawMark(Mark);
+
+            if (EDrawingMark.Tx === Mark.Get_Type())
+                Exclude.push({X : Mark.Get_X(), Y : Mark.Get_Y()});
+        }
+    }
+
+    for (var Pos in this.m_oHints)
+    {
+        var oPos = Common_ValuetoXY(Pos);
+        this.private_DrawHint(oPos.X, oPos.Y);
+        Exclude.push({X : oPos.X, Y : oPos.Y});
     }
 
     this.private_DrawTrueColorLines(Exclude);
@@ -2447,6 +2461,22 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
                 break;
             }
         }
+    }
+};
+CDrawingBoard.prototype.private_DrawHint = function(X, Y)
+{
+    if (!this.m_oImageData.Lines)
+        return;
+
+    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+    if (true === this.private_IsPointInViewPort(X - 1, Y - 1))
+    {
+        var d = this.m_oImageData.StoneDiam;
+        var Rad = (d - 1) / 2;
+        var Lines = this.m_oImageData.Lines;
+        var _X = Lines[X - 1].X - Rad;
+        var _Y = Lines[Y - 1].Y - Rad;
+        MarksCanvas.putImageData(this.m_oImageData.Tr_Hint, _X, _Y);
     }
 };
 CDrawingBoard.prototype.private_ClearMark = function(X, Y)
@@ -3455,4 +3485,14 @@ CDrawingBoard.prototype.Clear_Board = function()
 CDrawingBoard.prototype.Get_GameTree = function()
 {
     return this.m_oGameTree;
+};
+CDrawingBoard.prototype.Show_Hint = function(X, Y)
+{
+    this.m_oHints["" + Common_XYtoValue(X, Y)] = true;
+    this.private_DrawMarks();
+};
+CDrawingBoard.prototype.Hide_Hint = function()
+{
+    this.m_oHints = {};
+    this.private_DrawMarks();
 };

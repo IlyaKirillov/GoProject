@@ -125,6 +125,56 @@ function Common_X_to_String(_X, nSize)
     return Res;
 }
 
+function Common_StringToXY(sString, nSizeX, nSizeY)
+{
+    if (!sString || !sString.IsLatinLetter)
+        return null;
+
+    sString = sString.toUpperCase();
+    var nLen = sString.length;
+
+    var X = 1, Y = 1;
+    var sDigit = "";
+    if (nLen >= 3 && sString.IsLatinLetter(0) && sString.charAt(0) === sString.charAt(1) && sString.charAt(0) === sString.charAt(2))
+    {
+        sDigit = sString.substr(3);
+        X = sString.charCodeAt(0) - 'A'.charCodeAt(0) + 50;
+    }
+    else if (nLen >= 2 && sString.IsLatinLetter(0) && sString.charAt(0) === sString.charAt(1))
+    {
+        sDigit = sString.substr(2);
+
+        if ('I'.charCodeAt(0) < sString.charCodeAt(0))
+            X = sString.charCodeAt(0) - 'A'.charCodeAt(0) + 24;
+        else
+            X = sString.charCodeAt(0) - 'A'.charCodeAt(0) + 25;
+    }
+    else if (nLen >= 1 && sString.IsLatinLetter(0))
+    {
+        sDigit = sString.substr(1);
+
+        if ('I'.charCodeAt(0) < sString.charCodeAt(0))
+            X = sString.charCodeAt(0) - 'A'.charCodeAt(0) - 1;
+        else
+            X = sString.charCodeAt(0) - 'A'.charCodeAt(0);
+    }
+    else
+    {
+        return null;
+    }
+
+    Y = parseInt(sDigit);
+    if (isNaN(Y))
+        Y = 1;
+
+    Y = nSizeY - Y;
+
+    if (Y >= nSizeY || Y < 0 || X  < 0 || X >= nSizeX)
+        return null;
+
+    return {X : X, Y : Y};
+}
+
 function Common_IsInt(Value)
 {
     if ( "string" != typeof(Value) )
