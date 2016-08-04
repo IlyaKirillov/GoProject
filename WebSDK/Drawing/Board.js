@@ -2739,6 +2739,10 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
         var oSize = this.m_oLogicBoard.Get_Size();
         var sComment = Common_XYtoString(X, Y, oSize.X, oSize.Y);
         this.m_oGameTree.Add_Comment(sComment);
+
+        var oDrawing = this.m_oGameTree.Get_Drawing();
+        if (oDrawing && oDrawing.Add_CommentWithCoordinates)
+            oDrawing.Add_CommentWithCoordinates(sComment);
     }
     else if (event.ShiftKey)
     {
