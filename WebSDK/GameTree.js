@@ -489,7 +489,7 @@ CGameTree.prototype.Step_Forward = function(Count, bForce)
             return;
 
         if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
-            this.m_oHandler["GoTo_Node"](this.Get_CurNode().Get_Id());
+            this.m_oHandler["GoTo_Node"](this.Get_CurNode());
 
         this.Execute_CurNodeCommands();
     }
@@ -1309,7 +1309,7 @@ CGameTree.prototype.GoTo_Node = function(Node, bForce)
         return;
 
     if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
-        this.m_oHandler["GoTo_Node"](Node.Get_Id());
+        this.m_oHandler["GoTo_Node"](Node);
 
     this.Stop_AutoPlay();
 
