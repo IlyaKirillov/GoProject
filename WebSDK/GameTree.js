@@ -483,13 +483,23 @@ CGameTree.prototype.Step_Backward = function(Count)
 };
 CGameTree.prototype.Step_Forward = function(Count, bForce)
 {
+    var oCurNode      = this.m_oCurNode;
+    var nCurNodeDepth = this.m_nCurNodeDepth;
+
     if (1 === Count)
     {
         if (!this.GoTo_Next(bForce))
             return;
 
-        if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
-            this.m_oHandler["GoTo_Node"](this.Get_CurNode());
+        if (this.m_oHandler && this.m_oHandler["GoToNode"])
+        {
+            this.m_oHandler["GoToNode"](this.Get_CurNode());
+
+            this.m_nCurNodeDepth = nCurNodeDepth;
+            this.m_oCurNode      = oCurNode;
+            return;
+        }
+
 
         this.Execute_CurNodeCommands();
     }
@@ -503,13 +513,34 @@ CGameTree.prototype.Step_Forward = function(Count, bForce)
                 break;
         }
 
+        if (this.m_oHandler && this.m_oHandler["GoToNode"])
+        {
+            this.m_oHandler["GoToNode"](this.Get_CurNode());
+
+            this.m_nCurNodeDepth = nCurNodeDepth;
+            this.m_oCurNode      = oCurNode;
+            return;
+        }
+
         this.GoTo_Node(this.Get_CurNode());
     }
 };
 CGameTree.prototype.Step_ForwardToEnd = function()
 {
+    var oCurNode      = this.m_oCurNode;
+    var nCurNodeDepth = this.m_nCurNodeDepth;
+
     while (this.GoTo_Next())
         ;
+
+    if (this.m_oHandler && this.m_oHandler["GoToNode"])
+    {
+        this.m_oHandler["GoToNode"](this.Get_CurNode());
+
+        this.m_nCurNodeDepth = nCurNodeDepth;
+        this.m_oCurNode      = oCurNode;
+        return;
+    }
 
     this.GoTo_Node(this.Get_CurNode());
 };
@@ -607,6 +638,10 @@ CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
         this.m_oSound.Off();
 
     var CurNode = this.m_oCurNode;
+
+    var oHandler = this.Get_Handler();
+    this.Set_Handler(null);
+
     this.Step_BackwardToStart();
 
     var BreakCounter = 0;
@@ -614,6 +649,14 @@ CGameTree.prototype.GoTo_NodeByXY = function(X, Y)
     {
         this.Step_Forward(1);
         BreakCounter++;
+    }
+
+    if (oHandler && oHandler["GoToNode"])
+    {
+        oHandler["GoToNode"](this.Get_CurNode());
+        this.GoTo_Node(CurNode);
+        this.Set_Handler(oHandler);
+        return;
     }
 
     // Если мы не нашли искомую ноду, тогда возвращаемся к начальной
@@ -638,9 +681,6 @@ CGameTree.prototype.Get_CurNode = function()
 };
 CGameTree.prototype.Set_CurNode = function(oNode)
 {
-    if (this.m_oHandler && this.m_oHandler.Set_CurNode)
-        this.m_oHandler.Set_CurNode(oNode.Get_Id());
-
     this.m_oCurNode = oNode;
 };
 CGameTree.prototype.Set_GameCurNode = function(oNode)
@@ -1308,8 +1348,11 @@ CGameTree.prototype.GoTo_Node = function(Node, bForce)
     if (true === this.Is_KifuMode())
         return;
 
-    if (this.m_oHandler && this.m_oHandler["GoTo_Node"])
-        this.m_oHandler["GoTo_Node"](Node);
+    if (this.m_oHandler && this.m_oHandler["GoToNode"])
+    {
+        this.m_oHandler["GoToNode"](Node);
+        return;
+    }
 
     this.Stop_AutoPlay();
 
