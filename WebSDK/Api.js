@@ -463,7 +463,7 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     {
         sUrl        = decodeURIComponent(sUrl);
         var rawFile = new XMLHttpRequest();
-        rawFile["open"]("GET", sUrl + '?_=' + new Date().getTime(), false);
+        rawFile["open"]("GET", sUrl + '?_=' + new Date().getTime(), true);
 
         rawFile["onreadystatechange"] = function ()
         {
