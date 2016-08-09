@@ -2717,8 +2717,19 @@ CDrawingBoard.prototype.private_UpdateSelectCanvas = function()
 };
 CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 {
+    var oHandler = this.m_oGameTree.Get_Handler();
     if (g_mouse_button_right == event.Button)
     {
+        if (oHandler && oHandler["AddNewNodeWithMove"])
+        {
+            var oCurNode = this.m_oGameTree.Get_CurNode();
+            var oPrevNode = oCurNode.Get_Prev();
+            if (oPrevNode)
+                oHandler["AddNewNodeWithMove"](oPrevNode, X, Y, !this.m_oGameTree.Get_NextMove());
+
+            return;
+        }
+
         // По правой кнопки мыши создаем вариант текущего хода.
         if (this.m_oGameTree.Get_CurNodeDepth() >= 1)
         {
@@ -2751,6 +2762,12 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
     }
     else
     {
+        if (oHandler && oHandler["AddNewNodeWithMove"])
+        {
+            oHandler["AddNewNodeWithMove"](this.m_oGameTree.Get_CurNode(), X, Y, this.m_oGameTree.Get_NextMove());
+            return;
+        }
+        
         this.private_MakeMove(X, Y);
 
         if (null !== this.m_oPresentation)
