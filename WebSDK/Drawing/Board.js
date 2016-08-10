@@ -285,6 +285,11 @@ function CDrawingBoard(oDrawing)
             oThis.Focus();
         }
     };
+    this.private_OnContextMenu = function(e)
+	{
+		e.preventDefault();
+		return false;
+	};
 }
 
 CDrawingBoard.prototype.Init = function(sName, GameTree)
@@ -351,7 +356,10 @@ CDrawingBoard.prototype.Init = function(sName, GameTree)
     oEventDiv['ondrop']       = this.private_OnDrop;     // минимизатор не изменил названия.
     oEventDiv['onmousewheel'] = this.private_OnMouseWheel;
     if (oEventDiv.addEventListener)
-        oEventDiv.addEventListener("DOMMouseScroll", this.private_OnMouseWheel, false);
+	{
+		oEventDiv.addEventListener("contextmenu", this.private_OnContextMenu, false);
+		oEventDiv.addEventListener("DOMMouseScroll", this.private_OnMouseWheel, false);
+	}
 
     return oControl;
 };
@@ -2725,7 +2733,22 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
             var oCurNode = this.m_oGameTree.Get_CurNode();
             var oPrevNode = oCurNode.Get_Prev();
             if (oPrevNode)
-                oHandler["AddNewNodeWithMove"](oPrevNode, X, Y, !this.m_oGameTree.Get_NextMove());
+			{
+				this.m_oGameTree.Set_Handler(null);
+				this.m_oGameTree.GoTo_Node(oPrevNode);
+
+				var nNextMove = this.m_oGameTree.Get_NextMove();
+				if (false === this.private_CanMakeMove(X, Y))
+				{
+					this.m_oGameTree.GoTo_Node(oCurNode);
+					this.m_oGameTree.Set_Handler(oHandler);
+					return;
+				}
+
+				this.m_oGameTree.GoTo_Node(oCurNode);
+				this.m_oGameTree.Set_Handler(oHandler);
+				oHandler["AddNewNodeWithMove"](oPrevNode, X, Y, nNextMove);
+			}
 
             return;
         }
@@ -2764,6 +2787,9 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
     {
         if (oHandler && oHandler["AddNewNodeWithMove"])
         {
+        	if (false === this.private_CanMakeMove(X, Y))
+        		return;
+
             oHandler["AddNewNodeWithMove"](this.m_oGameTree.Get_CurNode(), X, Y, this.m_oGameTree.Get_NextMove());
             return;
         }
@@ -3052,35 +3078,39 @@ CDrawingBoard.prototype.private_GetNextNumMark = function()
 };
 CDrawingBoard.prototype.private_MakeMove = function(X, Y)
 {
-    if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
-    {
-        var Value = (BOARD_BLACK === this.m_oGameTree.Get_NextMove() ? BOARD_BLACK : BOARD_WHITE);
+	if (true == this.private_CanMakeMove(X, Y))
+	{
+		var Value = (BOARD_BLACK === this.m_oGameTree.Get_NextMove() ? BOARD_BLACK : BOARD_WHITE);
+		if (true === this.m_oGameTree.Add_NewNodeByPos(X, Y, Value))
+			this.m_oGameTree.Execute_CurNodeCommands();
+	}
+};
+CDrawingBoard.prototype.private_CanMakeMove = function(X, Y)
+{
+	var bMove = false;
+	if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
+	{
+		var Value = (BOARD_BLACK === this.m_oGameTree.Get_NextMove() ? BOARD_BLACK : BOARD_WHITE);
 
-        // Сначала мы проверим, можно ли совершить данный ход
-        var bMove = false;
+		// Сначала мы проверим, можно ли совершить данный ход
+		var OldKo = this.m_oLogicBoard.Get_Ko();
+		this.m_oLogicBoard.Set(X, Y, Value, -1);
 
-        var OldKo = this.m_oLogicBoard.Get_Ko();
-        this.m_oLogicBoard.Set(X, Y, Value, -1);
+		// Проверяем ко
+		if (null !== this.m_oLogicBoard.Check_Kill(X, Y, Value, true))
+			bMove = true;
+		// Запрещаем самоубийство
+		else if (null !== this.m_oLogicBoard.Check_Dead(X, Y, Value))
+			bMove = false;
+		else
+			bMove = true;
 
-        // Проверяем ко
-        if (null !== this.m_oLogicBoard.Check_Kill(X, Y, Value, true))
-            bMove = true;
-        // Запрещаем самоубийство
-        else if (null !== this.m_oLogicBoard.Check_Dead(X, Y, Value))
-            bMove = false;
-        else
-            bMove = true;
+		// Восстанвливаем позицию на доске.
+		this.m_oLogicBoard.Set(X, Y, BOARD_EMPTY, -1);
+		this.m_oLogicBoard.Set_Ko(OldKo);
+	}
 
-        // Восстанвливаем позицию на доске.
-        this.m_oLogicBoard.Set(X, Y, BOARD_EMPTY, -1);
-        this.m_oLogicBoard.Set_Ko(OldKo);
-
-        if (true == bMove)
-        {
-            if (true === this.m_oGameTree.Add_NewNodeByPos(X, Y, Value))
-                this.m_oGameTree.Execute_CurNodeCommands();
-        }
-    }
+	return bMove;
 };
 CDrawingBoard.prototype.private_ScoreEstimate = function(X, Y, event)
 {
