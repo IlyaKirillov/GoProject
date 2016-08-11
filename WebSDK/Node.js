@@ -774,6 +774,23 @@ CNode.prototype.Get_MoveNumber = function()
 
     return this.m_nMoveNumber;
 };
+CNode.prototype.Have_ChildNodeWithMove = function(X, Y, Value)
+{
+	if (Value !== BOARD_BLACK && Value !== BOARD_WHITE)
+		return -1;
+
+	var nPosValue = Common_XYtoValue(X, Y);
+	for (var nIndex = 0, nCount = this.Get_NextsCount(); nIndex < nCount; ++nIndex)
+	{
+		var oNode = this.Get_Next(nIndex);
+		var oMove = oNode.Get_Move();
+
+		if (nPosValue === oMove.Get_Value() && Value == oMove.Get_Type())
+			return nIndex;
+	}
+
+	return -1;
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Функции, которые приходят из вне
 //----------------------------------------------------------------------------------------------------------------------

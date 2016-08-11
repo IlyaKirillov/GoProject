@@ -2745,9 +2745,23 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 					return;
 				}
 
-				this.m_oGameTree.GoTo_Node(oCurNode);
-				this.m_oGameTree.Set_Handler(oHandler);
-				oHandler["AddNewNodeWithMove"](oPrevNode, X, Y, nNextMove);
+                var nNextIndex = this.m_oGameTree.Get_CurNode().Have_ChildNodeWithMove(X, Y, nNextMove);
+                if (-1 !== nNextIndex)
+                {
+                    var oNewNode = this.m_oGameTree.Get_CurNode().Get_Next(nNextIndex);
+
+                    this.m_oGameTree.GoTo_Node(oCurNode);
+                    this.m_oGameTree.Set_Handler(oHandler);
+
+                    if (oHandler["GoToNode"])
+                        oHandler["GoToNode"](oNewNode);
+                }
+                else
+                {
+                    this.m_oGameTree.GoTo_Node(oCurNode);
+                    this.m_oGameTree.Set_Handler(oHandler);
+                    oHandler["AddNewNodeWithMove"](oPrevNode, X, Y, nNextMove);
+                }
 			}
 
             return;
@@ -2790,7 +2804,19 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
         	if (false === this.private_CanMakeMove(X, Y))
         		return;
 
-            oHandler["AddNewNodeWithMove"](this.m_oGameTree.Get_CurNode(), X, Y, this.m_oGameTree.Get_NextMove());
+            var nNextMove = this.m_oGameTree.Get_NextMove();
+            var nNextIndex = this.m_oGameTree.Get_CurNode().Have_ChildNodeWithMove(X, Y, nNextMove);
+            if (-1 !== nNextIndex)
+            {
+                var oNewNode = this.m_oGameTree.Get_CurNode().Get_Next(nNextIndex);
+                if (oHandler["GoToNode"])
+                    oHandler["GoToNode"](oNewNode);
+            }
+            else
+            {
+                oHandler["AddNewNodeWithMove"](this.m_oGameTree.Get_CurNode(), X, Y, nNextMove);
+            }
+
             return;
         }
         
@@ -3129,11 +3155,18 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     if (EBoardMode.ScoreEstimate === this.m_eMode || EBoardMode.ViewPort === this.m_eMode)
         return;
 
+	var oHandler = this.m_oGameTree.Get_Handler();
     var KeyCode = Event.KeyCode;
 
     var bRetValue = false;
     if (8 === KeyCode || 46 === KeyCode) // backspace/delete
     {
+		if (oHandler && oHandler["RemoveNode"])
+		{
+			oHandler["RemoveNode"](this.m_oGameTree.Get_CurNode());
+			return;
+		}
+
         this.m_oGameTree.Remove_CurNode();
         bRetValue = true;
     }
