@@ -2927,7 +2927,7 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
 		if (oHandler)
 		{
 			if (oHandler["AddOrRemoveMark"])
-				oHandler["AddOrRemoveMark"](false, X, Y, EDrawingMark.Tx, "");
+				oHandler["AddOrRemoveMark"](false, X, Y, EDrawingMark.Tx, Mark.Get_Text());
 
 			return;
 		}
@@ -3044,7 +3044,7 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
 		if (oHandler)
 		{
 			if (oHandler["AddOrRemoveMark"])
-				oHandler["AddOrRemoveMark"](false, X, Y, EDrawingMark.Tx, "");
+				oHandler["AddOrRemoveMark"](false, X, Y, EDrawingMark.Tx, Mark.Get_Text());
 
 			return;
 		}
