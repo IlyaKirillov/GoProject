@@ -2844,25 +2844,35 @@ CDrawingBoard.prototype.private_CountScores = function(X, Y, event)
 };
 CDrawingBoard.prototype.private_AddOrRemoveStones = function(X, Y, event)
 {
-    // Если в данной ноде есть ход, тогда мы добавляем новую ноду, если нет,
-    // тогда добавляем изменения в текущую ноду.
+	var Value = BOARD_BLACK;
+	if (BOARD_EMPTY !== this.m_oLogicBoard.Get(X, Y))
+		Value = BOARD_EMPTY;
+	else if (event.ShiftKey)
+		Value = BOARD_WHITE;
 
-    if (true === this.m_oGameTree.Get_CurNode().Have_Move())
-    {
-        // Добавляем новую ноду
-        if (true === this.m_oGameTree.Add_NewNode(true, true))
-            this.m_oGameTree.Execute_CurNodeCommands();
-    }
+	var oHandler = this.m_oGameTree.Get_Handler();
+	if (oHandler)
+	{
+		var isAddNewNode = true === this.m_oGameTree.Get_CurNode().Have_Move();
+		if (oHandler["AddOrRemoveStone"])
+			oHandler["AddOrRemoveStone"](isAddNewNode, X, Y, Value);
 
-    var Value = BOARD_BLACK;
-    if (BOARD_EMPTY !== this.m_oLogicBoard.Get(X, Y))
-        Value = BOARD_EMPTY;
-    else if (event.ShiftKey)
-        Value = BOARD_WHITE;
+		return;
+	}
 
-    this.Draw_Sector(X, Y, Value);
-    this.m_oLogicBoard.Set(X, Y, Value, -1);
-    this.m_oGameTree.AddOrRemove_Stones(Value, [Common_XYtoValue(X, Y)]);
+	// Если в данной ноде есть ход, тогда мы добавляем новую ноду, если нет,
+	// тогда добавляем изменения в текущую ноду.
+
+	if (true === this.m_oGameTree.Get_CurNode().Have_Move())
+	{
+		// Добавляем новую ноду
+		if (true === this.m_oGameTree.Add_NewNode(true, true))
+			this.m_oGameTree.Execute_CurNodeCommands();
+	}
+
+	this.Draw_Sector(X, Y, Value);
+	this.m_oLogicBoard.Set(X, Y, Value, -1);
+	this.m_oGameTree.AddOrRemove_Stones(Value, [Common_XYtoValue(X, Y)]);
 };
 CDrawingBoard.prototype.private_AddMark = function(Type, X, Y)
 {
