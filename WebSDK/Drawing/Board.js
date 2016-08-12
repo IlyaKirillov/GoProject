@@ -2878,6 +2878,15 @@ CDrawingBoard.prototype.private_AddMark = function(Type, X, Y)
 {
     var Mark = this.private_GetMark(X, Y);
 
+	var oHandler = this.m_oGameTree.Get_Handler();
+	if (oHandler)
+	{
+		if (oHandler["AddOrRemoveMark"])
+			oHandler["AddOrRemoveMark"](null === Mark || Type !== Mark.Get_Type(), X, Y, Type);
+
+		return;
+	}
+
     if (null !== Mark && Type === Mark.Get_Type())
     {
         this.m_oGameTree.Remove_Mark([Common_XYtoValue(X, Y)]);
@@ -2912,8 +2921,17 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
 {
     var Mark = this.private_GetMark(X, Y);
 
+	var oHandler = this.m_oGameTree.Get_Handler();
     if (null !== Mark && EDrawingMark.Tx === Mark.Get_Type())
     {
+		if (oHandler)
+		{
+			if (oHandler["AddOrRemoveMark"])
+				oHandler["AddOrRemoveMark"](false, X, Y, EDrawingMark.Tx, "");
+
+			return;
+		}
+
         this.m_oGameTree.Remove_Mark([Common_XYtoValue(X, Y)]);
         this.Remove_Mark(X, Y);
     }
@@ -2964,12 +2982,22 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
                 }
                 else if (13 === e.keyCode)
                 {
-                    sText       = this.value;
-                    var NewMark = new CDrawingMark(X, Y, EDrawingMark.Tx, sText);
-                    oThis.m_oGameTree.Add_TextMark(sText, Common_XYtoValue(X, Y));
-                    oThis.private_SetMark(X, Y, NewMark);
-                    oThis.private_DrawMarks();
-                    oThis.m_oDrawing.Remove_LabelElement();
+					sText = this.value;
+
+					if (oHandler)
+					{
+						if (oHandler["AddOrRemoveMark"])
+							oHandler["AddOrRemoveMark"](true, X, Y, EDrawingMark.Tx, sText);
+
+						oThis.m_oDrawing.Remove_LabelElement();
+						return;
+					}
+
+					var NewMark = new CDrawingMark(X, Y, EDrawingMark.Tx, sText);
+					oThis.m_oGameTree.Add_TextMark(sText, Common_XYtoValue(X, Y));
+					oThis.private_SetMark(X, Y, NewMark);
+					oThis.private_DrawMarks();
+					oThis.m_oDrawing.Remove_LabelElement();
                 }
             };
 
@@ -2990,6 +3018,14 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
             }
         }
 
+		if (oHandler)
+		{
+			if (oHandler["AddOrRemoveMark"])
+				oHandler["AddOrRemoveMark"](true, X, Y, EDrawingMark.Tx, sText);
+
+			return;
+		}
+
         var NewMark = new CDrawingMark(X, Y, EDrawingMark.Tx, sText);
         this.m_oGameTree.Add_TextMark(sText, Common_XYtoValue(X, Y));
         this.private_SetMark(X, Y, NewMark);
@@ -3002,8 +3038,17 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
 {
     var Mark = this.private_GetMark(X, Y);
 
+	var oHandler = this.m_oGameTree.Get_Handler();
     if (null !== Mark && EDrawingMark.Tx === Mark.Get_Type())
     {
+		if (oHandler)
+		{
+			if (oHandler["AddOrRemoveMark"])
+				oHandler["AddOrRemoveMark"](false, X, Y, EDrawingMark.Tx, "");
+
+			return;
+		}
+
         this.m_oGameTree.Remove_Mark([Common_XYtoValue(X, Y)]);
         this.Remove_Mark(X, Y);
     }
@@ -3028,6 +3073,14 @@ CDrawingBoard.prototype.private_AddNum = function(X, Y, event)
 
         if (undefined === sText || "" === sText || null === sText)
             sText = this.private_GetNextNumMark();
+
+		if (oHandler)
+		{
+			if (oHandler["AddOrRemoveMark"])
+				oHandler["AddOrRemoveMark"](true, X, Y, EDrawingMark.Tx, sText);
+
+			return;
+		}
 
         var NewMark = new CDrawingMark(X, Y, EDrawingMark.Tx, sText);
         this.m_oGameTree.Add_TextMark(sText, Common_XYtoValue(X, Y));
