@@ -78,3 +78,7 @@ CCommand.prototype.From_String = function(sString)
     this.m_oValue = oCommand.Value;
     this.m_nCount = oCommand.m_nCount;
 };
+CCommand.prototype.Copy = function()
+{
+	return new CCommand(this.m_nType, this.m_oValue, this.m_nCount);
+};

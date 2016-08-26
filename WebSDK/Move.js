@@ -19,3 +19,7 @@ CMove.prototype.Get_Value = function() { return this.m_nValue; };
 CMove.prototype.Get_Type  = function() { return this.m_nType;  };
 CMove.prototype.Set_Value = function(Value) {this.m_nValue = Value;};
 CMove.prototype.Set_Type  = function(Type) {this.m_nType = Type;};
+CMove.prototype.Copy = function()
+{
+	return new CMove(this.m_nValue, this.m_nType);
+};

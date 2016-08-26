@@ -14,6 +14,17 @@ function CTerritory(Use, Points)
     this.m_bForceUse = false;
 }
 
+CTerritory.prototype.CopyFrom = function(oTerritory)
+{
+	this.m_bUse = oTerritory.m_bUse;
+	this.m_bForceUse = oTerritory.m_bForceUse;
+
+	this.m_aPoints = {};
+	for (var sId in oTerritory.m_aPoints)
+	{
+		this.m_aPoints[sId] = oTerritory.m_aPoints[sId];
+	}
+};
 CTerritory.prototype.Is_Use = function()
 {
     if (true === this.Is_ForceUse())

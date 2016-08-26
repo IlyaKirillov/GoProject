@@ -39,6 +39,7 @@ function CNode(oGameTree)
     this.m_bLoaded    = false;                     // Была ли данная нода в исходном загруженном файле.
     this.m_oColorMap  = {};                        // Карта цветов
     this.m_nMoveNumber= -1;
+	this.m_bOrigin    = false;                     // Помечаем, что данный узел - узел исходного файла
 }
 CNode.prototype.Get_Id = function()
 {
@@ -47,6 +48,42 @@ CNode.prototype.Get_Id = function()
 CNode.prototype.Is_FromFile = function()
 {
     return this.m_bLoaded;
+};
+CNode.prototype.Set_Origin = function(isOrigin)
+{
+	this.m_bOrigin = isOrigin;
+};
+CNode.prototype.Is_Origin = function()
+{
+	return this.m_bOrigin;
+};
+CNode.prototype.Reset_ToOrigin = function(oOriginNode)
+{
+	if (true !== this.m_bOrigin)
+		return;
+
+	for (var nNextIndex = 0; nNextIndex < this.m_aNext.length; ++nNextIndex)
+	{
+		if (true !== this.m_aNext[nNextIndex].m_bOrigin)
+		{
+			this.m_aNext.splice(nNextIndex, 1);
+			nNextIndex--;
+
+			if (this.m_nNextCur >= nNextIndex)
+				this.m_nNextCur--;
+		}
+	}
+
+	this.m_sComment    = oOriginNode.m_sComment;
+	this.m_nMoveNumber = oOriginNode.m_nMoveNumber;
+	this.m_aCommands   = [];
+	for (var nCommandIndex = 0, nCommandsCount = oOriginNode.m_aCommands.length; nCommandIndex < nCommandsCount; ++nCommandIndex)
+	{
+		var oCommand = oOriginNode.m_aCommands[nCommandIndex];
+		this.m_aCommands.push(oCommand.Copy());
+	}
+	this.m_oTerritory.CopyFrom(oOriginNode.m_oTerritory);
+	this.m_oMove = oOriginNode.m_oMove.Copy();
 };
 CNode.prototype.Get_NodeById = function(sId)
 {
@@ -135,7 +172,19 @@ CNode.prototype.Add_Next = function(Node, bSetCur, nPos)
 {
     Node.Set_Prev(this);
 
-    if (undefined === nPos)
+	if (undefined === nPos && true === this.m_bOrigin && true === Node.m_bOrigin)
+	{
+		nPos = 0;
+		while (nPos < this.m_aNext.length)
+		{
+			if (true !== this.m_aNext[nPos].m_bOrigin)
+				break;
+
+			nPos++;
+		}
+	}
+
+	if (undefined === nPos)
     {
         this.m_aNext.push(Node);
 
@@ -148,7 +197,14 @@ CNode.prototype.Add_Next = function(Node, bSetCur, nPos)
         this.m_aNext.splice(nPos, 0, Node);
 
         if (true === bSetCur || -1 === this.m_nNextCur)
-            this.m_nNextCur = nPos;
+		{
+			this.m_nNextCur = nPos;
+		}
+		else
+		{
+			if (this.m_nNextCur >= nPos)
+				this.m_nNextCur++;
+		}
     }
 
     if (this.m_oGameTree)
