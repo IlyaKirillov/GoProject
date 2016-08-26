@@ -608,7 +608,8 @@ function CDrawing(oGameTree)
 
         ToolbarCustomize: null,
         Menu            : null,
-        KifuMode        : null
+        KifuMode        : null,
+		EditorControl   : null
     };
 
     this.m_oWindows =
@@ -664,6 +665,9 @@ function CDrawing(oGameTree)
 
         if (oThis.m_oButtons.Menu)
             oThis.m_oButtons.Menu.Hide_Menu(false);
+
+		if (oThis.m_oButtons.EditorControl)
+			oThis.m_oButtons.EditorControl.Hide_Menu(false);
     };
     this.private_OnTimerDraw = function()
     {
@@ -1601,6 +1605,10 @@ CDrawing.prototype.Register_AddLabelElement = function(oElement)
 CDrawing.prototype.Register_MenuButton = function(oElement)
 {
     this.m_oButtons.Menu = oElement;
+};
+CDrawing.prototype.Register_EditorControlButton = function(oElement)
+{
+	this.m_oButtons.EditorControl = oElement;
 };
 CDrawing.prototype.Register_KifuModeButton = function(oElement)
 {
