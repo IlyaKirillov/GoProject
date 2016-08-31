@@ -14,6 +14,7 @@ var EDITINGFLAGS_BOARDMODE = 0x00000004; // Можно ли изменять т�
 var EDITINGFLAGS_LOADFILE  = 0x00000008; // Можно ли загружать файлы
 var EDITINGFLAGS_GAMEINFO  = 0x00000010; // Можно ли редактировать информацию об игре
 var EDITINGFLAGS_VIEWPORT  = 0x00000020; // Можно ли менять границы доски
+var EDITINGFLAGS_REMOVE    = 0x00000040; // Можно ли удалять ноды
 
 var EDITINGFLAGS_NEWNODE_NON   = EDITINGFLAGS_MASK ^ EDITINGFLAGS_NEWNODE;
 var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
@@ -21,6 +22,7 @@ var EDITINGFLAGS_BOARDMODE_NON = EDITINGFLAGS_MASK ^ EDITINGFLAGS_BOARDMODE;
 var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
 var EDITINGFLAGS_GAMEINFO_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_GAMEINFO;
 var EDITINGFLAGS_VIEWPORT_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_VIEWPORT;
+var EDITINGFLAGS_REMOVE_NON    = EDITINGFLAGS_MASK ^ EDITINGFLAGS_REMOVE;
 
 function CGameTree(Drawing)
 {
@@ -917,6 +919,9 @@ CGameTree.prototype.Clear_TerritoryPoints = function()
 };
 CGameTree.prototype.Remove_CurNode = function()
 {
+	if (!(this.m_nEditingFlags & EDITINGFLAGS_REMOVE))
+		return false;
+
     var PrevNode = this.m_oCurNode.Get_Prev();
 
     // Первую ноду удалить нельзя, поэтому мы просто чистим её
@@ -1868,6 +1873,11 @@ CGameTree.prototype.Set_EditingFlags = function(oFlags)
         this.m_nEditingFlags |= EDITINGFLAGS_VIEWPORT;
     else if (false === oFlags.ViewPort)
         this.m_nEditingFlags &= EDITINGFLAGS_VIEWPORT_NON;
+
+    if (true === oFlags.RemoveNodes)
+        this.m_nEditingFlags |= EDITINGFLAGS_REMOVE;
+    else if (false === oFlags.RemoveNodes)
+        this.m_nEditingFlags &= EDITINGFLAGS_REMOVE_NON;
 };
 CGameTree.prototype.Reset_EditingFlags = function()
 {

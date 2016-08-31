@@ -164,6 +164,7 @@ CGoBoardApi.prototype.Stop_AutoPlay = function(oGameTree)
  * @param {CGameTree} oGameTree - Дерево партии
  * @param {Object} oFlags - Запрещающие флаги
  * @param {boolean} oFlags.NewNode
+ * @param {boolean} oFlags.RemoveNodes
  * @param {boolean} oFlags.Move
  * @param {boolean} oFlags.ChangeBoardMode
  * @param {boolean} oFlags.LoadFile
@@ -175,6 +176,7 @@ CGoBoardApi.prototype.Set_Permissions = function(oGameTree, oFlags)
     var _Flags = {};
 
     _Flags.NewNode         = oFlags['NewNode'];
+    _Flags.RemoveNodes     = oFlags['RemoveNodes'];
     _Flags.Move            = oFlags['Move'];
     _Flags.ChangeBoardMode = oFlags['ChangeBoardMode'];
     _Flags.LoadFile        = oFlags['LoadFile'];
