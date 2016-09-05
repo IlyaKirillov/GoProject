@@ -416,16 +416,30 @@ function CommonExtend(Child, Parent)
     Child.superclass = Parent.prototype;
 }
 
-var Common_RequestAnimationFrame = (window['requestAnimationFrame'] ? window['requestAnimationFrame'] : (function()
+var Common_RequestAnimationFrame = (window['requestAnimationFrame'] ? window['requestAnimationFrame'] : (function ()
 {
-    return window['webkitRequestAnimationFrame'] ||
-           window['oRequestAnimationFrame']      ||
-           window['msRequestAnimationFrame']     ||
-           function(callback)
-           {
-               window.setTimeout(callback, 1000 / 60);
-           };
+	return window['webkitRequestAnimationFrame'] ||
+		window['mozRequestAnimationFrame'] ||
+		window['oRequestAnimationFrame'] ||
+		window['msRequestAnimationFrame'] ||
+		function (callback)
+		{
+			return window.setTimeout(callback, 1000 / 60);
+		};
 })());
+
+var Common_CancelAnimationFrame = (window['cancelAnimationFrame'] ? window['cancelAnimationFrame'] : (function ()
+{
+	return window['webkitCancelAnimationFrame'] ||
+		window['mozCancelAnimationFrame'] ||
+		window['oCancelAnimationFrame'] ||
+		window['msCancelAnimationFrame'] ||
+		function (id)
+		{
+			window.clearTimeout(id);
+		};
+})());
+
 
 function CCommon()
 {
