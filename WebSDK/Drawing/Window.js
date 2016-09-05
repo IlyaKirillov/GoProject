@@ -321,6 +321,15 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oMainControl.AddControl(oCaptionControl2);
     this.HtmlElement.Caption = oCaptionElement2;
 
+	function privateOnDragStart()
+	{
+		global_mouseEvent.LockMouse();
+	}
+	function privateOnDragEnd()
+	{
+		global_mouseEvent.UnLockMouse();
+	}
+
     Common_DragHandler.Init(oCaptionElement2, null);
     oCaptionElement2.onDrag  = function (X, Y)
     {
@@ -337,6 +346,8 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
         oThis.HtmlElement.Caption.style.top  = "0px";
         oThis.Update_Size();
     };
+	oCaptionElement2.onDragStart = privateOnDragStart;
+	oCaptionControl2.onDragEnd   = privateOnDragEnd;
 
     if (false !== bResizable)
     {
@@ -421,28 +432,44 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
         this.HtmlElement.HandlerRB              = oRightBottomHandlerElement;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerL, null, null, null, null, null);
-        this.HtmlElement.HandlerL.onDrag        = this.private_OnDragLeftHandler;
+		this.HtmlElement.HandlerL.onDrag      = this.private_OnDragLeftHandler;
+		this.HtmlElement.HandlerL.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerL.onDragEnd   = privateOnDragEnd;
 
-        Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
-        this.HtmlElement.HandlerR.onDrag        = this.private_OnDragRightHandler;
+		Common_DragHandler.Init(this.HtmlElement.HandlerR, null, null, null, null, null);
+        this.HtmlElement.HandlerR.onDrag      = this.private_OnDragRightHandler;
+		this.HtmlElement.HandlerR.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerR.onDragEnd   = privateOnDragEnd;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerT, null, null, null, null, null);
-        this.HtmlElement.HandlerT.onDrag        = this.private_OnDragTopHandler;
+        this.HtmlElement.HandlerT.onDrag      = this.private_OnDragTopHandler;
+		this.HtmlElement.HandlerT.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerT.onDragEnd   = privateOnDragEnd;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerB, null, null, null, null, null);
-        this.HtmlElement.HandlerB.onDrag        = this.private_OnDragBottomHandler;
+		this.HtmlElement.HandlerB.onDrag      = this.private_OnDragBottomHandler;
+		this.HtmlElement.HandlerB.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerB.onDragEnd   = privateOnDragEnd;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerLT, null, null, null, null, null);
-        this.HtmlElement.HandlerLT.onDrag       = this.private_OnDragLeftTopHandler;
+		this.HtmlElement.HandlerLT.onDrag      = this.private_OnDragLeftTopHandler;
+		this.HtmlElement.HandlerLT.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerLT.onDragEnd   = privateOnDragEnd;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerRT, null, null, null, null, null);
-        this.HtmlElement.HandlerRT.onDrag       = this.private_OnDragRightTopHandler;
+		this.HtmlElement.HandlerRT.onDrag      = this.private_OnDragRightTopHandler;
+		this.HtmlElement.HandlerRT.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerRT.onDragEnd   = privateOnDragEnd;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerLB, null, null, null, null, null);
-        this.HtmlElement.HandlerLB.onDrag       = this.private_OnDragLeftBottomHandler;
+		this.HtmlElement.HandlerLB.onDrag      = this.private_OnDragLeftBottomHandler;
+		this.HtmlElement.HandlerLB.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerLB.onDragEnd   = privateOnDragEnd;
 
         Common_DragHandler.Init(this.HtmlElement.HandlerRB, null, null, null, null, null);
-        this.HtmlElement.HandlerRB.onDrag       = this.private_OnDragRightBottomHandler;
+		this.HtmlElement.HandlerRB.onDrag      = this.private_OnDragRightBottomHandler;
+		this.HtmlElement.HandlerRB.onDragStart = privateOnDragStart;
+		this.HtmlElement.HandlerRB.onDragEnd   = privateOnDragEnd;
     }
 
     // CloseButton
