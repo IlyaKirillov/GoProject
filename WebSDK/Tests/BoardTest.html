@@ -62,7 +62,11 @@
 //        GoBoardApi.Create_Viewer(oGameTree, "divId");
 //        var nHeight = GoBoardApi.Get_DivHeightByWidth(oGameTree, 600);
 
-        GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
+        //GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
+
+        var oDrawing = new CDrawing(oGameTree);
+        oDrawing.Create_VerticalSpecialTemplate_1("divId");
+
         //GoBoardApi.Create_BoardWithNavigateButtons(oGameTree, "divId");
 
 

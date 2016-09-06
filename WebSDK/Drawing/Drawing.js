@@ -978,6 +978,145 @@ CDrawing.prototype.Create_VerticalFullTemplate = function(sDivId)
     this.private_CreateVerFullTemplate();
     this.Set_TemplateType(EDrawingTemplate.VerEditor);
 };
+CDrawing.prototype.Create_VerticalSpecialTemplate_1 = function(sDivId)
+{
+	this.private_CreateWrappingMainDiv(sDivId);
+
+	this.m_nMinWidth = 332;
+
+	var oGameTree    = this.m_oGameTree;
+	var oMainControl = this.m_oMainControl;
+	var sMainDivId   = this.m_oMainDiv.id;
+	var bIsEmbedding = oGameTree.Get_LocalSettings().Is_Embedding();
+	//------------------------------------------------------------------------------------------------------------------
+	// Делим главную дивку на 2 части сверху 50px под информацию об игрока, а снизу все остальное.
+	//------------------------------------------------------------------------------------------------------------------
+	var InfoH    = 50;
+
+	var sInfoBackDivId = sMainDivId + "B";
+	this.private_CreateDiv(oMainControl.HtmlElement, sInfoBackDivId).style.background = "rgb(217, 217, 217)";;
+	var oInfoControlBack = CreateControlContainer(sInfoBackDivId);
+	oInfoControlBack.Bounds.SetParams(0, 0, 1000, 0, true, false, false, false, -1, InfoH);
+	oInfoControlBack.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+	oMainControl.AddControl(oInfoControlBack);
+
+	var sInfoDivId = sMainDivId + "I";
+	this.private_CreateDiv(oMainControl.HtmlElement, sInfoDivId);
+	//------------------------------------------------------------------------------------------------------------------
+	// Добавляем кнопку меню слева.
+	//------------------------------------------------------------------------------------------------------------------
+	var oInfoControl = CreateControlContainer(sInfoDivId);
+	oInfoControl.Bounds.SetParams(true !== bIsEmbedding ? 36 + 7 : 0, 0, 1000, 0, true, false, false, false, -1, InfoH);
+	oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+	oMainControl.AddControl(oInfoControl);
+
+	var sNotInfoDivId = sMainDivId + "O";
+	this.private_CreateDiv(oMainControl.HtmlElement, sNotInfoDivId);
+	var oNotInfoControl = CreateControlContainer(sNotInfoDivId);
+	oNotInfoControl.Bounds.SetParams(0, InfoH, 1000, 1000, false, true, false, false, -1, -1);
+	oNotInfoControl.Anchor = (g_anchor_bottom | g_anchor_left | g_anchor_right);
+	oMainControl.AddControl(oNotInfoControl);
+	//------------------------------------------------------------------------------------------------------------------
+	// Заполняем контрол с информацией (слева информация о белом, справ о черном).
+	//------------------------------------------------------------------------------------------------------------------
+	var sWhiteInfo = sInfoDivId + "W";
+	this.private_CreateDiv(oInfoControl.HtmlElement, sWhiteInfo);
+	var oInfoWhiteControl = CreateControlContainer(sWhiteInfo);
+	oInfoWhiteControl.Bounds.SetParams(0, 0, 500, 1000, false, false, false, false, -1, -1);
+	oInfoWhiteControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+	oInfoControl.AddControl(oInfoWhiteControl);
+	var oDrawingWhiteInfo = new CDrawingPlayerInfo(this);
+	oDrawingWhiteInfo.Init(sWhiteInfo, oGameTree, BOARD_WHITE);
+	this.m_aElements.push(oDrawingWhiteInfo);
+
+	var sBlackInfo = sInfoDivId + "B";
+	this.private_CreateDiv(oInfoControl.HtmlElement, sBlackInfo);
+	var oInfoBlackControl = CreateControlContainer(sBlackInfo);
+	oInfoBlackControl.Bounds.SetParams(500, 0, 1000, 1000, false, false, false, false, -1, -1);
+	oInfoBlackControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+	oInfoControl.AddControl(oInfoBlackControl);
+	var oDrawingBlackInfo = new CDrawingPlayerInfo(this);
+	oDrawingBlackInfo.Init(sBlackInfo, oGameTree, BOARD_BLACK);
+	this.m_aElements.push(oDrawingBlackInfo);
+	//------------------------------------------------------------------------------------------------------------------
+	// Нижний контрол будет специального типа, вверху у него место под доску, внизу под все остальное.
+	//------------------------------------------------------------------------------------------------------------------
+	var oDrawingBoard = new CDrawingBoard(this);
+	this.m_aElements.push(oDrawingBoard);
+	oNotInfoControl.Set_Type(3, oDrawingBoard, {RMin : this.m_nMixedBotSize - 50});
+	var sBoardDivId = sNotInfoDivId  + "B";
+	this.private_CreateDiv(oNotInfoControl.HtmlElement, sBoardDivId);
+	var oBoardControl = CreateControlContainer(sBoardDivId);
+	oNotInfoControl.AddControl(oBoardControl);
+	oDrawingBoard.Init(sBoardDivId, oGameTree);
+	oDrawingBoard.Focus();
+
+	var sNotBoardDivId = sNotInfoDivId + "N";
+	var oNotBoardElement = this.private_CreateDiv(oNotInfoControl.HtmlElement, sNotBoardDivId);
+	var oNotBoardControl = CreateControlContainer(sNotBoardDivId);
+	oNotInfoControl.AddControl(oNotBoardControl);
+	oNotBoardElement.style.background = "rgb(217, 217, 217)";
+	//------------------------------------------------------------------------------------------------------------------
+	// Создаем контрол с кнопками.
+	//------------------------------------------------------------------------------------------------------------------
+	var sToolbarDivId = sNotBoardDivId + "T";
+	this.private_CreateDiv(oNotBoardControl.HtmlElement, sToolbarDivId);
+
+	var oToolbarControl = CreateControlContainer(sToolbarDivId);
+	oToolbarControl.Bounds.SetParams(0, 1, 1000, 1, false, true, false, true, -1, -1);
+	oToolbarControl.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
+	oNotBoardControl.AddControl(oToolbarControl);
+
+	var oDrawingToolbar = new CDrawingToolbar(this);
+	oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
+	oDrawingToolbar.Add_Control(new CDrawingButtonBackward5(this), 36, 1, EToolbarFloat.Left);
+	oDrawingToolbar.Add_Control(new CDrawingButtonBackward(this), 36, 1, EToolbarFloat.Left);
+	oDrawingToolbar.Add_Control(new CDrawingButtonForward(this), 36, 1, EToolbarFloat.Left);
+	oDrawingToolbar.Add_Control(new CDrawingButtonForward5(this), 36, 1, EToolbarFloat.Left);
+	oDrawingToolbar.Add_Control(new CDrawingButtonForwardToEnd(this), 36, 1, EToolbarFloat.Left);
+	oDrawingToolbar.Add_Control(new CDrawingButtonAbout(this), 36, 1, EToolbarFloat.Right);
+	oDrawingToolbar.Add_Control(new CDrawingButtonAutoPlay(this), 36, 1, EToolbarFloat.Right);
+	oDrawingToolbar.Init(sToolbarDivId, oGameTree);
+
+	var ToolbarH = 36;
+	this.m_aElements.push(oDrawingToolbar);
+	this.m_nMixedBotSize = ToolbarH + 160;
+	oNotInfoControl.Set_Type(3, oDrawingBoard, {RMin : this.m_nMixedBotSize - 50});
+	//------------------------------------------------------------------------------------------------------------------
+	// Контрол под доской тоже делим на 2 части: сверху 36px под кнопки, а снизу все остальное под навигатор.
+	//------------------------------------------------------------------------------------------------------------------
+	var oToolsControl = CreateControlContainer(sToolbarDivId);
+	oToolsControl.Bounds.SetParams(0, 1, 1000, 0, false, true, false, false, -1, ToolbarH);
+	oToolsControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top);
+	oNotBoardControl.AddControl(oToolsControl);
+
+	var sUnderToolbarDivId = sNotBoardDivId + "U";
+	this.private_CreateDiv(oNotBoardControl.HtmlElement, sUnderToolbarDivId);
+	var oUnderToolBarControl = CreateControlContainer(sUnderToolbarDivId);
+	oUnderToolBarControl.Bounds.SetParams(0, ToolbarH + 2, 1000, 1000, false, true, false, false, -1, -1);
+	oUnderToolBarControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_bottom);
+	oNotBoardControl.AddControl(oUnderToolBarControl);
+	//------------------------------------------------------------------------------------------------------------------
+	// Заполняем контрол справа. Туда добавим 2 контрола, которые оба будут занимать все место и перекрывать друг друга.
+	//------------------------------------------------------------------------------------------------------------------
+	var sNavigatorDivId = sUnderToolbarDivId + "N";
+	this.private_CreateDiv(oUnderToolBarControl.HtmlElement, sNavigatorDivId);
+	var oNavigatorControl = CreateControlContainer(sNavigatorDivId);
+	oNavigatorControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+	oNavigatorControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top | g_anchor_bottom);
+	oUnderToolBarControl.AddControl(oNavigatorControl);
+	//------------------------------------------------------------------------------------------------------------------
+	// Заполняем навигатор.
+	//------------------------------------------------------------------------------------------------------------------
+	var oDrawingNavigator = new CDrawingNavigator(this);
+	oDrawingNavigator.Init(sNavigatorDivId, oGameTree);
+	this.m_aElements.push(oDrawingNavigator);
+	//------------------------------------------------------------------------------------------------------------------
+	// Обновляем размер и сообщаем основному классу, что построение закончилось.
+	//------------------------------------------------------------------------------------------------------------------
+	this.Update_Size();
+	oGameTree.On_EndLoadDrawing();
+};
 CDrawing.prototype.private_CreateWrappingMainDiv = function(sDivId)
 {
     g_oGlobalSettings.Load_FromLocalStorage();

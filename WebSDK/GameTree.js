@@ -228,6 +228,10 @@ CGameTree.prototype.Stop_AutoPlay = function()
         this.m_nAutoPlayTimer = null;
     }
 };
+CGameTree.prototype.Is_AutoPlay = function()
+{
+    return null !== this.m_nAutoPlayTimer ? true : false;
+};
 CGameTree.prototype.Set_AutoPlaySpeed = function(dSpeed)
 {
     this.m_dAutoPlaySpeed = dSpeed;
