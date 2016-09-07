@@ -347,7 +347,7 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
         oThis.Update_Size();
     };
 	oCaptionElement2.onDragStart = privateOnDragStart;
-	oCaptionControl2.onDragEnd   = privateOnDragEnd;
+    oCaptionElement2.onDragEnd   = privateOnDragEnd;
 
     if (false !== bResizable)
     {
