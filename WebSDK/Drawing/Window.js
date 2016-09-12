@@ -560,10 +560,13 @@ CDrawingWindow.prototype.Set_Caption = function(sCaption)
 {
     Common.Set_InnerTextToElement(this.HtmlElement.CaptionText, sCaption);
 };
-CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, sName)
+CDrawingWindow.prototype.protected_CreateDivElement = function(oParentElement, sName, sTag)
 {
-    var oElement = document.createElement("div");
-    oElement.setAttribute("id", sName);
+    var oElement = document.createElement(sTag ? sTag : "div");
+
+    if (sName)
+        oElement.setAttribute("id", sName);
+
     oElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
     oElement.setAttribute("oncontextmenu", "return false;");
     oParentElement.appendChild(oElement);

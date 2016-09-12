@@ -385,6 +385,27 @@ CControlContainer.prototype.Clear = function()
     this.DrawingElement = null;
     this.RMin           = 400;
 };
+CControlContainer.prototype.SetParams = function(_l,_t,_r,_b,abs_l,abs_t,abs_r,abs_b,absW,absH)
+{
+	this.Bounds.SetParams(_l,_t,_r,_b,abs_l,abs_t,abs_r,abs_b,absW,absH);
+};
+CControlContainer.prototype.SetAnchor = function(isLeft, isTop, isRight, isBottom)
+{
+	this.Anchor = 0;
+
+	if (isLeft)
+		this.Anchor |= g_anchor_left;
+
+	if (isTop)
+		this.Anchor |= g_anchor_top;
+
+	if (isRight)
+		this.Anchor |= g_anchor_right;
+
+	if (isBottom)
+		this.Anchor |= g_anchor_bottom;
+
+};
 
 function CreateControlContainer(name)
 {
@@ -392,6 +413,12 @@ function CreateControlContainer(name)
     ctrl.Name = name;
     ctrl.HtmlElement = document.getElementById(name);
     return ctrl;
+}
+function CreateControlContainterByElement(oHtmlElement)
+{
+    var oControl = new CControlContainer();
+	oControl.HtmlElement = oHtmlElement;
+	return oControl;
 }
 function CControlContainerBoardAndBottomButtons()
 {
