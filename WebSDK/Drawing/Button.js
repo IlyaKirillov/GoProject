@@ -258,7 +258,7 @@ CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H,
 
     this.private_DrawOnCanvas(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor);
 
-    if (true === bSelected && !(this instanceof CDrawingButtonClose || this instanceof CDrawingButtonOK || this instanceof CDrawingButtonCancel))
+    if (true === bSelected && !(this instanceof CDrawingButtonClose || this instanceof CDrawingButtonOK || this instanceof CDrawingButtonCancel || this instanceof CDrawingButtonSimpleText))
     {
         Canvas.beginPath();
         Canvas.lineWidth = 1;
@@ -2571,4 +2571,64 @@ CDrawingButtonKifuMode.prototype.private_GetHint = function()
 CDrawingButtonKifuMode.prototype.private_RegisterButton = function()
 {
     this.m_oDrawing.Register_KifuModeButton(this);
+};
+//----------------------------------------------------------------------------------------------------------------------
+// Кнопка SimpleTextButton
+//----------------------------------------------------------------------------------------------------------------------
+function CDrawingButtonSimpleText(sText, fClickHandler, sHint)
+{
+    CDrawingButtonSimpleText.superclass.constructor.call(this, null);
+
+	this.m_oNormaBColor    = new CColor(234, 234, 234, 255); // 229,229,229 -> 240,240,240
+	this.m_oNormaFColor    = new CColor(172, 172, 172, 255);
+	this.m_oHoverBColor    = new CColor(227, 240, 252, 255); // 220,236,252 -> 236,244,252
+	this.m_oHoverFColor    = new CColor(126, 180, 234, 255);
+	this.m_oActiveBColor   = new CColor(207, 230, 252, 255); // 196,224,252 -> 218,235,252
+	this.m_oActiveFColor   = new CColor( 86, 157, 229, 255);
+	this.m_oDisabledBColor = new CColor(239, 239, 239, 255);
+	this.m_oDisabledFColor = new CColor(217, 217, 217, 255);
+
+    this.m_sText    = sText ? sText : "";
+    this.m_sHint    = sHint ? sHint : "";
+    this.m_fHandler = fClickHandler ? fClickHandler : null;
+}
+CommonExtend(CDrawingButtonSimpleText, CDrawingButtonBase);
+
+CDrawingButtonSimpleText.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+{
+    Canvas.lineWidth = 1;
+    Canvas.moveTo(0, 0);
+    Canvas.lineTo(0, H);
+    Canvas.lineTo(W, H);
+    Canvas.lineTo(W, 0);
+    Canvas.lineTo(0, 0);
+    Canvas.stroke();
+
+    var Text       = this.m_sText;
+    var FontSize   = 16;
+    var FontFamily = "'Segoe UI', Helvetica, Tahoma, Geneva, Verdana, sans-serif";
+    var sFont      = FontSize + "px " + FontFamily;
+
+    Canvas.fillStyle = (new CColor(0, 0, 0, 255)).ToString();
+    Canvas.font = sFont;
+
+    var Y = Y_off + Size / 2 + FontSize / 3;
+    var X = X_off + (Size - Canvas.measureText(Text).width) / 2;
+
+    Canvas.fillText(Text, X, Y);
+};
+CDrawingButtonSimpleText.prototype.private_HandleMouseDown = function()
+{
+    if (this.m_fHandler)
+        return this.m_fHandler();
+};
+CDrawingButtonSimpleText.prototype.private_GetHint = function()
+{
+    return this.m_sHint;
+};
+CDrawingButtonSimpleText.prototype.private_ClickTransformIn = function()
+{
+};
+CDrawingButtonSimpleText.prototype.private_ClickTransformOut = function()
+{
 };
