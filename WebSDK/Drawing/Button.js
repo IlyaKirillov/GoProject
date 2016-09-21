@@ -223,6 +223,16 @@ CDrawingButtonBase.prototype.Set_Selected = function(Value)
         }
     }
 };
+CDrawingButtonBase.prototype.Hide = function()
+{
+	if (this.HtmlElement.Control && this.HtmlElement.Control.HtmlElement)
+		this.HtmlElement.Control.HtmlElement.style.display = "none";
+};
+CDrawingButtonBase.prototype.Show = function()
+{
+	if (this.HtmlElement.Control && this.HtmlElement.Control.HtmlElement)
+		this.HtmlElement.Control.HtmlElement.style.display = "block";
+};
 CDrawingButtonBase.prototype.private_OnResize = function()
 {
     var H = this.m_nH;
