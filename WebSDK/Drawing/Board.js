@@ -1989,7 +1989,7 @@ CDrawingBoard.prototype.private_UpdateTargetType = function()
     }
     }
 
-    if (EBoardTargetType.Unknown == eTargetType)
+    if (EBoardTargetType.Unknown == eTargetType || !this.m_oGameTree.Get_LocalSettings().Is_ShowTarget())
         this.m_oTarget.Hide();
     else
         this.m_oTarget.Set_Type(eTargetType);
