@@ -2746,7 +2746,7 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 				}
 
                 var nNextIndex = this.m_oGameTree.Get_CurNode().Have_ChildNodeWithMove(X, Y, nNextMove);
-                if (-1 !== nNextIndex)
+                if (-1 !== nNextIndex && (!oHandler["CheckExistNodeOnMove"] || true === oHandler["CheckExistNodeOnMove"]()))
                 {
                     var oNewNode = this.m_oGameTree.Get_CurNode().Get_Next(nNextIndex);
 
@@ -2806,7 +2806,7 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 
             var nNextMove = this.m_oGameTree.Get_NextMove();
             var nNextIndex = this.m_oGameTree.Get_CurNode().Have_ChildNodeWithMove(X, Y, nNextMove);
-            if (-1 !== nNextIndex)
+            if (-1 !== nNextIndex && (!oHandler["CheckExistNodeOnMove"] || true === oHandler["CheckExistNodeOnMove"]()))
             {
                 var oNewNode = this.m_oGameTree.Get_CurNode().Get_Next(nNextIndex);
                 if (oHandler["GoToNode"])

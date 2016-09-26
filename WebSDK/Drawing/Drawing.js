@@ -44,7 +44,8 @@ var EDrawingTemplate =
     Problems    : 5,
 
     GoUniverseViewerHor : 21,
-    GoUniverseViewerVer : 22
+    GoUniverseViewerVer : 22,
+    GoUniverseMatch     : 23
 };
 
 function CSettingsBase()

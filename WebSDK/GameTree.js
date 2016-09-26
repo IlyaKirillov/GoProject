@@ -552,6 +552,12 @@ CGameTree.prototype.Step_ForwardToEnd = function()
 };
 CGameTree.prototype.Pass = function()
 {
+	if (this.m_oHandler && this.m_oHandler["Pass"])
+	{
+		this.m_oHandler["Pass"](this.m_nNextMove);
+		return;
+	}
+
     if (true === this.Add_NewNodeByPos(0, 0, this.m_nNextMove))
         this.Execute_CurNodeCommands();
 };
@@ -707,9 +713,6 @@ CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
         return false;
 
     var oNewNode = new CNode(this);
-    if (this.m_oHandler && this.m_oHandler.Add_NewNode)
-        this.m_oHandler.Add_NewNode(oNode.Get_Id());
-
     this.m_oCurNode.Add_Next(oNewNode, bSetCur);
     this.Set_CurNode(oNewNode);
     this.m_nCurNodeDepth++;
