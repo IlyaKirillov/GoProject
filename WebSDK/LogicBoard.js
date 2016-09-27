@@ -504,7 +504,7 @@ CLogicBoard.prototype.private_CheckDead = function(nX, nY, eValue, oChecker)
         return true;
     }
 };
-CLogicBoard.prototype.Init_CountScores = function()
+CLogicBoard.prototype.Init_CountScores = function(bDontFillEmpty)
 {
     this.m_aBoardScores = [];
     for (var Y = 1; Y <= this.m_nH; Y++)
@@ -515,7 +515,8 @@ CLogicBoard.prototype.Init_CountScores = function()
         }
     }
 
-    this.private_CheckAllEmptyAreas(false);
+    if (true !== bDontFillEmpty)
+        this.private_CheckAllEmptyAreas(false);
 };
 CLogicBoard.prototype.Set_ScorePoint = function(nX, nY, eValue)
 {

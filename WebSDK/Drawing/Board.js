@@ -719,6 +719,20 @@ CDrawingBoard.prototype.Get_Mode = function()
 {
     return this.m_eMode;
 };
+CDrawingBoard.prototype.Start_CountScoresInMatch = function()
+{
+	this.m_eMode = EBoardMode.CountScores;
+	this.private_UpdateTargetType();
+	this.m_oLogicBoard.Init_CountScores(true);
+	this.m_oGameTree.Count_Scores();
+	this.m_oGameTree.Update_InterfaceState();
+};
+CDrawingBoard.prototype.End_CountScoresInMatch = function()
+{
+	this.m_eMode = EBoardMode.Move;
+	this.private_UpdateTargetType();
+	this.m_oGameTree.Update_InterfaceState();
+};
 CDrawingBoard.prototype.private_DrawVariants = function()
 {
     if (this.m_oGameTree)
@@ -2831,6 +2845,20 @@ CDrawingBoard.prototype.private_AddMove = function(X, Y, event)
 };
 CDrawingBoard.prototype.private_CountScores = function(X, Y, event)
 {
+	var oHandler = this.m_oGameTree.Get_Handler();
+	if (oHandler)
+	{
+		if (oHandler["MarkLife"])
+		{
+			if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
+				return;
+
+			var nOwner = this.m_oLogicBoard.Get_ScorePoint(X, Y);
+			oHandler["MarkLife"](X, Y, (BOARD_BLACK !== nOwner && BOARD_WHITE !== nOwner ? false : true));
+		}
+		return;
+	}
+
     if (true === event.CtrlKey )
     {
         // Возвращаемся к режиму добавления ходов
