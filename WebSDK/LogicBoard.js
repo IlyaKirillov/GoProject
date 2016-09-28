@@ -504,6 +504,10 @@ CLogicBoard.prototype.private_CheckDead = function(nX, nY, eValue, oChecker)
         return true;
     }
 };
+CLogicBoard.prototype.Clear_Scores = function()
+{
+	this.m_aBoardScores = [];
+};
 CLogicBoard.prototype.Init_CountScores = function(bDontFillEmpty)
 {
     this.m_aBoardScores = [];

@@ -835,6 +835,8 @@ CGameTree.prototype.Update_TerritoryMarks = function()
 };
 CGameTree.prototype.Clear_TerritoryPoints = function()
 {
+	this.m_oBoard.Clear_Scores();
+
     if (true === this.m_oCurNode.Is_TerritoryUse())
     {
         this.m_oCurNode.Set_TerritoryUse(false);
@@ -993,7 +995,7 @@ CGameTree.prototype.Execute_CurNodeCommands = function()
         this.Show_Variants();
         
         if (this.m_oCurNode.Is_TerritoryForceUse())
-            this.m_oBoard.Init_CountScores();
+            this.m_oBoard.Init_CountScores(true);
     }
 
     for (var CommandIndex = 0, CommandsCount = this.m_oCurNode.Get_CommandsCount(); CommandIndex < CommandsCount; CommandIndex++)
@@ -1492,10 +1494,16 @@ CGameTree.prototype.Get_WhiteCapt = function()
 };
 CGameTree.prototype.Get_BlackScores = function()
 {
+	if (this.m_oHandler && this.m_oHandler["GetBlackScores"])
+		return this.m_oHandler["GetBlackScores"]();
+
     return this.m_nBlackScores;
 };
 CGameTree.prototype.Get_WhiteScores = function()
 {
+	if (this.m_oHandler && this.m_oHandler["GetWhiteScores"])
+		return this.m_oHandler["GetWhiteScores"];
+
     return this.m_nWhiteScores;
 };
 CGameTree.prototype.Get_CurNodeDepth = function()
