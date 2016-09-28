@@ -250,7 +250,7 @@ function CLogicBoard(nW, nH)
 
     this.m_oKo = new CBoardKo();
 
-    this.m_aBoardScores = null; // Массив с метками территории
+    this.m_aBoardScores = []; // Массив с метками территории
     this.m_oArea        = new CAreaScoreCounter();
     this.m_oBoundary    = new CBoundaryScoreCounter();
 

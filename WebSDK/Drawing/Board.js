@@ -723,7 +723,7 @@ CDrawingBoard.prototype.Start_CountScoresInMatch = function()
 {
 	this.m_eMode = EBoardMode.CountScores;
 	this.private_UpdateTargetType();
-	this.m_oLogicBoard.Init_CountScores(true);
+	//this.m_oLogicBoard.Init_CountScores(true);
 	this.m_oGameTree.Count_Scores();
 	this.m_oGameTree.Update_InterfaceState();
 };
