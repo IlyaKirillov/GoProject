@@ -414,7 +414,7 @@ function CreateControlContainer(name)
     ctrl.HtmlElement = document.getElementById(name);
     return ctrl;
 }
-function CreateControlContainterByElement(oHtmlElement)
+function CreateControlContainerByElement(oHtmlElement)
 {
     var oControl = new CControlContainer();
 	oControl.HtmlElement = oHtmlElement;
