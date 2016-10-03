@@ -23,3 +23,10 @@ CMove.prototype.Copy = function()
 {
 	return new CMove(this.m_nValue, this.m_nType);
 };
+CMove.prototype.Is_Pass = function()
+{
+	if (BOARD_EMPTY !== this.m_nType && 0 === this.m_nValue)
+		return true;
+
+	return false;
+};

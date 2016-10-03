@@ -2542,3 +2542,7 @@ CGameTree.prototype.Get_NodeReference = function(bStrong, oNode)
     oCurNode.Make_CurrentVariantMainly();
     return sRef;
 };
+CGameTree.prototype.Is_CurrentMovePass = function()
+{
+	return this.Get_CurNode().Get_Move().Is_Pass();
+};

@@ -30,6 +30,11 @@ function CBoardSound()
 	this.Feemale2  = null;
 	this.Feemale1  = null;
 
+	this.Tick      = null;
+	this.TickLast3 = null;
+	this.Beep      = null;
+	this.BeepBeep  = null;
+
 	this.PrevCountDownTime = null;
 
     this.m_bIE      = false;
@@ -65,6 +70,11 @@ CBoardSound.prototype.Init = function(sPath, bIE)
 	this.Feemale3  = this.private_AddSound(oBody, "GoBoardApiSoundFemale3", "");
 	this.Feemale2  = this.private_AddSound(oBody, "GoBoardApiSoundFemale2", "");
 	this.Feemale1  = this.private_AddSound(oBody, "GoBoardApiSoundFemale1", "");
+
+	this.Tick      = this.private_AddSound(oBody, "GoBoardApiSoundTick", "/Src/Files/Tick.ogg");
+	this.TickLast3 = this.private_AddSound(oBody, "GoBoardApiSoundTickLast3", "/Src/Files/TickLast3.ogg");
+	this.Beep      = this.private_AddSound(oBody, "GoBoardApiSoundBeep", "/Src/Files/Beep.wav");
+	this.BeepBeep  = this.private_AddSound(oBody, "GoBoardApiSoundBeepBeep", "/Src/Files/BeepBeep.wav");
 };
 CBoardSound.prototype.Play_PlaceStone = function()
 {
@@ -132,25 +142,57 @@ CBoardSound.prototype.private_PlaySound = function(oAudio)
 };
 CBoardSound.prototype.private_PlayCountDown = function(nValue)
 {
-	switch (nValue)
+	// switch (nValue)
+	// {
+	// 	case 10: this.private_PlaySound(this.Feemale10); break;
+	// 	case 9: this.private_PlaySound(this.Feemale9); break;
+	// 	case 8: this.private_PlaySound(this.Feemale8); break;
+	// 	case 7: this.private_PlaySound(this.Feemale7); break;
+	// 	case 6: this.private_PlaySound(this.Feemale6); break;
+	// 	case 5: this.private_PlaySound(this.Feemale5); break;
+	// 	case 4: this.private_PlaySound(this.Feemale4); break;
+	// 	case 3: this.private_PlaySound(this.Feemale3); break;
+	// 	case 2: this.private_PlaySound(this.Feemale2); break;
+	// 	case 1: this.private_PlaySound(this.Feemale1); break;
+	// }
+
+	if (nValue > 3)
 	{
-		case 10: this.private_PlaySound(this.Feemale10); break;
-		case 9: this.private_PlaySound(this.Feemale9); break;
-		case 8: this.private_PlaySound(this.Feemale8); break;
-		case 7: this.private_PlaySound(this.Feemale7); break;
-		case 6: this.private_PlaySound(this.Feemale6); break;
-		case 5: this.private_PlaySound(this.Feemale5); break;
-		case 4: this.private_PlaySound(this.Feemale4); break;
-		case 3: this.private_PlaySound(this.Feemale3); break;
-		case 2: this.private_PlaySound(this.Feemale2); break;
-		case 1: this.private_PlaySound(this.Feemale1); break;
+		this.private_PlaySound(this.Tick);
+	}
+	else if (3 === nValue)
+	{
+		this.private_PlaySound(this.TickLast3);
 	}
 };
-CBoardSound.prototype.PlayCountDown = function(sTime)
+CBoardSound.prototype.PlayCountDown = function(nTime, nStartTime)
 {
-	if (sTime < 10.5 && (null === this.PrevCountDownTime || sTime > this.PrevCountDownTime || Math.abs(this.PrevCountDownTime - sTime) > 0.99))
+	if (null === this.PrevCountDownTime && Math.abs(nTime - parseInt(nTime)) > 0.1)
+		return;
+
+	if (nTime < nStartTime + 1.05 && (null === this.PrevCountDownTime || nTime > this.PrevCountDownTime || Math.abs(this.PrevCountDownTime - nTime) > 0.99))
 	{
-		this.PrevCountDownTime = sTime;
-		this.private_PlayCountDown(parseInt(sTime + 0.5));
+		this.PrevCountDownTime = nTime;
+		this.private_PlayCountDown(parseInt(nTime + 0.5));
 	}
+};
+CBoardSound.prototype.ResetCountDown = function()
+{
+	this.PrevCountDownTime = null;
+};
+CBoardSound.prototype.StopCountDown = function()
+{
+	this.Tick.pause();
+	this.Tick.currentTime = 0;
+
+	this.TickLast3.pause();
+	this.TickLast3.currentTime = 0;
+};
+CBoardSound.prototype.PlayBeep = function()
+{
+	this.private_PlaySound(this.Beep);
+};
+CBoardSound.prototype.PlayBeepBeep = function()
+{
+	this.private_PlaySound(this.BeepBeep);
 };
