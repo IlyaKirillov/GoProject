@@ -15,6 +15,7 @@ var EDITINGFLAGS_LOADFILE  = 0x00000008; // Можно ли загружать �
 var EDITINGFLAGS_GAMEINFO  = 0x00000010; // Можно ли редактировать информацию об игре
 var EDITINGFLAGS_VIEWPORT  = 0x00000020; // Можно ли менять границы доски
 var EDITINGFLAGS_REMOVE    = 0x00000040; // Можно ли удалять ноды
+var EDITINGFLAGS_ESTIMATE  = 0x00000080; // Можно ли вызывать оценку счета
 
 var EDITINGFLAGS_NEWNODE_NON   = EDITINGFLAGS_MASK ^ EDITINGFLAGS_NEWNODE;
 var EDITINGFLAGS_MOVE_NON      = EDITINGFLAGS_MASK ^ EDITINGFLAGS_MOVE;
@@ -23,6 +24,7 @@ var EDITINGFLAGS_LOADFILE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_LOADFILE;
 var EDITINGFLAGS_GAMEINFO_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_GAMEINFO;
 var EDITINGFLAGS_VIEWPORT_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_VIEWPORT;
 var EDITINGFLAGS_REMOVE_NON    = EDITINGFLAGS_MASK ^ EDITINGFLAGS_REMOVE;
+var EDITINGFLAGS_ESTIMATE_NON  = EDITINGFLAGS_MASK ^ EDITINGFLAGS_ESTIMATE;
 
 function CGameTree(Drawing)
 {
@@ -1893,6 +1895,11 @@ CGameTree.prototype.Set_EditingFlags = function(oFlags)
         this.m_nEditingFlags |= EDITINGFLAGS_REMOVE;
     else if (false === oFlags.RemoveNodes)
         this.m_nEditingFlags &= EDITINGFLAGS_REMOVE_NON;
+
+	if (true === oFlags.ScoreEstimate)
+		this.m_nEditingFlags |= EDITINGFLAGS_ESTIMATE;
+	else if (false === oFlags.ScoreEstimate)
+		this.m_nEditingFlags &= EDITINGFLAGS_ESTIMATE_NON;
 };
 CGameTree.prototype.Reset_EditingFlags = function()
 {

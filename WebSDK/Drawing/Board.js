@@ -3331,7 +3331,13 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
     }
     else if (69 === KeyCode && true === Event.CtrlKey) // Ctrl + E
     {
-        CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {GameTree : this.m_oGameTree, Drawing : this.m_oDrawing});
+    	if (this.m_oGameTree && (this.m_oGameTree.m_nEditingFlags & EDITINGFLAGS_ESTIMATE))
+		{
+			CreateWindow(this.HtmlElement.Control.HtmlElement.id, EWindowType.ScoreEstimate, {
+				GameTree : this.m_oGameTree,
+				Drawing  : this.m_oDrawing
+			});
+		}
         bRetValue = true;
     }
     else if (72 === KeyCode && true === Event.CtrlKey) // Ctrl + H
