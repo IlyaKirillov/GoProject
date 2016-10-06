@@ -19,6 +19,7 @@ function CDrawingWindow()
         CloseButton  : null,
         Caption      : null,
         CaptionText  : null,
+		CaptionTextControl : null,
 
         HandlerL     : null,
         HandlerR     : null,
@@ -311,6 +312,7 @@ CDrawingWindow.prototype.Init = function(sDivId, bResizable)
     oCaptionTextElement.style.cursor              = "default";
     Common.Set_InnerTextToElement(oCaptionTextElement, "Caption");
     this.HtmlElement.CaptionText                  = oCaptionTextElement;
+	this.HtmlElement.CaptionTextControl           = oCaptionTextControl;
 
     // Caption
     var sCaptionId2          = sDivId + "_Caption2";

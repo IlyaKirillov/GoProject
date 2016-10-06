@@ -268,18 +268,9 @@ CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H,
 
     this.private_DrawOnCanvas(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor);
 
-    if (true === bSelected && !(this instanceof CDrawingButtonClose || this instanceof CDrawingButtonOK || this instanceof CDrawingButtonCancel || this instanceof CDrawingButtonSimpleText))
+    if (true === bSelected)
     {
-        Canvas.beginPath();
-        Canvas.lineWidth = 1;
-        Canvas.strokeStyle = (new CColor(0, 0, 0, 255)).ToString();
-        Canvas.moveTo(0, 0);
-        Canvas.lineTo(W, 0);
-        Canvas.lineTo(W, H);
-        Canvas.lineTo(0, H);
-        Canvas.lineTo(0, 0);
-        Canvas.stroke();
-        Canvas.beginPath();
+    	this.private_DrawSelectionBounds(Canvas, W, H);
     }
 
     return Canvas.getImageData(0, 0, W, H);
@@ -374,6 +365,19 @@ CDrawingButtonBase.prototype.private_ClickTransformOut = function()
 {
     this.HtmlElement.Control.HtmlElement.style.transition = "transform 0.2s ease-out";
     this.HtmlElement.Control.HtmlElement.style.transform  = "scale(1)";
+};
+CDrawingButtonBase.prototype.private_DrawSelectionBounds = function(Canvas, W, H)
+{
+	Canvas.beginPath();
+	Canvas.lineWidth = 1;
+	Canvas.strokeStyle = (new CColor(0, 0, 0, 255)).ToString();
+	Canvas.moveTo(0, 0);
+	Canvas.lineTo(W, 0);
+	Canvas.lineTo(W, H);
+	Canvas.lineTo(0, H);
+	Canvas.lineTo(0, 0);
+	Canvas.stroke();
+	Canvas.beginPath();
 };
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка возврата в начало партии
@@ -1176,6 +1180,9 @@ CDrawingButtonClose.prototype.private_ClickTransformIn = function()
 CDrawingButtonClose.prototype.private_ClickTransformOut = function()
 {
 };
+CDrawingButtonClose.prototype.private_DrawSelectionBounds = function(Canvas, W, H)
+{
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка GameInfo
 //----------------------------------------------------------------------------------------------------------------------
@@ -1263,6 +1270,9 @@ CDrawingButtonOK.prototype.private_ClickTransformIn = function()
 CDrawingButtonOK.prototype.private_ClickTransformOut = function()
 {
 };
+CDrawingButtonOK.prototype.private_DrawSelectionBounds = function(Canvas, W, H)
+{
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка Cancel
 //----------------------------------------------------------------------------------------------------------------------
@@ -1307,6 +1317,9 @@ CDrawingButtonCancel.prototype.private_ClickTransformIn = function()
 {
 };
 CDrawingButtonCancel.prototype.private_ClickTransformOut = function()
+{
+};
+CDrawingButtonCancel.prototype.private_DrawSelectionBounds = function(Canvas, W, H)
 {
 };
 //----------------------------------------------------------------------------------------------------------------------
@@ -2640,5 +2653,8 @@ CDrawingButtonSimpleText.prototype.private_ClickTransformIn = function()
 {
 };
 CDrawingButtonSimpleText.prototype.private_ClickTransformOut = function()
+{
+};
+CDrawingButtonSimpleText.prototype.private_DrawSelectionBounds = function(Canvas, W, H)
 {
 };
