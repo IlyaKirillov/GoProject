@@ -728,9 +728,6 @@ CDrawingBoard.prototype.Start_CountScoresInMatch = function()
 };
 CDrawingBoard.prototype.End_CountScoresInMatch = function()
 {
-	if (EBoardMode.CountScores === this.m_eMode)
-		this.m_oGameTree.Clear_TerritoryPoints();
-
 	this.m_eMode = EBoardMode.Move;
 	this.private_UpdateTargetType();
 	this.m_oGameTree.Update_InterfaceState();

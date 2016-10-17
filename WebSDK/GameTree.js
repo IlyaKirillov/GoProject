@@ -986,6 +986,8 @@ CGameTree.prototype.Is_CurNodeLast = function()
 };
 CGameTree.prototype.Execute_CurNodeCommands = function()
 {
+	this.m_oBoard.Clear_Scores();
+
     if (this.m_oDrawingBoard)
     {
         // При переходе к ноде отключаем подсчет очков, если он был включен
