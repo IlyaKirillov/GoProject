@@ -633,10 +633,10 @@ CDrawingWindow.prototype.private_CheckPosition = function()
 
 	if (nWidth > nOverallW + 1 || nHeight > nOverallH + 1)
 	{
-		if (nWidth > nOverallW - 1)
+		if (nWidth > nOverallW + 1)
 			this.HtmlElement.Control.HtmlElement.style.width = nOverallW + "px";
 
-		if (nHeight > nOverallH - 1)
+		if (nHeight > nOverallH + 1)
 			this.HtmlElement.Control.HtmlElement.style.height = nOverallH + "px";
 
 		this.Update_Size();

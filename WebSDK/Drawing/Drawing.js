@@ -655,6 +655,7 @@ function CDrawing(oGameTree)
     this.m_nVerEditorComNavH  = 0;
 
     this.m_arrStateHandlers = [];
+	this.m_nAnimationFrameTimer = null;
 
     this.private_OnMainDivClick = function()
     {
@@ -672,7 +673,13 @@ function CDrawing(oGameTree)
     };
     this.private_OnTimerDraw = function()
     {
-        Common_RequestAnimationFrame(oThis.private_OnTimerDraw);
+    	if (null !== oThis.m_nAnimationFrameTimer)
+		{
+			Common_CancelAnimationFrame(oThis.m_nAnimationFrameTimer);
+			oThis.m_nAnimationFrameTimer = null;
+		}
+
+		oThis.m_nAnimationFrameTimer = Common_RequestAnimationFrame(oThis.private_OnTimerDraw);
 
         if (oThis.m_oNavigator && oThis.m_oNavigator.Need_Redraw())
         {
@@ -685,6 +692,14 @@ function CDrawing(oGameTree)
 
     this.private_OnTimerDraw();
 }
+CDrawing.prototype.OnDestroy = function()
+{
+	if (null !== this.m_nAnimationFrameTimer)
+	{
+		Common_CancelAnimationFrame(this.m_nAnimationFrameTimer);
+		this.m_nAnimationFrameTimer = null;
+	}
+};
 CDrawing.prototype.Disable = function()
 {
     if (this.m_oMainDiv)
