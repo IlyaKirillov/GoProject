@@ -146,7 +146,6 @@ function CDrawingWindow()
             oThis.HtmlElement.Control.HtmlElement.style.width = CurWidth - LeftHandler + "px";
             oThis.HtmlElement.HandlerLT.style.left = "0px";
         }
-
         oThis.Update_Size();
     };
     this.private_OnDragRightTopHandler  = function()
@@ -180,7 +179,6 @@ function CDrawingWindow()
             oThis.HtmlElement.Control.HtmlElement.style.width = CurWidth + Diff + "px";
             oThis.HtmlElement.HandlerRT.style.left = CurWidth + Diff - 6 + "px";
         }
-
         oThis.Update_Size();
     };
     this.private_OnDragLeftBottomHandler = function()
@@ -510,6 +508,8 @@ CDrawingWindow.prototype.Update_Size = function(bForce)
         this.HtmlElement.Control.Resize(W, H);
         this.HtmlElement.CloseButton.Update_Size();
     }
+
+	this.private_CheckPosition();
 };
 CDrawingWindow.prototype.Close = function()
 {
@@ -614,6 +614,46 @@ CDrawingWindow.prototype.Update = function()
 };
 CDrawingWindow.prototype.private_OnFocus = function()
 {
+};
+CDrawingWindow.prototype.private_CheckPosition = function()
+{
+	var oWindowDiv = this.HtmlElement.Control.HtmlElement;
+	var oParentDiv = oWindowDiv.parentNode;
+
+	if (!oParentDiv)
+		return;
+
+	var nOverallW = parseInt(oParentDiv.clientWidth);
+	var nOverallH = parseInt(oParentDiv.clientHeight);
+
+	var nLeft   = parseInt(this.HtmlElement.Control.HtmlElement.style.left);
+	var nTop    = parseInt(this.HtmlElement.Control.HtmlElement.style.top);
+	var nWidth  = parseInt(this.HtmlElement.Control.HtmlElement.style.width);
+	var nHeight = parseInt(this.HtmlElement.Control.HtmlElement.style.height);
+
+	if (nWidth > nOverallW + 1 || nHeight > nOverallH + 1)
+	{
+		if (nWidth > nOverallW - 1)
+			this.HtmlElement.Control.HtmlElement.style.width = nOverallW + "px";
+
+		if (nHeight > nOverallH - 1)
+			this.HtmlElement.Control.HtmlElement.style.height = nOverallH + "px";
+
+		this.Update_Size();
+		return;
+	}
+
+	if (nLeft + nWidth > nOverallW)
+		this.HtmlElement.Control.HtmlElement.style.left = (nOverallW - nWidth) + "px";
+
+	if (nLeft <= 0)
+		this.HtmlElement.Control.HtmlElement.style.left = "0px";
+
+	if (nTop + nHeight > nOverallH)
+		this.HtmlElement.Control.HtmlElement.style.top = (nOverallH - nHeight) + "px";
+
+	if (nTop <= 0)
+		this.HtmlElement.Control.HtmlElement.style.top = "0px";
 };
 
 function CDrawingConfirmWindow()
