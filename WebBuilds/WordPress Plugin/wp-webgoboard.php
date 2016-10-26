@@ -43,7 +43,7 @@ class WpWebGoBoardPlugin {
 				the_post();
 				if (has_shortcode($post->post_content, 'webgoboard')) {
 					
-					wp_register_script('goboardmin_js', plugins_url( basename( __DIR__ ) . 'goboardmin.js' ));
+					wp_register_script('goboardmin_js', plugins_url('goboardmin.js', __FILE__));
 					wp_enqueue_script('goboardmin_js');
 				}
 			}
