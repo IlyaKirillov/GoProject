@@ -680,6 +680,13 @@ CCommon.prototype.Compare_Strings = function(sString1, sString2)
 
 	return 0;
 };
+CCommon.prototype.ClearNode = function(oNode)
+{
+	while (oNode.firstChild)
+	{
+		oNode.removeChild(oNode.firstChild);
+	}
+};
 
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
