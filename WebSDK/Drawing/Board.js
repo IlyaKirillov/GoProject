@@ -1377,67 +1377,6 @@ CDrawingBoard.prototype.private_DrawHandiMark = function(x, y, radius, w, h, Col
     }
 
     return ImageData;
-
-    var Canv   = document.createElement("canvas");
-    var Canvas = Canv.getContext("2d");
-
-    var ImageData = Canvas.createImageData(w,h);
-
-    var u = radius // ставим минимум 2, чтобы при любом маленьком зуме точки не пропадали
-    var v = -1;
-    var s = u * u;
-    var l = 0.0;
-
-    while ( u > v )
-    {
-        v++;
-
-        var p  = Math.sqrt(s - v * v);
-        var d  = Math.ceil(p) - p;
-
-        if (d <= l)
-            u--;
-
-        // Внешняя часть
-
-        var a0 = Math.floor((1.0 - d) * 255);
-
-        var xpu  = x + u;
-        var ypu  = y + u;
-        var xpv  = x + v;
-        var ypv  = y + v;
-        var xmu  = x - u;
-        var ymu  = y - u;
-        var xmv  = x - v;
-        var ymv  = y - v;
-
-        this.private_PutPixel(ImageData, xpu , ypv , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xpv , ypu , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xmu , ypv , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xmv , ypu , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xpu , ymv , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xpv , ymu , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xmu , ymv , a0, w, h, Color);
-        this.private_PutPixel(ImageData, xmv , ymu , a0, w, h, Color);
-
-        // Внутренняя часть
-
-        var a1 = 255;
-
-        var xpu0 = xpu - 1;
-        var ypu0 = ypu - 1;
-        var xmu1 = xmu + 1;
-        var ymu1 = ymu + 1;
-
-        this.private_PutHorLine(ImageData, xmu1, xpu0, a1, ypv, w, h, Color);
-        this.private_PutVerLine(ImageData, ymu1, ypu0, a1, xpv, w, h, Color);
-        this.private_PutHorLine(ImageData, xmu1, xpu0, a1, ymv, w, h, Color);
-        this.private_PutVerLine(ImageData, ymu1, ypu0, a1, xmv, w, h, Color);
-
-        l = d;
-    }
-
-    return ImageData;
 };
 CDrawingBoard.prototype.private_PutPixel = function(ImageData, x, y, alpha, w, h, Color)
 {
