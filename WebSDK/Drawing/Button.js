@@ -2153,7 +2153,7 @@ CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(o
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка меню
 //----------------------------------------------------------------------------------------------------------------------
-function CDrawingButtonFileMenu(oDrawing, bNoLoad)
+function CDrawingButtonFileMenu(oDrawing)
 {
     CDrawingButtonFileMenu.superclass.constructor.call(this, oDrawing);
 
@@ -2180,63 +2180,17 @@ function CDrawingButtonFileMenu(oDrawing, bNoLoad)
     oMenuElementWrapper.style.transitionDuration = "0.2s";
     oMenuElementWrapper.style.transitionDelay    = "0s";
 
-
-    oMainDiv.appendChild(oMenuElementWrapper);
-
-    var oThis = this;
-
-    if (true !== bNoLoad)
-    {
-        this.private_CreateMenuItem(oMenuElementWrapper, "Create New", function()
-        {
-            CreateWindow(oMainDiv.id, EWindowType.CreateNew, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
-        });
-        this.private_CreateMenuItem(oMenuElementWrapper, "Load from disk", function()
-        {
-            Common.OpenFileDialog(oGameTree);
-        });
-        this.private_CreateMenuItem(oMenuElementWrapper, "Load from clipboard", function()
-        {
-            CreateWindow(oMainDiv.id, EWindowType.Clipboard, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
-        });
-    }
-
-    this.private_CreateMenuItem(oMenuElementWrapper, "Download as SGF", function()
-    {
-        if (FileReader && Blob)
-        {
-            var sSgf = oGameTree.Save_Sgf();
-            var sGameName = oGameTree.Get_MatchName();
-            if ("" === sGameName)
-                sGameName = "download";
-
-            sGameName += ".sgf";
-            var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
-            Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
-        }
-    });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Create snapshot", function()
-    {
-        oGameTree.Download_PngBoardScreenShot();
-    });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Export to GIF", function()
-    {
-        oGameTree.Download_GifForCurVariant();
-    });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Convert to ASCII diagram", function()
-    {
-        CreateWindow(oMainDiv.id, EWindowType.DiagramSL, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
-    });
-    this.private_CreateMenuItem(oMenuElementWrapper, "Score estimate", function()
-    {
-        CreateWindow(oMainDiv.id, EWindowType.ScoreEstimate, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
-    });
-
+    this.m_oMainDiv      = oMainDiv;
     this.m_oMenuElement  = oMenuElementWrapper;
     this.m_nHeight       = oMenuElementWrapper.clientHeight;
     this.m_nWidth        = oMenuElementWrapper.clientWidth;
     this.m_nTransitionId = null;
     this.m_nShowId       = null;
+    this.m_oGameTree     = oGameTree;
+
+    this.InitDefaultMenu(false);
+
+    oMainDiv.appendChild(oMenuElementWrapper);
 
     oMenuElementWrapper.style.display = "none";
 }
@@ -2465,7 +2419,69 @@ CDrawingButtonFileMenu.prototype.private_ClickTransformIn = function()
 CDrawingButtonFileMenu.prototype.private_ClickTransformOut = function()
 {
 };
+CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
+{
+    var oMenuElementWrapper = this.m_oMenuElement;
+    var oGameTree           = this.m_oGameTree;
+    var oMainDiv            = this.m_oMainDiv;
 
+    oMenuElementWrapper.style.display = "block";
+    oMenuElementWrapper.style.opacity = null;
+    oMenuElementWrapper.style.height  = null;
+
+    Common.ClearNode(oMenuElementWrapper);
+
+    var oThis = this;
+    if (true !== bNoLoadFields)
+    {
+        this.private_CreateMenuItem(oMenuElementWrapper, "Create New", function()
+        {
+            CreateWindow(oMainDiv.id, EWindowType.CreateNew, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+        });
+        this.private_CreateMenuItem(oMenuElementWrapper, "Load from disk", function()
+        {
+            Common.OpenFileDialog(oGameTree);
+        });
+        this.private_CreateMenuItem(oMenuElementWrapper, "Load from clipboard", function()
+        {
+            CreateWindow(oMainDiv.id, EWindowType.Clipboard, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+        });
+    }
+
+    this.private_CreateMenuItem(oMenuElementWrapper, "Download as SGF", function()
+    {
+        if (FileReader && Blob)
+        {
+            var sSgf = oGameTree.Save_Sgf();
+            var sGameName = oGameTree.Get_MatchName();
+            if ("" === sGameName)
+                sGameName = "download";
+
+            sGameName += ".sgf";
+            var oBlob = new Blob([sSgf], {type: "text/plain;charset=utf-8"});
+            Common.SaveAs(oBlob, sGameName, "application/x-go-sgf");
+        }
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Create snapshot", function()
+    {
+        oGameTree.Download_PngBoardScreenShot();
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Export to GIF", function()
+    {
+        oGameTree.Download_GifForCurVariant();
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Convert to ASCII diagram", function()
+    {
+        CreateWindow(oMainDiv.id, EWindowType.DiagramSL, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+    });
+    this.private_CreateMenuItem(oMenuElementWrapper, "Score estimate", function()
+    {
+        CreateWindow(oMainDiv.id, EWindowType.ScoreEstimate, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+    });
+
+    this.m_nHeight = oMenuElementWrapper.clientHeight;
+    oMenuElementWrapper.style.display = "none";
+};
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка Kifu
 //----------------------------------------------------------------------------------------------------------------------
