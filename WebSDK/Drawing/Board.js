@@ -2880,7 +2880,9 @@ CDrawingBoard.prototype.private_AddOrRemoveStones = function(X, Y, event)
 	var oHandler = this.m_oGameTree.Get_Handler();
 	if (oHandler)
 	{
-		var isAddNewNode = true === this.m_oGameTree.Get_CurNode().Have_Move();
+	    var oCurNode = this.m_oGameTree.Get_CurNode();
+
+		var isAddNewNode = true === oCurNode.Have_Move() || oCurNode === this.m_oGameTree.Get_FirstNode();
 		if (oHandler["AddOrRemoveStone"])
 			oHandler["AddOrRemoveStone"](isAddNewNode, X, Y, Value);
 
