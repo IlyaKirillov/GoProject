@@ -30,10 +30,11 @@ function CBoardSound()
 	this.Feemale2  = null;
 	this.Feemale1  = null;
 
-	this.Tick      = null;
-	this.TickLast3 = null;
-	this.Beep      = null;
-	this.BeepBeep  = null;
+	this.Tick       = null;
+	this.TickLast3  = null;
+	this.Beep       = null;
+	this.BeepBeep   = null;
+	this.Challenger = null;
 
 	this.PrevCountDownTime = null;
 
@@ -71,10 +72,11 @@ CBoardSound.prototype.Init = function(sPath, bIE)
 	this.Feemale2  = this.private_AddSound(oBody, "GoBoardApiSoundFemale2", "");
 	this.Feemale1  = this.private_AddSound(oBody, "GoBoardApiSoundFemale1", "");
 
-	this.Tick      = this.private_AddSound(oBody, "GoBoardApiSoundTick", "/Src/Files/Tick.ogg");
-	this.TickLast3 = this.private_AddSound(oBody, "GoBoardApiSoundTickLast3", "/Src/Files/TickLast3.ogg");
-	this.Beep      = this.private_AddSound(oBody, "GoBoardApiSoundBeep", "/Src/Files/Beep.wav");
-	this.BeepBeep  = this.private_AddSound(oBody, "GoBoardApiSoundBeepBeep", "/Src/Files/BeepBeep.wav");
+	this.Tick       = this.private_AddSound(oBody, "GoBoardApiSoundTick", "/Src/Files/Tick.ogg");
+	this.TickLast3  = this.private_AddSound(oBody, "GoBoardApiSoundTickLast3", "/Src/Files/TickLast3.ogg");
+	this.Beep       = this.private_AddSound(oBody, "GoBoardApiSoundBeep", "/Src/Files/Beep.wav");
+	this.BeepBeep   = this.private_AddSound(oBody, "GoBoardApiSoundBeepBeep", "/Src/Files/BeepBeep.wav");
+	this.Challenger = this.private_AddSound(oBody, "GoBoardApiSoundChallenger", "/Src/Files/Challenger.wav");
 };
 CBoardSound.prototype.Play_PlaceStone = function()
 {
@@ -195,4 +197,8 @@ CBoardSound.prototype.PlayBeep = function()
 CBoardSound.prototype.PlayBeepBeep = function()
 {
 	this.private_PlaySound(this.BeepBeep);
+};
+CBoardSound.prototype.PlayChallenger = function()
+{
+	this.private_PlaySound(this.Challenger);
 };
