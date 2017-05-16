@@ -1235,6 +1235,10 @@ CommonExtend(CDrawingButtonOK, CDrawingButtonBase);
 
 CDrawingButtonOK.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
+	var sOK = "OK";
+	if (window.g_oLocalization)
+		sOK = g_oLocalization.common.button.ok;
+
     Canvas.lineWidth = 1;
     Canvas.moveTo(0, 0);
     Canvas.lineTo(0, H);
@@ -1243,7 +1247,7 @@ CDrawingButtonOK.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, 
     Canvas.lineTo(0, 0);
     Canvas.stroke();
 
-    var Text       = "OK";
+    var Text       = sOK;
     var FontSize   = Size * 0.8;
     var FontFamily = "Tahoma, Sans serif";
     var sFont      = FontSize + "px " + FontFamily;
@@ -1262,7 +1266,11 @@ CDrawingButtonOK.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonOK.prototype.private_GetHint = function()
 {
-    return "OK";
+	var sOK = "OK";
+	if (window.g_oLocalization)
+		sOK = g_oLocalization.common.button.ok;
+
+    return sOK;
 };
 CDrawingButtonOK.prototype.private_ClickTransformIn = function()
 {
@@ -1284,7 +1292,11 @@ CommonExtend(CDrawingButtonCancel, CDrawingButtonBase);
 
 CDrawingButtonCancel.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    Canvas.lineWidth = 1;
+	var sCancel = "Cancel";
+	if (window.g_oLocalization)
+		sCancel = g_oLocalization.common.button.cancel;
+
+	Canvas.lineWidth = 1;
     Canvas.moveTo(0, 0);
     Canvas.lineTo(0, H);
     Canvas.lineTo(W, H);
@@ -1292,7 +1304,7 @@ CDrawingButtonCancel.prototype.private_DrawOnCanvas = function(Canvas, Size, X_o
     Canvas.lineTo(0, 0);
     Canvas.stroke();
 
-    var Text       = "Cancel";
+    var Text       = sCancel;
     var FontSize   = Size * 0.8;
     var FontFamily = "Tahoma, Sans serif";
     var sFont      = FontSize + "px " + FontFamily;
@@ -1311,7 +1323,11 @@ CDrawingButtonCancel.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonCancel.prototype.private_GetHint = function()
 {
-    return "Cancel";
+	var sCancel = "Cancel";
+	if (window.g_oLocalization)
+		sCancel = g_oLocalization.common.button.cancel;
+
+    return sCancel;
 };
 CDrawingButtonCancel.prototype.private_ClickTransformIn = function()
 {
