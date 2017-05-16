@@ -1443,7 +1443,12 @@ CDrawingScoreEstimateWindow.prototype.Update_Size = function(bForce)
 };
 CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, WhiteReal, BlackPotential, WhitePotential, nResult)
 {
-    var sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ? "B+" + nResult : (nResult < 0 ? "W+" + Math.abs(nResult) : "Even"));
+    var sCaption;
+    if (g_oLocalization)
+        sCaption = g_oLocalization.common.shortBlack + " " + BlackReal + "(" + BlackPotential + ") " +  g_oLocalization.common.shortWhite + " " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ?  g_oLocalization.common.shortBlack + "+" + nResult : (nResult < 0 ?  g_oLocalization.common.shortWhite + "+" + Math.abs(nResult) : g_oLocalization.common.gameResult.even));
+    else
+        sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ? "B+" + nResult : (nResult < 0 ? "W+" + Math.abs(nResult) : "Even"));
+
     this.Set_Caption(sCaption);
 };
 CDrawingScoreEstimateWindow.prototype.Show = function(oPr)
