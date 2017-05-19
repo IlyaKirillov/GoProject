@@ -2494,6 +2494,10 @@ CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
     {
         CreateWindow(oMainDiv.id, EWindowType.ScoreEstimate, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
     });
+	this.private_CreateMenuItem(oMenuElementWrapper, "Toggle coordinates", function()
+	{
+		oGameTree.Toggle_Rulers();
+	});
 
     this.m_nHeight = oMenuElementWrapper.clientHeight;
     oMenuElementWrapper.style.display = "none";
