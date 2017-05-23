@@ -1883,8 +1883,29 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
 
     var oMainDiv = oDrawing.Get_MainDiv();
 
+    var sMainNavigation = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.mainNavigation : "Main navigation");
+    var sTreeNavigation = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.treeNavigation : "Tree navigation");
+    var sGeneralToolbar = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.generalToolbar : "General toolbar");
+    var sAutoplay       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.autoplay : "Autoplay toolbar");
+    var sTimeline       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.timelinePanel : "Timeline panel");
+    var sKifuMode       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
+
     this.m_nWidth  = 160;
     this.m_nHeight = 14 + 6 * 20;
+
+    if (g_oTextMeasurer)
+    {
+        g_oTextMeasurer.SetFont('16px "Times New Roman", Times, serif');
+
+        this.m_nWidth = 10 + 23 + Math.max(
+                g_oTextMeasurer.Measure(sMainNavigation),
+                g_oTextMeasurer.Measure(sTreeNavigation),
+                g_oTextMeasurer.Measure(sGeneralToolbar),
+                g_oTextMeasurer.Measure(sAutoplay),
+                g_oTextMeasurer.Measure(sTimeline),
+                g_oTextMeasurer.Measure(sKifuMode)
+            ) + 7;
+    }
 
     var oContextMenuElementWrapper              = document.createElement("div");
     oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
@@ -1918,12 +1939,6 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     oList.style.backgroundClip = "padding-box";
     oList.style.lineHeight     = "20px";
 
-    var sMainNavigation = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.mainNavigation : "Main navigation");
-    var sTreeNavigation = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.treeNavigation : "Tree navigation");
-    var sGeneralToolbar = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.generalToolbar : "General toolbar");
-    var sAutoplay       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.autoplay : "Autoplay toolbar");
-	var sTimeline       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.timelinePanel : "Timeline panel");
-	var sKifuMode       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
 
     this.m_oMainNavigationCheckElement  = this.private_CreateListItem(oList, sMainNavigation, function(){oDrawing.Toggle_MultiLevelToolbarMainNavigation()}, g_oGlobalSettings.Is_MultiLevelToolbarMainNavigation());
     this.m_oTreeNavigationCheckElement  = this.private_CreateListItem(oList, sTreeNavigation, function(){oDrawing.Toggle_MultiLevelToolbarTreeNavigation()}, g_oGlobalSettings.Is_MultiLevelToolbarTreeNavigation());
@@ -2453,6 +2468,7 @@ CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
 	var sConvertToASCII    = g_oLocalization ? g_oLocalization.gameRoom.menu.convertToASCIIDiagram : "Convert to ASCII diagram";
 	var sScoreEstimator    = g_oLocalization ? g_oLocalization.gameRoom.menu.scoreEstimator : "Score estimator";
 	var sToggleCoordinates = g_oLocalization ? g_oLocalization.gameRoom.menu.toggleCoordinates : "Toggle coordinates";
+    var sGameInfo          = g_oLocalization ? g_oLocalization.gameRoom.menu.gameInfo : "Game info";
 
     var oMenuElementWrapper = this.m_oMenuElement;
     var oGameTree           = this.m_oGameTree;
@@ -2481,6 +2497,10 @@ CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
         });
     }
 
+    this.private_CreateMenuItem(oMenuElementWrapper, sGameInfo, function()
+    {
+        CreateWindow(oMainDiv.id, EWindowType.GameInfo, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+    });
     this.private_CreateMenuItem(oMenuElementWrapper, sDownload, function()
     {
         if (FileReader && Blob)
