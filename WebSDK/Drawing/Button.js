@@ -404,7 +404,7 @@ CDrawingButtonBackwardToStart.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonBackwardToStart.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.backwardStart : "Back to the start")  + " (Ctrl+Shift+Left)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.backwardStart : "Back to the start")  + " (Ctrl+Shift+Left)";
 };
 CDrawingButtonBackwardToStart.prototype.private_RegisterButton = function()
 {
@@ -436,7 +436,7 @@ CDrawingButtonBackward5.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonBackward5.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.backward5 : "Back 5 moves") + " (Ctrl+Left)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.backward5 : "Back 5 moves") + " (Ctrl+Left)";
 };
 CDrawingButtonBackward5.prototype.private_RegisterButton = function()
 {
@@ -467,7 +467,7 @@ CDrawingButtonBackward.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonBackward.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.backward1 : "Back") + " (Left)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.backward1 : "Back") + " (Left)";
 };
 CDrawingButtonBackward.prototype.private_RegisterButton = function()
 {
@@ -498,7 +498,7 @@ CDrawingButtonForward.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonForward.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.forward1 : "Forward") + " (Right)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.forward1 : "Forward") + " (Right)";
 };
 CDrawingButtonForward.prototype.private_RegisterButton = function()
 {
@@ -529,7 +529,7 @@ CDrawingButtonForward5.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonForward5.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.forward5 : "Forward 5 moves") + " (Ctrl+Right)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.forward5 : "Forward 5 moves") + " (Ctrl+Right)";
 };
 CDrawingButtonForward5.prototype.private_RegisterButton = function()
 {
@@ -560,7 +560,7 @@ CDrawingButtonForwardToEnd.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonForwardToEnd.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.forwardEnd : "Go to the end") + " (Ctrl+Shift+Right)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.forwardEnd : "Go to the end") + " (Ctrl+Shift+Right)";
 };
 CDrawingButtonForwardToEnd.prototype.private_RegisterButton = function()
 {
@@ -608,7 +608,7 @@ CDrawingButtonNextVariant.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonNextVariant.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.nextVariant : "Next variant") + " (Down)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.nextVariant : "Next variant") + " (Down)";
 };
 CDrawingButtonNextVariant.prototype.private_RegisterButton = function()
 {
@@ -656,7 +656,7 @@ CDrawingButtonPrevVariant.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonPrevVariant.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.prevVariant : "Previous variant") + " (Up)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.prevVariant : "Previous variant") + " (Up)";
 };
 CDrawingButtonPrevVariant.prototype.private_RegisterButton = function()
 {
@@ -699,7 +699,7 @@ CDrawingButtonEditModeMove.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeMove.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeMoves : "Moves") + " (F1)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeMoves : "Moves") + " (F1)";
 };
 CDrawingButtonEditModeMove.prototype.private_RegisterButton = function()
 {
@@ -760,7 +760,7 @@ CDrawingButtonEditModeScores.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeScores.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeScores : "Count Scores") + " (F2)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeScores : "Count Scores") + " (F2)";
 };
 CDrawingButtonEditModeScores.prototype.private_RegisterButton = function()
 {
@@ -822,7 +822,7 @@ CDrawingButtonEditModeAddRem.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeAddRem.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeEditor : "Editor") + " (F3)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeEditor : "Editor") + " (F3)";
 };
 CDrawingButtonEditModeAddRem.prototype.private_RegisterButton = function()
 {
@@ -861,7 +861,7 @@ CDrawingButtonEditModeTr.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeTr.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeTriangles : "Triangles") + " (F4)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeTriangles : "Triangles") + " (F4)";
 };
 CDrawingButtonEditModeTr.prototype.private_RegisterButton = function()
 {
@@ -908,7 +908,7 @@ CDrawingButtonEditModeSq.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeSq.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeSquares : "Squares") + " (F5)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeSquares : "Squares") + " (F5)";
 };
 CDrawingButtonEditModeSq.prototype.private_RegisterButton = function()
 {
@@ -940,7 +940,7 @@ CDrawingButtonEditModeCr.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeCr.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeCircles : "Circles") + " (F6)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeCircles : "Circles") + " (F6)";
 };
 CDrawingButtonEditModeCr.prototype.private_RegisterButton = function()
 {
@@ -978,7 +978,7 @@ CDrawingButtonEditModeX.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeX.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeXMarks : "X marks") + " (F7)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeXMarks : "X marks") + " (F7)";
 };
 CDrawingButtonEditModeX.prototype.private_RegisterButton = function()
 {
@@ -1013,7 +1013,7 @@ CDrawingButtonEditModeText.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeText.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeText : "Text labels") + " (F8)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeText : "Text labels") + " (F8)";
 };
 CDrawingButtonEditModeText.prototype.private_RegisterButton = function()
 {
@@ -1048,7 +1048,7 @@ CDrawingButtonEditModeNum.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeNum.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeNumbers : "Numeric labels") + " (F9)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeNumbers : "Numeric labels") + " (F9)";
 };
 CDrawingButtonEditModeNum.prototype.private_RegisterButton = function()
 {
@@ -1106,9 +1106,9 @@ CDrawingButtonAutoPlay.prototype.private_HandleMouseDown = function()
 CDrawingButtonAutoPlay.prototype.private_GetHint = function()
 {
     if (EDrawingButtonState2.AutoPlayStopped === this.m_nState2)
-        return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.startAutoplay : "Start autoplay");
+        return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.startAutoplay : "Start autoplay");
     else
-        return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.stopAutoplay : "Stop autoplay");
+        return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.stopAutoplay : "Stop autoplay");
 };
 CDrawingButtonAutoPlay.prototype.private_RegisterButton = function()
 {
@@ -1172,7 +1172,7 @@ CDrawingButtonClose.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonClose.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.common.button.close : "Close");
+    return (window.g_oLocalization ? window.g_oLocalization.common.button.close : "Close");
 };
 CDrawingButtonClose.prototype.private_ClickTransformIn = function()
 {
@@ -1222,7 +1222,7 @@ CDrawingButtonGameInfo.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonGameInfo.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.gameInfo : "Game info");
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.gameInfo : "Game info");
 };
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка OK
@@ -1237,7 +1237,7 @@ CDrawingButtonOK.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, 
 {
 	var sOK = "OK";
 	if (window.g_oLocalization)
-		sOK = g_oLocalization.common.button.ok;
+		sOK = window.g_oLocalization.common.button.ok;
 
     Canvas.lineWidth = 1;
     Canvas.moveTo(0, 0);
@@ -1268,7 +1268,7 @@ CDrawingButtonOK.prototype.private_GetHint = function()
 {
 	var sOK = "OK";
 	if (window.g_oLocalization)
-		sOK = g_oLocalization.common.button.ok;
+		sOK = window.g_oLocalization.common.button.ok;
 
     return sOK;
 };
@@ -1294,7 +1294,7 @@ CDrawingButtonCancel.prototype.private_DrawOnCanvas = function(Canvas, Size, X_o
 {
 	var sCancel = "Cancel";
 	if (window.g_oLocalization)
-		sCancel = g_oLocalization.common.button.cancel;
+		sCancel = window.g_oLocalization.common.button.cancel;
 
 	Canvas.lineWidth = 1;
     Canvas.moveTo(0, 0);
@@ -1325,7 +1325,7 @@ CDrawingButtonCancel.prototype.private_GetHint = function()
 {
 	var sCancel = "Cancel";
 	if (window.g_oLocalization)
-		sCancel = g_oLocalization.common.button.cancel;
+		sCancel = window.g_oLocalization.common.button.cancel;
 
     return sCancel;
 };
@@ -1429,7 +1429,7 @@ CommonExtend(CDrawingButtonPass, CDrawingButtonBase);
 
 CDrawingButtonPass.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var Text       = (g_oLocalization ? g_oLocalization.gameRoom.button.pass : "Pass");
+    var Text       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.pass : "Pass");
     var FontSize   = Size * 0.9;
     var FontFamily = "Times New Roman, Sans serif";
     var sFont      = FontSize + "px " + FontFamily;
@@ -1447,7 +1447,7 @@ CDrawingButtonPass.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonPass.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.pass : "Pass");
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.pass : "Pass");
 };
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка About
@@ -1753,7 +1753,7 @@ CDrawingButtonBoardMode.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonBoardMode.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editMode : "Select Edit mode") + " (F1-F10)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editMode : "Select Edit mode") + " (F1-F10)";
 };
 CDrawingButtonBoardMode.prototype.private_RegisterButton = function()
 {
@@ -1862,7 +1862,7 @@ CDrawingButtonEditModeColor.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonEditModeColor.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.editModeColors : "Color marks") + " (F10)";
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.editModeColors : "Color marks") + " (F10)";
 };
 CDrawingButtonEditModeColor.prototype.private_RegisterButton = function()
 {
@@ -1883,12 +1883,12 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
 
     var oMainDiv = oDrawing.Get_MainDiv();
 
-    var sMainNavigation = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.mainNavigation : "Main navigation");
-    var sTreeNavigation = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.treeNavigation : "Tree navigation");
-    var sGeneralToolbar = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.generalToolbar : "General toolbar");
-    var sAutoplay       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.autoplay : "Autoplay toolbar");
-    var sTimeline       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.timelinePanel : "Timeline panel");
-    var sKifuMode       = (g_oLocalization ? g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
+    var sMainNavigation = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.mainNavigation : "Main navigation");
+    var sTreeNavigation = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.treeNavigation : "Tree navigation");
+    var sGeneralToolbar = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.generalToolbar : "General toolbar");
+    var sAutoplay       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.autoplay : "Autoplay toolbar");
+    var sTimeline       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.timelinePanel : "Timeline panel");
+    var sKifuMode       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
 
     this.m_nWidth  = 160;
     this.m_nHeight = 14 + 6 * 20;
@@ -2356,7 +2356,7 @@ CDrawingButtonFileMenu.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonFileMenu.prototype.private_GetHint = function()
 {
-    return g_oLocalization ? g_oLocalization.gameRoom.menu.hint : "Menu";
+    return window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.hint : "Menu";
 };
 CDrawingButtonFileMenu.prototype.Show_Menu = function()
 {
@@ -2459,17 +2459,17 @@ CDrawingButtonFileMenu.prototype.private_ClickTransformOut = function()
 };
 CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
 {
-	var sCreateNew         = g_oLocalization ? g_oLocalization.gameRoom.menu.createNew : "Create New";
-	var sLoadDisk          = g_oLocalization ? g_oLocalization.gameRoom.menu.loadFile : "Load from disk";
-	var sLoadClipboard     = g_oLocalization ? g_oLocalization.gameRoom.menu.loadFileFromClipboard : "Load from clipboard";
-	var sDownload          = g_oLocalization ? g_oLocalization.gameRoom.menu.downloadSGF : "Download as SGF";
-	var sSnapshot          = g_oLocalization ? g_oLocalization.gameRoom.menu.createSnapshot : "Create snapshot";
-	var sExportGIF         = g_oLocalization ? g_oLocalization.gameRoom.menu.exportToGif : "Export to GIF";
-	var sConvertToASCII    = g_oLocalization ? g_oLocalization.gameRoom.menu.convertToASCIIDiagram : "Convert to ASCII diagram";
-	var sScoreEstimator    = g_oLocalization ? g_oLocalization.gameRoom.menu.scoreEstimator : "Score estimator";
-	var sToggleCoordinates = g_oLocalization ? g_oLocalization.gameRoom.menu.toggleCoordinates : "Toggle coordinates";
-    var sGameInfo          = g_oLocalization ? g_oLocalization.gameRoom.menu.gameInfo : "Game info";
-    var sCropBoard         = g_oLocalization ? g_oLocalization.gameRoom.menu.cropBoard : "Crop the board";
+	var sCreateNew         = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.createNew : "Create New";
+	var sLoadDisk          = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.loadFile : "Load from disk";
+	var sLoadClipboard     = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.loadFileFromClipboard : "Load from clipboard";
+	var sDownload          = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.downloadSGF : "Download as SGF";
+	var sSnapshot          = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.createSnapshot : "Create snapshot";
+	var sExportGIF         = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.exportToGif : "Export to GIF";
+	var sConvertToASCII    = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.convertToASCIIDiagram : "Convert to ASCII diagram";
+	var sScoreEstimator    = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.scoreEstimator : "Score estimator";
+	var sToggleCoordinates = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.toggleCoordinates : "Toggle coordinates";
+    var sGameInfo          = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.gameInfo : "Game info";
+    var sCropBoard         = window.g_oLocalization ? window.g_oLocalization.gameRoom.menu.cropBoard : "Crop the board";
 
     var oMenuElementWrapper = this.m_oMenuElement;
     var oGameTree           = this.m_oGameTree;
@@ -2595,7 +2595,7 @@ CDrawingButtonKifuWindow.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonKifuWindow.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.showKifu : "Show kifu");
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.showKifu : "Show kifu");
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -2666,7 +2666,7 @@ CDrawingButtonKifuMode.prototype.private_HandleMouseDown = function()
 };
 CDrawingButtonKifuMode.prototype.private_GetHint = function()
 {
-    return (g_oLocalization ? g_oLocalization.gameRoom.button.hint.toggleKifuMode : "Toggle kifu mode");
+    return (window.g_oLocalization ? window.g_oLocalization.gameRoom.button.hint.toggleKifuMode : "Toggle kifu mode");
 };
 CDrawingButtonKifuMode.prototype.private_RegisterButton = function()
 {

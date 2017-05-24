@@ -784,53 +784,53 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
 
-	var sCaption      = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.caption : "Game info";
-	var sGameName     = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.gameName : "Game name";
-	var sResult       = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.result : "Result";
-	var sRules        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.rules : "Rules";
-	var sKomi         = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.komi : "Komi";
-	var sHandicap     = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.handicap : "Handicap";
-	var sTimeSettings = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.timeSettings : "Time settings";
-	var sBlack        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.black : "Black";
-	var sBlackRank    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.blackRank : "Black rank";
-	var sWhite        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.white : "White";
-	var sWhiteRank    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.whiteRank : "White rank";
-	var sCopyright    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.copyright : "Copyright";
-	var sDate         = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.date : "Date";
-	var sEvent        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.event : "Event";
-	var sRound        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.round : "Round";
-	var sPlace        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.place : "Place";
-	var sAnnotator    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.annotator : "Annotator";
-	var sFuseki       = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.fuseki : "Fuseki";
-	var sSource       = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.source : "Source";
-	var sTranscriber  = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.transcriber : "Transcriber";
-	var sGameInfo     = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.gameInfo : "Game info";
+	var sCaption      = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.caption : "Game info";
+	var sGameName     = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.gameName : "Game name";
+	var sResult       = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.result : "Result";
+	var sRules        = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.rules : "Rules";
+	var sKomi         = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.komi : "Komi";
+	var sHandicap     = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.handicap : "Handicap";
+	var sTimeSettings = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.timeSettings : "Time settings";
+	var sBlack        = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.black : "Black";
+	var sBlackRank    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.blackRank : "Black rank";
+	var sWhite        = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.white : "White";
+	var sWhiteRank    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.whiteRank : "White rank";
+	var sCopyright    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.copyright : "Copyright";
+	var sDate         = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.date : "Date";
+	var sEvent        = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.event : "Event";
+	var sRound        = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.round : "Round";
+	var sPlace        = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.place : "Place";
+	var sAnnotator    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.annotator : "Annotator";
+	var sFuseki       = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.fuseki : "Fuseki";
+	var sSource       = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.source : "Source";
+	var sTranscriber  = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.transcriber : "Transcriber";
+	var sGameInfo     = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.gameInfo : "Game info";
 
-	if (g_oTextMeasurer)
+	if (window.g_oTextMeasurer)
 	{
-		g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
+		window.g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
 
 		this.m_nLeftWidth = Math.max(
-			g_oTextMeasurer.Measure(sGameName),
-			g_oTextMeasurer.Measure(sResult),
-			g_oTextMeasurer.Measure(sRules),
-			g_oTextMeasurer.Measure(sKomi),
-			g_oTextMeasurer.Measure(sHandicap),
-			g_oTextMeasurer.Measure(sTimeSettings),
-			g_oTextMeasurer.Measure(sBlack),
-			g_oTextMeasurer.Measure(sBlackRank),
-			g_oTextMeasurer.Measure(sWhite),
-			g_oTextMeasurer.Measure(sWhiteRank),
-			g_oTextMeasurer.Measure(sCopyright),
-			g_oTextMeasurer.Measure(sDate),
-			g_oTextMeasurer.Measure(sEvent),
-			g_oTextMeasurer.Measure(sRound),
-			g_oTextMeasurer.Measure(sPlace),
-			g_oTextMeasurer.Measure(sAnnotator),
-			g_oTextMeasurer.Measure(sFuseki),
-			g_oTextMeasurer.Measure(sSource),
-			g_oTextMeasurer.Measure(sTranscriber),
-			g_oTextMeasurer.Measure(sGameInfo)
+			window.g_oTextMeasurer.Measure(sGameName),
+			window.g_oTextMeasurer.Measure(sResult),
+			window.g_oTextMeasurer.Measure(sRules),
+			window.g_oTextMeasurer.Measure(sKomi),
+			window.g_oTextMeasurer.Measure(sHandicap),
+			window.g_oTextMeasurer.Measure(sTimeSettings),
+			window.g_oTextMeasurer.Measure(sBlack),
+			window.g_oTextMeasurer.Measure(sBlackRank),
+			window.g_oTextMeasurer.Measure(sWhite),
+			window.g_oTextMeasurer.Measure(sWhiteRank),
+			window.g_oTextMeasurer.Measure(sCopyright),
+			window.g_oTextMeasurer.Measure(sDate),
+			window.g_oTextMeasurer.Measure(sEvent),
+			window.g_oTextMeasurer.Measure(sRound),
+			window.g_oTextMeasurer.Measure(sPlace),
+			window.g_oTextMeasurer.Measure(sAnnotator),
+			window.g_oTextMeasurer.Measure(sFuseki),
+			window.g_oTextMeasurer.Measure(sSource),
+			window.g_oTextMeasurer.Measure(sTranscriber),
+			window.g_oTextMeasurer.Measure(sGameInfo)
 		) + 12;
 	}
 
@@ -1118,7 +1118,7 @@ CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
 
     var sText = oPr.ErrorText;
 
-    var sError = g_oLocalization ? g_oLocalization.gameRoom.window.error.caption : "Error";
+    var sError = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.error.caption : "Error";
     this.Set_Caption(oPr.Caption ? oPr.Caption : sError);
 
     this.m_oGameTree = oPr.GameTree;
@@ -1152,10 +1152,10 @@ CDrawingErrorWindow.prototype.Show = function(oPr)
     this.m_nH = oPr.H;
     Common.Set_InnerTextToElement(this.m_oMainElement, oPr.ErrorText);
 
-    if (g_oTextMeasurer && this.m_nW - 14 > 0)
+    if (window.g_oTextMeasurer && this.m_nW - 14 > 0)
 	{
-		g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
-		var nTextW = g_oTextMeasurer.Measure(oPr.ErrorText);
+		window.g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
+		var nTextW = window.g_oTextMeasurer.Measure(oPr.ErrorText);
 
 		var nW = this.m_nW - 14;
 		var nH = (20 * Math.ceil((nTextW / nW) + 0.5)) + 10 + 30 + 7;
@@ -1512,8 +1512,8 @@ CDrawingScoreEstimateWindow.prototype.Update_Size = function(bForce)
 CDrawingScoreEstimateWindow.prototype.On_EstimateEnd = function(BlackReal, WhiteReal, BlackPotential, WhitePotential, nResult)
 {
     var sCaption;
-    if (g_oLocalization)
-        sCaption = g_oLocalization.common.shortBlack + " " + BlackReal + "(" + BlackPotential + ") " +  g_oLocalization.common.shortWhite + " " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ?  g_oLocalization.common.shortBlack + "+" + nResult : (nResult < 0 ?  g_oLocalization.common.shortWhite + "+" + Math.abs(nResult) : g_oLocalization.common.gameResult.even));
+    if (window.g_oLocalization)
+        sCaption = window.g_oLocalization.common.shortBlack + " " + BlackReal + "(" + BlackPotential + ") " +  window.g_oLocalization.common.shortWhite + " " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ?  window.g_oLocalization.common.shortBlack + "+" + nResult : (nResult < 0 ?  window.g_oLocalization.common.shortWhite + "+" + Math.abs(nResult) : window.g_oLocalization.common.gameResult.even));
     else
         sCaption = "B " + BlackReal + "(" + BlackPotential + ") W " + WhiteReal + "(" + WhitePotential + ") " + (nResult > 0 ? "B+" + nResult : (nResult < 0 ? "W+" + Math.abs(nResult) : "Even"));
 
@@ -1551,20 +1551,20 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, false);
 
-    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.caption : "Counter of colors";
-    var sRed     = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.red : "Red";
-    var sBlue    = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.blue : "Blue";
-	var sGreen   = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.green : "Green";
-	var sGray    = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.gray : "Gray";
+    var sCaption = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.caption : "Counter of colors";
+    var sRed     = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.red : "Red";
+    var sBlue    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.blue : "Blue";
+	var sGreen   = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.green : "Green";
+	var sGray    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.gray : "Gray";
 
-	if (g_oTextMeasurer)
+	if (window.g_oTextMeasurer)
 	{
-		g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
+		window.g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
 		this.m_nLeftWidth = Math.max(
-			g_oTextMeasurer.Measure(sRed),
-			g_oTextMeasurer.Measure(sBlue),
-			g_oTextMeasurer.Measure(sGreen),
-			g_oTextMeasurer.Measure(sGray)
+			window.g_oTextMeasurer.Measure(sRed),
+			window.g_oTextMeasurer.Measure(sBlue),
+			window.g_oTextMeasurer.Measure(sGreen),
+			window.g_oTextMeasurer.Measure(sGray)
 		) + 12;
 	}
 
@@ -1801,7 +1801,7 @@ CDrawingGifWriterWindow.prototype.Init = function(_sDivId, oPr)
     CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, false);
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
-    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.creatingGIF.caption : "Creating Gif file...";
+    var sCaption = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.creatingGIF.caption : "Creating Gif file...";
     this.Set_Caption(sCaption);
 
     if (oPr.GameTree)
@@ -2227,7 +2227,7 @@ CDrawingDiagramSLWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingDiagramSLWindow.superclass.Init.call(this, _sDivId, true);
 
-    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.asciiDiagram.caption : "ASCII diagram";
+    var sCaption = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.asciiDiagram.caption : "ASCII diagram";
     this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
@@ -2497,7 +2497,7 @@ CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
     this.m_oGameTree = oPr.GameTree;
     this.m_oDrawing  = oPr.Drawing;
 
-    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.boardCropping.caption : "Crop the board...";
+    var sCaption = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.boardCropping.caption : "Crop the board...";
     this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
@@ -2565,7 +2565,7 @@ CDrawingViewPortWindow.prototype.Handle_OK = function()
                 var oDrawing  = this.m_oDrawing;
                 if (oDrawing)
 				{
-					var sMessage = g_oLocalization ? g_oLocalization.gameRoom.window.boardCropping.errorMessage : "Sorry, the cropped part can't be so small.";
+					var sMessage = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.boardCropping.errorMessage : "Sorry, the cropped part can't be so small.";
 					CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {
 						GameTree  : oGameTree,
 						Drawing   : oDrawing,
@@ -2951,7 +2951,7 @@ CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
 {
     CDrawingKifuWindow.superclass.Init.call(this, sDivId, oPr);
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
-    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.kifu.caption : "Kifu";
+    var sCaption = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.kifu.caption : "Kifu";
     this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
@@ -3253,7 +3253,7 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
 
     if (nNextMoveNumber > 0 && nNextMoveNumber <= this.m_nMoveMax)
     {
-        var sText          = g_oLocalization ? g_oLocalization.gameRoom.window.kifu.next : "Next";
+        var sText          = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.kifu.next : "Next";
         oContext.fillStyle = "rgb(0,0,0)";
         oContext.font      = "16px Arial";
         var dOffsetY       = 20;
@@ -3261,10 +3261,10 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
         oContext.fillText(sText, dOffsetX, dOffsetY);
 
         var nLeft = 20;
-        if (g_oTextMeasurer)
+        if (window.g_oTextMeasurer)
 		{
-			g_oTextMeasurer.SetFont("16px Arial");
-			nLeft += g_oTextMeasurer.Measure(sText) + 5;
+			window.g_oTextMeasurer.SetFont("16px Arial");
+			nLeft += window.g_oTextMeasurer.Measure(sText) + 5;
 		}
 		else
 		{
@@ -3278,7 +3278,7 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
     }
     else if (nNextMoveNumber > 0)
     {
-        var sText          = g_oLocalization ? g_oLocalization.gameRoom.window.kifu.end : "End";
+        var sText          = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.kifu.end : "End";
         oContext.fillStyle = "rgb(0,0,0)";
         oContext.font      = "16px Arial";
         var dOffsetY       = 20;
