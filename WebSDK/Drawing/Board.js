@@ -2980,16 +2980,25 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
             var oPos = this.private_GetXYByBoardPos(X, Y);
             var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
 
+            var sLabelText = g_oLocalization ? g_oLocalization.gameRoom.labelPlaceholder : "Label...";
+            var nLabelWidth = 50;
+
+            if (g_oTextMeasurer)
+			{
+				g_oTextMeasurer.SetFont("16px 'Times New Roman', Times, serif");
+				nLabelWidth = g_oTextMeasurer.Measure(sLabelText) + 6 + 2 + 2; // 6 padding 2 board 2 error
+			}
+
             var oAddLabelInput              = document.createElement("input");
             oAddLabelInput.style.position   = "absolute";
             oAddLabelInput.style.top        = oOffset.Y + oPos.Y - 10 + "px";
-            oAddLabelInput.style.left       = oOffset.X + oPos.X - 25 + "px";
-            oAddLabelInput.style.width      = "50px";
+            oAddLabelInput.style.left       = oOffset.X + oPos.X - (nLabelWidth / 2) + "px";
+            oAddLabelInput.style.width      = nLabelWidth + "px";
             oAddLabelInput.style.height     = "20px";
             oAddLabelInput.style.fontFamily = '"Times New Roman", Times, serif';
             oAddLabelInput.style.fontSize   = "16px";
             oAddLabelInput.type             = "text";
-            oAddLabelInput.placeholder      = "Label...";
+            oAddLabelInput.placeholder      = sLabelText;
             oAddLabelInput.style.outline    = 0;
             oAddLabelInput.style.border     = "1px solid rgb(166, 166, 166)";
             oAddLabelInput.style.boxShadow  = "rgba(0, 0, 0, 0.8) 0px 1px 15px";

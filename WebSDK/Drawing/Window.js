@@ -1152,6 +1152,20 @@ CDrawingErrorWindow.prototype.Show = function(oPr)
     this.m_nH = oPr.H;
     Common.Set_InnerTextToElement(this.m_oMainElement, oPr.ErrorText);
 
+    if (g_oTextMeasurer && this.m_nW - 14 > 0)
+	{
+		g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
+		var nTextW = g_oTextMeasurer.Measure(oPr.ErrorText);
+
+		var nW = this.m_nW - 14;
+		var nH = (20 * Math.ceil((nTextW / nW) + 0.5)) + 10 + 30 + 7;
+
+		if (this.m_nH < nH)
+			this.m_nH = nH;
+
+		this.Update_Size(true);
+	}
+
     if (this.m_oDrawing)
     {
         this.m_oDrawing.Disable();
@@ -2929,13 +2943,16 @@ function CDrawingKifuWindow()
 
     this.m_nMoveMin = -1;
     this.m_nMoveMax = -1;
+
+    this.m_nNextW = 72;
 }
 CommonExtend(CDrawingKifuWindow, CDrawingWindow);
 CDrawingKifuWindow.prototype.Init = function(sDivId, oPr)
 {
     CDrawingKifuWindow.superclass.Init.call(this, sDivId, oPr);
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
-    this.Set_Caption("Kifu");
+    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.kifu.caption : "Kifu";
+    this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
@@ -3232,28 +3249,43 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
     var nValue          = this.m_oGameTree.Get_NextMove();
 
     var nRad = nSize / 2 | 0;
-    oContext.clearRect(0, 0, 70 + nRad + 2, 28 + 2);
+    oContext.clearRect(0, 0, this.m_nNextW, 28 + 2);
 
     if (nNextMoveNumber > 0 && nNextMoveNumber <= this.m_nMoveMax)
     {
-        var sText          = "Next";
+        var sText          = g_oLocalization ? g_oLocalization.gameRoom.window.kifu.next : "Next";
         oContext.fillStyle = "rgb(0,0,0)";
         oContext.font      = "16px Arial";
         var dOffsetY       = 20;
         var dOffsetX       = 20;
         oContext.fillText(sText, dOffsetX, dOffsetY);
 
-        this.private_DrawStone(oContext, nValue, 70, 28 - nRad, nRad);
-        this.private_DrawMoveNumber(oContext, nValue, 70, 28 - nRad, nRad, nNextMoveNumber);
+        var nLeft = 20;
+        if (g_oTextMeasurer)
+		{
+			g_oTextMeasurer.SetFont("16px Arial");
+			nLeft += g_oTextMeasurer.Measure(sText) + 5;
+		}
+		else
+		{
+			nLeft += 50;
+		}
+
+        this.private_DrawStone(oContext, nValue, nLeft + nRad, 28 - nRad, nRad);
+        this.private_DrawMoveNumber(oContext, nValue, nLeft + nRad, 28 - nRad, nRad, nNextMoveNumber);
+
+		this.m_nNextW = nLeft + 2 * nRad + 2;
     }
     else if (nNextMoveNumber > 0)
     {
-        var sText          = "End";
+        var sText          = g_oLocalization ? g_oLocalization.gameRoom.window.kifu.end : "End";
         oContext.fillStyle = "rgb(0,0,0)";
         oContext.font      = "16px Arial";
         var dOffsetY       = 20;
         var dOffsetX       = 20;
         oContext.fillText(sText, dOffsetX, dOffsetY);
+
+		this.m_nNextW = 100;
     }
 };
 CDrawingKifuWindow.prototype.Update_NextMove = function()
