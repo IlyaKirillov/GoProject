@@ -1118,7 +1118,8 @@ CDrawingErrorWindow.prototype.Init = function(_sDivId, oPr)
 
     var sText = oPr.ErrorText;
 
-    this.Set_Caption(oPr.Caption ? oPr.Caption : "Error");
+    var sError = g_oLocalization ? g_oLocalization.gameRoom.window.error.caption : "Error";
+    this.Set_Caption(oPr.Caption ? oPr.Caption : sError);
 
     this.m_oGameTree = oPr.GameTree;
     this.m_oDrawing  = oPr.Drawing;
@@ -1786,7 +1787,8 @@ CDrawingGifWriterWindow.prototype.Init = function(_sDivId, oPr)
     CDrawingGifWriterWindow.superclass.Init.call(this, _sDivId, false);
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
-    this.Set_Caption("Creating Gif file...");
+    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.creatingGIF.caption : "Creating Gif file...";
+    this.Set_Caption(sCaption);
 
     if (oPr.GameTree)
         this.m_oGameTree = oPr.GameTree;
@@ -2211,7 +2213,8 @@ CDrawingDiagramSLWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingDiagramSLWindow.superclass.Init.call(this, _sDivId, true);
 
-    this.Set_Caption("Ascii Diagram");
+    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.asciiDiagram.caption : "ASCII diagram";
+    this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
@@ -2480,7 +2483,8 @@ CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
     this.m_oGameTree = oPr.GameTree;
     this.m_oDrawing  = oPr.Drawing;
 
-    this.Set_Caption("Setting up view port...");
+    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.boardCropping.caption : "Crop the board...";
+    this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
     var oMainControl = this.HtmlElement.ConfirmInnerControl;
@@ -2546,7 +2550,16 @@ CDrawingViewPortWindow.prototype.Handle_OK = function()
                 var oGameTree = this.m_oGameTree;
                 var oDrawing  = this.m_oDrawing;
                 if (oDrawing)
-                    CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {GameTree : oGameTree, Drawing : oDrawing, ErrorText : "Sorry, viewport can't be so small.", W : 270, H : 80});
+				{
+					var sMessage = g_oLocalization ? g_oLocalization.gameRoom.window.boardCropping.errorMessage : "Sorry, the cropped part can't be so small.";
+					CreateWindow(oDrawing.Get_MainDiv().id, EWindowType.Error, {
+						GameTree  : oGameTree,
+						Drawing   : oDrawing,
+						ErrorText : sMessage,
+						W         : 270,
+						H         : 80
+					});
+				}
 
                 return;
             }

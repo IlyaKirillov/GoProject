@@ -1999,7 +1999,7 @@ CGameTree.prototype.private_DownloadGif = function(aNodes)
     var nIntervalsCount = Math.ceil(nOverallFramesCount / nTimerFramesCount);
     var bUseTimeout = (nIntervalsCount > 5 ? true : false);
 
-    var oGifWindow = true === bUseTimeout ? CreateWindow(oDrawingBoard.HtmlElement.Control.HtmlElement.id, EWindowType.GifWriter, {Drawing : this.m_oDrawing, GameTree : this}) : null;
+    var oGifWindow = true === bUseTimeout ? CreateWindow(this.m_oDrawing.Get_MainDiv().id, EWindowType.GifWriter, {Drawing : this.m_oDrawing, GameTree : this}) : null;
 
     // Устанавливаем черно-белый цвет, чтобы уменьшить количество используемых цветов.
     oDrawingBoard.Set_BlackWhiteLastMark(true);

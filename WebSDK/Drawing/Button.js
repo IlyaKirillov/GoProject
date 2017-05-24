@@ -2469,6 +2469,7 @@ CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
 	var sScoreEstimator    = g_oLocalization ? g_oLocalization.gameRoom.menu.scoreEstimator : "Score estimator";
 	var sToggleCoordinates = g_oLocalization ? g_oLocalization.gameRoom.menu.toggleCoordinates : "Toggle coordinates";
     var sGameInfo          = g_oLocalization ? g_oLocalization.gameRoom.menu.gameInfo : "Game info";
+    var sCropBoard         = g_oLocalization ? g_oLocalization.gameRoom.menu.cropBoard : "Crop the board";
 
     var oMenuElementWrapper = this.m_oMenuElement;
     var oGameTree           = this.m_oGameTree;
@@ -2535,7 +2536,10 @@ CDrawingButtonFileMenu.prototype.InitDefaultMenu = function(bNoLoadFields)
 	{
 		oGameTree.Toggle_Rulers();
 	});
-
+	this.private_CreateMenuItem(oMenuElementWrapper, sCropBoard, function()
+	{
+		CreateWindow(oMainDiv.id, EWindowType.ViewPort, {GameTree : oGameTree, Drawing : oThis.m_oDrawing});
+	});
     this.m_nHeight = oMenuElementWrapper.clientHeight;
     oMenuElementWrapper.style.display = "none";
 };
