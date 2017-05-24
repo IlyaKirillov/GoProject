@@ -43,10 +43,14 @@ CGoBoardApi.prototype.Create_SimpleBoard = function(oGameTree, sDivId)
  * @param {CGameTree} oGameTree
  * @param {string} sDivId
  */
-CGoBoardApi.prototype.Create_Viewer = function(oGameTree, sDivId)
+CGoBoardApi.prototype.Create_Viewer = function(oGameTree, sDivId, isBooklet)
 {
     var oDrawing = new CDrawing(oGameTree);
-    oDrawing.Create_Viewer(sDivId);
+
+    if (true === isBooklet)
+        oDrawing.Create_ViewerForBooklet(sDivId);
+    else
+        oDrawing.Create_Viewer(sDivId);
 };
 
 /**
@@ -400,6 +404,7 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     var nBoardWidth = null;
     var sTheme      = "TrueColor";
     var oThis       = this;
+    var isBooklet   = false;
 
     var oGameTree = this.Create_GameTree();
     oGameTree.Get_LocalSettings().Set_Embedding(true);
@@ -445,6 +450,9 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
     {
         sTheme = oConfig["boardTheme"];
     }
+
+    if (true === oConfig["booklet"])
+        isBooklet = true;
 
     if (null != oConfig["sgfUrl"])
     {
@@ -506,7 +514,7 @@ CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
         }
         else if ("viewer" == sBoardMode)
         {
-            oThis.Create_Viewer(oGameTree, sDivId);
+            oThis.Create_Viewer(oGameTree, sDivId, isBooklet);
             oPermissions["Move"] = true;
             nWidth               = 600;
         }

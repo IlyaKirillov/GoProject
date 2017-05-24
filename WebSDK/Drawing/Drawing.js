@@ -2046,6 +2046,103 @@ CDrawing.prototype.Add_StateHandler = function(oHandler)
 {
     this.m_arrStateHandlers.push(oHandler);
 };
+CDrawing.prototype.Create_ViewerForBooklet = function(sDivId)
+{
+    // Ширина страницы в буклете пока ровно 440px
+
+    this.Set_TemplateType(EDrawingTemplate.Viewer);
+    this.private_CreateWrappingMainDiv(sDivId);
+
+    this.m_oMainDiv.style.background = "";
+
+    this.m_nMinWidth = 295;
+
+    var oGameTree    = this.m_oGameTree;
+    var oMainControl = this.m_oMainControl;
+    var sMainDivId   = this.m_oMainDiv.id;
+
+    var InfoH    = 25;
+    var ToolbarH = 36;
+
+    this.m_nViewerTitleH   = InfoH;
+    this.m_nViewerToolbarH = ToolbarH;
+    //------------------------------------------------------------------------------------------------------------------
+    // Делим главную дивку на 3 части сверху 20px под информацию об игрока, снизу 36px под тулбар, а остальное для доски.
+    //------------------------------------------------------------------------------------------------------------------
+    var sInfoDivId = sMainDivId + "I";
+    this.private_CreateDiv(oMainControl.HtmlElement, sInfoDivId);
+
+    var oInfoControl = CreateControlContainer(sInfoDivId);
+    oInfoControl.Bounds.SetParams(0, 0, 1000, 0, false, false, false, false, -1, InfoH);
+    oInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right);
+    oMainControl.AddControl(oInfoControl);
+    //------------------------------------------------------------------------------------------------------------------
+    // Информация
+    //------------------------------------------------------------------------------------------------------------------
+    var sScoresInfo = sInfoDivId + "S";
+    this.private_CreateDiv(oInfoControl.HtmlElement, sScoresInfo);
+    var oScoresInfoControl = CreateControlContainer(sScoresInfo);
+    oScoresInfoControl.Bounds.SetParams(159, 0, 1000, 1000, true, false, false, false, 122, -1);
+    oScoresInfoControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_bottom);
+    oInfoControl.AddControl(oScoresInfoControl);
+
+    this.m_oViewerScores = new CDrawingViewerScores(this);
+    this.m_oViewerScores.Init(sScoresInfo, oGameTree);
+    this.m_oViewerScores.HtmlElement.Control.HtmlElement.style.backgroundColor = "";
+    this.m_aElements.push(this.m_oViewerScores);
+    //------------------------------------------------------------------------------------------------------------------
+    // Тулбар
+    //------------------------------------------------------------------------------------------------------------------
+    var sToolbarDivId = sMainDivId + "T";
+    this.private_CreateDiv(oMainControl.HtmlElement, sToolbarDivId);
+
+    var oToolbarControl = CreateControlContainer(sToolbarDivId);
+    oToolbarControl.Bounds.SetParams(109, 0, 1000, 0, true, false, false, true, 221, ToolbarH);
+    oToolbarControl.Anchor = (g_anchor_bottom | g_anchor_left);
+    oMainControl.AddControl(oToolbarControl);
+
+    var oDrawingToolbar = new CDrawingToolbar(this);
+
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackwardToStart(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonBackward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForward5(this), 36, 1, EToolbarFloat.Left);
+    oDrawingToolbar.Add_Control(new CDrawingButtonForwardToEnd(this), 36, 1, EToolbarFloat.Left);
+
+    oDrawingToolbar.Init(sToolbarDivId, oGameTree);
+    oDrawingToolbar.HtmlElement.Control.HtmlElement.style.backgroundColor = "";
+    this.m_aElements.push(oDrawingToolbar);
+    //------------------------------------------------------------------------------------------------------------------
+    // Доска
+    //------------------------------------------------------------------------------------------------------------------
+    var sBoardDivId = sMainDivId + "B";
+    var oBoardElement = this.private_CreateDiv(oMainControl.HtmlElement, sBoardDivId);
+
+    var oBoardControl = CreateControlContainer(sBoardDivId);
+    oBoardControl.Bounds.SetParams(0, InfoH, 1000, ToolbarH, false, true, false, true, -1, -1);
+    oBoardControl.Anchor = (g_anchor_left | g_anchor_right | g_anchor_top | g_anchor_bottom);
+    oMainControl.AddControl(oBoardControl);
+
+    var sBoardDivId2 = sBoardDivId + "B";
+    this.private_CreateDiv(oBoardElement, sBoardDivId2);
+    var oBoardControl2 = CreateControlContainer(sBoardDivId2);
+    oBoardControl.AddControl(oBoardControl2);
+
+    var sBoardDivId3 = sBoardDivId + "N";
+    this.private_CreateDiv(oBoardElement, sBoardDivId3);
+    var oBoardControl3 = CreateControlContainer(sBoardDivId3);
+    oBoardControl.AddControl(oBoardControl3);
+
+    var oDrawingBoard = new CDrawingBoard(this);
+    oDrawingBoard.Init(sBoardDivId2, this.m_oGameTree);
+    oDrawingBoard.Focus();
+    this.m_aElements.push(oDrawingBoard);
+    oBoardControl.Set_Type(3, oDrawingBoard, {RMin : 0});
+    //------------------------------------------------------------------------------------------------------------------
+    this.Update_Size();
+    oGameTree.On_EndLoadDrawing();
+};
 
 
 function CDrawingFullInfo()

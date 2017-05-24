@@ -58,6 +58,7 @@ function CDrawingButtonBase(oDrawing)
     this.m_oDisabledFColor = new CColor(140, 140, 140, 255);
     this.m_oSelectedBColor = new CColor(0, 0, 0, 77);
 
+
     this.m_nW = 0;
     this.m_nH = 0;
 
