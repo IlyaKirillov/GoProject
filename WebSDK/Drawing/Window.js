@@ -774,6 +774,8 @@ function CDrawingInfoWindow()
     this.m_nBottomOffset = 10;
     this.m_nRowHeight    = 20;
     this.m_nLineSpacing  = 5;
+
+    this.m_nLeftWidth = 100;
 }
 
 CommonExtend(CDrawingInfoWindow, CDrawingConfirmWindow);
@@ -781,6 +783,56 @@ CommonExtend(CDrawingInfoWindow, CDrawingConfirmWindow);
 CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingInfoWindow.superclass.Init.call(this, _sDivId);
+
+	var sCaption      = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.caption : "Game info";
+	var sGameName     = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.gameName : "Game name";
+	var sResult       = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.result : "Result";
+	var sRules        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.rules : "Rules";
+	var sKomi         = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.komi : "Komi";
+	var sHandicap     = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.handicap : "Handicap";
+	var sTimeSettings = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.timeSettings : "Time settings";
+	var sBlack        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.black : "Black";
+	var sBlackRank    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.blackRank : "Black rank";
+	var sWhite        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.white : "White";
+	var sWhiteRank    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.whiteRank : "White rank";
+	var sCopyright    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.copyright : "Copyright";
+	var sDate         = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.date : "Date";
+	var sEvent        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.event : "Event";
+	var sRound        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.round : "Round";
+	var sPlace        = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.place : "Place";
+	var sAnnotator    = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.annotator : "Annotator";
+	var sFuseki       = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.fuseki : "Fuseki";
+	var sSource       = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.source : "Source";
+	var sTranscriber  = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.transcriber : "Transcriber";
+	var sGameInfo     = g_oLocalization ? g_oLocalization.gameRoom.window.gameInfo.gameInfo : "Game info";
+
+	if (g_oTextMeasurer)
+	{
+		g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
+
+		this.m_nLeftWidth = Math.max(
+			g_oTextMeasurer.Measure(sGameName),
+			g_oTextMeasurer.Measure(sResult),
+			g_oTextMeasurer.Measure(sRules),
+			g_oTextMeasurer.Measure(sKomi),
+			g_oTextMeasurer.Measure(sHandicap),
+			g_oTextMeasurer.Measure(sTimeSettings),
+			g_oTextMeasurer.Measure(sBlack),
+			g_oTextMeasurer.Measure(sBlackRank),
+			g_oTextMeasurer.Measure(sWhite),
+			g_oTextMeasurer.Measure(sWhiteRank),
+			g_oTextMeasurer.Measure(sCopyright),
+			g_oTextMeasurer.Measure(sDate),
+			g_oTextMeasurer.Measure(sEvent),
+			g_oTextMeasurer.Measure(sRound),
+			g_oTextMeasurer.Measure(sPlace),
+			g_oTextMeasurer.Measure(sAnnotator),
+			g_oTextMeasurer.Measure(sFuseki),
+			g_oTextMeasurer.Measure(sSource),
+			g_oTextMeasurer.Measure(sTranscriber),
+			g_oTextMeasurer.Measure(sGameInfo)
+		) + 12;
+	}
 
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
@@ -790,7 +842,7 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     if (true !== oGameTree.Can_EditGameInfo())
         this.HtmlElement.OKButton.Set_Enabled(false);
 
-    this.Set_Caption("Game info");
+    this.Set_Caption(sCaption);
 
     var oMainControl = this.HtmlElement.ConfirmInnerControl;
     var oMainDiv     = this.HtmlElement.ConfirmInnerDiv;
@@ -804,50 +856,51 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
     var LineSpacing  = this.m_nLineSpacing;
     var BottomOffset = this.m_nBottomOffset;
 
+
     var bCanEdit = oGameTree.Can_EditGameInfo();
-    this.HtmlElement2.GameName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Game name", oGameTree.Get_GameName(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.GameName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sGameName, oGameTree.Get_GameName(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Result = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Result", oGameTree.Get_Result(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Result = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sResult, oGameTree.Get_Result(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Rules = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Rules", oGameTree.Get_Rules(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Rules = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sRules, oGameTree.Get_Rules(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Komi = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Komi", oGameTree.Get_Komi(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Komi = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sKomi, oGameTree.Get_Komi(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Handicap = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Handicap", oGameTree.Get_Handicap(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Handicap = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sHandicap, oGameTree.Get_Handicap(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.TimeSettings = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Time settings", oGameTree.Get_TimeLimit() + (oGameTree.Get_OverTime() === "" ? "" : " + " + oGameTree.Get_OverTime()), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
-
-    this.HtmlElement2.BlackName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Black", oGameTree.Get_BlackName(), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.BlackRank = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Black rank", oGameTree.Get_BlackRating(), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.WhiteName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "White", oGameTree.Get_WhiteName(), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.WhiteRank = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "White rank", oGameTree.Get_WhiteRating(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.TimeSettings = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sTimeSettings, oGameTree.Get_TimeLimit() + (oGameTree.Get_OverTime() === "" ? "" : " + " + oGameTree.Get_OverTime()), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
 
-    this.HtmlElement2.Copyright = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Copyright", oGameTree.Get_Copyright(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.BlackName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sBlack, oGameTree.Get_BlackName(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Date = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Date", oGameTree.Get_DateTime(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.BlackRank = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sBlackRank, oGameTree.Get_BlackRating(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Event = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Event", oGameTree.Get_GameEvent(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.WhiteName = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sWhite, oGameTree.Get_WhiteName(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Round = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Round", oGameTree.Get_GameRound(), TopOffset, RowHeight, bCanEdit);
-    TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Place = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Place", oGameTree.Get_GamePlace(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.WhiteRank = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sWhiteRank, oGameTree.Get_WhiteRating(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
 
-    this.HtmlElement2.Annotator = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Annotator", oGameTree.Get_GameAnnotator(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Copyright = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sCopyright, oGameTree.Get_Copyright(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Fuseki = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Fuseki", oGameTree.Get_GameFuseki(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Date = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sDate, oGameTree.Get_DateTime(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Source = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Source", oGameTree.Get_GameSource(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Event = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sEvent, oGameTree.Get_GameEvent(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
-    this.HtmlElement2.Transcriber = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Transcriber", oGameTree.Get_GameTranscriber(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Round = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sRound, oGameTree.Get_GameRound(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += RowHeight + LineSpacing;
+    this.HtmlElement2.Place = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sPlace, oGameTree.Get_GamePlace(), TopOffset, RowHeight, bCanEdit);
     TopOffset += RowHeight + LineSpacing;
 
-    this.HtmlElement2.GameInfo = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, "Game info", oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
+    this.HtmlElement2.Annotator = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sAnnotator, oGameTree.Get_GameAnnotator(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += RowHeight + LineSpacing;
+    this.HtmlElement2.Fuseki = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sFuseki, oGameTree.Get_GameFuseki(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += RowHeight + LineSpacing;
+    this.HtmlElement2.Source = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sSource, oGameTree.Get_GameSource(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += RowHeight + LineSpacing;
+    this.HtmlElement2.Transcriber = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sTranscriber, oGameTree.Get_GameTranscriber(), TopOffset, RowHeight, bCanEdit);
+    TopOffset += RowHeight + LineSpacing;
+
+    this.HtmlElement2.GameInfo = this.private_CreateInfoAreaElement(oMainDiv, oMainControl, sDivId, sGameInfo, oGameTree.Get_GameInfo(), TopOffset, RowHeight, bCanEdit);
     TopOffset += 3 * RowHeight;
 
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
@@ -944,7 +997,7 @@ CDrawingInfoWindow.prototype.private_CreateInputElement = function(oParentElemen
 };
 CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight, bCanEdit)
 {
-    var LeftWidth  = 100;
+    var LeftWidth  = this.m_nLeftWidth;
     var LeftOffset = 10;
     var RightOffset = 10;
 
@@ -970,7 +1023,7 @@ CDrawingInfoWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMai
 };
 CDrawingInfoWindow.prototype.private_CreateInfoAreaElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight, bCanEdit)
 {
-    var LeftWidth  = 100;
+    var LeftWidth  = this.m_nLeftWidth;
     var LeftOffset = 10;
     var RightOffset = 10;
 
