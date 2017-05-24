@@ -1526,6 +1526,8 @@ CDrawingScoreEstimateWindow.prototype.Show = function(oPr)
 function CDrawingCountColorsWindow()
 {
     CDrawingCountColorsWindow.superclass.constructor.call(this);
+
+    this.m_nLeftWidth = 100;
 }
 
 CommonExtend(CDrawingCountColorsWindow, CDrawingWindow);
@@ -1534,19 +1536,36 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
 {
     CDrawingCountColorsWindow.superclass.Init.call(this, _sDivId, false);
 
+    var sCaption = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.caption : "Counter of colors";
+    var sRed     = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.red : "Red";
+    var sBlue    = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.blue : "Blue";
+	var sGreen   = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.green : "Green";
+	var sGray    = g_oLocalization ? g_oLocalization.gameRoom.window.colorsCounter.gray : "Gray";
+
+	if (g_oTextMeasurer)
+	{
+		g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
+		this.m_nLeftWidth = Math.max(
+			g_oTextMeasurer.Measure(sRed),
+			g_oTextMeasurer.Measure(sBlue),
+			g_oTextMeasurer.Measure(sGreen),
+			g_oTextMeasurer.Measure(sGray)
+		) + 12;
+	}
+
     this.m_oGameTree     = oPr.GameTree;
     this.m_oDrawingBoard = oPr.DrawingBoard;
 
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
-    this.Set_Caption("Colors counter");
+    this.Set_Caption(sCaption);
 
     var oMainDiv     = this.HtmlElement.InnerDiv;
     var oMainControl = this.HtmlElement.InnerControl;
     var sDivId       = this.HtmlElement.InnerDiv.id;
 
     oMainDiv.style.overflowX = "hidden";
-    oMainDiv.style.overflowY = "scroll";
+    oMainDiv.style.overflowY = "hidden";
 
     var RowHeight   = 20;
     var TopOffset   = 10;
@@ -1603,13 +1622,13 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
         }
     }
 
-    this.Red = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Red", "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
+    this.Red = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sRed, "4 x " + Red[3] + "+ 3 x " + Red[2] + " + 2 x " + Red[1] + " + 1 x " + Red[0] + " =" + (4 * Red[3] + 3 * Red[2] + 2 * Red[1] + Red[0]), TopOffset, RowHeight);
     TopOffset += RowHeight + LineSpacing;
-    this.Green = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Green", "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
+    this.Green = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sGreen, "4 x " + Green[3] + "+ 3 x " + Green[2] + " + 2 x " + Green[1] + " + 1 x " + Green[0] + " =" + (4 * Green[3] + 3 * Green[2] + 2 * Green[1] + Green[0]), TopOffset, RowHeight);
     TopOffset += RowHeight + LineSpacing;
-    this.Blue = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Blue", "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
+    this.Blue = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sBlue, "4 x " + Blue[3] + "+ 3 x " + Blue[2] + " + 2 x " + Blue[1] + " + 1 x " + Blue[0] + " =" + (4 * Blue[3] + 3 * Blue[2] + 2 * Blue[1] + Blue[0]), TopOffset, RowHeight);
     TopOffset += RowHeight + LineSpacing;
-    this.Gray = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, "Gray", "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
+    this.Gray = this.private_CreateInfoElement(oMainDiv, oMainControl, sDivId, sGray, "4 x " + Gray[3] + "+ 3 x " + Gray[2] + " + 2 x " + Gray[1] + " + 1 x " + Gray[0] + " =" + (4 * Gray[3] + 3 * Gray[2] + 2 * Gray[1] + Gray[0]), TopOffset, RowHeight);
     TopOffset += RowHeight + LineSpacing;
 
     this.protected_CreateDivElement(oMainDiv, sDivId + "Bottom");
@@ -1649,7 +1668,7 @@ CDrawingCountColorsWindow.prototype.private_CreateInputElement = function(oParen
 };
 CDrawingCountColorsWindow.prototype.private_CreateInfoElement = function(oMainDiv, oMainControl, sDivId, sName, sValue, TopOffset, RowHeight, bCanEdit)
 {
-    var LeftWidth  = 100;
+    var LeftWidth  = this.m_nLeftWidth;
     var LeftOffset = 10;
     var RightOffset = 10;
 
