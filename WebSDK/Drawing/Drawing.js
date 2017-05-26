@@ -699,6 +699,9 @@ CDrawing.prototype.OnDestroy = function()
 		Common_CancelAnimationFrame(this.m_nAnimationFrameTimer);
 		this.m_nAnimationFrameTimer = null;
 	}
+
+    if (this.m_oMainDiv)
+        delete g_aWindows[this.m_oMainDiv.id];
 };
 CDrawing.prototype.Disable = function()
 {
