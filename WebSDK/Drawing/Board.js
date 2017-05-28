@@ -485,6 +485,10 @@ CDrawingBoard.prototype.Set_ViewPort = function(X0, Y0, X1, Y1)
         this.m_oViewPort.Y1 = nSizeY - 1;
     }
 };
+CDrawingBoard.prototype.Get_ViewPort = function()
+{
+    return this.m_oViewPort;
+};
 CDrawingBoard.prototype.Reset_ViewPort = function()
 {
     var oSize = this.m_oLogicBoard.Get_Size();
@@ -914,6 +918,9 @@ CDrawingBoard.prototype.private_OnResize = function(bForce)
     {
         this.private_DrawTrueColorFullBoard();
     }
+
+    if (EBoardMode.ViewPort === this.m_eMode)
+        this.private_UpdateSelectCanvas();
 };
 CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
 {
@@ -2694,10 +2701,25 @@ CDrawingBoard.prototype.private_EndViewPortSelection = function(X, Y)
         this.m_oViewPortSelection.EndY   = Y;
     }
 };
+CDrawingBoard.prototype.Set_ViewPortSelection = function(X0, Y0, X1, Y1)
+{
+    this.m_oViewPortSelection.StartX = X0 + 1;
+    this.m_oViewPortSelection.StartY = Y0 + 1;
+    this.m_oViewPortSelection.EndX   = X1 + 1;
+    this.m_oViewPortSelection.EndY   = Y1 + 1;
+    this.private_UpdateSelectCanvas();
+};
 CDrawingBoard.prototype.private_UpdateSelectCanvas = function()
 {
-    if (EBoardMode.ViewPort === this.m_eMode && true === this.m_oViewPortSelection.Start)
+    if (EBoardMode.ViewPort === this.m_eMode)
     {
+        if (!this.m_oImageData.Lines
+            || this.m_oViewPortSelection.StartX <= 0
+            || this.m_oViewPortSelection.StartY <= 0
+            || this.m_oViewPortSelection.EndX <= 0
+            || this.m_oViewPortSelection.EndY <= 0)
+            return;
+
         var W = this.m_oImageData.W;
         var H = this.m_oImageData.H;
         var Lines = this.m_oImageData.Lines;

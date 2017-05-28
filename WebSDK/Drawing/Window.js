@@ -2484,6 +2484,8 @@ CDrawingDiagramSLWindow.prototype.private_FillTextArea = function(oGameTree)
 function CDrawingViewPortWindow()
 {
     CDrawingViewPortWindow.superclass.constructor.call(this);
+
+    this.m_oButtonReset = null;
 }
 
 CommonExtend(CDrawingViewPortWindow, CDrawingConfirmWindow);
@@ -2522,6 +2524,39 @@ CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
     oDrawingBoard.Set_ViewPortMode(this);
 
     this.m_oDrawingBoard = oDrawingBoard;
+
+    var oButtonsDiv  = this.HtmlElement.OkCancelDiv;
+
+    var sReset = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.boardCropping.buttonReset : "Reset";
+    var nResetWidth = 100;
+    if (window.g_oTextMeasurer)
+    {
+        window.g_oTextMeasurer.SetFont("16px 'Segoe UI', Helvetica, Tahoma, Geneva, Verdana, sans-serif");
+        nResetWidth = window.g_oTextMeasurer.Measure(sReset) + 10;
+    }
+
+    var sButtonResetId      = sMainId + "R";
+    var oButtonResetElement = this.protected_CreateDivElement(oButtonsDiv, sButtonResetId);
+    var oButtonResetControl = CreateControlContainerByElement(oButtonResetElement);
+    oButtonResetControl.Bounds.SetParams(0, 9, 159, 1000, false, true, true, false, nResetWidth + 10, 21);
+    oButtonResetControl.Anchor = (g_anchor_top | g_anchor_right);
+    this.HtmlElement.InnerControl.AddControl(oButtonResetControl);
+
+    var oThis = this;
+    var oButttonReset = new CDrawingButtonSimpleText(sReset, function()
+    {
+        var oDrawingBoard = oThis.m_oGameTree.Get_DrawingBoard();
+        if (oDrawingBoard)
+        {
+            oDrawingBoard.Reset_ViewPort();
+            oThis.m_oDrawing.Update_Size(true);
+            oThis.Close();
+        }
+    }, "");
+    oButttonReset.Init(sButtonResetId, this);
+    this.m_oButtonReset = oButttonReset;
+
+    this.private_UpdateSelectionOnShow();
 };
 CDrawingViewPortWindow.prototype.Update_Size = function(bForce)
 {
@@ -2529,6 +2564,9 @@ CDrawingViewPortWindow.prototype.Update_Size = function(bForce)
 
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.Update_Size(bForce);
+
+    if (this.m_oButtonReset)
+        this.m_oButtonReset.Update_Size(bForce);
 };
 CDrawingViewPortWindow.prototype.Show = function(oPr)
 {
@@ -2547,6 +2585,8 @@ CDrawingViewPortWindow.prototype.Show = function(oPr)
     CDrawingViewPortWindow.superclass.Show.apply(this, arguments);
     // Для перерисовки позиции
     this.Update_Size(true);
+
+    this.private_UpdateSelectionOnShow();
 };
 CDrawingViewPortWindow.prototype.Handle_OK = function()
 {
@@ -2585,6 +2625,27 @@ CDrawingViewPortWindow.prototype.Handle_OK = function()
     }
 
     this.Close();
+};
+CDrawingViewPortWindow.prototype.private_UpdateSelectionOnShow = function()
+{
+    var oOriginDrawingBoard = this.m_oGameTree.Get_DrawingBoard();
+    if (oOriginDrawingBoard && this.m_oDrawingBoard)
+    {
+        var oViewPort = oOriginDrawingBoard.Get_ViewPort();
+        var oSize     = this.m_oGameTree.Get_Board().Get_Size();
+
+        if (0 !== oViewPort.X0
+            || 0 !== oViewPort.Y0
+            || oSize.X - 1 !== oViewPort.X1
+            || oSize.Y - 1 !== oViewPort.Y1)
+        {
+            this.m_oDrawingBoard.Set_ViewPortSelection(oViewPort.X0, oViewPort.Y0, oViewPort.X1, oViewPort.Y1);
+        }
+        else
+        {
+            this.m_oDrawingBoard.Set_ViewPortSelection(-1, -1, -1, -1);
+        }
+    }
 };
 
 function CDrawingCreateNewWindow()
