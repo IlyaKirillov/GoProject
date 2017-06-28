@@ -1894,20 +1894,6 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     this.m_nWidth  = 160;
     this.m_nHeight = 14 + 6 * 20;
 
-    if (g_oTextMeasurer)
-    {
-        g_oTextMeasurer.SetFont('16px "Times New Roman", Times, serif');
-
-        this.m_nWidth = 10 + 23 + Math.max(
-                g_oTextMeasurer.Measure(sMainNavigation),
-                g_oTextMeasurer.Measure(sTreeNavigation),
-                g_oTextMeasurer.Measure(sGeneralToolbar),
-                g_oTextMeasurer.Measure(sAutoplay),
-                g_oTextMeasurer.Measure(sTimeline),
-                g_oTextMeasurer.Measure(sKifuMode)
-            ) + 7;
-    }
-
     var oContextMenuElementWrapper              = document.createElement("div");
     oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
     oContextMenuElementWrapper.style.position   = "absolute";

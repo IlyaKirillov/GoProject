@@ -3005,12 +3005,6 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
             var sLabelText = g_oLocalization ? g_oLocalization.gameRoom.labelPlaceholder : "Label...";
             var nLabelWidth = 50;
 
-            if (g_oTextMeasurer)
-			{
-				g_oTextMeasurer.SetFont("16px 'Times New Roman', Times, serif");
-				nLabelWidth = g_oTextMeasurer.Measure(sLabelText) + 6 + 2 + 2; // 6 padding 2 board 2 error
-			}
-
             var oAddLabelInput              = document.createElement("input");
             oAddLabelInput.style.position   = "absolute";
             oAddLabelInput.style.top        = oOffset.Y + oPos.Y - 10 + "px";
