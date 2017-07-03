@@ -12,11 +12,12 @@ var BOARD_BLACK = 0x01;
 var BOARD_WHITE = 0x02;
 var BOARD_DRAW  = 0x03; // Это только для подсчета очков, для обозначения нейтральных пунктов.
 
+// EShowVariants value must be consistent with SGF ST property(0: children variation, 1: sibling variation, 2: "no (auto-) board markup).
 var EShowVariants =
 {
-    None : 0, // Не показвать варианты
+    Next : 0, // Все варианты следующего хода
     Curr : 1, // Альтернативные варианты текущего хода
-    Next : 2, // Все варианты следующего хода
+    None : 2, // Не показвать варианты
 
     Min  : 0,
     Max  : 2
