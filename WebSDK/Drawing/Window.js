@@ -806,34 +806,6 @@ CDrawingInfoWindow.prototype.Init = function(_sDivId, oPr)
 	var sTranscriber  = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.transcriber : "Transcriber";
 	var sGameInfo     = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.gameInfo.gameInfo : "Game info";
 
-	if (window.g_oTextMeasurer)
-	{
-		window.g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
-
-		this.m_nLeftWidth = Math.max(
-			window.g_oTextMeasurer.Measure(sGameName),
-			window.g_oTextMeasurer.Measure(sResult),
-			window.g_oTextMeasurer.Measure(sRules),
-			window.g_oTextMeasurer.Measure(sKomi),
-			window.g_oTextMeasurer.Measure(sHandicap),
-			window.g_oTextMeasurer.Measure(sTimeSettings),
-			window.g_oTextMeasurer.Measure(sBlack),
-			window.g_oTextMeasurer.Measure(sBlackRank),
-			window.g_oTextMeasurer.Measure(sWhite),
-			window.g_oTextMeasurer.Measure(sWhiteRank),
-			window.g_oTextMeasurer.Measure(sCopyright),
-			window.g_oTextMeasurer.Measure(sDate),
-			window.g_oTextMeasurer.Measure(sEvent),
-			window.g_oTextMeasurer.Measure(sRound),
-			window.g_oTextMeasurer.Measure(sPlace),
-			window.g_oTextMeasurer.Measure(sAnnotator),
-			window.g_oTextMeasurer.Measure(sFuseki),
-			window.g_oTextMeasurer.Measure(sSource),
-			window.g_oTextMeasurer.Measure(sTranscriber),
-			window.g_oTextMeasurer.Measure(sGameInfo)
-		) + 12;
-	}
-
     this.protected_UpdateSizeAndPosition(oPr.Drawing);
 
     var oGameTree = oPr.GameTree;
@@ -1151,20 +1123,6 @@ CDrawingErrorWindow.prototype.Show = function(oPr)
     this.m_nW = oPr.W;
     this.m_nH = oPr.H;
     Common.Set_InnerTextToElement(this.m_oMainElement, oPr.ErrorText);
-
-    if (window.g_oTextMeasurer && this.m_nW - 14 > 0)
-	{
-		window.g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
-		var nTextW = window.g_oTextMeasurer.Measure(oPr.ErrorText);
-
-		var nW = this.m_nW - 14;
-		var nH = (20 * Math.ceil((nTextW / nW) + 0.5)) + 10 + 30 + 7;
-
-		if (this.m_nH < nH)
-			this.m_nH = nH;
-
-		this.Update_Size(true);
-	}
 
     if (this.m_oDrawing)
     {
@@ -1556,17 +1514,6 @@ CDrawingCountColorsWindow.prototype.Init = function(_sDivId, oPr)
     var sBlue    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.blue : "Blue";
 	var sGreen   = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.green : "Green";
 	var sGray    = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.colorsCounter.gray : "Gray";
-
-	if (window.g_oTextMeasurer)
-	{
-		window.g_oTextMeasurer.SetFont("15px Tahoma, 'Sans serif'");
-		this.m_nLeftWidth = Math.max(
-			window.g_oTextMeasurer.Measure(sRed),
-			window.g_oTextMeasurer.Measure(sBlue),
-			window.g_oTextMeasurer.Measure(sGreen),
-			window.g_oTextMeasurer.Measure(sGray)
-		) + 12;
-	}
 
     this.m_oGameTree     = oPr.GameTree;
     this.m_oDrawingBoard = oPr.DrawingBoard;
@@ -2529,11 +2476,6 @@ CDrawingViewPortWindow.prototype.Init = function(_sDivId, oPr)
 
     var sReset = window.g_oLocalization ? window.g_oLocalization.gameRoom.window.boardCropping.buttonReset : "Reset";
     var nResetWidth = 100;
-    if (window.g_oTextMeasurer)
-    {
-        window.g_oTextMeasurer.SetFont("16px 'Segoe UI', Helvetica, Tahoma, Geneva, Verdana, sans-serif");
-        nResetWidth = window.g_oTextMeasurer.Measure(sReset) + 10;
-    }
 
     var sButtonResetId      = sMainId + "R";
     var oButtonResetElement = this.protected_CreateDivElement(oButtonsDiv, sButtonResetId);
@@ -3321,16 +3263,7 @@ CDrawingKifuWindow.prototype.private_DrawNextMove = function(oContext, nSize)
         var dOffsetX       = 20;
         oContext.fillText(sText, dOffsetX, dOffsetY);
 
-        var nLeft = 20;
-        if (window.g_oTextMeasurer)
-		{
-			window.g_oTextMeasurer.SetFont("16px Arial");
-			nLeft += window.g_oTextMeasurer.Measure(sText) + 5;
-		}
-		else
-		{
-			nLeft += 50;
-		}
+        var nLeft = 70;
 
         this.private_DrawStone(oContext, nValue, nLeft + nRad, 28 - nRad, nRad);
         this.private_DrawMoveNumber(oContext, nValue, nLeft + nRad, 28 - nRad, nRad, nNextMoveNumber);

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Board with comments, toolbar and navigator test</title>
+    
+    <script type="text/javascript" language="JavaScript" src="../Common.js"></script>
+
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Controls.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Board.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/BoardTarget.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/HtmlEvents.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Mark.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Button.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Toolbar.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Drawing.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/InterfaceState.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Comments.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Navigator.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/NavigatorMap.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Slider.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Sound.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Presentation.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/VerticalTabs.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Drawing/Window.js"></script>
+
+    <script type="text/javascript" language="JavaScript" src="../Command.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Consts.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../GameTree.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../GifWriter.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../LogicBoard.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Memory.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Move.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Node.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Territory.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../SgfReader.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../SgfWriter.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Api.js"></script>
+    <script type="text/javascript" language="JavaScript" src="../Version.js"></script>
+
+</head>
+<body style="position:absolute;padding:0;margin:0;">
+<div id="divId" style="position:relative; height: 100vh;width: 100vw" onfocus="BodyFocus()" tabindex="-1"></div>
+<script>
+    var oGameTree = GoBoardApi.Create_GameTree();
+    GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
+    GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
+
+    window.onresize = function()
+    {
+        GoBoardApi.Update_Size(oGameTree);
+    };
+
+    function BodyFocus()
+    {
+        if (oGameTree)
+            GoBoardApi.Focus(oGameTree);
+    }
+</script>
+</body>
+</html>
