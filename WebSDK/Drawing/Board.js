@@ -3002,13 +3002,13 @@ CDrawingBoard.prototype.private_AddText = function(X, Y, event)
             var oPos = this.private_GetXYByBoardPos(X, Y);
             var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
 
-            var sLabelText = g_oLocalization ? g_oLocalization.gameRoom.labelPlaceholder : "Label...";
+            var sLabelText = window.g_oLocalization ? window.g_oLocalization.gameRoom.labelPlaceholder : "Label...";
             var nLabelWidth = 50;
 
-            if (g_oTextMeasurer)
+            if (window.g_oTextMeasurer)
 			{
-				g_oTextMeasurer.SetFont("16px 'Times New Roman', Times, serif");
-				nLabelWidth = g_oTextMeasurer.Measure(sLabelText) + 6 + 2 + 2; // 6 padding 2 board 2 error
+                window.g_oTextMeasurer.SetFont("16px 'Times New Roman', Times, serif");
+				nLabelWidth = window.g_oTextMeasurer.Measure(sLabelText) + 6 + 2 + 2; // 6 padding 2 board 2 error
 			}
 
             var oAddLabelInput              = document.createElement("input");

@@ -1894,17 +1894,17 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
     this.m_nWidth  = 160;
     this.m_nHeight = 14 + 6 * 20;
 
-    if (g_oTextMeasurer)
+    if (window.g_oTextMeasurer)
     {
-        g_oTextMeasurer.SetFont('16px "Times New Roman", Times, serif');
+        window.g_oTextMeasurer.SetFont('16px "Times New Roman", Times, serif');
 
         this.m_nWidth = 10 + 23 + Math.max(
-                g_oTextMeasurer.Measure(sMainNavigation),
-                g_oTextMeasurer.Measure(sTreeNavigation),
-                g_oTextMeasurer.Measure(sGeneralToolbar),
-                g_oTextMeasurer.Measure(sAutoplay),
-                g_oTextMeasurer.Measure(sTimeline),
-                g_oTextMeasurer.Measure(sKifuMode)
+                window.g_oTextMeasurer.Measure(sMainNavigation),
+                window.g_oTextMeasurer.Measure(sTreeNavigation),
+                window.g_oTextMeasurer.Measure(sGeneralToolbar),
+                window.g_oTextMeasurer.Measure(sAutoplay),
+                window.g_oTextMeasurer.Measure(sTimeline),
+                window.g_oTextMeasurer.Measure(sKifuMode)
             ) + 7;
     }
 
