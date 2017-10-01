@@ -535,6 +535,12 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
         var _X = Lines[X - 1].X - Rad;
         var _Y = Lines[Y - 1].Y - Rad;
 
+        // Непонятно почему, с определенного момента Chrome плохо рендерит картинки с прозрачкой
+        // без предварительной очистки области
+        StonesCanvas.clearRect(_X, _Y, d, d);
+        if (true === bShadows)
+            ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
+
         switch (Value)
         {
             case BOARD_BLACK:
@@ -552,14 +558,14 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
                     ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
-            case BOARD_EMPTY:
-            default:
-            {
-                StonesCanvas.clearRect(_X, _Y, d, d);
-                if (true === bShadows)
-                    ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
-                break;
-            }
+            // case BOARD_EMPTY:
+            // default:
+            // {
+            //     StonesCanvas.clearRect(_X, _Y, d, d);
+            //     if (true === bShadows)
+            //         ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
+            //     break;
+            // }
         }
     }
 
