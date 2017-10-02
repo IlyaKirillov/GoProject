@@ -1720,6 +1720,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         var nType   = Value.Get_Type();
                         var oResult = Value.Is_OnCurrentVariant();
 
+						Lines.clearRect(_x, _y, 24, 24);
                         switch(nType)
                         {
                             case ENavigatorElementType.Empty:
@@ -1825,8 +1826,12 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         if (BOARD_BLACK === nMoveType)
                         {
                             if (bCurVariant && true === bShadows)
-                                Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+							{
+								Shadows.clearRect(_x + this.m_oImageData.ShadowOff, _y + this.m_oImageData.ShadowOff, 24, 24);
+								Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+							}
 
+                            Nodes.clearRect(_x, _y, 24, 24);
                             Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
 
                             if ("" === sComment)
@@ -1845,8 +1850,12 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         else if (BOARD_WHITE === nMoveType)
                         {
                             if (bCurVariant && true === bShadows)
-                                Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+							{
+								Shadows.clearRect(_x + this.m_oImageData.ShadowOff, _y + this.m_oImageData.ShadowOff, 24, 24);
+								Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+							}
 
+							Nodes.clearRect(_x, _y, 24, 24);
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
 
                             if ("" === sComment)
@@ -1864,11 +1873,14 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                         }
                         else // if (BOARD_EMPTY === nMoveType)
                         {
+							Nodes.clearRect(_x, _y, 24, 24);
                             Nodes.putImageData((bCurVariant ? this.m_oImageData.Triangle : this.m_oImageData.Triangle_T),  _x + 2, _y + 2);
                         }
 
                         var NextsCount = Value.Get_NextsCount();
                         var NextCur = Value.Get_NextCur();
+
+                        Lines.clearRect(_x, _y, 24, 24);
                         if (0 === X)
                         {
                             if (0 === NextsCount)
