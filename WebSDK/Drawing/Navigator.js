@@ -783,7 +783,7 @@ CDrawingNavigator.prototype.private_DrawBackground = function(W, H, bForce)
     }
     else
     {
-        Canvas.putImageData(this.m_oImageData.Board, 0, 0);
+        Canvas.drawImage(this.m_oImageData.Board, 0, 0);
     }
 };
 CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
@@ -882,23 +882,24 @@ CDrawingNavigator.prototype.private_CreateTrueColorBoard = function()
             }
         }
     }
-    this.m_oImageData.Board = oImageData;
-    Canvas.putImageData(this.m_oImageData.Board, 0, 0);
+
+    this.m_oImageData.Board = this.private_CreateCanvas(W, H, oImageData);
+    Canvas.drawImage(this.m_oImageData.Board, 0, 0);
 };
 CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
 {
     var Canvas = this.HtmlElement.Nodes.Control.HtmlElement.getContext("2d");
 
     var pixel = 0.8, shadow = 0.7, d = 20;
-    this.m_oImageData.Black  = Canvas.createImageData(d, d);
-    this.m_oImageData.White  = Canvas.createImageData(d, d);
-    this.m_oImageData.BlackT = Canvas.createImageData(d, d);
-    this.m_oImageData.WhiteT = Canvas.createImageData(d, d);
+    var oBlackImageData  = Canvas.createImageData(d, d);
+    var oWhiteImageData  = Canvas.createImageData(d, d);
+    var oBlackTImageData = Canvas.createImageData(d, d);
+    var oWhiteTImageData = Canvas.createImageData(d, d);
 
-    var BlackBitmap  = this.m_oImageData.Black.data;
-    var WhiteBitmap  = this.m_oImageData.White.data;
-    var BlackTBitmap = this.m_oImageData.BlackT.data;
-    var WhiteTBitmap = this.m_oImageData.WhiteT.data;
+    var BlackBitmap  = oBlackImageData.data;
+    var WhiteBitmap  = oWhiteImageData.data;
+    var BlackTBitmap = oBlackTImageData.data;
+    var WhiteTBitmap = oWhiteTImageData.data;
 
     var oWhiteColor = this.private_GetSettings_WhiteColor();
     var oBlackColor = this.private_GetSettings_BlackColor();
@@ -1123,6 +1124,11 @@ CDrawingNavigator.prototype.private_CreateTrueColorStones = function()
             }
         }
     }
+
+	this.m_oImageData.Black  = this.private_CreateCanvas(d, d, oBlackImageData);
+	this.m_oImageData.White  = this.private_CreateCanvas(d, d, oWhiteImageData);
+	this.m_oImageData.BlackT = this.private_CreateCanvas(d, d, oBlackTImageData);
+	this.m_oImageData.WhiteT = this.private_CreateCanvas(d, d, oWhiteTImageData);
 };
 CDrawingNavigator.prototype.private_CreateLines = function()
 {
@@ -1130,51 +1136,51 @@ CDrawingNavigator.prototype.private_CreateLines = function()
 
     var Canvas = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
 
-    this.m_oImageData.Hor_Start      = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_Start2     = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor            = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor2           = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_End        = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver            = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver2           = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver3           = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_Start_T    = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_Start2_T   = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_Start2_T_2 = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_Start2_T_3 = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_T          = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor2_T         = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor2_T_2       = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor2_T_3       = Canvas.createImageData(24, 24);
-    this.m_oImageData.Hor_End_T      = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver_T          = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver2_T         = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver2_T_2       = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver2_T_3       = Canvas.createImageData(24, 24);
-    this.m_oImageData.Ver3_T         = Canvas.createImageData(24, 24);
+    var oHor_Start      = Canvas.createImageData(24, 24);
+    var oHor_Start2     = Canvas.createImageData(24, 24);
+    var oHor            = Canvas.createImageData(24, 24);
+    var oHor2           = Canvas.createImageData(24, 24);
+    var oHor_End        = Canvas.createImageData(24, 24);
+    var oVer            = Canvas.createImageData(24, 24);
+    var oVer2           = Canvas.createImageData(24, 24);
+    var oVer3           = Canvas.createImageData(24, 24);
+    var oHor_Start_T    = Canvas.createImageData(24, 24);
+    var oHor_Start2_T   = Canvas.createImageData(24, 24);
+    var oHor_Start2_T_2 = Canvas.createImageData(24, 24);
+    var oHor_Start2_T_3 = Canvas.createImageData(24, 24);
+    var oHor_T          = Canvas.createImageData(24, 24);
+    var oHor2_T         = Canvas.createImageData(24, 24);
+    var oHor2_T_2       = Canvas.createImageData(24, 24);
+    var oHor2_T_3       = Canvas.createImageData(24, 24);
+    var oHor_End_T      = Canvas.createImageData(24, 24);
+    var oVer_T          = Canvas.createImageData(24, 24);
+    var oVer2_T         = Canvas.createImageData(24, 24);
+    var oVer2_T_2       = Canvas.createImageData(24, 24);
+    var oVer2_T_3       = Canvas.createImageData(24, 24);
+    var oVer3_T         = Canvas.createImageData(24, 24);
 
-    var NHS_Bitmap      = this.m_oImageData.Hor_Start.data;
-    var NHS2_Bitmap     = this.m_oImageData.Hor_Start2.data;
-    var NH_Bitmap       = this.m_oImageData.Hor.data;
-    var NH2_Bitmap      = this.m_oImageData.Hor2.data;
-    var NHE_Bitmap      = this.m_oImageData.Hor_End.data;
-    var NV_Bitmap       = this.m_oImageData.Ver.data;
-    var NV2_Bitmap      = this.m_oImageData.Ver2.data;
-    var NV3_Bitmap      = this.m_oImageData.Ver3.data;
-    var NHS_Bitmap_T    = this.m_oImageData.Hor_Start_T.data;
-    var NHS2_Bitmap_T   = this.m_oImageData.Hor_Start2_T.data;
-    var NHS2_Bitmap_T_2 = this.m_oImageData.Hor_Start2_T_2.data;
-    var NHS2_Bitmap_T_3 = this.m_oImageData.Hor_Start2_T_3.data;
-    var NH_Bitmap_T     = this.m_oImageData.Hor_T.data;
-    var NH2_Bitmap_T    = this.m_oImageData.Hor2_T.data;
-    var NH2_Bitmap_T_2  = this.m_oImageData.Hor2_T_2.data;
-    var NH2_Bitmap_T_3  = this.m_oImageData.Hor2_T_3.data;
-    var NHE_Bitmap_T    = this.m_oImageData.Hor_End_T.data;
-    var NV_Bitmap_T     = this.m_oImageData.Ver_T.data;
-    var NV2_Bitmap_T    = this.m_oImageData.Ver2_T.data;
-    var NV2_Bitmap_T_2  = this.m_oImageData.Ver2_T_2.data;
-    var NV2_Bitmap_T_3  = this.m_oImageData.Ver2_T_3.data;
-    var NV3_Bitmap_T    = this.m_oImageData.Ver3_T.data;
+    var NHS_Bitmap      = oHor_Start.data;
+    var NHS2_Bitmap     = oHor_Start2.data;
+    var NH_Bitmap       = oHor.data;
+    var NH2_Bitmap      = oHor2.data;
+    var NHE_Bitmap      = oHor_End.data;
+    var NV_Bitmap       = oVer.data;
+    var NV2_Bitmap      = oVer2.data;
+    var NV3_Bitmap      = oVer3.data;
+    var NHS_Bitmap_T    = oHor_Start_T.data;
+    var NHS2_Bitmap_T   = oHor_Start2_T.data;
+    var NHS2_Bitmap_T_2 = oHor_Start2_T_2.data;
+    var NHS2_Bitmap_T_3 = oHor_Start2_T_3.data;
+    var NH_Bitmap_T     = oHor_T.data;
+    var NH2_Bitmap_T    = oHor2_T.data;
+    var NH2_Bitmap_T_2  = oHor2_T_2.data;
+    var NH2_Bitmap_T_3  = oHor2_T_3.data;
+    var NHE_Bitmap_T    = oHor_End_T.data;
+    var NV_Bitmap_T     = oVer_T.data;
+    var NV2_Bitmap_T    = oVer2_T.data;
+    var NV2_Bitmap_T_2  = oVer2_T_2.data;
+    var NV2_Bitmap_T_3  = oVer2_T_3.data;
+    var NV3_Bitmap_T    = oVer3_T.data;
 
     var nChannel = true === this.private_GetSettings_DarkBoard() ? 200 : 28;
 
@@ -1445,7 +1451,31 @@ CDrawingNavigator.prototype.private_CreateLines = function()
         }
     }
 
-    this.m_oImageData.Triangle    = this.private_DrawTriangle(20, 20, 20 * 0.07, Color, 1, null);
+
+	this.m_oImageData.Hor_Start      = this.private_CreateCanvas(24, 24, oHor_Start);
+	this.m_oImageData.Hor_Start2     = this.private_CreateCanvas(24, 24, oHor_Start2);
+	this.m_oImageData.Hor            = this.private_CreateCanvas(24, 24, oHor);
+	this.m_oImageData.Hor2           = this.private_CreateCanvas(24, 24, oHor2);
+	this.m_oImageData.Hor_End        = this.private_CreateCanvas(24, 24, oHor_End);
+	this.m_oImageData.Ver            = this.private_CreateCanvas(24, 24, oVer);
+	this.m_oImageData.Ver2           = this.private_CreateCanvas(24, 24, oVer2);
+	this.m_oImageData.Ver3           = this.private_CreateCanvas(24, 24, oVer3);
+	this.m_oImageData.Hor_Start_T    = this.private_CreateCanvas(24, 24, oHor_Start_T);
+	this.m_oImageData.Hor_Start2_T   = this.private_CreateCanvas(24, 24, oHor_Start2_T);
+	this.m_oImageData.Hor_Start2_T_2 = this.private_CreateCanvas(24, 24, oHor_Start2_T_2);
+	this.m_oImageData.Hor_Start2_T_3 = this.private_CreateCanvas(24, 24, oHor_Start2_T_3);
+	this.m_oImageData.Hor_T          = this.private_CreateCanvas(24, 24, oHor_T);
+	this.m_oImageData.Hor2_T         = this.private_CreateCanvas(24, 24, oHor2_T);
+	this.m_oImageData.Hor2_T_2       = this.private_CreateCanvas(24, 24, oHor2_T_2);
+	this.m_oImageData.Hor2_T_3       = this.private_CreateCanvas(24, 24, oHor2_T_3);
+	this.m_oImageData.Hor_End_T      = this.private_CreateCanvas(24, 24, oHor_End_T);
+	this.m_oImageData.Ver_T          = this.private_CreateCanvas(24, 24, oVer_T);
+	this.m_oImageData.Ver2_T         = this.private_CreateCanvas(24, 24, oVer2_T);
+	this.m_oImageData.Ver2_T_2       = this.private_CreateCanvas(24, 24, oVer2_T_2);
+	this.m_oImageData.Ver2_T_3       = this.private_CreateCanvas(24, 24, oVer2_T_3);
+	this.m_oImageData.Ver3_T         = this.private_CreateCanvas(24, 24, oVer3_T);
+
+	this.m_oImageData.Triangle    = this.private_DrawTriangle(20, 20, 20 * 0.07, Color, 1, null);
     this.m_oImageData.Triangle_T  = this.private_DrawTriangle(20, 20, 20 * 0.07, new CColor(nChannel, nChannel, nChannel, nTransAlpha), 1, null);
     this.m_oImageData.Triangle_B  = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(255, 255, 255, 255), 1, this.m_oImageData.Black);
     this.m_oImageData.Triangle_W  = this.private_DrawTriangle(20, 20, 20 * 0.06, new CColor(0, 0, 0, 255), 1, this.m_oImageData.White);
@@ -1457,13 +1487,13 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
     var Size = 24;
     var Canvas = this.HtmlElement.Selection.Control.HtmlElement.getContext("2d");
 
-    this.m_oImageData.Target      = Canvas.createImageData(Size, Size);
-    this.m_oImageData.Current     = Canvas.createImageData(Size, Size);
-    this.m_oImageData.GameCurrent = Canvas.createImageData(Size, Size);
+    var oTarget      = Canvas.createImageData(Size, Size);
+    var oCurrent     = Canvas.createImageData(Size, Size);
+    var oGameCurrent = Canvas.createImageData(Size, Size);
 
-    var TargetBitmap      = this.m_oImageData.Target.data;
-    var CurrentBitmap     = this.m_oImageData.Current.data;
-    var GameCurrentBitmap = this.m_oImageData.GameCurrent.data;
+    var TargetBitmap      = oTarget.data;
+    var CurrentBitmap     = oCurrent.data;
+    var GameCurrentBitmap = oGameCurrent.data;
 
     for (var Y = 0; Y < Size; Y++)
     {
@@ -1533,20 +1563,26 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
         }
     }
 
-    Canvas.putImageData(this.m_oImageData.Target, 0, 0);
-    Canvas.putImageData(this.m_oImageData.Current, 0, 30);
-    Canvas.putImageData(this.m_oImageData.GameCurrent, 0, 60)
+	this.m_oImageData.Target      = this.private_CreateCanvas(Size, Size, oTarget);
+	this.m_oImageData.Current     = this.private_CreateCanvas(Size, Size, oCurrent);
+	this.m_oImageData.GameCurrent = this.private_CreateCanvas(Size, Size, oGameCurrent);
+
+    Canvas.drawImage(this.m_oImageData.Target, 0, 0);
+    Canvas.drawImage(this.m_oImageData.Current, 0, 30);
+    Canvas.drawImage(this.m_oImageData.GameCurrent, 0, 60)
 };
-CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha, oStoneImageData)
+CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha, oStoneCanvas)
 {
     if (undefined === Alpha)
         Alpha = 1;
 
-    var Canvas = this.HtmlElement.Lines.Control.HtmlElement.getContext("2d");
+    var oCanvasElement = document.createElement("canvas");
+	var Canvas = oCanvasElement.getContext("2d");
+
     Canvas.clearRect(0, 0, W, H);
 
-    if (null !== oStoneImageData)
-        Canvas.putImageData(oStoneImageData, 0, 0);
+    if (null !== oStoneCanvas)
+        Canvas.drawImage(oStoneCanvas, 0, 0);
 
     Canvas.globalAlpha = Alpha;
     Canvas.strokeStyle = Color.ToString();
@@ -1565,7 +1601,7 @@ CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Colo
     var y1 = shift;
     var y2 = _y;
 
-    if (null !== oStoneImageData)
+    if (null !== oStoneCanvas)
     {
         x1 = Math.floor(x1 - 0.5);
         x2 = Math.ceil(x2 + 0.5);
@@ -1581,17 +1617,14 @@ CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Colo
     Canvas.closePath();
     Canvas.stroke();
 
-    var data = Canvas.getImageData(0, 0, W, H);
-
-    Canvas.putImageData(data, 0, 0);
-    return data;
+	return oCanvasElement;
 };
 CDrawingNavigator.prototype.private_CreateShadows = function()
 {
     var ShadowCanvas = this.HtmlElement.Shadows.Control.HtmlElement.getContext("2d");
     var d = 20;
-    this.m_oImageData.Shadow = ShadowCanvas.createImageData(d, d);
-    var Shadow = this.m_oImageData.Shadow.data;
+    var oShadowImageData = ShadowCanvas.createImageData(d, d);
+    var Shadow = oShadowImageData.data;
     this.m_oImageData.ShadowOff = Math.max(parseInt(d * 0.15), 3);
 
     var r = (d - 5) / 2 + 1;
@@ -1612,6 +1645,8 @@ CDrawingNavigator.prototype.private_CreateShadows = function()
             Shadow[Index + 3] = parseInt( 255 * f );
         }
     }
+
+    this.m_oImageData.Shadow = this.private_CreateCanvas(d, d, oShadowImageData);
 };
 CDrawingNavigator.prototype.private_DrawMap = function()
 {
@@ -1642,7 +1677,7 @@ CDrawingNavigator.prototype.private_UpdateTarget = function(X, Y)
 
         var Value = this.m_oMap.Get(X, Y);
         if (Value.Is_Node())
-            Canvas.putImageData(this.m_oImageData.Target, RealX, RealY);
+            Canvas.drawImage(this.m_oImageData.Target, RealX, RealY);
     }
 };
 CDrawingNavigator.prototype.private_UpdateScrollsPos = function()
@@ -1730,9 +1765,9 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             case ENavigatorElementType.Line_Ver:
                             {
                                 if (!oResult.bResult)
-                                    Lines.putImageData(this.m_oImageData.Ver_T, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Ver_T, _x, _y);
                                 else
-                                    Lines.putImageData(this.m_oImageData.Ver, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Ver, _x, _y);
 
                                 break;
                             }
@@ -1741,21 +1776,21 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                                 if (oResult.bResult)
                                 {
                                     if (1 === oResult.Temp)
-                                        Lines.putImageData(this.m_oImageData.Ver2_T, _x, _y);
+                                        Lines.drawImage(this.m_oImageData.Ver2_T, _x, _y);
                                     else
-                                        Lines.putImageData(this.m_oImageData.Ver2_T_2, _x, _y);
+                                        Lines.drawImage(this.m_oImageData.Ver2_T_2, _x, _y);
                                 }
                                 else
-                                    Lines.putImageData(this.m_oImageData.Ver2_T_3, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Ver2_T_3, _x, _y);
 
                                 break;
                             }
                             case ENavigatorElementType.Line_Ver_End:
                             {
                                 if ( !oResult.bResult )
-                                    Lines.putImageData(this.m_oImageData.Ver3_T, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Ver3_T, _x, _y);
                                 else
-                                    Lines.putImageData(this.m_oImageData.Ver3, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Ver3, _x, _y);
                             }
                         }
                     }
@@ -1828,11 +1863,11 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             if (bCurVariant && true === bShadows)
 							{
 								Shadows.clearRect(_x + this.m_oImageData.ShadowOff, _y + this.m_oImageData.ShadowOff, 24, 24);
-								Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+								Shadows.drawImage(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 							}
 
                             Nodes.clearRect(_x, _y, 24, 24);
-                            Nodes.putImageData((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
+                            Nodes.drawImage((bCurVariant ?  this.m_oImageData.Black : this.m_oImageData.BlackT) , _x + 2, _y + 2);
 
                             if ("" === sComment)
                             {
@@ -1844,7 +1879,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             }
                             else
                             {
-                                Nodes.putImageData((bCurVariant ?  this.m_oImageData.Triangle_B : this.m_oImageData.Triangle_BT) , _x + 2, _y + 2);
+                                Nodes.drawImage((bCurVariant ?  this.m_oImageData.Triangle_B : this.m_oImageData.Triangle_BT) , _x + 2, _y + 2);
                             }
                         }
                         else if (BOARD_WHITE === nMoveType)
@@ -1852,11 +1887,11 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             if (bCurVariant && true === bShadows)
 							{
 								Shadows.clearRect(_x + this.m_oImageData.ShadowOff, _y + this.m_oImageData.ShadowOff, 24, 24);
-								Shadows.putImageData(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
+								Shadows.drawImage(this.m_oImageData.Shadow, _x + 2 + this.m_oImageData.ShadowOff, _y + 2 + this.m_oImageData.ShadowOff);
 							}
 
 							Nodes.clearRect(_x, _y, 24, 24);
-                            Nodes.putImageData((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
+                            Nodes.drawImage((bCurVariant ? this.m_oImageData.White : this.m_oImageData.WhiteT), _x + 2, _y + 2);
 
                             if ("" === sComment)
                             {
@@ -1868,13 +1903,13 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             }
                             else
                             {
-                                Nodes.putImageData((bCurVariant ?  this.m_oImageData.Triangle_W : this.m_oImageData.Triangle_WT) , _x + 2, _y + 2);
+                                Nodes.drawImage((bCurVariant ?  this.m_oImageData.Triangle_W : this.m_oImageData.Triangle_WT) , _x + 2, _y + 2);
                             }
                         }
                         else // if (BOARD_EMPTY === nMoveType)
                         {
 							Nodes.clearRect(_x, _y, 24, 24);
-                            Nodes.putImageData((bCurVariant ? this.m_oImageData.Triangle : this.m_oImageData.Triangle_T),  _x + 2, _y + 2);
+                            Nodes.drawImage((bCurVariant ? this.m_oImageData.Triangle : this.m_oImageData.Triangle_T),  _x + 2, _y + 2);
                         }
 
                         var NextsCount = Value.Get_NextsCount();
@@ -1888,21 +1923,21 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             else if (1 === NextsCount)
                             {
                                 if (bCurVariant)
-                                    Lines.putImageData(this.m_oImageData.Hor_Start, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor_Start, _x, _y);
                                 else
-                                    Lines.putImageData(this.m_oImageData.Hor_Start_T, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor_Start_T, _x, _y);
                             }
                             else
                             {
                                 if (bCurVariant)
                                 {
                                     if (0 == NextCur)
-                                        Lines.putImageData(this.m_oImageData.Hor_Start2_T, _x, _y);
+                                        Lines.drawImage(this.m_oImageData.Hor_Start2_T, _x, _y);
                                     else
-                                        Lines.putImageData(this.m_oImageData.Hor_Start2_T_2, _x, _y);
+                                        Lines.drawImage(this.m_oImageData.Hor_Start2_T_2, _x, _y);
                                 }
                                 else
-                                    Lines.putImageData(this.m_oImageData.Hor_Start2_T_3, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor_Start2_T_3, _x, _y);
                             }
                         }
                         else
@@ -1910,28 +1945,28 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             if (0 === NextsCount)
                             {
                                 if (bCurVariant)
-                                    Lines.putImageData(this.m_oImageData.Hor_End, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor_End, _x, _y);
                                 else
-                                    Lines.putImageData(this.m_oImageData.Hor_End_T, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor_End_T, _x, _y);
                             }
                             else if (1 === NextsCount)
                             {
                                 if (bCurVariant)
-                                    Lines.putImageData(this.m_oImageData.Hor, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor, _x, _y);
                                 else
-                                    Lines.putImageData(this.m_oImageData.Hor_T, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor_T, _x, _y);
                             }
                             else
                             {
                                 if (bCurVariant)
                                 {
                                     if (0 === NextCur)
-                                        Lines.putImageData(this.m_oImageData.Hor2_T, _x, _y);
+                                        Lines.drawImage(this.m_oImageData.Hor2_T, _x, _y);
                                     else
-                                        Lines.putImageData(this.m_oImageData.Hor2_T_2, _x, _y);
+                                        Lines.drawImage(this.m_oImageData.Hor2_T_2, _x, _y);
                                 }
                                 else
-                                    Lines.putImageData(this.m_oImageData.Hor2_T_3, _x, _y);
+                                    Lines.drawImage(this.m_oImageData.Hor2_T_3, _x, _y);
                             }
                         }
 
@@ -1968,7 +2003,7 @@ CDrawingNavigator.prototype.private_DrawCurrentOnTimer = function()
 
     if (RealX  >= -24 && RealX <= W + 24 && RealY >= -24 && RealY <= H + 24)
     {
-        Canvas.putImageData(this.m_oImageData.Current, RealX, RealY);
+        Canvas.drawImage(this.m_oImageData.Current, RealX, RealY);
     }
 
     this.private_DrawGameCurrentOnTimer();
@@ -2005,7 +2040,7 @@ CDrawingNavigator.prototype.private_DrawGameCurrentOnTimer = function()
 
     if (RealX  >= -24 && RealX <= W + 24 && RealY >= -24 && RealY <= H + 24)
     {
-        Canvas.putImageData(this.m_oImageData.GameCurrent, RealX, RealY);
+        Canvas.drawImage(this.m_oImageData.GameCurrent, RealX, RealY);
     }
 };
 CDrawingNavigator.prototype.private_GetSettings_TrueColorBoard = function()
@@ -2039,4 +2074,12 @@ CDrawingNavigator.prototype.private_GetSettings_LinesColor = function()
 CDrawingNavigator.prototype.private_GetSettings_DarkBoard = function()
 {
     return this.m_oGameTree.Get_LocalSettings().Is_NavigatorDarkBoard();
+};
+CDrawingNavigator.prototype.private_CreateCanvas = function(nWidth, nHeight, oImageData)
+{
+	var oCanvas    = document.createElement("canvas");
+	oCanvas.width  = nWidth;
+	oCanvas.height = nHeight;
+	oCanvas.getContext("2d").putImageData(oImageData, 0, 0);
+	return oCanvas;
 };

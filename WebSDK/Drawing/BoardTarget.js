@@ -107,16 +107,16 @@ CBoardTarget.prototype.Set_Type = function(eType)
             TargetCanvas.drawImage(this.m_oImageData.X_White, 0, 0);
             break;
         case EBoardTargetType.ColorR:
-            TargetCanvas.putImageData(this.m_oImageData.RcolorTarget, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.RcolorTarget, 0, 0);
             break;
         case EBoardTargetType.ColorG:
-            TargetCanvas.putImageData(this.m_oImageData.GcolorTarget, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.GcolorTarget, 0, 0);
             break;
         case EBoardTargetType.ColorB:
-            TargetCanvas.putImageData(this.m_oImageData.BcolorTarget, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.BcolorTarget, 0, 0);
             break;
         case EBoardTargetType.ColorA:
-            TargetCanvas.putImageData(this.m_oImageData.AcolorTarget, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.AcolorTarget, 0, 0);
             break;
         }
 

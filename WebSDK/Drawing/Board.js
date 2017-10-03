@@ -1146,7 +1146,7 @@ CDrawingBoard.prototype.private_CreateTrueColorBoard = function()
         }
     }
 
-    this.m_oImageData.Board = ImageData;
+    this.m_oImageData.Board = this.private_CreateCanvas(W, H, ImageData);
     this.m_oImageData.W = W;
     this.m_oImageData.H = H;
 
@@ -1165,7 +1165,7 @@ CDrawingBoard.prototype.private_DrawTrueColorFullBoard = function()
 CDrawingBoard.prototype.private_DrawTrueColorBoard = function()
 {
     var Board = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
-    Board.putImageData(this.m_oImageData.Board, 0, 0);
+    Board.drawImage(this.m_oImageData.Board, 0, 0);
 };
 CDrawingBoard.prototype.private_CreateLines = function()
 {
@@ -1257,7 +1257,7 @@ CDrawingBoard.prototype.private_DrawTrueColorLines = function(Exclude)
             var dX = Lines[aPoints[nPointIndex][0]].X - nRad;
             var dY = Lines[aPoints[nPointIndex][1]].Y - nRad;
 
-            LinesCanvas.putImageData(Handi, dX, dY);
+            LinesCanvas.drawImage(Handi, dX, dY);
         }
     }
 
@@ -1379,7 +1379,7 @@ CDrawingBoard.prototype.private_DrawHandiMark = function(x, y, radius, w, h, Col
         }
     }
 
-    return ImageData;
+    return this.private_CreateCanvas(w, h, ImageData);
 
     var Canv   = document.createElement("canvas");
     var Canvas = Canv.getContext("2d");
@@ -1440,7 +1440,7 @@ CDrawingBoard.prototype.private_DrawHandiMark = function(x, y, radius, w, h, Col
         l = d;
     }
 
-    return ImageData;
+    return this.private_CreateCanvas(w, h, ImageData);
 };
 CDrawingBoard.prototype.private_PutPixel = function(ImageData, x, y, alpha, w, h, Color)
 {
