@@ -535,8 +535,6 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
         var _X = Lines[X - 1].X - Rad;
         var _Y = Lines[Y - 1].Y - Rad;
 
-        // Непонятно почему, с определенного момента Chrome плохо рендерит картинки с прозрачкой
-        // без предварительной очистки области
         StonesCanvas.clearRect(_X, _Y, d, d);
         if (true === bShadows)
             ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
@@ -545,27 +543,19 @@ CDrawingBoard.prototype.Draw_Sector = function(X, Y, Value)
         {
             case BOARD_BLACK:
             {
-                StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y);
+                StonesCanvas.drawImage(this.m_oImageData.BlackStone, _X, _Y);
                 if (true === bShadows)
-                    ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                    ShadowCanvas.drawImage(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
             case BOARD_WHITE:
             {
                 var Val = this.m_oImageData.WhiteStones2[X - 1 + (Y - 1) * this.m_oLogicBoard.Get_Size().X];
-                StonesCanvas.putImageData(this.m_oImageData.WhiteStones[Val], _X, _Y);
+                StonesCanvas.drawImage(this.m_oImageData.WhiteStones[Val], _X, _Y);
                 if (true === bShadows)
-                    ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                    ShadowCanvas.drawImage(this.m_oImageData.Shadow, _X + Off, _Y + Off);
                 break;
             }
-            // case BOARD_EMPTY:
-            // default:
-            // {
-            //     StonesCanvas.clearRect(_X, _Y, d, d);
-            //     if (true === bShadows)
-            //         ShadowCanvas.clearRect(_X + Off, _Y + Off, d, d);
-            //     break;
-            // }
         }
     }
 
@@ -1471,6 +1461,14 @@ CDrawingBoard.prototype.private_PutVerLine = function(ImageData, y1, y2,alpha, x
     for (var y = y1; y <= y2; y++)
         this.private_PutPixel(ImageData, x, y, alpha, w, h, Color);
 };
+CDrawingBoard.prototype.private_CreateCanvas = function(nWidth, nHeight, oImageData)
+{
+    var oCanvas    = document.createElement("canvas");
+    oCanvas.width  = nWidth;
+    oCanvas.height = nHeight;
+	oCanvas.getContext("2d").putImageData(oImageData, 0, 0);
+    return oCanvas;
+};
 CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
 {
     if (!this.m_oImageData.Lines)
@@ -1489,15 +1487,15 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
     this.m_oImageData.StoneDiam = d;
     this.m_oTarget.Update_Size(d);
 
-    this.m_oImageData.BlackStone  = StonesCanvas.createImageData(d, d);
-    this.m_oImageData.WhiteStone  = StonesCanvas.createImageData(d, d);
-    this.m_oImageData.BlackTarget = StonesCanvas.createImageData(d, d);
-    this.m_oImageData.WhiteTarget = StonesCanvas.createImageData(d, d);
+   var oBlackStone  = StonesCanvas.createImageData(d, d);
+   var oWhiteStone  = StonesCanvas.createImageData(d, d);
+   var oBlackTarget = StonesCanvas.createImageData(d, d);
+   var oWhiteTarget = StonesCanvas.createImageData(d, d);
 
-    var BlackBitmap = this.m_oImageData.BlackStone.data;
-    var WhiteBitmap = this.m_oImageData.WhiteStone.data;
-    var BlackTarget = this.m_oImageData.BlackTarget.data;
-    var WhiteTarget = this.m_oImageData.WhiteTarget.data;
+    var BlackBitmap = oBlackStone.data;
+    var WhiteBitmap = oWhiteStone.data;
+    var BlackTarget = oBlackTarget.data;
+    var WhiteTarget = oWhiteTarget.data;
 
     var oWhiteColor = this.private_GetSettings_WhiteColor();
     var oBlackColor = this.private_GetSettings_BlackColor();
@@ -1734,12 +1732,17 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
         }
     }
 
-    var WhiteStones = new Array();
+	this.m_oImageData.BlackStone  = this.private_CreateCanvas(d, d, oBlackStone);
+	this.m_oImageData.WhiteStone  = this.private_CreateCanvas(d, d, oWhiteStone);
+	this.m_oImageData.BlackTarget = this.private_CreateCanvas(d, d, oBlackTarget);
+	this.m_oImageData.WhiteTarget = this.private_CreateCanvas(d, d, oWhiteTarget);
+
+	var WhiteStones = new Array();
     var WhiteStones2 = new Array();
 
     for (var Index = 0; Index < 28; Index++)
     {
-        WhiteStones[Index]  = StonesCanvas.createImageData(d, d);
+		WhiteStones[Index]  = StonesCanvas.createImageData(d, d);
         WhiteStones2[Index] = WhiteStones[Index].data;
         for (var i = 0; i < d; i++)
         {
@@ -1754,13 +1757,16 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
         }
     }
 
-    WhiteStones2.push(WhiteTarget);
+	WhiteStones2.push(WhiteTarget);
     WhiteStones2.push(WhiteBitmap);
 
     if (true === this.private_GetSettings_ShellWhiteStones())
         this.private_CreateShellWhiteStones(WhiteStones2, d, d);
 
-    this.m_oImageData.WhiteStones  = WhiteStones;
+	for (var nIndex = 0, nCount = WhiteStones.length; nIndex < nCount; ++nIndex)
+	{
+		this.m_oImageData.WhiteStones[nIndex] = this.private_CreateCanvas(d, d, WhiteStones[nIndex]);
+	}
 
     var oSize = this.m_oLogicBoard.Get_Size();
     for (var Y = 0; Y < oSize.Y; Y++)
@@ -1901,8 +1907,8 @@ CDrawingBoard.prototype.private_CreateShadows = function()
 
     var ShadowCanvas = this.HtmlElement.Shadow.Control.HtmlElement.getContext("2d");
     var d = this.m_oImageData.StoneDiam;
-    this.m_oImageData.Shadow = ShadowCanvas.createImageData(d, d);
-    var Shadow = this.m_oImageData.Shadow.data;
+    var oShadowImageData = ShadowCanvas.createImageData(d, d);
+    var Shadow = oShadowImageData.data;
     this.m_oImageData.ShadowOff = Math.max(parseInt(d * 0.15), 3);
 
     var r = (d - 5) / 2 + 1;
@@ -1923,6 +1929,8 @@ CDrawingBoard.prototype.private_CreateShadows = function()
             Shadow[Index + 3] = parseInt( 255 * f );
         }
     }
+
+    this.m_oImageData.Shadow = this.private_CreateCanvas(d, d, oShadowImageData);
 };
 CDrawingBoard.prototype.Update_Target = function()
 {
@@ -2143,7 +2151,11 @@ CDrawingBoard.prototype.private_CreateMarks = function()
 };
 CDrawingBoard.prototype.private_DrawX = function(W, H, PenWidth, Color)
 {
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+	var oCanvas = document.createElement("canvas");
+	oCanvas.width  = W;
+	oCanvas.height = H;
+
+    var MarksCanvas = oCanvas.getContext("2d");
     MarksCanvas.clearRect(0, 0, W, H);
 
     MarksCanvas.strokeStyle = Color.ToString();
@@ -2157,14 +2169,18 @@ CDrawingBoard.prototype.private_DrawX = function(W, H, PenWidth, Color)
     MarksCanvas.lineTo(W * 1 / 4, H * 3 / 4);
     MarksCanvas.stroke();
 
-    return MarksCanvas.getImageData(0, 0, W, H);
+    return oCanvas;
 };
 CDrawingBoard.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha)
 {
     if (undefined === Alpha)
         Alpha = 1;
 
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+	var oCanvas = document.createElement("canvas");
+	oCanvas.width  = W;
+	oCanvas.height = H;
+
+    var MarksCanvas = oCanvas.getContext("2d");
     MarksCanvas.clearRect(0, 0, W, H);
 
     MarksCanvas.globalAlpha = Alpha;
@@ -2186,11 +2202,15 @@ CDrawingBoard.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, A
     MarksCanvas.closePath();
     MarksCanvas.stroke();
 
-    return MarksCanvas.getImageData(0, 0, W, H);
+    return oCanvas;
 };
 CDrawingBoard.prototype.private_DrawEmptySquare = function(W, H, PenWidth, Color)
 {
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+	var oCanvas = document.createElement("canvas");
+	oCanvas.width  = W;
+	oCanvas.height = H;
+
+    var MarksCanvas = oCanvas.getContext("2d");
     MarksCanvas.clearRect(0, 0, W, H);
 
     MarksCanvas.strokeStyle = Color.ToString();
@@ -2237,12 +2257,16 @@ CDrawingBoard.prototype.private_DrawEmptySquare = function(W, H, PenWidth, Color
         }
     }
 
-
-    return ImageData;
+    MarksCanvas.putImageData(ImageData, 0, 0);
+    return oCanvas;
 };
 CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, bBig, Color, BorderColor)
 {
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+	var oCanvas = document.createElement("canvas");
+	oCanvas.width  = W;
+	oCanvas.height = H;
+
+    var MarksCanvas = oCanvas.getContext("2d");
 
     var ImageData = MarksCanvas.createImageData(W, H);
 
@@ -2274,12 +2298,17 @@ CDrawingBoard.prototype.private_DrawFilledSquare = function(W, H, PenWidth, bBig
                 ImageData.data[Index + 3] = 0;
         }
     }
+    MarksCanvas.putImageData(ImageData, 0, 0);
 
-    return ImageData;
+    return oCanvas;
 };
 CDrawingBoard.prototype.private_DrawCircle = function(W, H, PenWidth, Color)
 {
-    var MarksCanvas = this.HtmlElement.Marks.Control.HtmlElement.getContext("2d");
+	var oCanvas = document.createElement("canvas");
+	oCanvas.width  = W;
+	oCanvas.height = H;
+
+    var MarksCanvas = oCanvas.getContext("2d");
     MarksCanvas.clearRect(0, 0, W, H);
 
     var r     = W / 2;
@@ -2292,7 +2321,7 @@ CDrawingBoard.prototype.private_DrawCircle = function(W, H, PenWidth, Color)
     MarksCanvas.arc(W / 2, H / 2, r - shift, 0, 2 * Math.PI, false);
     MarksCanvas.stroke();
 
-    return MarksCanvas.getImageData(0, 0, W, H);
+	return oCanvas;
 };
 CDrawingBoard.prototype.private_DrawRulers = function()
 {
@@ -2438,44 +2467,46 @@ CDrawingBoard.prototype.private_DrawMark = function(Mark)
 
         var Value = this.m_oLogicBoard.Get(X, Y);
 
+		MarksCanvas.clearRect(_X, _Y, d, d);
+
         switch (nType)
         {
             case EDrawingMark.Tb:
-                MarksCanvas.putImageData(this.m_oImageData.Ter_Black, _X, _Y);
+                MarksCanvas.drawImage(this.m_oImageData.Ter_Black, _X, _Y);
                 break;
             case EDrawingMark.Tw:
-                MarksCanvas.putImageData(this.m_oImageData.Ter_White, _X, _Y);
+                MarksCanvas.drawImage(this.m_oImageData.Ter_White, _X, _Y);
                 break;
             case EDrawingMark.Tb2:
-                MarksCanvas.putImageData(this.m_oImageData.Ter_Black2, _X, _Y);
+                MarksCanvas.drawImage(this.m_oImageData.Ter_Black2, _X, _Y);
                 break;
             case EDrawingMark.Tw2:
-                MarksCanvas.putImageData(this.m_oImageData.Ter_White2, _X, _Y);
+                MarksCanvas.drawImage(this.m_oImageData.Ter_White2, _X, _Y);
                 break;
             case EDrawingMark.Lm:
             {
                 if (true === this.m_bBlackWhiteLastMark)
                 {
                     if (BOARD_BLACK === Value)
-                        MarksCanvas.putImageData(this.m_oImageData.Cr_White, _X, _Y);
+                        MarksCanvas.drawImage(this.m_oImageData.Cr_White, _X, _Y);
                     else
-                        MarksCanvas.putImageData(this.m_oImageData.Cr_Black, _X, _Y);
+                        MarksCanvas.drawImage(this.m_oImageData.Cr_Black, _X, _Y);
                 }
                 else
-                    MarksCanvas.putImageData(this.m_oImageData.LastMove, _X, _Y);
+                    MarksCanvas.drawImage(this.m_oImageData.LastMove, _X, _Y);
                 break;
             }
             case EDrawingMark.Cr:
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
+                MarksCanvas.drawImage(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Cr_White : this.m_oImageData.Cr_Black, _X, _Y);
                 break;
             case EDrawingMark.Sq:
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
+                MarksCanvas.drawImage(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Sq_White : this.m_oImageData.Sq_Black, _X, _Y);
                 break;
             case EDrawingMark.Tr:
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
+                MarksCanvas.drawImage(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.Tr_White : this.m_oImageData.Tr_Black, _X, _Y);
                 break;
             case EDrawingMark.X :
-                MarksCanvas.putImageData(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
+                MarksCanvas.drawImage(Value === BOARD_BLACK || (Value == BOARD_EMPTY && true == bDarkBoard) ? this.m_oImageData.X_White : this.m_oImageData.X_Black, _X, _Y);
                 break;
             case EDrawingMark.Tx:
             {
@@ -2510,7 +2541,7 @@ CDrawingBoard.prototype.private_DrawHint = function(X, Y)
         var Lines = this.m_oImageData.Lines;
         var _X = Lines[X - 1].X - Rad;
         var _Y = Lines[Y - 1].Y - Rad;
-        MarksCanvas.putImageData(this.m_oImageData.Tr_Hint, _X, _Y);
+        MarksCanvas.drawImage(this.m_oImageData.Tr_Hint, _X, _Y);
     }
 };
 CDrawingBoard.prototype.private_ClearMark = function(X, Y)
@@ -3673,15 +3704,15 @@ CDrawingBoard.prototype.private_DrawLogo = function()
             var _Y = ((oPoint[1] * dKoefY) | 0) - Rad;
 
             if (BOARD_BLACK === oPoint[2])
-                StonesCanvas.putImageData(this.m_oImageData.BlackStone, _X, _Y);
+                StonesCanvas.drawImage(this.m_oImageData.BlackStone, _X, _Y);
             else if (BOARD_WHITE === oPoint[2])
             {
                 var nRand = (Math.random() * (this.m_oImageData.WhiteStones.length - 1)) | 0;
-                StonesCanvas.putImageData(this.m_oImageData.WhiteStones[nRand], _X, _Y);
+                StonesCanvas.drawImage(this.m_oImageData.WhiteStones[nRand], _X, _Y);
             }
 
             if (BOARD_BLACK === oPoint[2] || BOARD_WHITE === oPoint[2])
-                ShadowCanvas.putImageData(this.m_oImageData.Shadow, _X + Off, _Y + Off);
+                ShadowCanvas.drawImage(this.m_oImageData.Shadow, _X + Off, _Y + Off);
         }
 
     }

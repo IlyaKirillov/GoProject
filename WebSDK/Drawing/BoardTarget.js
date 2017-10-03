@@ -95,16 +95,16 @@ CBoardTarget.prototype.Set_Type = function(eType)
         switch (eType)
         {
         case EBoardTargetType.BlackStone:
-            TargetCanvas.putImageData(this.m_oImageData.BlackTarget, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.BlackTarget, 0, 0);
             break;
         case EBoardTargetType.WhiteStone:
-            TargetCanvas.putImageData(this.m_oImageData.WhiteTarget, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.WhiteTarget, 0, 0);
             break;
         case EBoardTargetType.BlackX:
-            TargetCanvas.putImageData(this.m_oImageData.X_Black, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.X_Black, 0, 0);
             break;
         case EBoardTargetType.WhiteX:
-            TargetCanvas.putImageData(this.m_oImageData.X_White, 0, 0);
+            TargetCanvas.drawImage(this.m_oImageData.X_White, 0, 0);
             break;
         case EBoardTargetType.ColorR:
             TargetCanvas.putImageData(this.m_oImageData.RcolorTarget, 0, 0);
