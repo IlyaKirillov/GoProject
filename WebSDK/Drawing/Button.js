@@ -2219,6 +2219,7 @@ function CDrawingButtonFileMenu(oDrawing)
     oMenuElementWrapper.style.transitionDuration = "0.2s";
     oMenuElementWrapper.style.transitionDelay    = "0s";
 
+
     this.m_oMainDiv      = oMainDiv;
     this.m_oMenuElement  = oMenuElementWrapper;
     this.m_nHeight       = oMenuElementWrapper.clientHeight;
@@ -2227,9 +2228,9 @@ function CDrawingButtonFileMenu(oDrawing)
     this.m_nShowId       = null;
     this.m_oGameTree     = oGameTree;
 
-    this.InitDefaultMenu(false);
-
     oMainDiv.appendChild(oMenuElementWrapper);
+
+    this.InitDefaultMenu(false);
 
     oMenuElementWrapper.style.display = "none";
 }
