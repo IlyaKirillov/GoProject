@@ -114,6 +114,7 @@ function CGameTree(Drawing)
     this.m_nKifuEditFlags      = 0;
 
     this.m_fModifyCallback     = null;
+	this.m_bCheckCapturing     = true;
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -1274,7 +1275,7 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
 
     // Проверяем, убиваем ли мы данным ходом чужие камни (без проверки правила КО)
     var oDeadChecker = null;
-    if (null !== (oDeadChecker = this.m_oBoard.Check_Kill(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
+    if (true === this.m_bCheckCapturing && null !== (oDeadChecker = this.m_oBoard.Check_Kill(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
     {
         var nGroupSize = oDeadChecker.Get_Size();
         for (var Index = 0; Index < nGroupSize; Index++)
@@ -1292,7 +1293,7 @@ CGameTree.prototype.Execute_Move = function(X, Y, Value, bSilent)
             this.m_nWhiteCapt += nGroupSize;
     }
     // Проверяем самоубийство
-    else if (null !== (oDeadChecker = this.m_oBoard.Check_Dead(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
+    else if (true === this.m_bCheckCapturing && null !== (oDeadChecker = this.m_oBoard.Check_Dead(X, Y, Value, false)) && oDeadChecker.Get_Size() > 0)
     {
         var nGroupSize = oDeadChecker.Get_Size();
         for (var Index = 0; Index < nGroupSize; Index++)
@@ -2564,4 +2565,12 @@ CGameTree.prototype.Set_OnGameTreeModifiedCallback = function(fCallback)
 {
     if (fCallback)
         this.m_fModifyCallback = fCallback;
+};
+CGameTree.prototype.Set_CapturingMode = function(isCapture)
+{
+	this.m_bCheckCapturing = isCapture;
+};
+CGameTree.prototype.Is_CheckCapturing = function()
+{
+	return this.m_bCheckCapturing;
 };

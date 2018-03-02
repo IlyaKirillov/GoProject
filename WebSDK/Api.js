@@ -394,12 +394,24 @@ CGoBoardApi.prototype.Get_DivHeightByWidth = function(oGameTree, nWidth)
 
 /**
  * Задаем обработку сообщения об изменении дерева вариантов
+ * @param {CGameTree} oGameTree
  * @param fOnGameTreeModified
  */
 CGoBoardApi.prototype.Set_OnGameTreeModifiedCallback = function(oGameTree, fOnGameTreeModified)
 {
 	if (fOnGameTreeModified && oGameTree)
 		oGameTree.Set_OnGameTreeModifiedCallback(fOnGameTreeModified);
+};
+
+/**
+ * Задаем режим с захватом камней или без него
+ * @param {CGameTree} oGameTree
+ * @param {boolean} [isCapture=true]
+ */
+CGoBoardApi.prototype.Set_CapturingMode = function(oGameTree, isCapture)
+{
+	if (oGameTree)
+		oGameTree.Set_CapturingMode(isCapture);
 };
 
 /**
@@ -635,3 +647,5 @@ CGoBoardApi.prototype['GoTo_NodeByMoveNumber']                = CGoBoardApi.prot
 CGoBoardApi.prototype['Set_ShowTarget']                       = CGoBoardApi.prototype.Set_ShowTarget;
 CGoBoardApi.prototype['Get_DivHeightByWidth']                 = CGoBoardApi.prototype.Get_DivHeightByWidth;
 CGoBoardApi.prototype['Set_BoardTheme']                       = CGoBoardApi.prototype.Set_BoardTheme;
+CGoBoardApi.prototype['Set_OnGameTreeModifiedCallback']       = CGoBoardApi.prototype.Set_OnGameTreeModifiedCallback;
+CGoBoardApi.prototype['Set_CapturingMode']                    = CGoBoardApi.prototype.Set_CapturingMode;
