@@ -46,6 +46,10 @@
     GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
 
+//    GoBoardApi.Set_OnGameTreeModifiedCallback(oGameTree, function(){
+//        alert("test");
+//    });
+
     window.onresize = function()
     {
         GoBoardApi.Update_Size(oGameTree);

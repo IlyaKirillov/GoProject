@@ -112,6 +112,8 @@ function CGameTree(Drawing)
 
     this.m_bKifuMode           = false;
     this.m_nKifuEditFlags      = 0;
+
+    this.m_fModifyCallback     = null;
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -2469,6 +2471,9 @@ CGameTree.prototype.Get_DivHeightByWidth = function(nWidth)
 CGameTree.prototype.Set_Modified = function(bModified)
 {
     this.m_bModified = bModified;
+
+	if (this.m_bModified && this.m_fModifyCallback)
+		this.m_fModifyCallback();
 };
 CGameTree.prototype.Is_Modified = function()
 {
@@ -2554,4 +2559,9 @@ CGameTree.prototype.Get_NodeReference = function(bStrong, oNode)
 CGameTree.prototype.Is_CurrentMovePass = function()
 {
 	return this.Get_CurNode().Get_Move().Is_Pass();
+};
+CGameTree.prototype.Set_OnGameTreeModifiedCallback = function(fCallback)
+{
+    if (fCallback)
+        this.m_fModifyCallback = fCallback;
 };

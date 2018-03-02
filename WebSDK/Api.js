@@ -393,6 +393,16 @@ CGoBoardApi.prototype.Get_DivHeightByWidth = function(oGameTree, nWidth)
 };
 
 /**
+ * Задаем обработку сообщения об изменении дерева вариантов
+ * @param fOnGameTreeModified
+ */
+CGoBoardApi.prototype.Set_OnGameTreeModifiedCallback = function(oGameTree, fOnGameTreeModified)
+{
+	if (fOnGameTreeModified && oGameTree)
+		oGameTree.Set_OnGameTreeModifiedCallback(fOnGameTreeModified);
+};
+
+/**
  * Функция, которая встраивает доску с заданными параметрами.
  */
 CGoBoardApi.prototype.Embed = function (sDivId, oConfig)
