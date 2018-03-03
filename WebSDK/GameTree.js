@@ -2574,3 +2574,7 @@ CGameTree.prototype.Is_CheckCapturing = function()
 {
 	return this.m_bCheckCapturing;
 };
+CGameTree.prototype.Set_DrawHandicapMarks = function(isDraw)
+{
+    this.m_oBoard.Set_UseHandiPoints(isDraw);
+};

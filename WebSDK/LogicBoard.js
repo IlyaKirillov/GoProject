@@ -254,6 +254,7 @@ function CLogicBoard(nW, nH)
     this.m_oArea        = new CAreaScoreCounter();
     this.m_oBoundary    = new CBoundaryScoreCounter();
 
+    this.m_bHandiPoints = true;
 }
 CLogicBoard.prototype.Copy = function()
 {
@@ -316,6 +317,9 @@ CLogicBoard.prototype.Get_Num = function(nX, nY)
 };
 CLogicBoard.prototype.Get_HandiPoints = function()
 {
+    if (true !== this.m_bHandiPoints)
+        return [];
+
     var aPoints = [];
 
     var aPointsX = this.private_GetLineHandiPoints(this.m_nW);
@@ -1027,6 +1031,10 @@ CLogicBoard.prototype.private_MakeErosion = function()
     }
 
     this.m_aScoreEstimate = aNewSE;
+};
+CLogicBoard.prototype.Set_UseHandiPoints = function(isUse)
+{
+    this.m_bHandiPoints = isUse;
 };
 
 /**

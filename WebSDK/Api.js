@@ -413,7 +413,16 @@ CGoBoardApi.prototype.Set_CapturingMode = function(oGameTree, isCapture)
 	if (oGameTree)
 		oGameTree.Set_CapturingMode(isCapture);
 };
-
+/**
+ * Задаем рисовать ли форовые точки (по умолчанию рисуем)
+ * @param {CGameTree} oGameTree
+ * @param {boolean} [isDraw=true]
+ */
+CGoBoardApi.prototype.Set_DrawHandicapMarks = function(oGameTree, isDraw)
+{
+    if (oGameTree)
+        oGameTree.Set_DrawHandicapMarks(isDraw);
+};
 /**
  * Функция, которая встраивает доску с заданными параметрами.
  */
@@ -649,3 +658,4 @@ CGoBoardApi.prototype['Get_DivHeightByWidth']                 = CGoBoardApi.prot
 CGoBoardApi.prototype['Set_BoardTheme']                       = CGoBoardApi.prototype.Set_BoardTheme;
 CGoBoardApi.prototype['Set_OnGameTreeModifiedCallback']       = CGoBoardApi.prototype.Set_OnGameTreeModifiedCallback;
 CGoBoardApi.prototype['Set_CapturingMode']                    = CGoBoardApi.prototype.Set_CapturingMode;
+CGoBoardApi.prototype['Set_DrawHandicapMarks']                = CGoBoardApi.prototype.Set_DrawHandicapMarks;
