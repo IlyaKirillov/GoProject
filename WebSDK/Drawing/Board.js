@@ -3371,6 +3371,17 @@ CDrawingBoard.prototype.private_HandleKeyDown = function(Event)
         this.m_oGameTree.GoTo_NextVariant();
         bRetValue = true;
     }
+    else if (45 === KeyCode && true === Event.CtrlKey)
+    {
+        if (oHandler && oHandler["AddNewNode"])
+        {
+            oHandler["AddNewNode"](this.m_oGameTree.Get_CurNode());
+            return;
+        }
+
+        this.m_oGameTree.Add_NewNode(true, true);
+        bRetValue = true;
+    }
     else if (65 === KeyCode && true === Event.CtrlKey && true === Event.ShiftKey)
     {
         this.private_DrawLogo();
