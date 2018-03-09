@@ -3276,6 +3276,9 @@ CDrawingBoard.prototype.private_CanMakeMove = function(X, Y)
 	var bMove = false;
 	if (BOARD_EMPTY === this.m_oLogicBoard.Get(X, Y))
 	{
+	    if (!this.m_oGameTree.Is_CheckCapturing())
+	    	return true;
+
 		var Value = (BOARD_BLACK === this.m_oGameTree.Get_NextMove() ? BOARD_BLACK : BOARD_WHITE);
 
 		// Сначала мы проверим, можно ли совершить данный ход
