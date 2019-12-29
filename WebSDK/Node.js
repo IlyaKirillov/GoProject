@@ -170,6 +170,10 @@ CNode.prototype.Get_NextsCount = function()
 };
 CNode.prototype.Add_Next = function(Node, bSetCur, nPos)
 {
+	var oGameTree = this.m_oGameTree;
+	if (oGameTree)
+		oGameTree.BeginCatchChanges();
+
     Node.Set_Prev(this);
 
 	if (undefined === nPos && true === this.m_bOrigin && true === Node.m_bOrigin)
@@ -207,8 +211,11 @@ CNode.prototype.Add_Next = function(Node, bSetCur, nPos)
 		}
     }
 
-    if (this.m_oGameTree)
-        this.m_oGameTree.Set_Modified(true);
+    if (oGameTree)
+	{
+		oGameTree.Set_Modified(true);
+		oGameTree.EndCatchChanges();
+	}
 };
 CNode.prototype.Remove_Next = function(Index)
 {

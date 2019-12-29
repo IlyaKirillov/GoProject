@@ -135,8 +135,14 @@ CBoardSound.prototype.private_PlaySound = function(oAudio)
             oAudio.autoplay = "";
             oAudio.autoplay = "autoplay";
         }
-        else
-            oAudio.play();
+		else
+		{
+			function startPlayback() 
+			{
+				return oAudio.play();
+			}			  
+			startPlayback().then(function(){}).catch(function(error){});
+		}
     }
     catch(e)
     {

@@ -71,7 +71,7 @@ function OnDocumentReady()
     document.getElementById("idButtonFreshLoad").onclick = FreshLoad;
 
     oGameTree = GoBoardApi.Create_GameTree();
-    GoBoardApi.Set_Sound(oGameTree, "http://webgoboard.com/Sound");
+    GoBoardApi.Set_Sound(oGameTree, "http://webgoboard.net/Sound");
     GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
 
     var oFilesInfo = GetCachesFiles();

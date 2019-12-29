@@ -5,7 +5,7 @@ Plugin URI:
 Description: WebGoBoard for WordPress makes it easy to embed SGF files in your WordPress-powered blog with the Web Go Board viewer and editor.
 Version: 0.10.1
 Author: Ilya Kirillov
-Author URI: http://www.webgoboard.com/
+Author URI: http://www.webgoboard.net/
 */
 
 /*

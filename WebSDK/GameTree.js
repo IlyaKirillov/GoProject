@@ -115,6 +115,11 @@ function CGameTree(Drawing)
 
     this.m_fModifyCallback     = null;
 	this.m_bCheckCapturing     = true;
+
+	// Специальный параметр для отслеживания изменений. Он нужен, чтобы мы могли стартовать/останавливать отслеживание
+	// изменений несколько раз. Просто реагировать будем на первый старт и последнюю остановку.
+	this.m_nCatchChanges       = 0; //
+	this.m_nCurrentAction      = EActionDescription.None;
 }
 CGameTree.prototype.Copy_ForScoreEstimate = function()
 {
@@ -345,6 +350,8 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
 
     g_oIdCounter.Reset();
 
+    this.BeginCatchChanges(EActionDescription.LoadSGF);
+
     var nEditingFlags = this.m_nEditingFlags;
     this.Reset_EditingFlags();
 
@@ -405,6 +412,8 @@ CGameTree.prototype.Load_Sgf = function(sFile, oViewPort, sMoveReference, sExt)
         this.m_eShowVariants = eShowVariants;
 
     this.m_nEditingFlags = nEditingFlags;
+
+    this.EndCatchChanges();
 
     if (this.m_oDrawingBoard)
         this.m_oDrawingBoard.On_EndLoadSgf();
@@ -717,10 +726,14 @@ CGameTree.prototype.Add_NewNode = function(bUpdateNavigator, bSetCur)
     if (!(this.m_nEditingFlags & EDITINGFLAGS_NEWNODE))
         return false;
 
+    this.BeginCatchChanges(EActionDescription.AddNewNode);
+
     var oNewNode = new CNode(this);
     this.m_oCurNode.Add_Next(oNewNode, bSetCur);
     this.Set_CurNode(oNewNode);
     this.m_nCurNodeDepth++;
+
+    this.EndCatchChanges();
 
     if (true === bUpdateNavigator && this.m_oDrawingNavigator)
     {
@@ -761,6 +774,8 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
     if (!(this.m_nEditingFlags & EDITINGFLAGS_NEWNODE))
         return false;
 
+    this.BeginCatchChanges(EActionDescription.AddNewNodeWithMove);
+
     // Если мы попали сюда, значит данного хода нет среди следующих у текущей ноды.
     this.Add_NewNode(false, true);
     this.m_oCurNode.Add_Move(X, Y, Value);
@@ -773,6 +788,8 @@ CGameTree.prototype.Add_NewNodeByPos = function(X, Y, Value)
 
     if (BOARD_EMPTY !== this.m_nTutorMode && "" !== this.m_sTutorText)
         this.m_oCurNode.Set_Comment(this.m_sTutorText);
+
+    this.EndCatchChanges();
 
     return true;
 };
@@ -941,7 +958,9 @@ CGameTree.prototype.Remove_CurNode = function()
     // Первую ноду удалить нельзя, поэтому мы просто чистим её
     if (null === PrevNode)
     {
+    	this.BeginCatchChanges(EActionDescription.RemoveNode);
         this.m_oCurNode.Clear();
+        this.EndCatchChanges();
 
         // Перестраиваем визуальное дерево вариантов
         if (this.m_oDrawingNavigator)
@@ -960,8 +979,10 @@ CGameTree.prototype.Remove_CurNode = function()
     {
         if (this.m_oCurNode === PrevNode.Get_Next(Index))
         {
-            PrevNode.Remove_Next(Index);
+			this.BeginCatchChanges(EActionDescription.RemoveNode);
+			PrevNode.Remove_Next(Index);
             this.Set_CurNode(PrevNode);
+			this.EndCatchChanges();
 
             // Перестраиваем визуальное дерево вариантов
             if (this.m_oDrawingNavigator)
@@ -2472,9 +2493,6 @@ CGameTree.prototype.Get_DivHeightByWidth = function(nWidth)
 CGameTree.prototype.Set_Modified = function(bModified)
 {
     this.m_bModified = bModified;
-
-	if (this.m_bModified && this.m_fModifyCallback)
-		this.m_fModifyCallback();
 };
 CGameTree.prototype.Is_Modified = function()
 {
@@ -2563,8 +2581,7 @@ CGameTree.prototype.Is_CurrentMovePass = function()
 };
 CGameTree.prototype.Set_OnGameTreeModifiedCallback = function(fCallback)
 {
-    if (fCallback)
-        this.m_fModifyCallback = fCallback;
+	this.m_fModifyCallback = fCallback;
 };
 CGameTree.prototype.Set_CapturingMode = function(isCapture)
 {
@@ -2577,4 +2594,33 @@ CGameTree.prototype.Is_CheckCapturing = function()
 CGameTree.prototype.Set_DrawHandicapMarks = function(isDraw)
 {
     this.m_oBoard.Set_UseHandiPoints(isDraw);
+};
+/**
+ * Начинаем отслеживать изменения
+ * @param {number} nDescription - тип изменения
+ */
+CGameTree.prototype.BeginCatchChanges = function(nDescription)
+{
+	this.m_nCatchChanges++;
+
+	if (1 !== this.m_nCatchChanges)
+		return;
+
+	this.m_nCurrentAction = nDescription;
+};
+/**
+ * Заканчиваем отслеживать изменени
+ * @constructor
+ */
+CGameTree.prototype.EndCatchChanges = function()
+{
+	this.m_nCatchChanges--;
+
+	if (0 !== this.m_nCatchChanges)
+		return;
+
+	if (this.m_fModifyCallback)
+		this.m_fModifyCallback();
+
+	this.m_nCurrentAction = EActionDescription.None;
 };

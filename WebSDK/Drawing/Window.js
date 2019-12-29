@@ -1983,9 +1983,9 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     Common.Set_InnerTextToElement(oString, "Our site:");
     oString                  = document.createElement("a");
     oString.target           = "_blank";
-    oString.href             = "http://webgoboard.com/";
+    oString.href             = "http://webgoboard.net/";
     oDivMainPart.appendChild(oString);
-    Common.Set_InnerTextToElement(oString, "http://webgoboard.com/");
+    Common.Set_InnerTextToElement(oString, "http://webgoboard.net/");
 
     oString                  = document.createElement("div");
     oString.style.paddingTop = "20px";

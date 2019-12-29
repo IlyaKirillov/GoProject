@@ -42,17 +42,19 @@
 <div id="divId" style="position:relative; height: 100vh;width: 100vw" onfocus="BodyFocus()" tabindex="-1"></div>
 <script>
     var oGameTree = GoBoardApi.Create_GameTree();
-    GoBoardApi.Set_Sound(oGameTree, "../Resources/Sound");
+    GoBoardApi.Set_Sound(oGameTree, "../../Resources/Sound");
     GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
 
     GoBoardApi.Set_DrawHandicapMarks(oGameTree, true);
+    GoBoardApi.Set_CapturingMode(oGameTree, true);
 
     //GoBoardApi.Set_CapturingMode(oGameTree, false);
 
-//    GoBoardApi.Set_OnGameTreeModifiedCallback(oGameTree, function(){
-//        alert("test");
-//    });
+
+    GoBoardApi.Set_OnGameTreeModifiedCallback(oGameTree, function(){
+        console.log("Test");
+    });
 
     window.onresize = function()
     {
