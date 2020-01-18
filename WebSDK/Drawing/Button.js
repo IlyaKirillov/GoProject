@@ -170,7 +170,7 @@ CDrawingButtonBase.prototype.Update_Size = function(bForce)
 {
     if (true !== this.private_IsReady())
         return;
-
+        
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
 

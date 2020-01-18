@@ -443,6 +443,7 @@ var Common_CancelAnimationFrame = (window['cancelAnimationFrame'] ? window['canc
 
 function CCommon()
 {
+
 }
 CCommon.prototype.Get_Browser = function()
 {
@@ -691,6 +692,211 @@ CCommon.prototype.ClearNode = function(oNode)
 var g_oBase64String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 var Common = new CCommon();
+
+(function (window, undefined) 
+{
+    var Browser = {
+        userAgent : "",
+        isIE : false,
+        isMacOs : false,
+        isSafariMacOs : false,
+        isAppleDevices : false,
+        isAndroid : false,
+        isMobile : false,
+        isGecko : false,
+        isChrome : false,
+        isOpera : false,
+        isOperaOld : false,
+        isWebkit : false,
+        isSafari : false,
+        isArm : false,
+        isMozilla : false,
+        isRetina : false,
+        isLinuxOS : false,
+        retinaPixelRatio : 1,
+        isVivaldiLinux : false,
+        isSailfish : false,
+        isEmulateDevicePixelRatio : false,
+        isNeedEmulateUpload : false
+    };
+    
+    // user agent lower case
+    Browser.userAgent = navigator.userAgent.toLowerCase();
+    
+    // ie detect
+    Browser.isIE =  (Browser.userAgent.indexOf("msie") > -1 ||
+                        Browser.userAgent.indexOf("trident") > -1 ||
+                        Browser.userAgent.indexOf("edge") > -1);
+    
+    Browser.isIeEdge = (Browser.userAgent.indexOf("edge/") > -1);
+    
+    Browser.isIE9 =  (Browser.userAgent.indexOf("msie9") > -1 || Browser.userAgent.indexOf("msie 9") > -1);
+    Browser.isIE10 =  (Browser.userAgent.indexOf("msie10") > -1 || Browser.userAgent.indexOf("msie 10") > -1);
+    
+    // macOs detect
+    Browser.isMacOs = (Browser.userAgent.indexOf('mac') > -1);
+    
+    // chrome detect
+    Browser.isChrome = !Browser.isIE && (Browser.userAgent.indexOf("chrome") > -1);
+    
+    // safari detect
+    Browser.isSafari = !Browser.isIE && !Browser.isChrome && (Browser.userAgent.indexOf("safari") > -1);
+    
+    // macOs safari detect
+    Browser.isSafariMacOs = (Browser.isSafari && Browser.isMacOs);
+    
+    // apple devices detect
+    Browser.isAppleDevices = (Browser.userAgent.indexOf("ipad") > -1 ||
+                                 Browser.userAgent.indexOf("iphone") > -1 ||
+                                 Browser.userAgent.indexOf("ipod") > -1);
+    
+    // android devices detect
+    Browser.isAndroid = (Browser.userAgent.indexOf("android") > -1);
+    
+    // mobile detect
+    Browser.isMobile = /android|avantgo|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent || navigator.vendor || window.opera);
+    
+    // gecko detect
+    Browser.isGecko = (Browser.userAgent.indexOf("gecko/") > -1);
+    
+    // opera detect
+    Browser.isOpera = (!!window.opera || Browser.userAgent.indexOf("opr/") > -1);
+    Browser.isOperaOld = (!!window.opera);
+    
+    // webkit detect
+    Browser.isWebkit = !Browser.isIE && (Browser.userAgent.indexOf("webkit") > -1);
+    
+    // arm detect
+    Browser.isArm = (Browser.userAgent.indexOf("arm") > -1);
+    
+    Browser.isMozilla = !Browser.isIE && (Browser.userAgent.indexOf("firefox") > -1);
+    
+    Browser.isLinuxOS = (Browser.userAgent.indexOf(" linux ") > -1);
+    
+    Browser.isVivaldiLinux = Browser.isLinuxOS && (Browser.userAgent.indexOf("vivaldi") > -1);
+    
+    Browser.isSailfish = (Browser.userAgent.indexOf("sailfish") > -1);
+    
+    Browser.isEmulateDevicePixelRatio = (Browser.userAgent.indexOf("emulatedevicepixelratio") > -1);
+    
+    Browser.isNeedEmulateUpload = (Browser.userAgent.indexOf("needemulateupload") > -1);
+    
+    Browser.zoom = 1;
+    
+    Browser.CheckZoom = function()
+    {
+        if (Browser.isSailfish && Browser.isEmulateDevicePixelRatio)
+        {
+            var scale = 1;
+            if (screen.width <= 540)
+                scale = 1.5;
+            else if (screen.width > 540 && screen.width <= 768)
+                scale = 2;
+            else if (screen.width > 768)
+                scale = 3;
+    
+    
+            //document.body.style.zoom = scale;
+            //Browser.zoom = 1 / scale;
+            Browser.isRetina = (scale >= 1.9);
+            Browser.retinaPixelRatio = scale;
+            window.devicePixelRatio = scale;
+            return;
+        }
+    
+        if (Browser.isAndroid)
+        {
+            Browser.isRetina = (window.devicePixelRatio >= 1.9);
+            Browser.retinaPixelRatio = window.devicePixelRatio;
+            return;
+        }
+    
+        Browser.zoom = 1.0;
+        Browser.isRetina = false;
+        Browser.retinaPixelRatio = 1;
+    
+        // пока отключаем мозиллу... хотя почти все работает
+        if ((/*Browser.isMozilla || */Browser.isChrome) && !Browser.isOperaOld && !Browser.isMobile && document && document.firstElementChild && document.body)
+        {
+            // делаем простую проверку
+            // считаем: 0 < window.devicePixelRatio < 2 => _devicePixelRatio = 1; zoom = window.devicePixelRatio / _devicePixelRatio;
+            // считаем: window.devicePixelRatio >= 2 => _devicePixelRatio = 2; zoom = window.devicePixelRatio / _devicePixelRatio;
+            if (window.devicePixelRatio > 0.1)
+            {
+                if (window.devicePixelRatio < 1.99)
+                {
+                    var _devicePixelRatio = 1;
+                    Browser.zoom = window.devicePixelRatio / _devicePixelRatio;
+                }
+                else
+                {
+                    var _devicePixelRatio = 2;
+                    Browser.zoom = window.devicePixelRatio / _devicePixelRatio;
+                    Browser.isRetina = true;
+                }
+            }
+    
+            var firstElemStyle = document.firstElementChild.style;
+            if (Browser.isMozilla)
+            {
+                if (window.devicePixelRatio > 0.1)
+                {
+                    firstElemStyle.transformOrigin = "0 0";
+                    firstElemStyle.transform = ("scale(" + (1 / Browser.zoom) + ")");
+                    firstElemStyle.width = ((Browser.zoom * 100) + "%");
+                    firstElemStyle.height = ((Browser.zoom * 100) + "%");
+                }
+                else
+                {
+                    firstElemStyle.transformOrigin = "0 0";
+                    firstElemStyle.transform = "scale(1)";
+                    firstElemStyle.width = "100%";
+                    firstElemStyle.height = "100%";
+                }
+            }
+            else
+            {
+                if (window.devicePixelRatio > 0.1)
+                {
+                    // chrome 54.x: zoom = "reset" - clear retina zoom (windows)
+                    //document.firstElementChild.style.zoom = "reset";
+                    firstElemStyle.zoom = 1.0 / Browser.zoom;
+                }
+                else
+                    firstElemStyle.zoom = "normal";
+            }
+    
+            if (Browser.isRetina)
+                Browser.retinaPixelRatio = 2;
+        }
+        else
+        {
+            Browser.isRetina = (Math.abs(2 - (window.devicePixelRatio / Browser.zoom)) < 0.01);
+            if (Browser.isRetina)
+                Browser.retinaPixelRatio = 2;
+    
+            if (Browser.isMobile)
+            {
+                Browser.isRetina = (window.devicePixelRatio >= 1.9);
+                Browser.retinaPixelRatio = window.devicePixelRatio;
+            }
+        }
+    };
+    
+    Browser.CheckZoom();
+    
+    Common.Browser = Browser;
+
+    Common.ConvertToRetinaValue = function(nValue, isScale)
+    {
+        if (false !== isScale)
+            return ((nValue * Browser.retinaPixelRatio) + 0.5) >> 0;
+        else
+            return ((nValue / Browser.retinaPixelRatio) + 0.5) >> 0;
+    };
+    
+})(window);
+    
 
 
 

@@ -134,14 +134,14 @@ CDrawingPlayerInfo.prototype.Init = function(sDivId, oGameTree, nPlayer)
     oImage.style.top             = "0px";
     oImage.style.width           = 25 + "px";
     oImage.style.height          = 25 + "px";
-    oImage.width                 = 25;
-    oImage.height                = 25;
+    oImage.width                 = Common.ConvertToRetinaValue(25);
+    oImage.height                = Common.ConvertToRetinaValue(25);
 
     var Canvas = oImage.getContext("2d");
 
-    var Size = 25;
+    var Size = Common.ConvertToRetinaValue(25);
 
-    Canvas.clearRect(0, 0, 25, 25);
+    Canvas.clearRect(0, 0, Size, Size);
 
     var X = Math.ceil(0.5 * Size + 0.5);
     var Y = Math.ceil(0.5 * Size + 0.5);

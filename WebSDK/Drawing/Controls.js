@@ -85,8 +85,8 @@ CControlContainer.prototype.AddControl = function(ctrl)
 };
 CControlContainer.prototype.Resize = function(_width,_height)
 {
-    this.width  = _width;
-    this.height = _height;
+    this.width  = Common.ConvertToRetinaValue(_width);
+    this.height = Common.ConvertToRetinaValue(_height);
 
     if (null == this.Parent)
     {
@@ -234,8 +234,8 @@ CControlContainer.prototype.Resize = function(_width,_height)
     this.HtmlElement.style.width 	= (((_r - _x) + 0.5) | 0) + "px";
     this.HtmlElement.style.height 	= (((_b - _y) + 0.5) | 0) + "px";
 
-    this.HtmlElement.width 	= ((_r - _x) + 0.5) | 0;
-    this.HtmlElement.height = ((_b - _y) + 0.5) | 0;
+    this.HtmlElement.width 	= Common.ConvertToRetinaValue(((_r - _x) + 0.5) | 0);
+    this.HtmlElement.height = Common.ConvertToRetinaValue(((_b - _y) + 0.5) | 0);
 
     this.private_ResizeControls(_r - _x, _b - _y);
 };
@@ -453,15 +453,13 @@ CControlContainerBoardAndBottomButtons.prototype.Resize = function(_width,_heigh
     var X_off = (_width - BoardW) / 2;
     var Y_off = (_height - this.H - BoardH) / 2;
 
-
-
     this.HtmlElement.style.left 	= parseInt(X_off + 0.5) + "px";
     this.HtmlElement.style.top 		= parseInt(Y_off + 0.5) + "px";
     this.HtmlElement.style.width 	= parseInt(BoardW + 0.5) + "px";
     this.HtmlElement.style.height 	= parseInt(BoardH + this.H + 0.5) + "px";
 
-    this.HtmlElement.width 	= parseInt(BoardW + 0.5);
-    this.HtmlElement.height = parseInt(BoardH + this.H + 0.5);
+    this.HtmlElement.width 	= Common.ConvertToRetinaValue(BoardW + 0.5);
+    this.HtmlElement.height = Common.ConvertToRetinaValue(BoardH + this.H + 0.5);
 
     var lCount = this.Controls.length;
     for (var i = 0; i < lCount; i++)
