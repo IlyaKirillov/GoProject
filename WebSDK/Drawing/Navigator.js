@@ -217,9 +217,12 @@ function CDrawingNavigator(oDrawing)
 
         var YOffset = delta;
 
+        var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+        var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
         var LogicYMax  = oThis.m_oMap.Get_Height() + 1;
         var NavH       = oThis.HtmlElement.Board.Control.HtmlElement.height;
-        var YMaxOffset = (this.m_nTile_20 + LogicYMax * this.m_nTile_24 - NavH);
+        var YMaxOffset = (nTile_20 + LogicYMax * nTile_24 - NavH);
 
         oThis.m_oOffset.Y -= YOffset;
         oThis.m_oOffset.Y = Math.min(0, Math.max(oThis.m_oOffset.Y, -YMaxOffset));
@@ -276,8 +279,11 @@ function CDrawingNavigator(oDrawing)
         X -= ScrollW / 2;
         X = Math.max(0, Math.min(NavW - ScrollW, X));
 
+        var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+        var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
         var nSpeed = 200;
-        var nEndXOffset = (this.m_nTile_20 + LogicXMax * this.m_nTile_24 - NavW) * (X / (NavW - ScrollW));
+        var nEndXOffset = (nTile_20 + LogicXMax * nTile_24 - NavW) * (X / (NavW - ScrollW));
 
         function HorScrollTimer(bFirstTime)
         {
@@ -362,8 +368,11 @@ function CDrawingNavigator(oDrawing)
         Y -= ScrollH / 2;
         Y = Math.max(0, Math.min(NavH - ScrollH, Y));
 
+        var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+        var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
         var nSpeed = 48;
-        var nEndYOffset = (this.m_nTile_20 + LogicYMax * this.m_nTile_24 - NavH) * (Y / (NavH - ScrollH));
+        var nEndYOffset = (nTile_20 + LogicYMax * nTile_24 - NavH) * (Y / (NavH - ScrollH));
 
         function VerScrollTimer(bFirstTime)
         {
@@ -470,7 +479,10 @@ function CDrawingNavigator(oDrawing)
         var ScrollW   = oThis.HtmlElement.ScrollW;
         var NavW      = oThis.m_oImageData.W;
 
-        var XOffset = (this.m_nTile_20 + LogicXMax * this.m_nTile_24 - NavW) * (X / (NavW - 4 - ScrollW));
+        var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+        var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
+        var XOffset = (nTile_20 + LogicXMax * nTile_24 - NavW) * (X / (NavW - 4 - ScrollW));
         oThis.m_oOffset.X = -XOffset;
         oThis.private_DrawMap();
     };
@@ -482,7 +494,10 @@ function CDrawingNavigator(oDrawing)
         var ScrollH   = oThis.HtmlElement.ScrollH;
         var NavH      = oThis.m_oImageData.H;
 
-        var YOffset = (this.m_nTile_20 + LogicYMax * this.m_nTile_24 - NavH) * (Y / (NavH - 4 - ScrollH));
+        var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+        var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
+        var YOffset = (nTile_20 + LogicYMax * nTile_24 - NavH) * (Y / (NavH - 4 - ScrollH));
         oThis.m_oOffset.Y = -YOffset;
         oThis.private_DrawMap();
     };
@@ -604,11 +619,14 @@ CDrawingNavigator.prototype.Update = function()
     var LogicXMax = this.m_oMap.Get_Width() + 1;
     var LogicYMax = this.m_oMap.Get_Height() + 1;
 
-    var NavW = this.m_oImageData.W;
-    var NavH = this.m_oImageData.H;
+    var NavW = Common.ConvertToRetinaValue(this.m_oImageData.W, false);
+    var NavH = Common.ConvertToRetinaValue(this.m_oImageData.H, false);
 
-    var _NavW = this.m_nTile_20 + LogicXMax * this.m_nTile_24;
-    var _NavH = this.m_nTile_20 + LogicYMax * this.m_nTile_24;
+    var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+    var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
+    var _NavW = nTile_20 + LogicXMax * nTile_24;
+    var _NavH = nTile_20 + LogicYMax * nTile_24;
     if (_NavW > NavW)
     {
         this.HtmlElement.ScrollW                    = Math.max(50, NavW * NavW / _NavW);
@@ -1206,7 +1224,7 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             var Index = (i * this.m_nTile_24 + j) * 4;
 
             // NHS
-            if ( j >= nSize_12 && ( nSize_11 === i || nSize_12 === i ) )
+            if (j >= nSize_12 && nSize_11 <= i && i <= nSize_12)
             {
                 NHS_Bitmap[Index + 0] = Color.r;
                 NHS_Bitmap[Index + 1] = Color.b;
@@ -1225,7 +1243,7 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
 
             // NHS2
-            if ( ( j >= nSize_11 && ( nSize_11 === i || nSize_12 === i ) ) || ( i >= nSize_12 && ( nSize_11 === j || nSize_12 === j ) ) )
+            if ((j >= nSize_11 && nSize_11 <= i && i <= nSize_12) || (i >= nSize_12 && nSize_11 <= j && j <= nSize_12))
             {
                 NHS2_Bitmap[Index + 0] = Color.r;
                 NHS2_Bitmap[Index + 1] = Color.b;
@@ -1239,18 +1257,18 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NHS2_Bitmap[Index + 3] = 0;
+                NHS2_Bitmap[Index + 3]     = 0;
                 NHS2_Bitmap_T_3[Index + 3] = 0;
             }
 
-            if ( j >= nSize_11 && ( nSize_11 === i || nSize_12 === i ) )
+            if (j >= nSize_11 && nSize_11 <= i && i <= nSize_12)
             {
                 NHS2_Bitmap_T[Index + 0] = Color.r;
                 NHS2_Bitmap_T[Index + 1] = Color.b;
                 NHS2_Bitmap_T[Index + 2] = Color.g;
                 NHS2_Bitmap_T[Index + 3] = 255;
             }
-            else if ( i >= nSize_12 && ( nSize_11 === j || nSize_12 === j ) )
+            else if (i >= nSize_12 && nSize_11 <= j && j <= nSize_12)
             {
                 NHS2_Bitmap_T[Index + 0] = Color.r;
                 NHS2_Bitmap_T[Index + 1] = Color.b;
@@ -1258,17 +1276,18 @@ CDrawingNavigator.prototype.private_CreateLines = function()
                 NHS2_Bitmap_T[Index + 3] = nTransAlpha;
             }
             else
+            {
                 NHS2_Bitmap_T[Index + 3] = 0;
+            }
 
-
-            if ( i >= nSize_12 && ( nSize_11 === j || nSize_12 === j ) )
+            if (i >= nSize_12 && nSize_11 <= j && j <= nSize_12)
             {
                 NHS2_Bitmap_T_2[Index + 0] = Color.r;
                 NHS2_Bitmap_T_2[Index + 1] = Color.b;
                 NHS2_Bitmap_T_2[Index + 2] = Color.g;
                 NHS2_Bitmap_T_2[Index + 3] = 255;
             }
-            else if ( j >= nSize_11 && ( nSize_11 === i || nSize_12 === i ) )
+            else if (j >= nSize_11 && nSize_11 <= i && i <= nSize_12)
             {
                 NHS2_Bitmap_T_2[Index + 0] = Color.r;
                 NHS2_Bitmap_T_2[Index + 1] = Color.b;
@@ -1276,10 +1295,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
                 NHS2_Bitmap_T_2[Index + 3] = nTransAlpha;
             }
             else
+            {
                 NHS2_Bitmap_T_2[Index + 3] = 0;
+            }
 
             // NH
-            if ( nSize_11 === i || nSize_12 === i )
+            if (nSize_11 <= i && i <= nSize_12)
             {
                 NH_Bitmap[Index + 0] = Color.r;
                 NH_Bitmap[Index + 1] = Color.b;
@@ -1293,12 +1314,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NH_Bitmap[Index + 3] = 0;
+                NH_Bitmap[Index + 3]   = 0;
                 NH_Bitmap_T[Index + 3] = 0;
             }
 
             // NH2
-            if ( ( nSize_11 === i || nSize_12 === i ) || ( i >= nSize_12 && ( nSize_11 === j || nSize_12 === j ) ) )
+            if ((nSize_11 <= i || i <= nSize_12) || (i >= nSize_12 && nSize_11 <= j && j <= nSize_12))
             {
                 NH2_Bitmap[Index + 0] = Color.r;
                 NH2_Bitmap[Index + 1] = Color.b;
@@ -1312,18 +1333,18 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NH2_Bitmap[Index + 3] = 0;
+                NH2_Bitmap[Index + 3]     = 0;
                 NH2_Bitmap_T_3[Index + 3] = 0;
             }
 
-            if ( nSize_11 === i || nSize_12 === i )
+            if (nSize_11 <= i && i <= nSize_12)
             {
                 NH2_Bitmap_T[Index + 0] = Color.r;
                 NH2_Bitmap_T[Index + 1] = Color.b;
                 NH2_Bitmap_T[Index + 2] = Color.g;
                 NH2_Bitmap_T[Index + 3] = 255;
             }
-            else if ( i >= nSize_12 && ( nSize_11 === j || nSize_12 === j ) )
+            else if (i >= nSize_12 && nSize_11 <= j && j <= nSize_12)
             {
                 NH2_Bitmap_T[Index + 0] = Color.r;
                 NH2_Bitmap_T[Index + 1] = Color.b;
@@ -1331,16 +1352,18 @@ CDrawingNavigator.prototype.private_CreateLines = function()
                 NH2_Bitmap_T[Index + 3] = nTransAlpha;
             }
             else
+            {
                 NH2_Bitmap_T[Index + 3] = 0;
+            }
 
-            if ( ( ( nSize_11 === i || nSize_12 === i ) && j <= nSize_12 ) || ( i >= nSize_12 && ( nSize_11 === j || nSize_12 === j ) ) )
+            if ((nSize_11 <= i && i <= nSize_12 && j <= nSize_12) || (i >= nSize_12 && nSize_11 <= j && j <= nSize_12))
             {
                 NH2_Bitmap_T_2[Index + 0] = Color.r;
                 NH2_Bitmap_T_2[Index + 1] = Color.b;
                 NH2_Bitmap_T_2[Index + 2] = Color.g;
                 NH2_Bitmap_T_2[Index + 3] = 255;
             }
-            else if ( ( nSize_11 === i || nSize_12 === i ) && j > nSize_12 )
+            else if (nSize_11 <= i && i <= nSize_12 && j > nSize_12)
             {
                 NH2_Bitmap_T_2[Index + 0] = Color.r;
                 NH2_Bitmap_T_2[Index + 1] = Color.b;
@@ -1349,12 +1372,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NH2_Bitmap[Index + 3] = 0;
+                NH2_Bitmap[Index + 3]     = 0;
                 NH2_Bitmap_T_3[Index + 3] = 0;
             }
 
             // NHE
-            if ( j <= nSize_11 && ( nSize_11 === i || nSize_12 === i ) )
+            if (j <= nSize_11 && nSize_11 <= i && i <= nSize_12)
             {
                 NHE_Bitmap[Index + 0] = Color.r;
                 NHE_Bitmap[Index + 1] = Color.b;
@@ -1368,12 +1391,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NHE_Bitmap[Index + 3] = 0;
+                NHE_Bitmap[Index + 3]   = 0;
                 NHE_Bitmap_T[Index + 3] = 0;
             }
 
             // NV
-            if ( nSize_11 === j || nSize_12 === j )
+            if (nSize_11 <= j && j <= nSize_12)
             {
                 NV_Bitmap[Index + 0] = Color.r;
                 NV_Bitmap[Index + 1] = Color.b;
@@ -1387,12 +1410,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NV_Bitmap[Index + 3] = 0;
+                NV_Bitmap[Index + 3]   = 0;
                 NV_Bitmap_T[Index + 3] = 0;
             }
 
             // NV2
-            if ( ( nSize_11 === j || nSize_12 === j ) || ( j >= nSize_12 && ( nSize_11 === i || nSize_12 === i ) ) )
+            if ((nSize_11 <= j && j <= nSize_12) || (j >= nSize_12 && nSize_11 <= i && i <= nSize_12))
             {
                 NV2_Bitmap[Index + 0] = Color.r;
                 NV2_Bitmap[Index + 1] = Color.b;
@@ -1406,18 +1429,18 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NV2_Bitmap[Index + 3] = 0;
+                NV2_Bitmap[Index + 3]     = 0;
                 NV2_Bitmap_T_3[Index + 3] = 0;
             }
 
-            if ( ( ( nSize_11 === j || nSize_12 === j ) && i <= nSize_12 ) || ( j >= nSize_12 && ( nSize_11 === i || nSize_12 === i ) ) )
+            if ((nSize_11 <= j && j <= nSize_12 && i <= nSize_12) || (j >= nSize_12 && nSize_11 <= i && i <= nSize_12))
             {
                 NV2_Bitmap_T[Index + 0] = Color.r;
                 NV2_Bitmap_T[Index + 1] = Color.b;
                 NV2_Bitmap_T[Index + 2] = Color.g;
                 NV2_Bitmap_T[Index + 3] = 255;
             }
-            else if ( ( nSize_11 === j || nSize_12 === j ) && i > nSize_12 )
+            else if (nSize_11 <= j && j <= nSize_12 && i > nSize_12)
             {
                 NV2_Bitmap_T[Index + 0] = Color.r;
                 NV2_Bitmap_T[Index + 1] = Color.b;
@@ -1425,16 +1448,18 @@ CDrawingNavigator.prototype.private_CreateLines = function()
                 NV2_Bitmap_T[Index + 3] = nTransAlpha;
             }
             else
+            {
                 NV2_Bitmap_T[Index + 3] = 0;
+            }
 
-            if ( nSize_11 === j || nSize_12 === j )
+            if (nSize_11 <= j && j <= nSize_12)
             {
                 NV2_Bitmap_T_2[Index + 0] = Color.r;
                 NV2_Bitmap_T_2[Index + 1] = Color.b;
                 NV2_Bitmap_T_2[Index + 2] = Color.g;
                 NV2_Bitmap_T_2[Index + 3] = 255;
             }
-            else if ( j > nSize_12 && ( nSize_11 === i || nSize_12 === i ) )
+            else if (j > nSize_12 && nSize_11 <= i && i <= nSize_12)
             {
                 NV2_Bitmap_T_2[Index + 0] = Color.r;
                 NV2_Bitmap_T_2[Index + 1] = Color.b;
@@ -1442,10 +1467,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
                 NV2_Bitmap_T_2[Index + 3] = nTransAlpha;
             }
             else
+            {
                 NV2_Bitmap_T_2[Index + 3] = 0;
+            }
 
             // NV3
-            if ( ( i <= nSize_11 && ( nSize_11 === j || nSize_12 === j ) ) || ( j >= nSize_11 && ( nSize_11 === i || nSize_12 === i ) ) )
+            if ((i <= nSize_11 && nSize_11 <= j && j <= nSize_12) || (j >= nSize_11 && nSize_11 <= i && i <= nSize_12))
             {
                 NV3_Bitmap[Index + 0] = Color.r;
                 NV3_Bitmap[Index + 1] = Color.b;
@@ -1459,7 +1486,7 @@ CDrawingNavigator.prototype.private_CreateLines = function()
             }
             else
             {
-                NV3_Bitmap[Index + 3] = 0;
+                NV3_Bitmap[Index + 3]   = 0;
                 NV3_Bitmap_T[Index + 3] = 0;
             }
         }
@@ -1670,8 +1697,13 @@ CDrawingNavigator.prototype.private_DrawMap = function()
 CDrawingNavigator.prototype.private_UpdateMousePos = function(X, Y)
 {
     var oPos = Common_FindPosition(this.HtmlElement.Board.Control.HtmlElement);
-    var _X = ((X - oPos.X - this.m_nTile_10 - this.m_oOffset.X) / this.m_nTile_24) | 0;
-    var _Y = ((Y - oPos.Y - this.m_nTile_10 - this.m_oOffset.Y) / this.m_nTile_24) | 0;
+
+    var nTile_10 = Common.ConvertToRetinaValue(this.m_nTile_10, false);
+    var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
+    var _X = ((X - oPos.X - nTile_10 - this.m_oOffset.X) / nTile_24) | 0;
+    var _Y = ((Y - oPos.Y - nTile_10 - this.m_oOffset.Y) / nTile_24) | 0;
+
     return {X : _X, Y : _Y};
 };
 CDrawingNavigator.prototype.private_UpdateTarget = function(X, Y)
@@ -1701,14 +1733,17 @@ CDrawingNavigator.prototype.private_UpdateScrollsPos = function()
     var ScrollW   =  this.HtmlElement.ScrollW;
     var NavW      =  this.m_oImageData.W;
 
-    var X = XOffset / (this.m_nTile_20 + LogicXMax * this.m_nTile_24 - NavW) * (NavW - 4 - ScrollW) + 2;
+    var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
+    var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+
+    var X = XOffset / (nTile_20 + LogicXMax * nTile_24 - NavW) * (NavW - 4 - ScrollW) + 2;
 
     var YOffset   = -this.m_oOffset.Y;
     var LogicYMax =  this.m_oMap.Get_Height() + 1;
     var ScrollH   =  this.HtmlElement.ScrollH;
     var NavH      =  this.m_oImageData.H;
 
-    var Y = YOffset / (this.m_nTile_20 + LogicYMax * this.m_nTile_24 - NavH) * (NavH - 4 - ScrollH) + 2;
+    var Y = YOffset / (nTile_20 + LogicYMax * nTile_24 - NavH) * (NavH - 4 - ScrollH) + 2;
 
     this.HtmlElement.HorScroll.style.left = X + "px";
     this.HtmlElement.VerScroll.style.top  = Y + "px";
@@ -1779,7 +1814,7 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                             case ENavigatorElementType.Line_Ver:
                             {
                                 if (!oResult.bResult)
-                                    Lines.drawImage(this.m_oImageData.Ver_T, _x, _y);
+                                     Lines.drawImage(this.m_oImageData.Ver_T, _x, _y);
                                 else
                                     Lines.drawImage(this.m_oImageData.Ver, _x, _y);
 
@@ -1790,12 +1825,12 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
                                 if (oResult.bResult)
                                 {
                                     if (1 === oResult.Temp)
-                                        Lines.drawImage(this.m_oImageData.Ver2_T, _x, _y);
+                                         Lines.drawImage(this.m_oImageData.Ver2_T, _x, _y);
                                     else
                                         Lines.drawImage(this.m_oImageData.Ver2_T_2, _x, _y);
                                 }
                                 else
-                                    Lines.drawImage(this.m_oImageData.Ver2_T_3, _x, _y);
+                                     Lines.drawImage(this.m_oImageData.Ver2_T_3, _x, _y);
 
                                 break;
                             }
