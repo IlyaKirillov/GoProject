@@ -218,7 +218,7 @@ function CDrawingNavigator(oDrawing)
         var YOffset = Common.ConvertToRetinaValue(delta);
 
         var LogicYMax  = oThis.m_oMap.Get_Height() + 1;
-        var NavH       = Common.ConvertToRetinaValue(oThis.HtmlElement.Board.Control.HtmlElement.height);
+        var NavH       = oThis.m_oImageData.H;
         var YMaxOffset = (oThis.m_nTile_20 + LogicYMax * oThis.m_nTile_24 - NavH);
 
         oThis.m_oOffset.Y -= YOffset;
@@ -271,8 +271,8 @@ function CDrawingNavigator(oDrawing)
 
         var LogicXMax = oThis.m_oMap.Get_Width() + 1;
         var ScrollW   = oThis.HtmlElement.ScrollW;
-        var NavW      = oThis.m_oImageData.W - Common.ConvertToRetinaValue(4);
-        var _NavW     = Common.ConvertToRetinaValue(NavW, false);
+        var NavW      = oThis.m_oImageData.W;
+        var _NavW     = Common.ConvertToRetinaValue(NavW, false) - 4;
 
         X -= ScrollW / 2;
         X = Math.max(0, Math.min(_NavW - ScrollW, X));
@@ -358,8 +358,8 @@ function CDrawingNavigator(oDrawing)
 
         var LogicYMax = oThis.m_oMap.Get_Height() + 1;
         var ScrollH   = oThis.HtmlElement.ScrollH;
-        var NavH      = oThis.m_oImageData.H - Common.ConvertToRetinaValue(4);
-        var _NavH     = Common.ConvertToRetinaValue(NavH, false);
+        var NavH      = oThis.m_oImageData.H;
+        var _NavH     = Common.ConvertToRetinaValue(NavH, false) - 4;
 
         Y -= ScrollH / 2;
         Y = Math.max(0, Math.min(_NavH - ScrollH, Y));
@@ -470,9 +470,10 @@ function CDrawingNavigator(oDrawing)
         X -= 2;
         var LogicXMax = oThis.m_oMap.Get_Width() + 1;
         var ScrollW   = oThis.HtmlElement.ScrollW;
-        var NavW      = oThis.m_oImageData.W;
+        var NavW      = oThis.m_oImageData.W;        
 
         var XOffset = (oThis.m_nTile_20 + LogicXMax * oThis.m_nTile_24 - NavW) * (X / (Common.ConvertToRetinaValue(NavW, false) - 4 - ScrollW));
+
         oThis.m_oOffset.X = -XOffset;
         oThis.private_DrawMap();
     };
@@ -485,6 +486,7 @@ function CDrawingNavigator(oDrawing)
         var NavH      = oThis.m_oImageData.H;
 
         var YOffset = (oThis.m_nTile_20 + LogicYMax * oThis.m_nTile_24 - NavH) * (Y / (Common.ConvertToRetinaValue(NavH, false) - 4 - ScrollH));
+
         oThis.m_oOffset.Y = -YOffset;
         oThis.private_DrawMap();
     };
@@ -616,8 +618,8 @@ CDrawingNavigator.prototype.Update = function()
     var _NavH = nTile_20 + LogicYMax * nTile_24;
     if (_NavW > NavW)
     {
-        this.HtmlElement.ScrollW                    = Math.max(50, NavW * NavW / _NavW);
-        this.HtmlElement.HorScroll.style.width      = Math.max(50, NavW * NavW / _NavW) + "px";
+        this.HtmlElement.ScrollW                    = (Math.max(50, NavW * NavW / _NavW)) | 0;
+        this.HtmlElement.HorScroll.style.width      = this.HtmlElement.ScrollW + "px";
         this.HtmlElement.HorScroll.style.display    = "block";
         this.HtmlElement.HorScroll.style.position   = "absolute";
         this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
@@ -641,8 +643,8 @@ CDrawingNavigator.prototype.Update = function()
 
     if (_NavH > NavH)
     {
-        this.HtmlElement.ScrollH                    = Math.max(50, NavH * NavH / _NavH);
-        this.HtmlElement.VerScroll.style.height     = Math.max(50, NavH * NavH / _NavH) + "px";
+        this.HtmlElement.ScrollH                    = (Math.max(50, NavH * NavH / _NavH)) | 0;
+        this.HtmlElement.VerScroll.style.height     = this.HtmlElement.ScrollH + "px";
         this.HtmlElement.VerScroll.style.display    = "block";
         this.HtmlElement.VerScroll.style.position   = "absolute";
         this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
@@ -1687,9 +1689,11 @@ CDrawingNavigator.prototype.private_UpdateMousePos = function(X, Y)
 
     var nTile_10 = Common.ConvertToRetinaValue(this.m_nTile_10, false);
     var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+    var nOffsetX = Common.ConvertToRetinaValue(this.m_oOffset.X, false);
+    var nOffsetY = Common.ConvertToRetinaValue(this.m_oOffset.Y, false);
 
-    var _X = ((X - oPos.X - nTile_10 - this.m_oOffset.X) / nTile_24) | 0;
-    var _Y = ((Y - oPos.Y - nTile_10 - this.m_oOffset.Y) / nTile_24) | 0;
+    var _X = ((X - oPos.X - nTile_10 - nOffsetX) / nTile_24) | 0;
+    var _Y = ((Y - oPos.Y - nTile_10 - nOffsetY) / nTile_24) | 0;
 
     return {X : _X, Y : _Y};
 };
@@ -1719,18 +1723,20 @@ CDrawingNavigator.prototype.private_UpdateScrollsPos = function()
     var LogicXMax =  this.m_oMap.Get_Width() + 1;
     var ScrollW   =  this.HtmlElement.ScrollW;
     var NavW      =  this.m_oImageData.W;
+    var _NavW     =  Common.ConvertToRetinaValue(this.m_oImageData.W, false);
 
-    var nTile_20 = Common.ConvertToRetinaValue(this.m_nTile_20, false);
-    var nTile_24 = Common.ConvertToRetinaValue(this.m_nTile_24, false);
+    var nTile_20 = this.m_nTile_20;
+    var nTile_24 = this.m_nTile_24;
 
-    var X = XOffset / (nTile_20 + LogicXMax * nTile_24 - NavW) * (NavW - 4 - ScrollW) + 2;
+    var X = XOffset / (nTile_20 + LogicXMax * nTile_24 - NavW) * (_NavW - 4 - ScrollW) + 2;
 
     var YOffset   = -this.m_oOffset.Y;
     var LogicYMax =  this.m_oMap.Get_Height() + 1;
     var ScrollH   =  this.HtmlElement.ScrollH;
     var NavH      =  this.m_oImageData.H;
+    var _NavH     =  Common.ConvertToRetinaValue(this.m_oImageData.H, false);
 
-    var Y = YOffset / (nTile_20 + LogicYMax * nTile_24 - NavH) * (NavH - 4 - ScrollH) + 2;
+    var Y = YOffset / (nTile_20 + LogicYMax * nTile_24 - NavH) * (_NavH - 4 - ScrollH) + 2;
 
     this.HtmlElement.HorScroll.style.left = X + "px";
     this.HtmlElement.VerScroll.style.top  = Y + "px";
