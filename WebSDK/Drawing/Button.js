@@ -250,9 +250,12 @@ CDrawingButtonBase.prototype.private_OnResize = function()
 
     this.private_UpdateState();
 };
-CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, W, H, bDisabled, bSelected)
+CDrawingButtonBase.prototype.private_Draw = function(BackColor, FillColor, _W, _H, bDisabled, bSelected)
 {
     var Canvas = this.HtmlElement.Canvas.Control.HtmlElement.getContext("2d");
+
+    var W = Common.ConvertToRetinaValue(_W);
+    var H = Common.ConvertToRetinaValue(_H);
 
     Canvas.clearRect(0, 0, W, H);
 
@@ -1129,8 +1132,15 @@ CDrawingButtonClose.prototype.private_DrawOnCanvas = function(Canvas, Size, X_of
     var oImageData = Canvas.createImageData(W, H);
     var oBitmap = oImageData.data;
 
-    var X_off = (W - 8) / 2 | 0;
-    var Y_off = (H - 8) / 2 | 0;
+    // TODO: Переделать по-нормальному
+    var nT = [];
+    for (var nIndex = 0; nIndex <= 8; ++nIndex)
+    {
+        nT[nIndex] = Common.ConvertToRetinaValue(nIndex);
+    }
+
+    var X_off = (W - nT[8]) / 2 | 0;
+    var Y_off = (H - nT[8]) / 2 | 0;
 
     for (var Y = 0; Y < H; Y++)
     {
@@ -1144,14 +1154,14 @@ CDrawingButtonClose.prototype.private_DrawOnCanvas = function(Canvas, Size, X_of
 
             var y = Y - Y_off;
             var x = X - X_off;
-            if ((0 === y && (0 === x || 1 === x || 6 === x || 7 === x)) ||
-                (1 === y && (1 === x || 2 === x || 5 === x || 6 === x)) ||
-                (2 === y && (2 === x || 3 === x || 4 === x || 5 === x)) ||
-                (3 === y && (3 === x || 4 === x)) ||
-                (4 === y && (3 === x || 4 === x)) ||
-                (5 === y && (2 === x || 3 === x || 4 === x || 5 === x)) ||
-                (6 === y && (1 === x || 2 === x || 5 === x || 6 === x)) ||
-                (7 === y && (0 === x || 1 === x || 6 === x || 7 === x)))
+            if ((nT[0] === y && ((nT[0] <= x && x <= nT[1]) || (nT[6] <= x && x <= nT[7]))) ||
+                (nT[1] === y && ((nT[1] <= x && x <= nT[2]) || (nT[5] <= x && x <= nT[6]))) ||
+                (nT[2] === y && ((nT[2] <= x && x <= nT[3]) || (nT[4] <= x && x <= nT[5]))) ||
+                (nT[3] === y && (nT[3] <= x && x <= nT[4])) ||
+                (nT[4] === y && (nT[3] <= x && x <= nT[4])) ||
+                (nT[5] === y && ((nT[2] <= x && x <= nT[3]) || (nT[4] <= x && x <= nT[5]))) ||
+                (nT[6] === y && ((nT[1] <= x && x <= nT[2]) || (nT[5] <= x && x <= nT[6]))) ||
+                (nT[7] === y && ((nT[0] <= x && x <= nT[1]) || (nT[6] <= x && x <= nT[7]))))
             {
                 r = 255;
                 g = 255;
@@ -1359,8 +1369,12 @@ CDrawingButtonSettings.prototype.Init = function(sDivId, oGameTree)
     oCanvasElement.setAttribute("id", sDivId + "_transform");
     oCanvasElement.setAttribute("style", "position:absolute;padding:0;margin:0;");
     oCanvasElement.setAttribute("oncontextmenu", "return false;");
-    oCanvasElement.width  = 36;
-    oCanvasElement.height = 36;
+    oCanvasElement.width  = Common.ConvertToRetinaValue(36);
+    oCanvasElement.height = Common.ConvertToRetinaValue(36);
+
+    oCanvasElement.style.width  = "36px";
+    oCanvasElement.style.height = "36px";
+
     oCanvasElement.draggable = "false";
     oCanvasElement['ondragstart'] = function(event) { event.preventDefault(); return false; };
     oDivElement.appendChild(oCanvasElement);
@@ -2238,10 +2252,10 @@ CommonExtend(CDrawingButtonFileMenu, CDrawingButtonBase);
 
 CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var shiftY = 9;
-    var spaceY = 6;
-    var shiftX = 3;
-    var W = 2;
+    var shiftY = Common.ConvertToRetinaValue(9);
+    var spaceY = Common.ConvertToRetinaValue(6);
+    var shiftX = Common.ConvertToRetinaValue(3);
+    var W      = Common.ConvertToRetinaValue(2);
 
     var x1 = X_off + shiftX;
     var x2 = X_off + Size - shiftX;
@@ -2611,13 +2625,13 @@ CommonExtend(CDrawingButtonKifuMode, CDrawingButtonBase);
 
 CDrawingButtonKifuMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    X_off = 0, Y_off = 0, Size = 36;
-    var X1 = (X_off + 10 ) | 0 + 0.5;
-    var X2 = (X_off + 25) | 0 + 0.5;
-    var Y1 = (Y_off + 10 ) | 0 + 0.5;
-    var Y2 = (Y_off + 25) | 0 + 0.5;
+    X_off = 0, Y_off = 0, Size = Common.ConvertToRetinaValue(36);
+    var X1 = (X_off + Common.ConvertToRetinaValue(10)) | 0 + 0.5;
+    var X2 = (X_off + Common.ConvertToRetinaValue(25)) | 0 + 0.5;
+    var Y1 = (Y_off + Common.ConvertToRetinaValue(10)) | 0 + 0.5;
+    var Y2 = (Y_off + Common.ConvertToRetinaValue(25)) | 0 + 0.5;
 
-    Canvas.lineWidth = 2;
+    Canvas.lineWidth = Common.ConvertToRetinaValue(2);
 
     Canvas.strokeStyle = "rgb(0, 0, 0)";
     Canvas.beginPath();
@@ -2633,21 +2647,21 @@ CDrawingButtonKifuMode.prototype.private_DrawOnCanvas = function(Canvas, Size, X
 
     Canvas.fillStyle = "rgb(255, 255, 255)";
     Canvas.beginPath();
-    Canvas.arc(X1, Y1, 11 / 2, 0, 2 * Math.PI, false);
+    Canvas.arc(X1, Y1, Common.ConvertToRetinaValue(11 / 2), 0, 2 * Math.PI, false);
     Canvas.stroke();
     Canvas.fill();
     Canvas.beginPath();
-    Canvas.arc(X2, Y2, 11 / 2, 0, 2 * Math.PI, false);
+    Canvas.arc(X2, Y2, Common.ConvertToRetinaValue(11 / 2), 0, 2 * Math.PI, false);
     Canvas.stroke();
     Canvas.fill();
     Canvas.fillStyle = "rgb(0, 0, 0)";
     Canvas.beginPath();
-    Canvas.arc(X1, Y2, 11 / 2, 0, 2 * Math.PI, false);
+    Canvas.arc(X1, Y2, Common.ConvertToRetinaValue(11 / 2), 0, 2 * Math.PI, false);
     Canvas.stroke();
     Canvas.fill();
 
     var Text       = "?";
-    var FontSize   = 22;
+    var FontSize   = Common.ConvertToRetinaValue(22);
     var FontFamily = "Times New Roman, Sans serif";
     var sFont      = FontSize + "px " + FontFamily;
 
