@@ -217,7 +217,7 @@ function CDrawingNavigator(oDrawing)
 
         var YOffset = Common.ConvertToRetinaValue(delta);
 
-        var LogicYMax  = oThis.m_oMap.Get_Height() + 1;
+        var LogicYMax  = oThis.m_oMap.GetHeight();
         var NavH       = oThis.m_oImageData.H;
         var YMaxOffset = (oThis.m_nTile_20 + LogicYMax * oThis.m_nTile_24 - NavH);
 
@@ -269,7 +269,7 @@ function CDrawingNavigator(oDrawing)
         var oPos = Common_FindPosition(oThis.HtmlElement.HorScrollBG);
         var X = global_mouseEvent.X - oPos.X;
 
-        var LogicXMax = oThis.m_oMap.Get_Width() + 1;
+        var LogicXMax = oThis.m_oMap.GetWidth();
         var ScrollW   = oThis.HtmlElement.ScrollW;
         var NavW      = oThis.m_oImageData.W;
         var _NavW     = Common.ConvertToRetinaValue(NavW, false) - 4;
@@ -321,12 +321,22 @@ function CDrawingNavigator(oDrawing)
 
         oThis.HtmlElement.HorScrollBG.style.opacity = 0.3;
         oThis.HtmlElement.HorScroll.style.opacity   = 0.5;
+
+        oThis.HtmlElement.VerScroll.style.display   = "none";
+        oThis.HtmlElement.VerScrollBG.style.display = "none";
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
+        oThis.HtmlElement.VerScroll.style.opacity   = 0;        
+        oThis.private_ClearVerScrollTimer();
+        oThis.private_ClearVerScrollBlurTimer();
     };
 
     this.private_OnMouseOutHorScrollBG = function()
     {
         oThis.private_ClearHorScrollTimer();
         oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
+
+        oThis.HtmlElement.VerScroll.style.display   = "block";
+        oThis.HtmlElement.VerScrollBG.style.display = "block";
     };
 
     this.private_ClearVerScrollTimer = function()
@@ -356,7 +366,7 @@ function CDrawingNavigator(oDrawing)
         var oPos = Common_FindPosition(oThis.HtmlElement.VerScrollBG);
         var Y = global_mouseEvent.Y - oPos.Y;
 
-        var LogicYMax = oThis.m_oMap.Get_Height() + 1;
+        var LogicYMax = oThis.m_oMap.GetHeight();
         var ScrollH   = oThis.HtmlElement.ScrollH;
         var NavH      = oThis.m_oImageData.H;
         var _NavH     = Common.ConvertToRetinaValue(NavH, false) - 4;
@@ -407,16 +417,33 @@ function CDrawingNavigator(oDrawing)
         oThis.private_ClearVerScrollBlurTimer();
         oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
         oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
+
+        oThis.HtmlElement.HorScroll.style.display   = "none";
+        oThis.HtmlElement.HorScrollBG.style.display = "none";
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+        oThis.HtmlElement.HorScroll.style.opacity   = 0;        
+        oThis.private_ClearHorScrollTimer();
+        oThis.private_ClearHorScrollBlurTimer();
     };
 
     this.private_OnMouseOutVerScrollBG = function()
-    {
+    {       
+        oThis.HtmlElement.HorScroll.style.display   = "block";
+        oThis.HtmlElement.HorScrollBG.style.display = "block";
+
         oThis.private_ClearVerScrollTimer();
         oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
 
     this.private_OnMouseOverHorScroll = function()
     {
+        oThis.HtmlElement.VerScroll.style.display   = "none";
+        oThis.HtmlElement.VerScrollBG.style.display = "none";
+        oThis.HtmlElement.VerScrollBG.style.opacity = 0;
+        oThis.HtmlElement.VerScroll.style.opacity   = 0;   
+        oThis.private_ClearVerScrollTimer();
+        oThis.private_ClearVerScrollBlurTimer();
+
         oThis.private_ClearHorScrollBlurTimer();
 
         oThis.HtmlElement.HorScroll.style.opacity   = 0.7;
@@ -425,12 +452,23 @@ function CDrawingNavigator(oDrawing)
 
     this.private_OnMouseOutHorScroll = function()
     {
+        oThis.HtmlElement.VerScroll.style.display   = "block";
+        oThis.HtmlElement.VerScrollBG.style.display = "block";
+
         oThis.private_ClearHorScrollTimer();
         oThis.m_nHorScrollBlurTimerId = setTimeout(HorScrollBlur, 10);
     };
 
     this.private_OnMouseOverVerScroll = function()
     {
+        oThis.HtmlElement.HorScroll.style.display   = "none";
+        oThis.HtmlElement.HorScrollBG.style.display = "none";
+        oThis.HtmlElement.HorScrollBG.style.opacity = 0;
+        oThis.HtmlElement.HorScroll.style.opacity   = 0;  
+        oThis.private_ClearHorScrollTimer();
+        oThis.private_ClearHorScrollBlurTimer();
+
+
         oThis.private_ClearVerScrollBlurTimer();
         oThis.HtmlElement.VerScroll.style.opacity   = 0.7;
         oThis.HtmlElement.VerScrollBG.style.opacity = 0.3;
@@ -438,6 +476,9 @@ function CDrawingNavigator(oDrawing)
 
     this.private_OnMouseOutVerScroll = function()
     {
+        oThis.HtmlElement.HorScroll.style.display   = "block";
+        oThis.HtmlElement.HorScrollBG.style.display = "block";
+
         oThis.HtmlElement.VerScroll.style.opacity   = 0.5;
         oThis.m_nVerScrollBlurTimerId = setTimeout(VerScrollBlur, 10);
     };
@@ -468,7 +509,7 @@ function CDrawingNavigator(oDrawing)
     this.private_OnDragHorScroll = function(X, Y)
     {
         X -= 2;
-        var LogicXMax = oThis.m_oMap.Get_Width() + 1;
+        var LogicXMax = oThis.m_oMap.GetWidth();
         var ScrollW   = oThis.HtmlElement.ScrollW;
         var NavW      = oThis.m_oImageData.W;        
 
@@ -481,7 +522,7 @@ function CDrawingNavigator(oDrawing)
     this.private_OnDragVerScroll = function(X, Y)
     {
         Y -= 2;
-        var LogicYMax = oThis.m_oMap.Get_Height() + 1;
+        var LogicYMax = oThis.m_oMap.GetHeight();
         var ScrollH   = oThis.HtmlElement.ScrollH;
         var NavH      = oThis.m_oImageData.H;
 
@@ -547,12 +588,12 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     this.HtmlElement.VerScroll['onmouseout']  = this.private_OnMouseOutVerScroll;
 
     var oHorScroll = CreateControlContainer(sDivId + "HorScroll_BG");
-    oHorScroll.Bounds.SetParams(2, 0, 2, 4, true, false, true, true, -1, 8);
+    oHorScroll.Bounds.SetParams(2, 0, 2, 2, true, false, true, true, -1, 8);
     oHorScroll.Anchor = (g_anchor_left | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oHorScroll);
 
     var oVerScroll = CreateControlContainer(sDivId + "VerScroll_BG");
-    oVerScroll.Bounds.SetParams(0, 2, 4, 2, false, true, true, true, 8, -1);
+    oVerScroll.Bounds.SetParams(0, 2, 2, 2, false, true, true, true, 8, -1);
     oVerScroll.Anchor = (g_anchor_top | g_anchor_bottom | g_anchor_right);
     oMainControl.AddControl(oVerScroll);
 
@@ -605,8 +646,8 @@ CDrawingNavigator.prototype.Update = function()
     if (this.m_oImageData.W <= 0 || this.m_oImageData.H <= 0)
         return;
 
-    var LogicXMax = this.m_oMap.Get_Width() + 1;
-    var LogicYMax = this.m_oMap.Get_Height() + 1;
+    var LogicXMax = this.m_oMap.GetWidth();
+    var LogicYMax = this.m_oMap.GetHeight();
 
     var NavW = Common.ConvertToRetinaValue(this.m_oImageData.W, false);
     var NavH = Common.ConvertToRetinaValue(this.m_oImageData.H, false);
@@ -622,12 +663,12 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.HorScroll.style.width      = this.HtmlElement.ScrollW + "px";
         this.HtmlElement.HorScroll.style.display    = "block";
         this.HtmlElement.HorScroll.style.position   = "absolute";
-        this.HtmlElement.HorScroll.style.top        = NavH - 12 + "px";
+        this.HtmlElement.HorScroll.style.top        = NavH - 10 + "px";
         this.HtmlElement.HorScroll.style.height     = 8 + "px";
         this.HtmlElement.HorScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
         this.HtmlElement.HorScroll.style.opacity    = 0;
 
-        Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 12, NavH - 12);
+        Common_DragHandler.Init(this.HtmlElement.HorScroll, null, 2, NavW - this.HtmlElement.ScrollW - 2, NavH - 10, NavH - 10);
 
         this.HtmlElement.HorScroll.onDrag         = this.private_OnDragHorScroll;
         this.HtmlElement.HorScroll.onDragStart    = this.private_OnDragStartScroll;
@@ -647,12 +688,12 @@ CDrawingNavigator.prototype.Update = function()
         this.HtmlElement.VerScroll.style.height     = this.HtmlElement.ScrollH + "px";
         this.HtmlElement.VerScroll.style.display    = "block";
         this.HtmlElement.VerScroll.style.position   = "absolute";
-        this.HtmlElement.VerScroll.style.left       = NavW - 12 + "px";
+        this.HtmlElement.VerScroll.style.left       = NavW - 10 + "px";
         this.HtmlElement.VerScroll.style.width      = 8 + "px";
         this.HtmlElement.VerScroll.style.background = this.private_GetSettings_DarkBoard() ? "rgb(220, 220, 220)" : "rgb(0,0,0)";
         this.HtmlElement.VerScroll.style.opacity    = 0;
 
-        Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 12, NavW - 12, 2, NavH - this.HtmlElement.ScrollH - 2);
+        Common_DragHandler.Init(this.HtmlElement.VerScroll, null, NavW - 10, NavW - 10, 2, NavH - this.HtmlElement.ScrollH - 2);
 
         this.HtmlElement.VerScroll.onDrag         = this.private_OnDragVerScroll;
         this.HtmlElement.VerScroll.onDragStart    = this.private_OnDragStartScroll;
@@ -699,10 +740,10 @@ CDrawingNavigator.prototype.Update_Current = function(bScrollToCurPos)
 
     if (false != bScrollToCurPos && true === this.m_bNavigatorScroll && (RealX <= this.m_nTile_10 || RealX >= W - this.m_nTile_10 || RealY <= this.m_nTile_10 || RealY >= H - this.m_nTile_10))
     {
-        var LogicYMax  = this.m_oMap.Get_Height() + 1;
+        var LogicYMax  = this.m_oMap.GetHeight();
         var YMaxOffset = (this.m_nTile_20 + LogicYMax * this.m_nTile_24 - H);
 
-        var LogicXMax  = this.m_oMap.Get_Width() + 1;
+        var LogicXMax  = this.m_oMap.GetWidth();
         var XMaxOffset = (this.m_nTile_20 + LogicXMax * this.m_nTile_24 - W);
 
         if (RealX <= this.m_nTile_10)
@@ -1720,7 +1761,7 @@ CDrawingNavigator.prototype.private_UpdateTarget = function(X, Y)
 CDrawingNavigator.prototype.private_UpdateScrollsPos = function()
 {
     var XOffset   = -this.m_oOffset.X;
-    var LogicXMax =  this.m_oMap.Get_Width() + 1;
+    var LogicXMax =  this.m_oMap.GetWidth();
     var ScrollW   =  this.HtmlElement.ScrollW;
     var NavW      =  this.m_oImageData.W;
     var _NavW     =  Common.ConvertToRetinaValue(this.m_oImageData.W, false);
@@ -1731,7 +1772,7 @@ CDrawingNavigator.prototype.private_UpdateScrollsPos = function()
     var X = XOffset / (nTile_20 + LogicXMax * nTile_24 - NavW) * (_NavW - 4 - ScrollW) + 2;
 
     var YOffset   = -this.m_oOffset.Y;
-    var LogicYMax =  this.m_oMap.Get_Height() + 1;
+    var LogicYMax =  this.m_oMap.GetHeight();
     var ScrollH   =  this.HtmlElement.ScrollH;
     var NavH      =  this.m_oImageData.H;
     var _NavH     =  Common.ConvertToRetinaValue(this.m_oImageData.H, false);
@@ -1772,19 +1813,19 @@ CDrawingNavigator.prototype.private_DrawMapOnTimer = function()
     var x = this.m_nTile_10 + this.m_oOffset.X;
     var y = this.m_nTile_10 + this.m_oOffset.Y;
 
-    var Height = this.m_oMap.Get_Height();
+    var Height = this.m_oMap.GetHeight();
 
     var bShadows = this.private_GetSettings_Shadows();
 
-    for (var Y = 0; Y <= Height - 1 ; Y++)
+    for (var Y = 0; Y < Height; Y++)
     {
         var _y = y + this.m_nTile_24 * Y;
 
         // Отрисовываем только те строки, которые попадают в поле видимости
         if (_y >= -this.m_nTile_24 && _y <= H + this.m_nTile_24)
         {
-            var Width = this.m_oMap.Get_LineWidth(Y);
-            for (var X = 0; X <= Width; X++)
+            var Width = this.m_oMap.GetLineWidth(Y);
+            for (var X = 0; X < Width; X++)
             {
                 var _x = x + this.m_nTile_24 * X;
 

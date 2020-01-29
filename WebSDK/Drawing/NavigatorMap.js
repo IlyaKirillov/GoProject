@@ -212,24 +212,24 @@ CNavigatorMap.prototype.private_FillNodeMainVariant = function(Node, X, Y)
         this.Set(X, Y, CurNode);
     }
 };
-CNavigatorMap.prototype.Get_Height = function()
+CNavigatorMap.prototype.GetHeight = function()
 {
     return this.m_oMap.length;
 };
-CNavigatorMap.prototype.Get_Width = function()
+CNavigatorMap.prototype.GetWidth = function()
 {
     var X = 0;
-    var Height = this.Get_Height();
+    var Height = this.GetHeight();
     for (var Y = 0; Y < Height; Y++)
     {
-        var CurX = this.Get_LineWidth(Y);
+        var CurX = this.GetLineWidth(Y);
         if (CurX > X)
             X = CurX;
     }
 
     return X;
 };
-CNavigatorMap.prototype.Get_LineWidth = function(Y)
+CNavigatorMap.prototype.GetLineWidth = function(Y)
 {
-    return this.m_oMap[Y].length - 1;
+    return this.m_oMap[Y].length;
 };

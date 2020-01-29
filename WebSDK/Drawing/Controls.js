@@ -229,13 +229,18 @@ CControlContainer.prototype.Resize = function(_width,_height)
     this.AbsolutePosition.R = _r;
     this.AbsolutePosition.B = _b;
 
-    this.HtmlElement.style.left 	= ((_x + 0.5) | 0) + "px";
-    this.HtmlElement.style.top 		= ((_y + 0.5) | 0) + "px";
-    this.HtmlElement.style.width 	= (((_r - _x) + 0.5) | 0) + "px";
-    this.HtmlElement.style.height 	= (((_b - _y) + 0.5) | 0) + "px";
+    var __l = ((_x + 0.5) | 0);
+    var __r = ((_r + 0.5) | 0);
+    var __t = ((_y + 0.5) | 0);
+    var __b = ((_b + 0.5) | 0);
 
-    this.HtmlElement.width 	= Common.ConvertToRetinaValue(((_r - _x) + 0.5) | 0);
-    this.HtmlElement.height = Common.ConvertToRetinaValue(((_b - _y) + 0.5) | 0);
+    this.HtmlElement.style.left 	= __l + "px";
+    this.HtmlElement.style.top 		= __t + "px";
+    this.HtmlElement.style.width 	= (__r - __l) + "px";
+    this.HtmlElement.style.height 	= (__b - __t) + "px";
+
+    this.HtmlElement.width 	= Common.ConvertToRetinaValue(__r - __l);
+    this.HtmlElement.height = Common.ConvertToRetinaValue(__b - __t);
 
     this.private_ResizeControls(_r - _x, _b - _y);
 };
