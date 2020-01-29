@@ -1546,12 +1546,12 @@ CDrawingNavigator.prototype.private_CreateLines = function()
 	this.m_oImageData.Ver2_T_3       = this.private_CreateCanvas(this.m_nTile_24, this.m_nTile_24, oVer2_T_3);
 	this.m_oImageData.Ver3_T         = this.private_CreateCanvas(this.m_nTile_24, this.m_nTile_24, oVer3_T);
 
-	this.m_oImageData.Triangle    = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.07, Color, 1, null);
-    this.m_oImageData.Triangle_T  = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.07, new CColor(nChannel, nChannel, nChannel, nTransAlpha), 1, null);
-    this.m_oImageData.Triangle_B  = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(255, 255, 255, 255), 1, this.m_oImageData.Black);
-    this.m_oImageData.Triangle_W  = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(0, 0, 0, 255), 1, this.m_oImageData.White);
-    this.m_oImageData.Triangle_BT = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(255, 255, 255, nTransAlpha), 1, this.m_oImageData.BlackT);
-    this.m_oImageData.Triangle_WT = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(0, 0, 0, nTransAlpha), 1, this.m_oImageData.WhiteT);
+	this.m_oImageData.Triangle    = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.07, Color, 1, false);
+    this.m_oImageData.Triangle_T  = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.07, new CColor(nChannel, nChannel, nChannel, nTransAlpha), 1, false);
+    this.m_oImageData.Triangle_B  = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(255, 255, 255, 255), 1, true);
+    this.m_oImageData.Triangle_W  = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(0, 0, 0, 255), 1, true);
+    this.m_oImageData.Triangle_BT = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(255, 255, 255, nTransAlpha), 1, true);
+    this.m_oImageData.Triangle_WT = this.private_DrawTriangle(this.m_nTile_20, this.m_nTile_20, this.m_nTile_20 * 0.06, new CColor(0, 0, 0, nTransAlpha), 1, true);
 };
 CDrawingNavigator.prototype.private_CreateTarget = function()
 {
@@ -1642,7 +1642,7 @@ CDrawingNavigator.prototype.private_CreateTarget = function()
     Canvas.drawImage(this.m_oImageData.Current, 0, 30);
     Canvas.drawImage(this.m_oImageData.GameCurrent, 0, 60)
 };
-CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha, oStoneCanvas)
+CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Color, Alpha, isSmall)
 {
     if (undefined === Alpha)
         Alpha = 1;
@@ -1651,9 +1651,6 @@ CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Colo
 	var Canvas = oCanvasElement.getContext("2d");
 
     Canvas.clearRect(0, 0, W, H);
-
-    if (null !== oStoneCanvas)
-        Canvas.drawImage(oStoneCanvas, 0, 0);
 
     Canvas.globalAlpha = Alpha;
     Canvas.strokeStyle = Color.ToString();
@@ -1672,14 +1669,13 @@ CDrawingNavigator.prototype.private_DrawTriangle = function(W, H, PenWidth, Colo
     var y1 = shift;
     var y2 = _y;
 
-    if (null !== oStoneCanvas)
+    if (isSmall)
     {
         x1 = Math.floor(x1 - 0.5);
         x2 = Math.ceil(x2 + 0.5);
         y1 = Math.ceil(y1 + 0.5);
         y2 = Math.floor(y2 - 0.5);
     }
-
 
     Canvas.beginPath();
     Canvas.moveTo(W / 2, y1);
