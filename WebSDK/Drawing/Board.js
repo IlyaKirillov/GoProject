@@ -407,8 +407,8 @@ CDrawingBoard.prototype.Get_FullImage = function(bColorMarks)
     var Canvas = document.createElement("canvas");
     var Context = Canvas.getContext("2d");
 
-    Canvas.width  = this.HtmlElement.Board.Control.HtmlElement.width;
-    Canvas.height = this.HtmlElement.Board.Control.HtmlElement.height;
+    Canvas.width  = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.width);
+    Canvas.height = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.height);
 
     Context.drawImage(this.HtmlElement.Board.Control.HtmlElement, 0, 0);
     Context.drawImage(this.HtmlElement.Lines.Control.HtmlElement, 0, 0);
@@ -434,12 +434,13 @@ CDrawingBoard.prototype.Update_Size = function(bForce)
     else
         H = _H;
 
-    if (W !== this.m_oImageData.W2 || H !== this.m_oImageData.H2 || true === bForce)
+    if (Common.ConvertToRetinaValue(W) !== this.m_oImageData.W2 || Common.ConvertToRetinaValue(H) !== this.m_oImageData.H2 || true === bForce)
     {
-        this.m_oImageData.W2 = W;
-        this.m_oImageData.H2 = H;
+        this.m_oImageData.W2 = Common.ConvertToRetinaValue(W);
+        this.m_oImageData.H2 = Common.ConvertToRetinaValue(H);
 
         this.HtmlElement.Control.Resize(W, H);
+        this.m_oTarget.Update_Size(W, H);
 
         this.private_UpdateKoeffs();
         this.private_OnResize(bForce);
@@ -1485,7 +1486,7 @@ CDrawingBoard.prototype.private_CreateTrueColorStones = function(dForceDiam)
 
     var d = Math.floor(DWidth / 2) * 2 + 1;
     this.m_oImageData.StoneDiam = d;
-    this.m_oTarget.Update_Size(d);
+    this.m_oTarget.SetTargetSize(d);
 
    var oBlackStone  = StonesCanvas.createImageData(d, d);
    var oWhiteStone  = StonesCanvas.createImageData(d, d);
@@ -2070,8 +2071,8 @@ CDrawingBoard.prototype.private_HideTarget = function()
 };
 CDrawingBoard.prototype.private_GetBoardPosByXY = function(_X, _Y)
 {
-    var W = this.m_oImageData.W;
-    var H = this.m_oImageData.H;
+    var W = Common.ConvertToRetinaValue(this.m_oImageData.W, false);
+    var H = Common.ConvertToRetinaValue(this.m_oImageData.H, false);
 
     var dCellH  = this.m_dKoeffCellH * H;
     var dCellW  = this.m_dKoeffCellW * W;
