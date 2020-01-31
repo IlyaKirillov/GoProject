@@ -389,18 +389,20 @@ CDrawingButtonBase.prototype.private_DrawSelectionBounds = function(Canvas, W, H
 function CDrawingButtonBackwardToStart(oDrawing)
 {
     CDrawingButtonBackwardToStart.superclass.constructor.call(this, oDrawing);
-
-    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDRIczM2u5QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA80lEQVRYw+3XMYqFMBQF0JshlYgg8hqXIELERrfgAmaVA65DYQrTuASbIIKIVSBTDQy/m59A/od3+8AhvNxHBACM44hXyQdeLAxiEIMY9HYgIvoehsG1beve4oaklOi6ztV17aKDpJTo+96VZYk8z5GmaTzQL4aIsO87tNbiuq44oEfMsiziPM84MxQS4w0KjfEGKaUcEeG+b6zr+uWL8QZprYUxBkmSoKqqzyzL4oKstZimSRhjUBQFmqZxvijvoQ6NCvLsQ6KCFeMjSinlojb1X9S2bTiOA880tQy9XK21mOdZPHte8EeRQQxiEIMY9L/8AMSPglq/uMNKAAAAAElFTkSuQmCC");
-    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDRcMrA1KxAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA6UlEQVRYw+3XPQqEMBAF4Jdgr52VYBpvIlZWoodUUll5Ae+gjYKVnb1gttrFakGdJYGd1Al8+XvDAI4NAQDDMDgDkq6dEIMYxKC/A3lXF+z7bvq+h1IKaZqKb3PvBK73i122bWt83/9UAqtXprU24zhiXVccx2H3DWmtzTzPiKIIZVkKKaU90BlTVZWw+suoMCQgSsxjUNd1ZpomBEFAgnkMyrJMKKWwbRvqujZOJHVRFCKOYyzLQoIiedSUKLJvT4UiDcYzqmkaYz2p36gkSRCGIe4k9U+Ka57nt9sr7ssYxCAGMYhBF8cLoc5sGgK/ZxQAAAAASUVORK5CYII=");
 }
 CommonExtend(CDrawingButtonBackwardToStart, CDrawingButtonBase);
 
-CDrawingButtonBackwardToStart.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonBackwardToStart.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+    oCanvas.lineWidth = nW / 18;
+    oCanvas.moveTo(21 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(15 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(21 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 
-    if (oImage)
-        Canvas.drawImage(oImage, 0, 0);
+    oCanvas.moveTo(12 / 36 * nW, 9 / 36 * nW);
+    oCanvas.lineTo(12 / 36 * nW, 25 / 36 * nW);
+    oCanvas.stroke();
 };
 CDrawingButtonBackwardToStart.prototype.private_HandleMouseDown = function()
 {
@@ -421,18 +423,21 @@ CDrawingButtonBackwardToStart.prototype.private_RegisterButton = function()
 function CDrawingButtonBackward5(oDrawing)
 {
     CDrawingButtonBackward5.superclass.constructor.call(this, oDrawing);
-
-    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDRwVK5I7zwAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAcUlEQVRYw+3VwQnAIAyFYVu6UJbqDB0vh9xFcA7xHALpCAptpbXvO77TDwENAQAAfkBECjPvvfujYoyuql5r9Z59SIyqekrJW/uwmJyzt3bETBuzfv7NedXJEDVV1F1fx3Y1iIgWESlmdvTsAAAAszsB2vBQahKN40YAAAAASUVORK5CYII=");
-    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSMBaZbFjgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA80lEQVRYw+3XvQqDMBQF4HNtcBOsc0fBB9DB53dScHB1cepWcMkWxNulFilU1Cb9457xLPlIokkIt7Rti08mSRIAgIcvi4AEJCAB/QXIGMPDMPCsOj7pn+VkDaS15qIo0DQNmO9jH+b9ipytgLTWXFUVmBlxHIOIpv4y79+yZBNmHEekaYowDGmpXxu1F1OWJZgZWZYhiiJa6p3OkEvMZpBrzO//h4IgoDzPQUSo6xp93/NS/5YZco3atWQuUbv3kCvUS5t6PnjXdfej47HfErLxDDLGsOd5UErRmn7pGaRsfKq+79OWXi5oAhKQgAQkIIu5AvJV2EqdOHDMAAAAAElFTkSuQmCC");
 }
 CommonExtend(CDrawingButtonBackward5, CDrawingButtonBase);
 
-CDrawingButtonBackward5.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonBackward5.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+    oCanvas.lineWidth = nW / 18;
+    oCanvas.moveTo(19 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(13 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(19 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 
-    if (oImage)
-        Canvas.drawImage(oImage, 0, 0);
+    oCanvas.moveTo(25 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(19 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(25 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 };
 CDrawingButtonBackward5.prototype.private_HandleMouseDown = function()
 {
@@ -452,18 +457,16 @@ CDrawingButtonBackward5.prototype.private_RegisterButton = function()
 function CDrawingButtonBackward(oDrawing)
 {
     CDrawingButtonBackward.superclass.constructor.call(this, oDrawing);
-
-    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSUz9xsziAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAxUlEQVRYw+3VIQ7DMAwF0J+ppHABQSEhISVBPdLOsKvsEr1NSKQoKi0oq0IqdbQabN0lquwTPNnfthiGATXVA5UVgxjEIAbdDqSUmqWUrypAxpit7/unc+7Ttm1ZkDFm67oOADCOI3LO5UB7TAgBMUZRbGS/mBCCKBZqaswp0BWYe92hlJLw3gMArLWw1m7FO3QF6vTIqFEkGaJEkYV6j9Ja4+jraCg3JKUklmWZ13V9H30dDfXaTtMk+Q4xiEEMYhCD/lhfy3RcBznfWwkAAAAASUVORK5CYII=");
-    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSgeB2oRsAAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAx0lEQVRYw+3XMQqEMBAF0D8h2AniGbyBFp7fSiGFrY1HsEkXxL/VwtY6bkTmHyA8kskPEQBYlgVPicPDYiADGchArwOllLjvOx8BijFyGAbM8wySeUExRk7TBJJomgYikg/0xRzHgbZtUVWVnF3La2DGcQRJdF2Huq4l21BrYy6B7sC8q4fKspS+7yEiCCFg2zZm36E7UJePTBulMkOaKLWh/kWt63r66RDtb1BKic45eO9P1YDXvrZFUYj1kIEMZCADGeiP+QAy+XDf76BlKwAAAABJRU5ErkJggg==");
 }
 CommonExtend(CDrawingButtonBackward, CDrawingButtonBase);
 
-CDrawingButtonBackward.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonBackward.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
-
-    if (oImage)
-        Canvas.drawImage(oImage, 0, 0);
+    oCanvas.lineWidth = nW / 18;
+    oCanvas.moveTo(22 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(16 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(22 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 };
 CDrawingButtonBackward.prototype.private_HandleMouseDown = function()
 {
@@ -483,18 +486,16 @@ CDrawingButtonBackward.prototype.private_RegisterButton = function()
 function CDrawingButtonForward(oDrawing)
 {
     CDrawingButtonForward.superclass.constructor.call(this, oDrawing);
-
-    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSkJnaKlNgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAxUlEQVRYw+3WIQ7DIBQG4L8NBiQCVVODqeFU21V6he0QPUsNhqQh2AossrsDvKVseb8n+QL8D4Zt29BTRnQWBjGIQQz6WZDW+mGMydQgUbNISgnn3EspBe/9FWMcbt2hUgpSSgCAZVkwz/N1+5EdxzGEEMhRTZc6hECOam4ZNYqk9pSo/xyM1trLWgsA8N6jZQyMPWGaQdSYJtA3MNUgKSWmaSLHVL9lpRTs+/4UQqzneeouWpZzflNj+IPGIAYxiEEMqsgHyjhf9O2e3l4AAAAASUVORK5CYII=");
-    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSgxrLss6QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAyUlEQVRYw+3VsQqDUAwF0JvycBPEbxBcBR38ficFB1cXP8HFTSS3U3/Al9LXNtkDB5KbyLquSKXqusYDiZWDHOQgB30t6LounufJJEAksSwLhmHAcRz8OEhEUFUVSGKaJlPU7ZEVRSFt20JVTVFRS12WpXRdB1XFOI4mqOiUvVAkTVAmsbdE/eZh3Ped8zxDRND3PfI8l4+BLDHRIGtMFOgdmKjXsW2bOQYAwt3X0TQNVBVZlollysLtxhAk2dg7yEEOcpCD/gn0BPdVbmFsgto0AAAAAElFTkSuQmCC");
 }
 CommonExtend(CDrawingButtonForward, CDrawingButtonBase);
 
-CDrawingButtonForward.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonForward.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
-
-    if (oImage)
-        Canvas.drawImage(oImage, 0, 0);
+    oCanvas.lineWidth = nW / 18;
+    oCanvas.moveTo(16 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(22 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(16 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 };
 CDrawingButtonForward.prototype.private_HandleMouseDown = function()
 {
@@ -514,18 +515,21 @@ CDrawingButtonForward.prototype.private_RegisterButton = function()
 function CDrawingButtonForward5(oDrawing)
 {
     CDrawingButtonForward5.superclass.constructor.call(this, oDrawing);
-
-    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSQ2nmr2RgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAZUlEQVRYw+3VMQrAIAyFYelhe84M7kHwHMU5S3qAVnCxpOH/xrfkQdCUAgBIRETOWuu1mm83xnAzc1X1lXy71pqb2WP4LP9E7/11+CynVPpSR5o/KdTKKPOblxXudIQ7rgAABHQDS2dNsnKXx6sAAAAASUVORK5CYII=");
-    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDSQYQrz7iQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAxElEQVRYw+2VPQuDMBCG30j/QIduHQP5AQr6/5cQyBAQBxenbl0C2b0uOhQSxI8ULfdM4eXgHnJHAjAMwzAXoe/751JN13XUti1N9fdYvpfbfFBKvZaKnXPw3sNaSwAesbyqKrFHqFhTLKUEEcEYgxDCO5ZPsr8RqutalGWJcRy/mqfyLWy6Xq01WWshhEDTNJjHlMqzC+WU2rWAOaSKsz0//zGyUy11TpnVQrllVi/1MAzRpqk8O6lP9MjPlWEYhmGuzgcvy8ThfV4IDQAAAABJRU5ErkJggg==");
 }
 CommonExtend(CDrawingButtonForward5, CDrawingButtonBase);
 
-CDrawingButtonForward5.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonForward5.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+    oCanvas.lineWidth = nW / 18;
+    oCanvas.moveTo(13 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(19 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(13 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 
-    if (oImage)
-        Canvas.drawImage(oImage, 0, 0);
+    oCanvas.moveTo(19 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(25 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(19 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 };
 CDrawingButtonForward5.prototype.private_HandleMouseDown = function()
 {
@@ -546,17 +550,20 @@ function CDrawingButtonForwardToEnd(oDrawing)
 {
     CDrawingButtonForwardToEnd.superclass.constructor.call(this, oDrawing);
 
-    this.m_oImage         = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDRAjSJ3hWgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAABBElEQVRYw+3WwYmFMBAG4D8PvUgIiKYJERQv2oJXYatcsA4Pqxh42EQQIQQPImRr2DyzesgUMHyZyUwCPCxI3/ePwXRdh9fTKuRBHuRBHnRFVFVl2rY1nPOffwHleW7qujZBEFx+mD9npJQijmOkaYowDM0wDOQ8z/taprWGEIKs6wrOOZqmubRSVi1TSmGeZyco60vtCvXRlLlAfTz2Siksy/K97zs45yiKwtwKYowhy7KvKIogpYQQgtwGYoyhLEuTJAmklLhiBbyehLEGucJYgSilKIrCCcbq6dBaY9s2HMeBcRwvxViBAOD9fhM4isBF0mmayG17yP8YPciDPMiDHMcvBCGFxBHbK9gAAAAASUVORK5CYII=");
-    this.m_oImageDisabled = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwTDQ4kArhLJgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAA9UlEQVRYw+3WsY6FIBAF0CtQWNjTEWw0Uf+/9x/URBsNVnQmdhqZ1+wPLMo+s2H6S85MYALwskrGcXwNpixLsLdNKIIiKIIi6IkyxlDbtnSe59+ArLU0TROFaEb8NuCcg7UWxhgcx0FN0yRfBTHGUNd1QkS0LAsAPIoSPiHOOX4Qj6OEbzAUStwJh0CJux1xzlFVVbLvO83zjCzLiDH2vT10XReGYaBt25DnObTWtybE7mK6rqN1XaG1xhN3iL0J4w0KhfECOefQ930QjPemllIiTVMURfEoxvvZSykTKWWQ74cIcahSKlFKxQ9aBEVQBEXQv6wPn1Z3S2AlDhEAAAAASUVORK5CYII=");
 }
 CommonExtend(CDrawingButtonForwardToEnd, CDrawingButtonBase);
 
-CDrawingButtonForwardToEnd.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonForwardToEnd.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImage = (bDisabled ? this.m_oImageDisabled : this.m_oImage);
+    oCanvas.lineWidth = nW / 18;
+    oCanvas.moveTo(15 / 36 * nW, 11 / 36 * nW);
+    oCanvas.lineTo(21 / 36 * nW, 17 / 36 * nW);
+    oCanvas.lineTo(15 / 36 * nW, 23 / 36 * nW);
+    oCanvas.stroke();
 
-    if (oImage)
-        Canvas.drawImage(oImage, 0, 0);
+    oCanvas.moveTo(24 / 36 * nW, 9 / 36 * nW);
+    oCanvas.lineTo(24 / 36 * nW, 25 / 36 * nW);
+    oCanvas.stroke();
 };
 CDrawingButtonForwardToEnd.prototype.private_HandleMouseDown = function()
 {
