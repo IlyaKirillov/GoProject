@@ -395,13 +395,13 @@ CommonExtend(CDrawingButtonBackwardToStart, CDrawingButtonBase);
 CDrawingButtonBackwardToStart.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
     oCanvas.lineWidth = nW / 18;
-    oCanvas.moveTo(21 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(15 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(21 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(22 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(16 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(22 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 
-    oCanvas.moveTo(12 / 36 * nW, 9 / 36 * nW);
-    oCanvas.lineTo(12 / 36 * nW, 25 / 36 * nW);
+    oCanvas.moveTo(13 / 36 * nW, 10 / 36 * nW);
+    oCanvas.lineTo(13 / 36 * nW, 26 / 36 * nW);
     oCanvas.stroke();
 };
 CDrawingButtonBackwardToStart.prototype.private_HandleMouseDown = function()
@@ -429,14 +429,14 @@ CommonExtend(CDrawingButtonBackward5, CDrawingButtonBase);
 CDrawingButtonBackward5.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
     oCanvas.lineWidth = nW / 18;
-    oCanvas.moveTo(19 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(13 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(19 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(18 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(12 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(18 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 
-    oCanvas.moveTo(25 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(19 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(25 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(24 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(18 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(24 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 };
 CDrawingButtonBackward5.prototype.private_HandleMouseDown = function()
@@ -463,9 +463,9 @@ CommonExtend(CDrawingButtonBackward, CDrawingButtonBase);
 CDrawingButtonBackward.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
     oCanvas.lineWidth = nW / 18;
-    oCanvas.moveTo(22 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(16 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(22 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(21 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(15 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(21 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 };
 CDrawingButtonBackward.prototype.private_HandleMouseDown = function()
@@ -492,9 +492,9 @@ CommonExtend(CDrawingButtonForward, CDrawingButtonBase);
 CDrawingButtonForward.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
     oCanvas.lineWidth = nW / 18;
-    oCanvas.moveTo(16 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(22 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(16 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(15 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(21 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(15 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 };
 CDrawingButtonForward.prototype.private_HandleMouseDown = function()
@@ -521,14 +521,14 @@ CommonExtend(CDrawingButtonForward5, CDrawingButtonBase);
 CDrawingButtonForward5.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
     oCanvas.lineWidth = nW / 18;
-    oCanvas.moveTo(13 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(19 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(13 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(12 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(18 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(12 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 
-    oCanvas.moveTo(19 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(25 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(19 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(18 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(24 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(18 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 };
 CDrawingButtonForward5.prototype.private_HandleMouseDown = function()
@@ -556,13 +556,13 @@ CommonExtend(CDrawingButtonForwardToEnd, CDrawingButtonBase);
 CDrawingButtonForwardToEnd.prototype.private_DrawOnCanvas = function(oCanvas, nSize, nXoff, nYoff, bDisabled, nW, nH, BackColor, FillColor)
 {
     oCanvas.lineWidth = nW / 18;
-    oCanvas.moveTo(15 / 36 * nW, 11 / 36 * nW);
-    oCanvas.lineTo(21 / 36 * nW, 17 / 36 * nW);
-    oCanvas.lineTo(15 / 36 * nW, 23 / 36 * nW);
+    oCanvas.moveTo(14 / 36 * nW, 12 / 36 * nW);
+    oCanvas.lineTo(20 / 36 * nW, 18 / 36 * nW);
+    oCanvas.lineTo(14 / 36 * nW, 24 / 36 * nW);
     oCanvas.stroke();
 
-    oCanvas.moveTo(24 / 36 * nW, 9 / 36 * nW);
-    oCanvas.lineTo(24 / 36 * nW, 25 / 36 * nW);
+    oCanvas.moveTo(23 / 36 * nW, 10 / 36 * nW);
+    oCanvas.lineTo(23 / 36 * nW, 26 / 36 * nW);
     oCanvas.stroke();
 };
 CDrawingButtonForwardToEnd.prototype.private_HandleMouseDown = function()
