@@ -1840,9 +1840,9 @@ CommonExtend(CDrawingButtonEditModeColor, CDrawingButtonBase);
 
 CDrawingButtonEditModeColor.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
 {
-    var shift = 6, size = 12;
-    var x1 = 6, x12 = x1 + size;
-    var y1 = 6, y12 = y1 + size;
+    var shift = W / 6, size = W / 3;
+    var x1 = W / 6, x12 = x1 + size;
+    var y1 = W / 6, y12 = y1 + size;
 
     var x2 = x1 + shift, x22 = x2 + size;
     var y2 = y1 + shift, y22 = y2 + size;
@@ -1850,7 +1850,7 @@ CDrawingButtonEditModeColor.prototype.private_DrawOnCanvas = function(Canvas, Si
     var x3 = x2 + shift, x32 = x3 + size;
     var y3 = y2 + shift, y32 = y3 + size;
 
-    Canvas.lineWidth = 2;
+    Canvas.lineWidth = W / 18;
     Canvas.strokeStyle = "rgb(0, 0, 200)";
     Canvas.beginPath();
     Canvas.moveTo(x12, y2);
