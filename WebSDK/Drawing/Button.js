@@ -1981,8 +1981,10 @@ CDrawingButtonToolbarCustomize.prototype.Init = function(sDivId, oGameTree)
     var oCanvasElement = document.createElement("canvas");
     oCanvasElement.setAttribute("id", sDivId + "_transform");
     oCanvasElement.setAttribute("style", "position:absolute;padding:0;margin:0;top:14px;left:11px;width:14px;height:8px;");
-    oCanvasElement.width  = 14;
-    oCanvasElement.height = 8;
+    oCanvasElement.width  = Common.ConvertToRetinaValue(14);
+    oCanvasElement.height = Common.ConvertToRetinaValue(8);
+    oCanvasElement.style.width  = 14;
+    oCanvasElement.style.height = 8;
     oCanvasElement.setAttribute("oncontextmenu", "return false;");
     oCanvasElement.draggable = "false";
     oCanvasElement['ondragstart'] = function(event) { event.preventDefault(); return false; };
@@ -1992,10 +1994,14 @@ CDrawingButtonToolbarCustomize.prototype.Init = function(sDivId, oGameTree)
 CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
 {
     CDrawingButtonToolbarCustomize.superclass.Update_Size.apply(this, arguments);
+
+    var W = this.HtmlElement.Control.HtmlElement.clientWidth;
+    var H = this.HtmlElement.Control.HtmlElement.clientHeight;
+
     var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
 
-    var nLeft = oOffset.X + 36 - this.m_nWidth;
-    var nTop  = oOffset.Y + 36 + 5;
+    var nLeft = oOffset.X + W - this.m_nWidth;
+    var nTop  = oOffset.Y + H + 5;
 
     var nOverallW = this.m_oDrawing.Get_Width();
     var nOverallH = this.m_oDrawing.Get_Height();
