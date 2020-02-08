@@ -1130,67 +1130,35 @@ CDrawingButtonAutoPlay.prototype.private_RegisterButton = function()
 //----------------------------------------------------------------------------------------------------------------------
 function CDrawingButtonClose(oDrawing)
 {
-    CDrawingButtonClose.superclass.constructor.call(this, oDrawing);
+	CDrawingButtonClose.superclass.constructor.call(this, oDrawing);
 }
 CommonExtend(CDrawingButtonClose, CDrawingButtonBase);
 
-CDrawingButtonClose.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonClose.prototype.private_DrawOnCanvas = function(oCanvas, Size, X_off, Y_off, bDisabled, nW, nH, BackColor, FillColor)
 {
-    var oImageData = Canvas.createImageData(W, H);
-    var oBitmap = oImageData.data;
+	var nSize = Math.min(nW, nH);
+	var nXOffset = (nW - nSize) / 2;
+	var nYOffset = (nH - nSize) / 2;
 
-    // TODO: Переделать по-нормальному
-    var nT = [];
-    for (var nIndex = 0; nIndex <= 8; ++nIndex)
-    {
-        nT[nIndex] = Common.ConvertToRetinaValue(nIndex);
-    }
+	oCanvas.fillStyle = FillColor.ToString();
+	oCanvas.fillRect(0, 0, nW, nH);
 
-    var X_off = (W - nT[8]) / 2 | 0;
-    var Y_off = (H - nT[8]) / 2 | 0;
+	oCanvas.strokeStyle = (new CColor(255, 255, 255)).ToString();
 
-    for (var Y = 0; Y < H; Y++)
-    {
-        for (var X = 0; X < W; X++)
-        {
-            var Index = (X + Y * W) * 4;
-
-            var r = FillColor.r;
-            var g = FillColor.g;
-            var b = FillColor.b;
-
-            var y = Y - Y_off;
-            var x = X - X_off;
-            if ((nT[0] === y && ((nT[0] <= x && x <= nT[1]) || (nT[6] <= x && x <= nT[7]))) ||
-                (nT[1] === y && ((nT[1] <= x && x <= nT[2]) || (nT[5] <= x && x <= nT[6]))) ||
-                (nT[2] === y && ((nT[2] <= x && x <= nT[3]) || (nT[4] <= x && x <= nT[5]))) ||
-                (nT[3] === y && (nT[3] <= x && x <= nT[4])) ||
-                (nT[4] === y && (nT[3] <= x && x <= nT[4])) ||
-                (nT[5] === y && ((nT[2] <= x && x <= nT[3]) || (nT[4] <= x && x <= nT[5]))) ||
-                (nT[6] === y && ((nT[1] <= x && x <= nT[2]) || (nT[5] <= x && x <= nT[6]))) ||
-                (nT[7] === y && ((nT[0] <= x && x <= nT[1]) || (nT[6] <= x && x <= nT[7]))))
-            {
-                r = 255;
-                g = 255;
-                b = 255;
-            }
-
-            oBitmap[Index + 0] = r;
-            oBitmap[Index + 1] = g;
-            oBitmap[Index + 2] = b;
-            oBitmap[Index + 3] = 255;
-        }
-    }
-
-    Canvas.putImageData(oImageData, 0, 0);
+	oCanvas.lineWidth = nSize / 15;
+	oCanvas.moveTo(nXOffset + 9 / 30 * nSize, nYOffset + 9 / 30 * nSize);
+	oCanvas.lineTo(nXOffset + 21 / 30 * nSize, nYOffset + 21 / 30 * nSize);
+	oCanvas.moveTo(nXOffset + 21 / 30 * nSize, nYOffset + 9 / 30 * nSize);
+	oCanvas.lineTo(nXOffset + 9 / 30 * nSize, nYOffset + 21 / 30 * nSize);
+	oCanvas.stroke();
 };
 CDrawingButtonClose.prototype.private_HandleMouseDown = function()
 {
-    this.m_oGameTree.Close();
+	this.m_oGameTree.Close();
 };
 CDrawingButtonClose.prototype.private_GetHint = function()
 {
-    return (window.g_oLocalization ? window.g_oLocalization.common.button.close : "Close");
+	return (window.g_oLocalization ? window.g_oLocalization.common.button.close : "Close");
 };
 CDrawingButtonClose.prototype.private_ClickTransformIn = function()
 {
