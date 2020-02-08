@@ -1897,8 +1897,6 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
 {
     CDrawingButtonEditModeText.superclass.constructor.call(this, oDrawing);
 
-    // Картинка рамзмером 14х8
-    this.m_oImage = this.private_AddImageToLoad("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAICAYAAADJEc7MAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wwVDQAZ4Th1ZQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAkUlEQVQY033PsRHDIAwF0A+nitILUHCnhoapklW8QrZhBBo1NDRULEEak3OwsSpO0pOEijG+QgifWityzgoP4Zzr1lqklN5ERLsxBswMAH2FmbkfPSCiXbfWNhEZRTBzf0IigtbapgGglKJWeEalFAUANBqORPfe/84eg2b0Bxf4FgGAnv9zPnuFLhvnzaf3Jb5oPFaLEyr1tgAAAABJRU5ErkJggg==");
     this.m_oTransformCanvas = null;
 
     this.m_oMultiLevelToolbar = oMutliLevelToolbar;
@@ -1975,21 +1973,22 @@ CommonExtend(CDrawingButtonToolbarCustomize, CDrawingButtonBase);
 
 CDrawingButtonToolbarCustomize.prototype.Init = function(sDivId, oGameTree)
 {
-    CDrawingButtonToolbarCustomize.superclass.Init.apply(this, arguments);
+	CDrawingButtonToolbarCustomize.superclass.Init.apply(this, arguments);
 
-    var oDivElement = this.HtmlElement.Control.HtmlElement;
-    var oCanvasElement = document.createElement("canvas");
-    oCanvasElement.setAttribute("id", sDivId + "_transform");
-    oCanvasElement.setAttribute("style", "position:absolute;padding:0;margin:0;top:14px;left:11px;width:14px;height:8px;");
-    oCanvasElement.width  = Common.ConvertToRetinaValue(14);
-    oCanvasElement.height = Common.ConvertToRetinaValue(8);
-    oCanvasElement.style.width  = 14;
-    oCanvasElement.style.height = 8;
-    oCanvasElement.setAttribute("oncontextmenu", "return false;");
-    oCanvasElement.draggable = "false";
-    oCanvasElement['ondragstart'] = function(event) { event.preventDefault(); return false; };
-    oDivElement.appendChild(oCanvasElement);
-    this.m_oTransformCanvas = oCanvasElement;
+	var oDivElement = this.HtmlElement.Control.HtmlElement;
+	var oCanvasElement = document.createElement("canvas");
+	oCanvasElement.setAttribute("id", sDivId + "_transform");
+	oCanvasElement.style.position = "absolute";
+	oCanvasElement.style.top = "0px";
+	oCanvasElement.style.left = "0px";
+	oCanvasElement.style.padding = "0";
+	oCanvasElement.style.margin = "0";
+	
+	oCanvasElement.setAttribute("oncontextmenu", "return false;");
+	oCanvasElement.draggable = "false";
+	oCanvasElement['ondragstart'] = function(event) { event.preventDefault(); return false; };
+	oDivElement.appendChild(oCanvasElement);
+	this.m_oTransformCanvas = oCanvasElement;
 };
 CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
 {
@@ -1997,6 +1996,16 @@ CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
 
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
+
+	if (this.m_oTransformCanvas)
+	{
+		this.m_oTransformCanvas.style.width = W + "px";
+		this.m_oTransformCanvas.style.height = H + "px";
+		this.m_oTransformCanvas.width = Common.ConvertToRetinaValue(W);
+		this.m_oTransformCanvas.height = Common.ConvertToRetinaValue(H);
+
+		this.private_DrawOnCanvas(null, null, 0, 0, Common.ConvertToRetinaValue(W), Common.ConvertToRetinaValue(H));
+	}
 
     var oOffset = this.m_oDrawing.Get_ElementOffset(this.HtmlElement.Control.HtmlElement);
 
@@ -2025,13 +2034,21 @@ CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
     this.m_oContextMenuElement.style.left = nLeft + "px";
     this.m_oContextMenuElement.style.top  = nTop + "px";
 };
-CDrawingButtonToolbarCustomize.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, W, H, BackColor, FillColor)
+CDrawingButtonToolbarCustomize.prototype.private_DrawOnCanvas = function(Canvas, Size, X_off, Y_off, bDisabled, nW, nH, BackColor, FillColor)
 {
-    if (this.m_oTransformCanvas)
-    {
-        var oCanvas = this.m_oTransformCanvas.getContext("2d");
-        oCanvas.drawImage(this.m_oImage, 0, 0);
-    }
+	if (this.m_oTransformCanvas)
+	{
+		var oCanvas = this.m_oTransformCanvas.getContext("2d");
+
+		oCanvas.fillStyle = this.m_oNormaFColor.ToString();
+		oCanvas.strokeStyle = this.m_oNormaFColor.ToString();
+
+		oCanvas.lineWidth = nW / 18;
+		oCanvas.moveTo(12 / 36 * nW, 15 / 36 * nW);
+		oCanvas.lineTo(18 / 36 * nW, 21 / 36 * nW);
+		oCanvas.lineTo(24 / 36 * nW, 15 / 36 * nW);
+		oCanvas.stroke();
+	}
 };
 CDrawingButtonToolbarCustomize.prototype.private_HandleMouseDown = function()
 {
