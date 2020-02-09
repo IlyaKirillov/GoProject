@@ -1943,6 +1943,12 @@ CDrawingButtonToolbarCustomize.prototype.Init = function(sDivId, oGameTree)
 {
 	CDrawingButtonToolbarCustomize.superclass.Init.apply(this, arguments);
 
+	var nW = this.HtmlElement.Control.HtmlElement.clientWidth;
+	var nH = this.HtmlElement.Control.HtmlElement.clientHeight;
+
+	var nOffX = (nW * 10 / 36) | 0;
+	var nOffY = (nH * 10 / 36) | 0;
+
 	var oDivElement = this.HtmlElement.Control.HtmlElement;
 	var oCanvasElement = document.createElement("canvas");
 	oCanvasElement.setAttribute("id", sDivId + "_transform");
@@ -1967,10 +1973,15 @@ CDrawingButtonToolbarCustomize.prototype.Update_Size = function()
 
 	if (this.m_oTransformCanvas)
 	{
-		this.m_oTransformCanvas.style.width = W + "px";
-		this.m_oTransformCanvas.style.height = H + "px";
-		this.m_oTransformCanvas.width = Common.ConvertToRetinaValue(W);
-		this.m_oTransformCanvas.height = Common.ConvertToRetinaValue(H);
+		var nOffX = (W * 10 / 36) | 0;
+		var nOffY = (H * 10 / 36) | 0;
+
+		this.m_oTransformCanvas.style.top = nOffY + "px";
+		this.m_oTransformCanvas.style.left = nOffX + "px";
+		this.m_oTransformCanvas.style.width = (W - 2 * nOffX) + "px";
+		this.m_oTransformCanvas.style.height = (H - 2 * nOffY) + "px";
+		this.m_oTransformCanvas.width = Common.ConvertToRetinaValue(W - 2 * nOffX);
+		this.m_oTransformCanvas.height = Common.ConvertToRetinaValue(H - 2 * nOffY);
 
 		this.private_DrawOnCanvas(null, null, 0, 0, Common.ConvertToRetinaValue(W), Common.ConvertToRetinaValue(H));
 	}
@@ -2011,10 +2022,16 @@ CDrawingButtonToolbarCustomize.prototype.private_DrawOnCanvas = function(Canvas,
 		oCanvas.fillStyle = this.m_oNormaFColor.ToString();
 		oCanvas.strokeStyle = this.m_oNormaFColor.ToString();
 
+		// oCanvas.lineWidth = nW / 18;
+		// oCanvas.moveTo(12 / 36 * nW, 15 / 36 * nW);
+		// oCanvas.lineTo(18 / 36 * nW, 21 / 36 * nW);
+		// oCanvas.lineTo(24 / 36 * nW, 15 / 36 * nW);
+		// oCanvas.stroke();
+
 		oCanvas.lineWidth = nW / 18;
-		oCanvas.moveTo(12 / 36 * nW, 15 / 36 * nW);
-		oCanvas.lineTo(18 / 36 * nW, 21 / 36 * nW);
-		oCanvas.lineTo(24 / 36 * nW, 15 / 36 * nW);
+		oCanvas.moveTo(2 / 36 * nW, 5 / 36 * nW);
+		oCanvas.lineTo(8 / 36 * nW, 11 / 36 * nW);
+		oCanvas.lineTo(14 / 36 * nW, 5 / 36 * nW);
 		oCanvas.stroke();
 	}
 };
@@ -2071,7 +2088,7 @@ CDrawingButtonToolbarCustomize.prototype.Hide_ContextMenu = function(bFast)
             this.m_oContextMenuElement.style.display = "none";
 
             this.m_oTransformCanvas.style.transition = "transform 0.2s ease";
-            this.m_oTransformCanvas.style.transform  = "rotate(0deg)";
+			this.m_oTransformCanvas.style.transform  = "rotate(0deg)";
             this.Set_Selected(false);
         }
         else

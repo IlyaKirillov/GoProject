@@ -9,7 +9,7 @@ Author URI: http://www.webgoboard.net/
 */
 
 /*
- * Copyright (C) 2014-2016  Ilya Kirillov
+ * Copyright (C) 2014-2020  Ilya Kirillov
  * email: ilya_kirillov@inbox.ru
  *
  * This library is free software; you can redistribute it and/or
