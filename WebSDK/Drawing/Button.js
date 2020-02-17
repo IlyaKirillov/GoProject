@@ -2022,12 +2022,6 @@ CDrawingButtonToolbarCustomize.prototype.private_DrawOnCanvas = function(Canvas,
 		oCanvas.fillStyle = this.m_oNormaFColor.ToString();
 		oCanvas.strokeStyle = this.m_oNormaFColor.ToString();
 
-		// oCanvas.lineWidth = nW / 18;
-		// oCanvas.moveTo(12 / 36 * nW, 15 / 36 * nW);
-		// oCanvas.lineTo(18 / 36 * nW, 21 / 36 * nW);
-		// oCanvas.lineTo(24 / 36 * nW, 15 / 36 * nW);
-		// oCanvas.stroke();
-
 		oCanvas.lineWidth = nW / 18;
 		oCanvas.moveTo(2 / 36 * nW, 5 / 36 * nW);
 		oCanvas.lineTo(8 / 36 * nW, 11 / 36 * nW);

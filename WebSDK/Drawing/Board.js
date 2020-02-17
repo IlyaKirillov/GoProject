@@ -405,18 +405,21 @@ CDrawingBoard.prototype.Set_BlackWhiteLastMark = function(Value)
 CDrawingBoard.prototype.Get_FullImage = function(bColorMarks)
 {
     var Canvas = document.createElement("canvas");
-    var Context = Canvas.getContext("2d");
+	var Context = Canvas.getContext("2d");
+	
+	if (this.HtmlElement.Board.Control.HtmlElement.width > 0 && this.HtmlElement.Board.Control.HtmlElement.height > 0)
+	{
+		Canvas.width = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.width);
+		Canvas.height = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.height);
 
-    Canvas.width  = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.width);
-    Canvas.height = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.height);
-
-    Context.drawImage(this.HtmlElement.Board.Control.HtmlElement, 0, 0);
-    Context.drawImage(this.HtmlElement.Lines.Control.HtmlElement, 0, 0);
-    if (true === bColorMarks)
-        Context.drawImage(this.HtmlElement.Colors.Control.HtmlElement, 0, 0);
-    Context.drawImage(this.HtmlElement.Shadow.Control.HtmlElement, 0, 0);
-    Context.drawImage(this.HtmlElement.Stones.Control.HtmlElement, 0, 0);
-    Context.drawImage(this.HtmlElement.Marks.Control.HtmlElement, 0, 0);
+		Context.drawImage(this.HtmlElement.Board.Control.HtmlElement, 0, 0);
+		Context.drawImage(this.HtmlElement.Lines.Control.HtmlElement, 0, 0);
+		if (true === bColorMarks)
+			Context.drawImage(this.HtmlElement.Colors.Control.HtmlElement, 0, 0);
+		Context.drawImage(this.HtmlElement.Shadow.Control.HtmlElement, 0, 0);
+		Context.drawImage(this.HtmlElement.Stones.Control.HtmlElement, 0, 0);
+		Context.drawImage(this.HtmlElement.Marks.Control.HtmlElement, 0, 0);
+	}
 
     return Canvas;
 };
@@ -895,7 +898,10 @@ CDrawingBoard.prototype.private_UpdateKoeffs = function()
 CDrawingBoard.prototype.private_OnResize = function(bForce)
 {
     var W = this.HtmlElement.Board.Control.HtmlElement.width;
-    var H = this.HtmlElement.Board.Control.HtmlElement.height;
+	var H = this.HtmlElement.Board.Control.HtmlElement.height;
+	
+	if (W <= 0 || H <= 0)
+		return;
 
     if (W != this.m_oImageData.W || H != this.m_oImageData.H || null === this.m_oImageData.Board || null !== this.m_oCreateWoodyId || true === bForce)
     {
@@ -926,8 +932,8 @@ CDrawingBoard.prototype.private_DrawSimpleBoard = function(W, H)
 
     if (null !== this.m_oImageData.ResizeBoard)
     {
-        var Canvas = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
-        Canvas.drawImage(this.m_oImageData.ResizeBoard, 0, 0, W, H);
+		var Canvas = this.HtmlElement.Board.Control.HtmlElement.getContext("2d");
+		Canvas.drawImage(this.m_oImageData.ResizeBoard, 0, 0, this.HtmlElement.Board.Control.HtmlElement.width, this.HtmlElement.Board.Control.HtmlElement.height);//, W, H);
         return;
     }
 
