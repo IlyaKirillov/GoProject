@@ -1945,7 +1945,7 @@ CGameTree.prototype.Download_PngBoardScreenShot = function()
 
     if (oDrawingBoard)
     {
-        var oCanvas = oDrawingBoard.Get_FullImage(true);
+        var oCanvas = oDrawingBoard.GetFullImage(true);
         var sImage  = oCanvas.toDataURL("image/png");
 
         var oHref = document.createElement("a");
@@ -2058,7 +2058,7 @@ CGameTree.prototype.private_DownloadGif = function(aNodes)
         {
             oThis.GoTo_Node(aNodes[nCurrentFrame], true);
 
-            oCanvas  = oDrawingBoard.Get_FullImage(false);
+            oCanvas  = oDrawingBoard.GetFullImage(false);
             oContext = oCanvas.getContext("2d");
 
             // Теперь нам надо запоминать логическое состояние отрисовки, т.е. где что отрисовано (камни и метки)

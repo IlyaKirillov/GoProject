@@ -258,7 +258,7 @@ function CDrawingBoard(oDrawing)
             oThis.private_CreateMarks();
             oThis.private_OnResize();
 
-            oThis.m_oImageData.ResizeBoard = oThis.Get_FullImage(true);
+            oThis.m_oImageData.ResizeBoard = oThis.GetFullImage(true);
         }, 20);
     };
     this.private_OnDragover = function(e)
@@ -402,15 +402,15 @@ CDrawingBoard.prototype.Set_BlackWhiteLastMark = function(Value)
 {
     this.m_bBlackWhiteLastMark = Value;
 };
-CDrawingBoard.prototype.Get_FullImage = function(bColorMarks)
+CDrawingBoard.prototype.GetFullImage = function(bColorMarks)
 {
     var Canvas = document.createElement("canvas");
 	var Context = Canvas.getContext("2d");
 	
 	if (this.HtmlElement.Board.Control.HtmlElement.width > 0 && this.HtmlElement.Board.Control.HtmlElement.height > 0)
 	{
-		Canvas.width = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.width);
-		Canvas.height = Common.ConvertToRetinaValue(this.HtmlElement.Board.Control.HtmlElement.height);
+		Canvas.width  = this.HtmlElement.Board.Control.HtmlElement.width;
+		Canvas.height = this.HtmlElement.Board.Control.HtmlElement.height;
 
 		Context.drawImage(this.HtmlElement.Board.Control.HtmlElement, 0, 0);
 		Context.drawImage(this.HtmlElement.Lines.Control.HtmlElement, 0, 0);
