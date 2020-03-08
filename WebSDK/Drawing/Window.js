@@ -3066,16 +3066,16 @@ CDrawingKifuWindow.prototype.private_DrawLogicBoard = function(oContext, nWidth,
 CDrawingKifuWindow.prototype.Show = function(oPr)
 {
     CDrawingKifuWindow.superclass.Show.call(this, oPr);
-    var W = this.HtmlElement.InnerDiv.clientWidth;
-    var H = this.HtmlElement.InnerDiv.clientHeight;
+    var W = Common.ConvertToRetinaValue(this.HtmlElement.InnerDiv.clientWidth, true);
+    var H = Common.ConvertToRetinaValue(this.HtmlElement.InnerDiv.clientHeight, true);
     this.private_DrawLogicBoard(this.HtmlElement.Canvas.getContext("2d"), W, H, this.m_oGameTree.Get_LogicBoardForKifu());
 };
 CDrawingKifuWindow.prototype.Update_Size = function(bForce)
 {
     CDrawingKifuWindow.superclass.Update_Size.call(this, bForce);
 
-    var W = this.HtmlElement.InnerDiv.clientWidth;
-    var H = this.HtmlElement.InnerDiv.clientHeight;
+    var W = Common.ConvertToRetinaValue(this.HtmlElement.InnerDiv.clientWidth, true);
+    var H = Common.ConvertToRetinaValue(this.HtmlElement.InnerDiv.clientHeight, true);
     if (true === bForce || Math.abs(W - this.m_nKifuW) > 0.001 || Math.abs(H - this.m_nKifuH) > 0.001)
     {
         this.m_nKifuW = W;
