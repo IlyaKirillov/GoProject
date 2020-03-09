@@ -71,7 +71,11 @@ CSgfWriter.prototype.private_WriteReal = function(nValue)
 };
 CSgfWriter.prototype.private_WriteSimpleText = function(sText)
 {
-    this.private_WriteString("[" + sText + "]");
+	var _sText = sText;
+	if ('string' === typeof sText)
+		_sText = sText.replace(new RegExp("]", "g"), "\\]");
+	
+	this.private_WriteString("[" + _sText + "]");
 };
 CSgfWriter.prototype.private_WriteCommand = function(sName, sParam)
 {

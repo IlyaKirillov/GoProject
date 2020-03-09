@@ -359,22 +359,31 @@ CSgfReader.prototype.private_ReadNode = function()
 };
 CSgfReader.prototype.private_ReadSimpleText = function(EndChar)
 {
-    if (undefined === EndChar)
-        EndChar = ']';
+	if (undefined === EndChar)
+		EndChar = ']';
 
-    var sResult = "";
-    while (undefined !== this.m_sSGF[this.m_nPos] && EndChar !== this.m_sSGF[this.m_nPos])
-    {
-        sResult += this.m_sSGF[this.m_nPos];
-        this.m_nPos++;
-    }
+	var sResult = "";
+	while (undefined !== this.m_sSGF[this.m_nPos] && ('\\' === this.m_sSGF[this.m_nPos - 1] || EndChar !== this.m_sSGF[this.m_nPos]))
+	{
+		if (EndChar === this.m_sSGF[this.m_nPos + 1] && '\\' === this.m_sSGF[this.m_nPos])
+		{
+			sResult += EndChar;
+			this.m_nPos++;
+		}
+		else
+		{
+			sResult += this.m_sSGF[this.m_nPos];
+		}
 
-    if (undefined === this.m_sSGF[this.m_nPos])
-        this.m_bValidNode = false;
+		this.m_nPos++;
+	}
 
-    this.m_nPos++;
+	if (undefined === this.m_sSGF[this.m_nPos])
+		this.m_bValidNode = false;
 
-    return sResult;
+	this.m_nPos++;
+
+	return sResult;
 };
 CSgfReader.prototype.private_ReadReal = function(EndChar)
 {
