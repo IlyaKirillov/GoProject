@@ -2264,19 +2264,23 @@ CDrawingButtonFileMenu.prototype.private_DrawOnCanvas = function(Canvas, Size, X
     var shiftY = Common.ConvertToRetinaValue(9);
     var spaceY = Common.ConvertToRetinaValue(6);
     var shiftX = Common.ConvertToRetinaValue(3);
-    var W      = Common.ConvertToRetinaValue(2);
+	var lineW  = Common.ConvertToRetinaValue(2);
+	
+	var nXOffset = X_off | 0;
+	var nYOffset = Y_off | 0;
 
-    var x1 = X_off + shiftX;
-    var x2 = X_off + Size - shiftX;
+    var x1 = nXOffset + shiftX;
+    var x2 = nXOffset + Size - shiftX;
 
-    var y1 = Y_off + shiftY;
-    var y2 = Y_off + spaceY + shiftY;
-    var y3 = Y_off + 2 * spaceY + shiftY;
+    var y1 = nYOffset + shiftY;
+    var y2 = nYOffset + spaceY + shiftY;
+    var y3 = nYOffset + 2 * spaceY + shiftY;
 
     Canvas.fillStyle = (true === this.m_oActiveBColor.Compare(BackColor) ? "rgb(167, 167, 167)" : "rgb(217, 217, 217)");
-    Canvas.fillRect(0, 0, Size + 2 * X_off, Size + 2 * X_off);
+    Canvas.fillRect(0, 0, W, H);
 
-    Canvas.lineWidth = W;
+	Canvas.lineWidth = lineW;
+	
     Canvas.strokeStyle = "rgb(100, 100, 100)";
     Canvas.beginPath();
     Canvas.moveTo(x1, y1);
