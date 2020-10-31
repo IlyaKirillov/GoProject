@@ -203,22 +203,23 @@ function CSettings()
     this.m_bMultiLevelToolbarGeneral        = true;
     this.m_bMultiLevelToolbarAutoPlay       = true;
     this.m_bMultiLevelToolbarTimeline       = true;
+	this.m_bMultiLevelToolbarNavigationMap  = true;
     this.m_bMultiLevelToolbarKifuMode       = true;
 }
 CommonExtend(CSettings, CSettingsBase);
 CSettings.prototype.Load_FromLocalStorage = function()
 {
     // Appearance
-    this.m_bShowTarget           = ("0" === Common.Get_LocalStorageItem("ShowTarget") ? false : true);
-    this.m_bCycleThroughVariants = ("1" === Common.Get_LocalStorageItem("CycleThroughVariants") ? true : false);
-    this.m_bSound                = ("0" === Common.Get_LocalStorageItem("Sound") ? false : true);
+    this.m_bShowTarget           = ("0" === Common.GetLocalStorageItem("ShowTarget") ? false : true);
+    this.m_bCycleThroughVariants = ("1" === Common.GetLocalStorageItem("CycleThroughVariants") ? true : false);
+    this.m_bSound                = ("0" === Common.GetLocalStorageItem("Sound") ? false : true);
 
-    var sNavigatorLabels    = Common.Get_LocalStorageItem("NavigatorLabels");
+    var sNavigatorLabels    = Common.GetLocalStorageItem("NavigatorLabels");
     this.m_eNavigatorLabels = (!sNavigatorLabels || "" === sNavigatorLabels ? ESettingsNavigatorLabels.MoveNumbers : parseInt(sNavigatorLabels));
 
     // ColorScheme
     var eColorScheme = EColorScheme.TrueColor;
-    var sColorScheme = Common.Get_LocalStorageItem("ColorScheme");
+    var sColorScheme = Common.GetLocalStorageItem("ColorScheme");
     if ("BookStyle" === sColorScheme)
         eColorScheme = EColorScheme.BookStyle;
     else if ("SimpleColor" === sColorScheme)
@@ -229,27 +230,28 @@ CSettings.prototype.Load_FromLocalStorage = function()
     this.Set_ColorScheme(eColorScheme);
 
     // Loading Settings
-    this.m_bLoadUnfinishedFilesOnLastNode = ("1" === Common.Get_LocalStorageItem("LoadUnfinishedFilesOnLastNode") ? true : false);
+    this.m_bLoadUnfinishedFilesOnLastNode = ("1" === Common.GetLocalStorageItem("LoadUnfinishedFilesOnLastNode") ? true : false);
 
-    var sLoadShowVariants    = Common.Get_LocalStorageItem("ShowVariants");
+    var sLoadShowVariants    = Common.GetLocalStorageItem("ShowVariants");
     this.m_eLoadShowVariants = (!sLoadShowVariants || "" === sLoadShowVariants ? ESettingsLoadShowVariants.FromFile : parseInt(sLoadShowVariants));
 
     // Rulers
-    var sRulers    = Common.Get_LocalStorageItem("Rulers");
+    var sRulers    = Common.GetLocalStorageItem("Rulers");
     this.m_bRulers = (sRulers === "1" ? true : false);
 
     // MultilevelToolbar
-    this.m_bMultiLevelToolbarMainNavigation = Common.Get_LocalStorageItem("MultiLevelToolbarMainNavigation") == "0" ? false : true;
-    this.m_bMultiLevelToolbarTreeNavigation = Common.Get_LocalStorageItem("MultiLevelToolbarTreeNavigation") == "0" ? false : true;
-    this.m_bMultiLevelToolbarGeneral        = Common.Get_LocalStorageItem("MultiLevelToolbarGeneral") == "0" ? false : true;
-    this.m_bMultiLevelToolbarAutoPlay       = Common.Get_LocalStorageItem("MultiLevelToolbarAutoPlay") == "1" ? true : false;
-    this.m_bMultiLevelToolbarTimeline       = Common.Get_LocalStorageItem("MultiLevelToolbarTimeline") == "1" ? true : false;
-    this.m_bMultiLevelToolbarKifuMode       = Common.Get_LocalStorageItem("MultiLevelToolbarKifuMode") == "1" ? true : false;
+    this.m_bMultiLevelToolbarMainNavigation = Common.GetLocalStorageItem("MultiLevelToolbarMainNavigation") !== "0";
+    this.m_bMultiLevelToolbarTreeNavigation = Common.GetLocalStorageItem("MultiLevelToolbarTreeNavigation") !== "0";
+    this.m_bMultiLevelToolbarGeneral        = Common.GetLocalStorageItem("MultiLevelToolbarGeneral") !== "0";
+    this.m_bMultiLevelToolbarAutoPlay       = Common.GetLocalStorageItem("MultiLevelToolbarAutoPlay") === "1";
+    this.m_bMultiLevelToolbarTimeline       = Common.GetLocalStorageItem("MultiLevelToolbarTimeline") === "1";
+	this.m_bMultiLevelToolbarNavigationMap  = Common.GetLocalStorageItem("MultiLevelToolbarNavigationMap") !== "0";
+    this.m_bMultiLevelToolbarKifuMode       = Common.GetLocalStorageItem("MultiLevelToolbarKifuMode") === "1";
 };
 CSettings.prototype.Set_Sound = function(Value)
 {
     this.m_bSound = Value;
-    Common.Set_LocalStorageItem("Sound", Value === true ? "1" : "0");
+    Common.SetLocalStorageItem("Sound", Value === true ? "1" : "0");
 };
 CSettings.prototype.Is_SoundOn = function()
 {
@@ -258,7 +260,7 @@ CSettings.prototype.Is_SoundOn = function()
 CSettings.prototype.Set_Rulers = function(Value)
 {
     this.m_bRulers = Value;
-    Common.Set_LocalStorageItem("Rulers", Value === true ? "1" : "0");
+    Common.SetLocalStorageItem("Rulers", Value === true ? "1" : "0");
 };
 CSettings.prototype.Is_Rulers = function()
 {
@@ -267,7 +269,7 @@ CSettings.prototype.Is_Rulers = function()
 CSettings.prototype.Set_LoadUnfinishedFilesOnLastNode = function(Value)
 {
     this.m_bLoadUnfinishedFilesOnLastNode = Value;
-    Common.Set_LocalStorageItem("LoadUnfinishedFilesOnLastNode", Value === true ? "1" : "0");
+    Common.SetLocalStorageItem("LoadUnfinishedFilesOnLastNode", Value === true ? "1" : "0");
 };
 CSettings.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
 {
@@ -276,7 +278,7 @@ CSettings.prototype.Is_LoadUnfinishedFilesOnLastNode = function()
 CSettings.prototype.Set_CycleThroughVariants = function(Value)
 {
     this.m_bCycleThroughVariants = Value;
-    Common.Set_LocalStorageItem("CycleThroughVariants", Value === true ? "1" : "0");
+    Common.SetLocalStorageItem("CycleThroughVariants", Value === true ? "1" : "0");
 };
 CSettings.prototype.Is_CycleThroughVariants = function()
 {
@@ -285,7 +287,7 @@ CSettings.prototype.Is_CycleThroughVariants = function()
 CSettings.prototype.Set_ShowTarget = function(Value)
 {
     this.m_bShowTarget = Value;
-    Common.Set_LocalStorageItem("ShowTarget", Value === true ? "1" : "0");
+    Common.SetLocalStorageItem("ShowTarget", Value === true ? "1" : "0");
 };
 CSettings.prototype.Is_ShowTarget = function()
 {
@@ -295,10 +297,10 @@ CSettings.prototype.Set_ColorScheme = function(eScheme)
 {
     switch (eScheme)
     {
-    case EColorScheme.TrueColor: Common.Set_LocalStorageItem("ColorScheme", "TrueColor"); break;
-    case EColorScheme.BookStyle: Common.Set_LocalStorageItem("ColorScheme", "BookStyle"); break;
-    case EColorScheme.SimpleColor: Common.Set_LocalStorageItem("ColorScheme", "SimpleColor"); break;
-    case EColorScheme.Dark: Common.Set_LocalStorageItem("ColorScheme", "Dark"); break;
+    case EColorScheme.TrueColor: Common.SetLocalStorageItem("ColorScheme", "TrueColor"); break;
+    case EColorScheme.BookStyle: Common.SetLocalStorageItem("ColorScheme", "BookStyle"); break;
+    case EColorScheme.SimpleColor: Common.SetLocalStorageItem("ColorScheme", "SimpleColor"); break;
+    case EColorScheme.Dark: Common.SetLocalStorageItem("ColorScheme", "Dark"); break;
     }
 
     return this.private_SetColorScheme(eScheme);
@@ -310,7 +312,7 @@ CSettings.prototype.Get_NavigatorLabel = function()
 CSettings.prototype.Set_NavigatorLabel = function(eValue)
 {
     this.m_eNavigatorLabels = eValue;
-    Common.Set_LocalStorageItem("NavigatorLabels", eValue);
+    Common.SetLocalStorageItem("NavigatorLabels", eValue);
 };
 CSettings.prototype.Get_LoadShowVariants = function()
 {
@@ -319,65 +321,75 @@ CSettings.prototype.Get_LoadShowVariants = function()
 CSettings.prototype.Set_LoadShowVariants = function(eValue)
 {
     this.m_eLoadShowVariants = eValue;
-    Common.Set_LocalStorageItem("ShowVariants", eValue);
+    Common.SetLocalStorageItem("ShowVariants", eValue);
 };
-CSettings.prototype.Toggle_MultiLevelToolbarMainNavigation = function()
+CSettings.prototype.ToggleMultiLevelToolbarMainNavigation = function()
 {
     this.m_bMultiLevelToolbarMainNavigation = !this.m_bMultiLevelToolbarMainNavigation;
-    Common.Set_LocalStorageItem("MultiLevelToolbarMainNavigation", true === this.m_bMultiLevelToolbarMainNavigation ? "1" : "0");
+    Common.SetLocalStorageItem("MultiLevelToolbarMainNavigation", true === this.m_bMultiLevelToolbarMainNavigation ? "1" : "0");
     return this.m_bMultiLevelToolbarMainNavigation;
 };
-CSettings.prototype.Toggle_MultiLevelToolbarTreeNavigation = function()
+CSettings.prototype.ToggleMultiLevelToolbarTreeNavigation = function()
 {
     this.m_bMultiLevelToolbarTreeNavigation = !this.m_bMultiLevelToolbarTreeNavigation;
-    Common.Set_LocalStorageItem("MultiLevelToolbarTreeNavigation", true === this.m_bMultiLevelToolbarTreeNavigation ? "1" : "0");
+    Common.SetLocalStorageItem("MultiLevelToolbarTreeNavigation", true === this.m_bMultiLevelToolbarTreeNavigation ? "1" : "0");
     return this.m_bMultiLevelToolbarTreeNavigation;
 };
-CSettings.prototype.Toggle_MultiLevelToolbarGeneral = function()
+CSettings.prototype.ToggleMultiLevelToolbarGeneral = function()
 {
     this.m_bMultiLevelToolbarGeneral = !this.m_bMultiLevelToolbarGeneral;
-    Common.Set_LocalStorageItem("MultiLevelToolbarGeneral", true === this.m_bMultiLevelToolbarGeneral ? "1" : "0");
+    Common.SetLocalStorageItem("MultiLevelToolbarGeneral", true === this.m_bMultiLevelToolbarGeneral ? "1" : "0");
     return this.m_bMultiLevelToolbarGeneral;
 };
-CSettings.prototype.Toggle_MultiLevelToolbarAutoPlay = function()
+CSettings.prototype.ToggleMultiLevelToolbarAutoPlay = function()
 {
     this.m_bMultiLevelToolbarAutoPlay = !this.m_bMultiLevelToolbarAutoPlay;
-    Common.Set_LocalStorageItem("MultiLevelToolbarAutoPlay", true === this.m_bMultiLevelToolbarAutoPlay ? "1" : "0");
+    Common.SetLocalStorageItem("MultiLevelToolbarAutoPlay", true === this.m_bMultiLevelToolbarAutoPlay ? "1" : "0");
     return this.m_bMultiLevelToolbarAutoPlay;
 };
-CSettings.prototype.Toggle_MultiLevelToolbarTimeline = function()
+CSettings.prototype.ToggleMultiLevelToolbarTimeline = function()
 {
     this.m_bMultiLevelToolbarTimeline = !this.m_bMultiLevelToolbarTimeline;
-    Common.Set_LocalStorageItem("MultiLevelToolbarTimeline", true === this.m_bMultiLevelToolbarTimeline ? "1" : "0");
+    Common.SetLocalStorageItem("MultiLevelToolbarTimeline", true === this.m_bMultiLevelToolbarTimeline ? "1" : "0");
     return this.m_bMultiLevelToolbarTimeline;
 };
-CSettings.prototype.Toggle_MultiLevelToolbarKifuMode = function()
+CSettings.prototype.ToggleMultiLevelToolbarNavigationMap = function()
+{
+	this.m_bMultiLevelToolbarNavigationMap = !this.m_bMultiLevelToolbarNavigationMap;
+	Common.SetLocalStorageItem("MultiLevelToolbarNavigationMap", true === this.m_bMultiLevelToolbarNavigationMap ? "1" : "0");
+	return this.m_bMultiLevelToolbarNavigationMap;
+};
+CSettings.prototype.ToggleMultiLevelToolbarKifuMode = function()
 {
     this.m_bMultiLevelToolbarKifuMode = !this.m_bMultiLevelToolbarKifuMode;
-    Common.Set_LocalStorageItem("MultiLevelToolbarKifuMode", true === this.m_bMultiLevelToolbarKifuMode ? "1" : "0");
+    Common.SetLocalStorageItem("MultiLevelToolbarKifuMode", true === this.m_bMultiLevelToolbarKifuMode ? "1" : "0");
     return this.m_bMultiLevelToolbarKifuMode;
 };
-CSettings.prototype.Is_MultiLevelToolbarMainNavigation = function()
+CSettings.prototype.IsMultiLevelToolbarMainNavigation = function()
 {
     return this.m_bMultiLevelToolbarMainNavigation;
 };
-CSettings.prototype.Is_MultiLevelToolbarTreeNavigation = function()
+CSettings.prototype.IsMultiLevelToolbarTreeNavigation = function()
 {
     return this.m_bMultiLevelToolbarTreeNavigation;
 };
-CSettings.prototype.Is_MultiLevelToolbarGeneral = function()
+CSettings.prototype.IsMultiLevelToolbarGeneral = function()
 {
     return this.m_bMultiLevelToolbarGeneral;
 };
-CSettings.prototype.Is_MultiLevelToolbarAutoPlay = function()
+CSettings.prototype.IsMultiLevelToolbarAutoPlay = function()
 {
     return this.m_bMultiLevelToolbarAutoPlay;
 };
-CSettings.prototype.Is_MultiLevelToolbarTimeline = function()
+CSettings.prototype.IsMultiLevelToolbarTimeline = function()
 {
     return this.m_bMultiLevelToolbarTimeline;
 };
-CSettings.prototype.Is_MultiLevelToolbarKifuMode = function()
+CSettings.prototype.IsMultiLevelToolbarNavigationMap = function()
+{
+	return this.m_bMultiLevelToolbarNavigationMap;
+};
+CSettings.prototype.IsMultiLevelToolbarKifuMode = function()
 {
     return this.m_bMultiLevelToolbarKifuMode;
 };
@@ -1955,59 +1967,68 @@ CDrawing.prototype.Update_ColorsCounter = function()
     if (oCountColorsWindow && oCountColorsWindow.Is_Visible())
         oCountColorsWindow.Update();
 };
-CDrawing.prototype.Toggle_MultiLevelToolbarMainNavigation = function()
+CDrawing.prototype.ToggleMultiLevelToolbarMainNavigation = function()
 {
-    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarMainNavigation();
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarMainNavigation();
 
-    if (this.m_oButtons.ToolbarCustomize)
-        this.m_oButtons.ToolbarCustomize.Set_MainNavigation(bShow);
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.Set_MainNavigation(bShow);
 
-    return bShow;
+	return bShow;
 };
-CDrawing.prototype.Toggle_MultiLevelToolbarTreeNavigation = function()
+CDrawing.prototype.ToggleMultiLevelToolbarTreeNavigation = function()
 {
-    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarTreeNavigation();
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarTreeNavigation();
 
-    if (this.m_oButtons.ToolbarCustomize)
-        this.m_oButtons.ToolbarCustomize.Set_TreeNavigation(bShow);
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.Set_TreeNavigation(bShow);
 
-    return bShow;
+	return bShow;
 };
-CDrawing.prototype.Toggle_MultiLevelToolbarGeneral = function()
+CDrawing.prototype.ToggleMultiLevelToolbarGeneral = function()
 {
-    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarGeneral();
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarGeneral();
 
-    if (this.m_oButtons.ToolbarCustomize)
-        this.m_oButtons.ToolbarCustomize.Set_General(bShow);
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.Set_General(bShow);
 
-    return bShow;
+	return bShow;
 };
-CDrawing.prototype.Toggle_MultiLevelToolbarAutoPlay = function()
+CDrawing.prototype.ToggleMultiLevelToolbarAutoPlay = function()
 {
-    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarAutoPlay();
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarAutoPlay();
 
-    if (this.m_oButtons.ToolbarCustomize)
-        this.m_oButtons.ToolbarCustomize.Set_AutoPlay(bShow);
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.Set_AutoPlay(bShow);
 
-    return bShow;
+	return bShow;
 };
-CDrawing.prototype.Toggle_MultiLevelToolbarTimeline = function()
+CDrawing.prototype.ToggleMultiLevelToolbarTimeline = function()
 {
-    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarTimeline();
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarTimeline();
 
-    if (this.m_oButtons.ToolbarCustomize)
-        this.m_oButtons.ToolbarCustomize.Set_Timeline(bShow);
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.Set_Timeline(bShow);
 
-    return bShow;
+	return bShow;
 };
-CDrawing.prototype.Toggle_MultiLevelToolbarKifuMode = function()
+CDrawing.prototype.ToggleMultiLevelToolbarNavigationMap = function()
 {
-    var bShow = g_oGlobalSettings.Toggle_MultiLevelToolbarKifuMode();
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarNavigationMap();
 
-    if (this.m_oButtons.ToolbarCustomize)
-        this.m_oButtons.ToolbarCustomize.Set_KifuMode(bShow);
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.SetNavigationMap(bShow);
 
-    return bShow;
+	return bShow;
+};
+CDrawing.prototype.ToggleMultiLevelToolbarKifuMode = function()
+{
+	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarKifuMode();
+
+	if (this.m_oButtons.ToolbarCustomize)
+		this.m_oButtons.ToolbarCustomize.Set_KifuMode(bShow);
+
+	return bShow;
 };
 CDrawing.prototype.Get_DivHeightByWidth = function(nWidth)
 {

@@ -1948,8 +1948,8 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
 
     var oLogo            = document.createElement("img");
     oLogo.src            = g_sLogo100;
-    oLogo.width          = 100;
-    oLogo.height         = 100;
+	oLogo.width          = 100;
+	oLogo.height         = 100;
     oLogo.style['float'] = "left";
     oDivMainPart.appendChild(oLogo);
 

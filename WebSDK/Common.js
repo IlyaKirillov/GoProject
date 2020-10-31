@@ -523,7 +523,7 @@ CCommon.prototype.Click = function(oNode)
     oEvent.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
     oNode.dispatchEvent(oEvent);
 };
-CCommon.prototype.Get_LocalStorageItem = function(_name)
+CCommon.prototype.GetLocalStorageItem = function(_name)
 {
     if (undefined !== window.localStorage)
     {
@@ -532,7 +532,7 @@ CCommon.prototype.Get_LocalStorageItem = function(_name)
     }
     return "";
 };
-CCommon.prototype.Set_LocalStorageItem = function(_name, value)
+CCommon.prototype.SetLocalStorageItem = function(_name, value)
 {
     if (undefined !== window.localStorage)
     {

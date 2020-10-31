@@ -1861,81 +1861,124 @@ CDrawingButtonEditModeColor.prototype.private_RegisterButton = function()
 //----------------------------------------------------------------------------------------------------------------------
 // Кнопка для настройки тулбара
 //----------------------------------------------------------------------------------------------------------------------
-function CDrawingButtonToolbarCustomize(oDrawing, oMutliLevelToolbar)
+function CDrawingButtonToolbarCustomize(oDrawing, oMultiLevelToolbar)
 {
-    CDrawingButtonEditModeText.superclass.constructor.call(this, oDrawing);
+	CDrawingButtonEditModeText.superclass.constructor.call(this, oDrawing);
 
-    this.m_oTransformCanvas = null;
+	this.m_oTransformCanvas = null;
 
-    this.m_oMultiLevelToolbar = oMutliLevelToolbar;
+	this.m_oMultiLevelToolbar = oMultiLevelToolbar;
 
-    var oMainDiv = oDrawing.Get_MainDiv();
+	var oMainDiv = oDrawing.Get_MainDiv();
 
-    var sMainNavigation = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.mainNavigation : "Main navigation");
-    var sTreeNavigation = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.treeNavigation : "Tree navigation");
-    var sGeneralToolbar = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.generalToolbar : "General toolbar");
-    var sAutoplay       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.autoplay : "Autoplay toolbar");
-    var sTimeline       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.timelinePanel : "Timeline panel");
-    var sKifuMode       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
+	var sMainNavigation = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.mainNavigation : "Main navigation");
+	var sTreeNavigation = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.treeNavigation : "Tree navigation");
+	var sGeneralToolbar = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.generalToolbar : "General toolbar");
+	var sAutoplay       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.autoplay : "Autoplay toolbar");
+	var sTimeline       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.timelinePanel : "Timeline panel");
+	var sNavigationMap  = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.navigationMap : "Navigation map");
+	var sKifuMode       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
 
-    this.m_nWidth  = 160;
-    this.m_nHeight = 14 + 6 * 20;
+	this.m_nWidth  = 160;
+	this.m_nHeight = 14 + 6 * 20;
 
-    if (window.g_oTextMeasurer)
-    {
-        window.g_oTextMeasurer.SetFont('16px "Times New Roman", Times, serif');
+	if (window.g_oTextMeasurer)
+	{
+		window.g_oTextMeasurer.SetFont('16px "Times New Roman", Times, serif');
 
-        this.m_nWidth = 10 + 23 + Math.max(
-                window.g_oTextMeasurer.Measure(sMainNavigation),
-                window.g_oTextMeasurer.Measure(sTreeNavigation),
-                window.g_oTextMeasurer.Measure(sGeneralToolbar),
-                window.g_oTextMeasurer.Measure(sAutoplay),
-                window.g_oTextMeasurer.Measure(sTimeline),
-                window.g_oTextMeasurer.Measure(sKifuMode)
-            ) + 7;
-    }
+		this.m_nWidth = 10 + 23 + Math.max(
+			window.g_oTextMeasurer.Measure(sMainNavigation),
+			window.g_oTextMeasurer.Measure(sTreeNavigation),
+			window.g_oTextMeasurer.Measure(sGeneralToolbar),
+			window.g_oTextMeasurer.Measure(sAutoplay),
+			window.g_oTextMeasurer.Measure(sTimeline),
+			window.g_oTextMeasurer.Measure(sNavigationMap),
+			window.g_oTextMeasurer.Measure(sKifuMode)
+		) + 7;
+	}
 
-    var oContextMenuElementWrapper              = document.createElement("div");
-    oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
-    oContextMenuElementWrapper.style.position   = "absolute";
-    oContextMenuElementWrapper.style.top        = "100px";
-    oContextMenuElementWrapper.style.left       = "100px";
-    oContextMenuElementWrapper.style.width      = this.m_nWidth + "px";
-    oContextMenuElementWrapper.style.height     = this.m_nHeight + "px";
-    oContextMenuElementWrapper.style.background = "rgb(255, 255, 255)";
-    oContextMenuElementWrapper.style.display    = "block";
-    oContextMenuElementWrapper.style.border     = "1px solid rgb(166, 166, 166)";
-    oContextMenuElementWrapper.style.boxShadow  = "0px 1px 15px rgba(0,0,0,0.8)";
-    oContextMenuElementWrapper.style.overflowY  = "hidden";
-    oMainDiv.appendChild(oContextMenuElementWrapper);
+	var oContextMenuElementWrapper              = document.createElement("div");
+	oContextMenuElementWrapper.id               = oMainDiv.id + "ToolbarCustomizeWrapper";
+	oContextMenuElementWrapper.style.position   = "absolute";
+	oContextMenuElementWrapper.style.top        = "100px";
+	oContextMenuElementWrapper.style.left       = "100px";
+	oContextMenuElementWrapper.style.width      = this.m_nWidth + "px";
+	oContextMenuElementWrapper.style.height     = this.m_nHeight + "px";
+	oContextMenuElementWrapper.style.background = "rgb(255, 255, 255)";
+	oContextMenuElementWrapper.style.display    = "block";
+	oContextMenuElementWrapper.style.border     = "1px solid rgb(166, 166, 166)";
+	oContextMenuElementWrapper.style.boxShadow  = "0px 1px 15px rgba(0,0,0,0.8)";
+	oContextMenuElementWrapper.style.overflowY  = "hidden";
+	oMainDiv.appendChild(oContextMenuElementWrapper);
 
-    oContextMenuElementWrapper.style.transitionProperty = "height";
-    oContextMenuElementWrapper.style.transitionDuration = "0.2s";
-    oContextMenuElementWrapper.style.transitionDelay    = "0s";
-    oContextMenuElementWrapper.style.display            = "none";
+	oContextMenuElementWrapper.style.transitionProperty = "height";
+	oContextMenuElementWrapper.style.transitionDuration = "0.2s";
+	oContextMenuElementWrapper.style.transitionDelay    = "0s";
+	oContextMenuElementWrapper.style.display            = "none";
 
-    this.m_oContextMenuElement = oContextMenuElementWrapper;
-    this.m_nTransitionId       = null;
-    this.m_nShowId             = null;
+	this.m_oContextMenuElement = oContextMenuElementWrapper;
+	this.m_nTransitionId       = null;
+	this.m_nShowId             = null;
 
-    var oList = document.createElement("ul");
+	var oList = document.createElement("ul");
 
-    oList.style.padding        = "5px 0";
-    oList.style.margin         = "2px 0 0";
-    oList.style.listStyle      = "none";
-    oList.style.fontSize       = "16px";
-    oList.style.backgroundClip = "padding-box";
-    oList.style.lineHeight     = "20px";
+	oList.style.padding        = "5px 0";
+	oList.style.margin         = "2px 0 0";
+	oList.style.listStyle      = "none";
+	oList.style.fontSize       = "16px";
+	oList.style.backgroundClip = "padding-box";
+	oList.style.lineHeight     = "20px";
 
+	this.m_oMainNavigationCheckElement = this.private_CreateListItem(
+		oList,
+		sMainNavigation,
+		() => oDrawing.ToggleMultiLevelToolbarMainNavigation(),
+		g_oGlobalSettings.IsMultiLevelToolbarMainNavigation()
+	);
 
-    this.m_oMainNavigationCheckElement  = this.private_CreateListItem(oList, sMainNavigation, function(){oDrawing.Toggle_MultiLevelToolbarMainNavigation()}, g_oGlobalSettings.Is_MultiLevelToolbarMainNavigation());
-    this.m_oTreeNavigationCheckElement  = this.private_CreateListItem(oList, sTreeNavigation, function(){oDrawing.Toggle_MultiLevelToolbarTreeNavigation()}, g_oGlobalSettings.Is_MultiLevelToolbarTreeNavigation());
-    this.m_oGeneralCheckElement  = this.private_CreateListItem(oList, sGeneralToolbar, function(){oDrawing.Toggle_MultiLevelToolbarGeneral()}, g_oGlobalSettings.Is_MultiLevelToolbarGeneral());
-    this.m_oAutoPlayCheckElement = this.private_CreateListItem(oList, sAutoplay, function(){oDrawing.Toggle_MultiLevelToolbarAutoPlay()}, g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay());
-    this.m_oTimelineCheckElement = this.private_CreateListItem(oList, sTimeline, function(){oDrawing.Toggle_MultiLevelToolbarTimeline()}, g_oGlobalSettings.Is_MultiLevelToolbarTimeline());
-    this.m_oKifuModeCheckElement = this.private_CreateListItem(oList, sKifuMode, function(){oDrawing.Toggle_MultiLevelToolbarKifuMode()}, g_oGlobalSettings.Is_MultiLevelToolbarKifuMode());
+	this.m_oTreeNavigationCheckElement = this.private_CreateListItem(
+		oList,
+		sTreeNavigation,
+		() => oDrawing.ToggleMultiLevelToolbarTreeNavigation(),
+		g_oGlobalSettings.IsMultiLevelToolbarTreeNavigation()
+	);
 
-    oContextMenuElementWrapper.appendChild(oList);
+	this.m_oGeneralCheckElement = this.private_CreateListItem(
+		oList,
+		sGeneralToolbar,
+		() => oDrawing.ToggleMultiLevelToolbarGeneral(),
+		g_oGlobalSettings.IsMultiLevelToolbarGeneral()
+	);
+
+	this.m_oAutoPlayCheckElement = this.private_CreateListItem(
+		oList,
+		sAutoplay,
+		() => oDrawing.ToggleMultiLevelToolbarAutoPlay(),
+		g_oGlobalSettings.IsMultiLevelToolbarAutoPlay()
+	);
+
+	this.m_oTimelineCheckElement = this.private_CreateListItem(
+		oList,
+		sTimeline,
+		() => oDrawing.ToggleMultiLevelToolbarTimeline(),
+		g_oGlobalSettings.IsMultiLevelToolbarTimeline()
+	);
+
+	this.m_oNavigationMapElement = this.private_CreateListItem(
+		oList,
+		sNavigationMap,
+		() => oDrawing.ToggleMultiLevelToolbarNavigationMap(),
+		g_oGlobalSettings.IsMultiLevelToolbarNavigationMap()
+	);
+
+	this.m_oKifuModeCheckElement = this.private_CreateListItem(
+		oList,
+		sKifuMode,
+		() => oDrawing.ToggleMultiLevelToolbarKifuMode(),
+		g_oGlobalSettings.IsMultiLevelToolbarKifuMode()
+	);
+
+	oContextMenuElementWrapper.appendChild(oList);
 }
 CommonExtend(CDrawingButtonToolbarCustomize, CDrawingButtonBase);
 

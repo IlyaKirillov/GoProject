@@ -279,12 +279,12 @@ function CDrawingMultiLevelToolbar(oDrawing)
         KifuModeControl : null
     };
 
-    this.m_bGeneralNavigation = g_oGlobalSettings.Is_MultiLevelToolbarMainNavigation();
-    this.m_bTreeNavigation    = g_oGlobalSettings.Is_MultiLevelToolbarTreeNavigation();
-    this.m_bGeneralToolbar    = g_oGlobalSettings.Is_MultiLevelToolbarGeneral();
-    this.m_bAutoPlayToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarAutoPlay();
-    this.m_bTimelimeToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarTimeline();
-    this.m_bKifuModeToolbar   = g_oGlobalSettings.Is_MultiLevelToolbarKifuMode();
+    this.m_bGeneralNavigation = g_oGlobalSettings.IsMultiLevelToolbarMainNavigation();
+    this.m_bTreeNavigation    = g_oGlobalSettings.IsMultiLevelToolbarTreeNavigation();
+    this.m_bGeneralToolbar    = g_oGlobalSettings.IsMultiLevelToolbarGeneral();
+    this.m_bAutoPlayToolbar   = g_oGlobalSettings.IsMultiLevelToolbarAutoPlay();
+    this.m_bTimelimeToolbar   = g_oGlobalSettings.IsMultiLevelToolbarTimeline();
+    this.m_bKifuModeToolbar   = g_oGlobalSettings.IsMultiLevelToolbarKifuMode();
 
     this.m_nW = -1;
     this.m_nH = -1;

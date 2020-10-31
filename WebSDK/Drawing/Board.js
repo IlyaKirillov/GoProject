@@ -247,8 +247,19 @@ function CDrawingBoard(oDrawing)
     this.private_OnKeyPress = function(e)
     {
     };
-    this.private_StartDrawingTimer = function()
-    {
+    this.private_StartDrawingTimer = function(isNoTimer)
+	{
+		if (true === isNoTimer)
+		{
+			oThis.private_CreateTrueColorBoard();
+            oThis.private_CreateLines();
+            oThis.private_CreateTrueColorStones();
+            oThis.private_CreateShadows();
+            oThis.private_CreateMarks();
+			oThis.private_OnResize();
+			return null;
+		}
+
         return setTimeout(function()
         {
             oThis.private_CreateTrueColorBoard();
@@ -423,7 +434,7 @@ CDrawingBoard.prototype.GetFullImage = function(bColorMarks)
 
     return Canvas;
 };
-CDrawingBoard.prototype.Update_Size = function(bForce)
+CDrawingBoard.prototype.Update_Size = function(bForce, isNoTimer)
 {
     var W = this.HtmlElement.Control.HtmlElement.clientWidth;
     var H = this.HtmlElement.Control.HtmlElement.clientHeight;
@@ -446,7 +457,7 @@ CDrawingBoard.prototype.Update_Size = function(bForce)
         this.m_oTarget.Update_Size(W, H);
 
         this.private_UpdateKoeffs();
-        this.private_OnResize(bForce);
+        this.private_OnResize(bForce, isNoTimer);
     }
 };
 CDrawingBoard.prototype.Set_Presentation = function(oPresentation)
@@ -895,7 +906,7 @@ CDrawingBoard.prototype.private_UpdateKoeffs = function()
     this.m_dKoeffOffsetY = dAbsVerOff / dAbsBoardH;
     this.m_dKoeffDiam    = 4 / dAbsBoardW;
 };
-CDrawingBoard.prototype.private_OnResize = function(bForce)
+CDrawingBoard.prototype.private_OnResize = function(bForce, isNoTimer)
 {
     var W = this.HtmlElement.Board.Control.HtmlElement.width;
 	var H = this.HtmlElement.Board.Control.HtmlElement.height;
@@ -910,7 +921,7 @@ CDrawingBoard.prototype.private_OnResize = function(bForce)
             clearTimeout(this.m_oCreateWoodyId);
 
         // Стартуем таймер с отрисовкой красивой доски
-        this.m_oCreateWoodyId = this.private_StartDrawingTimer();
+        this.m_oCreateWoodyId = this.private_StartDrawingTimer(isNoTimer);
 
         this.private_CreateLines();
 
