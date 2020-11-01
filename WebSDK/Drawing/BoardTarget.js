@@ -39,14 +39,18 @@ function CBoardTarget(oImageData, oDrawingBoard)
 }
 CBoardTarget.prototype.Init = function(sCanvasId)
 {
-    this.m_oHtmlElement = document.getElementById(sCanvasId);
-    this.m_oHtmlElement.style.position = "absolute";
-    this.m_oHtmlElement.style.left     = "0px";
-    this.m_oHtmlElement.style.top      = "0px";
-    this.m_oCanvas = document.createElement("canvas");    
-    this.m_oHtmlElement.appendChild(this.m_oCanvas);
+	this.m_oHtmlElement                = document.getElementById(sCanvasId);
+	this.m_oHtmlElement.style.position = "absolute";
+	this.m_oHtmlElement.style.left     = "0px";
+	this.m_oHtmlElement.style.top      = "0px";
+	this.m_oCanvas                     = document.createElement("canvas");
+	this.m_oHtmlElement.appendChild(this.m_oCanvas);
 
-    this.Hide();
+	this.m_oCanvas.style.position = "absolute";
+	this.m_oCanvas.style.left     = "0px";
+	this.m_oCanvas.style.top      = "0px";
+
+	this.Hide();
 };
 CBoardTarget.prototype.Get_LogicPos = function()
 {
