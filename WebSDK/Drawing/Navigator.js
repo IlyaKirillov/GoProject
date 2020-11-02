@@ -644,10 +644,11 @@ CDrawingNavigator.prototype.Init = function(sDivId, oGameTree)
     if (oEventDiv.addEventListener)
         oEventDiv.addEventListener("DOMMouseScroll", this.private_OnMouseWheel, false);
 
-    oEventDiv['onfocus']      = this.private_OnFocus;
-    oEventDiv.tabIndex        = -1;   // Этот параметр нужен, чтобы принимать сообщения клавиатуры (чтобы на этой div вставал фокус)
-    oEventDiv.style.hidefocus = true; // Убираем рамку фокуса в IE
-    oEventDiv.style.outline   = 0;    // Убираем рамку фокуса в остальных браузерах
+    oEventDiv['onfocus']       = this.private_OnFocus;
+    oEventDiv.tabIndex         = -1;     // Этот параметр нужен, чтобы принимать сообщения клавиатуры (чтобы на этой div вставал фокус)
+    oEventDiv.style.hidefocus  = true;   // Убираем рамку фокуса в IE
+    oEventDiv.style.outline    = 0;      // Убираем рамку фокуса в остальных браузерах
+	oEventDiv.style.userSelect = "none"; // Убираем селект в FF
 
     // Сразу создаем камни и линии, потому что они у нас не зависят от размера Div.
     this.private_CreateTrueColorStones();
