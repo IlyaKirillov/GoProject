@@ -1,0 +1,31 @@
+{
+  "name": "web-go-board",
+  "version": "1.0.0",
+  "description": "Using this js-library you can view/edit sgf/ngf/gib files right in your browser. It's pure html5+javascript.",
+  "main": "gulp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mih4ajlo/GoProject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mih4ajlo/GoProject/issues"
+  },
+  "homepage": "https://github.com/mih4ajlo/GoProject#readme",
+  "dependencies": {
+    "@babel/core": "^7.12.9",
+    "babel": "^6.23.0",
+    "google-closure-compiler": "^20201102.0.1",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-flatmap": "^1.0.2",
+    "gulp-recursive-concat": "^0.2.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-uglify": "^3.0.2"
+  }
+}
