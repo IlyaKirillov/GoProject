@@ -442,19 +442,19 @@ CDrawingMultiLevelToolbar.prototype.Set_General = function(bGeneral)
     this.private_Update();
     this.Update_Size(true);
 };
-CDrawingMultiLevelToolbar.prototype.Set_AutoPlay = function(bAutoPlay)
+CDrawingMultiLevelToolbar.prototype.SetAutoPlay = function(bAutoPlay)
 {
     this.m_bAutoPlayToolbar = bAutoPlay;
     this.private_Update();
     this.Update_Size(true);
 };
-CDrawingMultiLevelToolbar.prototype.Set_Timeline = function(bTimeline)
+CDrawingMultiLevelToolbar.prototype.SetTimeline = function(bTimeline)
 {
     this.m_bTimelimeToolbar = bTimeline;
     this.private_Update();
     this.Update_Size(true);
 };
-CDrawingMultiLevelToolbar.prototype.Set_KifuMode = function(bKifuMode)
+CDrawingMultiLevelToolbar.prototype.SetKifuMode = function(bKifuMode)
 {
     this.m_bKifuModeToolbar = bKifuMode;
     this.private_Update();

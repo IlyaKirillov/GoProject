@@ -18,4 +18,4 @@ function CInterfaceState()
     this.BoardMode     = EBoardMode.Move;
     this.TimelinePos   = 0;
     this.AutoPlaySpeed = null;
-};
+}

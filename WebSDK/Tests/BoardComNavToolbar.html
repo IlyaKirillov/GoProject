@@ -43,7 +43,7 @@
 <script>
     var oGameTree = GoBoardApi.Create_GameTree();
     GoBoardApi.Set_Sound(oGameTree, "../../Resources/Sound");
-    GoBoardApi.Create_BoardCommentsButtonsNavigator(oGameTree, "divId");
+    GoBoardApi.Create_EditorHor(oGameTree, "divId");
     GoBoardApi.Load_Sgf(oGameTree, '(;FF[1]GM[1]SZ[19]GN[test];B[fj]CR[ii][ji][kh][pp][po][op];W[ip])');
 
     GoBoardApi.Set_DrawHandicapMarks(oGameTree, true);

@@ -1206,7 +1206,13 @@ CDrawing.prototype.private_CreateHorFullTemplate = function()
     oNavigatorControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
     oPanelControl.AddControl(oNavigatorControl);
 
-    var oDrawingNavigator = new CDrawingNavigator(this);
+	this.Controls = {
+		Panel     : oPanelControl,
+		CaT       : oCaTControl,
+		Navigator : oNavigatorControl
+	};
+
+	var oDrawingNavigator = new CDrawingNavigator(this);
     oDrawingNavigator.Init(sNavigatorDivId, oGameTree);
 
     var sInfoDivId     = sCaTDivId + "_Info";
@@ -1999,7 +2005,7 @@ CDrawing.prototype.ToggleMultiLevelToolbarAutoPlay = function()
 	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarAutoPlay();
 
 	if (this.m_oButtons.ToolbarCustomize)
-		this.m_oButtons.ToolbarCustomize.Set_AutoPlay(bShow);
+		this.m_oButtons.ToolbarCustomize.SetAutoPlay(bShow);
 
 	return bShow;
 };
@@ -2008,25 +2014,27 @@ CDrawing.prototype.ToggleMultiLevelToolbarTimeline = function()
 	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarTimeline();
 
 	if (this.m_oButtons.ToolbarCustomize)
-		this.m_oButtons.ToolbarCustomize.Set_Timeline(bShow);
+		this.m_oButtons.ToolbarCustomize.SetTimeline(bShow);
 
 	return bShow;
 };
 CDrawing.prototype.ToggleMultiLevelToolbarNavigationMap = function()
 {
-	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarNavigationMap();
+	var isShow = g_oGlobalSettings.ToggleMultiLevelToolbarNavigationMap();
 
 	if (this.m_oButtons.ToolbarCustomize)
-		this.m_oButtons.ToolbarCustomize.SetNavigationMap(bShow);
+		this.m_oButtons.ToolbarCustomize.SetNavigationMap(isShow);
 
-	return bShow;
+	this.SetShowNavigationMap(isShow);
+
+	return isShow;
 };
 CDrawing.prototype.ToggleMultiLevelToolbarKifuMode = function()
 {
 	var bShow = g_oGlobalSettings.ToggleMultiLevelToolbarKifuMode();
 
 	if (this.m_oButtons.ToolbarCustomize)
-		this.m_oButtons.ToolbarCustomize.Set_KifuMode(bShow);
+		this.m_oButtons.ToolbarCustomize.SetKifuMode(bShow);
 
 	return bShow;
 };
@@ -2166,6 +2174,48 @@ CDrawing.prototype.Create_ViewerForBooklet = function(sDivId)
     //------------------------------------------------------------------------------------------------------------------
     this.Update_Size();
     oGameTree.On_EndLoadDrawing();
+};
+CDrawing.prototype.SetShowNavigationMap = function(isShow)
+{
+	switch (this.m_eTemplateType)
+	{
+		case EDrawingTemplate.SimpleBoard:
+		case EDrawingTemplate.Viewer:
+		case EDrawingTemplate.VerEditor:
+		case EDrawingTemplate.Problems:
+		case EDrawingTemplate.None:
+		default:
+			break;
+		case EDrawingTemplate.HorEditor:
+		{
+			if (!isShow)
+			{
+				let oCaTControl = this.Controls.CaT;
+				oCaTControl.Bounds.SetParams(0, 0, 1000, 1000, false, false, false, false, -1, -1);
+				oCaTControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+				oCaTControl.HtmlElement.style.background = "rgb(217, 217, 217)";
+
+				let oNavigatorControl = this.Controls.Navigator;
+				oNavigatorControl.Bounds.SetParams(0, 1000, 1000, 1000, false, false, false, false, -1, -1);
+				oNavigatorControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+				oNavigatorControl.HtmlElement.style.display = "none";
+			}
+			else
+			{
+				let oCaTControl = this.Controls.CaT;
+				oCaTControl.Bounds.SetParams(0, 0, 1000, 500, false, false, false, false, -1, -1);
+				oCaTControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+				oCaTControl.HtmlElement.style.background = "rgb(217, 217, 217)";
+
+				let oNavigatorControl = this.Controls.Navigator;
+				oNavigatorControl.Bounds.SetParams(0, 500, 1000, 1000, false, false, false, false, -1, -1);
+				oNavigatorControl.Anchor = (g_anchor_top | g_anchor_left | g_anchor_right | g_anchor_bottom);
+				oNavigatorControl.HtmlElement.style.display = "block";
+			}
+
+			this.Update_Size(true);
+		}
+	}
 };
 
 

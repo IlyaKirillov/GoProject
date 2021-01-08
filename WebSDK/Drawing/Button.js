@@ -1880,7 +1880,7 @@ function CDrawingButtonToolbarCustomize(oDrawing, oMultiLevelToolbar)
 	var sKifuMode       = (window.g_oLocalization ? window.g_oLocalization.gameRoom.toolbarCustomization.kifuMode : "Kifu mode");
 
 	this.m_nWidth  = 160;
-	this.m_nHeight = 14 + 6 * 20;
+	this.m_nHeight = 14 + 7 * 20;
 
 	if (window.g_oTextMeasurer)
 	{
@@ -2224,26 +2224,30 @@ CDrawingButtonToolbarCustomize.prototype.Set_General = function(bChecked)
 
     this.private_UpdateCheckElement(this.m_oGeneralCheckElement, bChecked);
 };
-CDrawingButtonToolbarCustomize.prototype.Set_AutoPlay = function(bChecked)
+CDrawingButtonToolbarCustomize.prototype.SetAutoPlay = function(bChecked)
 {
     if (this.m_oMultiLevelToolbar)
-        this.m_oMultiLevelToolbar.Set_AutoPlay(bChecked);
+        this.m_oMultiLevelToolbar.SetAutoPlay(bChecked);
 
     this.private_UpdateCheckElement(this.m_oAutoPlayCheckElement, bChecked);
 };
-CDrawingButtonToolbarCustomize.prototype.Set_Timeline = function(bChecked)
+CDrawingButtonToolbarCustomize.prototype.SetTimeline = function(bChecked)
 {
     if (this.m_oMultiLevelToolbar)
-        this.m_oMultiLevelToolbar.Set_Timeline(bChecked);
+        this.m_oMultiLevelToolbar.SetTimeline(bChecked);
 
     this.private_UpdateCheckElement(this.m_oTimelineCheckElement, bChecked);
 };
-CDrawingButtonToolbarCustomize.prototype.Set_KifuMode = function(bKifuMode)
+CDrawingButtonToolbarCustomize.prototype.SetKifuMode = function(bKifuMode)
 {
     if (this.m_oMultiLevelToolbar)
-        this.m_oMultiLevelToolbar.Set_KifuMode(bKifuMode);
+        this.m_oMultiLevelToolbar.SetKifuMode(bKifuMode);
 
     this.private_UpdateCheckElement(this.m_oKifuModeCheckElement, bKifuMode);
+};
+CDrawingButtonToolbarCustomize.prototype.SetNavigationMap = function(bChecked)
+{
+	this.private_UpdateCheckElement(this.m_oNavigationMapElement, bChecked);
 };
 CDrawingButtonToolbarCustomize.prototype.private_UpdateCheckElement = function(oCheckElement, bChecked)
 {

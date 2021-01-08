@@ -23,7 +23,7 @@ var EDrawingMark =
 
 function CDrawingMark(X, Y, Type, Text)
 {
-    this.m_oPos  = {X : undefined === X ? 0 : X, Y : undefined == Y ? 0 : Y}; // Позиция на доске
+    this.m_oPos  = {X : undefined === X ? 0 : X, Y : undefined === Y ? 0 : Y}; // Позиция на доске
     this.m_nType = undefined === Type ? EDrawingMark.Tr : Type;               // Типа
     this.m_sText = undefined === Text ? "" : Text;                            // Текст
 }
