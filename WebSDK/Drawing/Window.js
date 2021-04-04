@@ -2022,7 +2022,7 @@ CDrawingAboutWindow.prototype.private_InitAboutPage = function(oDiv)
     oString                  = document.createElement("div");
     oString.style.paddingTop = "30px";
     oDivMainPart.appendChild(oString);
-    Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2020. All rights reserved.");
+    Common.Set_InnerTextToElement(oString, "© Ilya Kirillov, 2014-2021. All rights reserved.");
 };
 CDrawingAboutWindow.prototype.private_InitKeyBoardShortcutsPage = function(oDiv, oPr)
 {
